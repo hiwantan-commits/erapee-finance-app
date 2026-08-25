@@ -21,8 +21,8 @@
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
                 <!-- Selamat Datang Banner -->
                 <div class="dashboard-card p-6 md:p-8 mb-6 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-2xl shadow-sm">
-                    <h2 class="text-2xl font-bold mb-2">Selamat Datang di Dashboard PT ERAPEE</h2>
-                    <p class="text-indigo-100 text-sm max-w-2xl mb-6">Sistem Informasi Keuangan, Akuntansi Terpadu, dan Kepatuhan Pajak Standar Coretax.</p>
+                    <h2 class="text-2xl font-bold mb-2">Dashboard Eksekutif PT ERAPEE Anugrah Sejahtera</h2>
+                    <p class="text-indigo-100 text-sm max-w-2xl mb-6">Sistem Informasi Keuangan, Akuntansi Terpadu, dan Kepatuhan Pajak Standar Coretax (Tahun Buku 2026).</p>
                     <div class="flex flex-wrap gap-3">
                         <a href="input-jurnal.html" class="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
                             + Input Jurnal Baru
@@ -33,48 +33,138 @@
                     </div>
                 </div>
 
-                <!-- Statistik Ringkas & Keuangan Utama -->
+                <!-- Statistik Ringkas (Total Keseluruhan) -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Unit Usaha Utama</p>
-                        <h3 class="text-base font-bold text-gray-800 mt-2">SaaS & Pertanian</h3>
-                        <p class="text-xs text-indigo-600 mt-1 font-medium">KBLI 58290 & Komoditas Unggulan</p>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Pendapatan (YTD)</p>
+                        <h3 class="text-xl font-bold text-gray-800 mt-2">Rp 0</h3>
+                        <p class="text-xs text-indigo-600 mt-1 font-medium">Konsolidasi Segmen</p>
                     </div>
                     <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Keuntungan (Laba YTD)</p>
-                        <h3 class="text-lg font-bold text-green-600 mt-2">Rp 0</h3>
-                        <p class="text-xs text-gray-500 mt-1 font-medium">Bersih Setelah Pajak</p>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Keuntungan (Laba Bersih)</p>
+                        <h3 class="text-xl font-bold text-green-600 mt-2">Rp 0</h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium">Setelah Pajak</p>
                     </div>
                     <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
                         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Utang (Liabilitas)</p>
-                        <h3 class="text-lg font-bold text-red-600 mt-2">Rp 0</h3>
-                        <p class="text-xs text-gray-500 mt-1 font-medium">Usaha & Pajak Terutang</p>
+                        <h3 class="text-xl font-bold text-red-600 mt-2">Rp 0</h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium">Usaha & Akrual</p>
                     </div>
                     <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
                         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Akumulasi Pajak</p>
-                        <h3 class="text-lg font-bold text-amber-600 mt-2">Rp 0</h3>
+                        <h3 class="text-xl font-bold text-amber-600 mt-2">Rp 0</h3>
                         <p class="text-xs text-gray-500 mt-1 font-medium">PPN & PPh Terutang</p>
                     </div>
                 </div>
 
-                <!-- Bagian Grafik & Detail Analisis -->
+                <!-- Detail Keuangan Berdasarkan Master Data Unit Usaha -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 mb-8">
+                    <div class="mb-4 pb-3 border-b border-gray-100 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-base">Detail Keuangan Per Unit Usaha (Sesuai Master Data)</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Klasifikasi divisi digital, pertanian, korporat, dan biaya bersama</p>
+                        </div>
+                        <span class="text-xs px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">Master Data 03</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-3">Kode & Unit Usaha</th>
+                                    <th class="p-3">Klasifikasi / KBLI</th>
+                                    <th class="p-3 text-right">Pendapatan (Rp)</th>
+                                    <th class="p-3 text-right">Beban (Rp)</th>
+                                    <th class="p-3 text-right">Keuntungan / Laba (Rp)</th>
+                                    <th class="p-3 text-right">Utang & Pajak (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 text-xs">
+                                <tr>
+                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded mr-1 font-mono">CORP</span> Corporate / Head Office</td>
+                                    <td class="p-3 text-gray-500">Kantor Pusat & Administrasi</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
+                                    <td class="p-3 text-right text-red-600">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded mr-1 font-mono">MARC</span> Marcframe</td>
+                                    <td class="p-3 text-gray-500">Digital Services (KBLI 62199)</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
+                                    <td class="p-3 text-right text-red-600">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded mr-1 font-mono">SIP</span> SiPacul</td>
+                                    <td class="p-3 text-gray-500">Software Publishing (KBLI 58290)</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
+                                    <td class="p-3 text-right text-red-600">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-green-100 text-green-700 rounded mr-1 font-mono">WT-NANAS</span> Wani Tani - Nanas</td>
+                                    <td class="p-3 text-gray-500">Pertanian (KBLI 01220)</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
+                                    <td class="p-3 text-right text-red-600">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-green-100 text-green-700 rounded mr-1 font-mono">WT-TEBU</span> Wani Tani - Tebu</td>
+                                    <td class="p-3 text-gray-500">Pertanian (KBLI 01140)</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
+                                    <td class="p-3 text-right text-red-600">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-green-100 text-green-700 rounded mr-1 font-mono">WT-CABAI</span> Wani Tani - Cabai</td>
+                                    <td class="p-3 text-gray-500">Pertanian (KBLI 01138)</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
+                                    <td class="p-3 text-right text-red-600">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-gray-200 text-gray-700 rounded mr-1 font-mono">SHARED</span> Biaya Bersama</td>
+                                    <td class="p-3 text-gray-500">Alokasi Bersama (Shared Cost)</td>
+                                    <td class="p-3 text-right">-</td>
+                                    <td class="p-3 text-right">0</td>
+                                    <td class="p-3 text-right">-</td>
+                                    <td class="p-3 text-right">0</td>
+                                </tr>
+                                <tr class="bg-indigo-50 font-bold text-indigo-900 border-t-2 border-indigo-200 text-sm">
+                                    <td colspan="2" class="p-3">TOTAL KESELURUHAN (KONSOLIDASI)</td>
+                                    <td class="p-3 text-right">Rp 0</td>
+                                    <td class="p-3 text-right">Rp 0</td>
+                                    <td class="p-3 text-right text-green-700">Rp 0</td>
+                                    <td class="p-3 text-right text-red-700">Rp 0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bagian Grafik & Tren Bulanan -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                     <!-- Grafik Tren Keuangan (2 Kolom) -->
                     <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
                         <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
-                            <h3 class="font-bold text-gray-800 text-sm">Grafik Kinerja Pendapatan & Keuntungan 2026</h3>
-                            <span class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">Bulanan</span>
+                            <h3 class="font-bold text-gray-800 text-sm">Grafik Kinerja Pendapatan & Keuntungan Bulanan</h3>
+                            <span class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">2026</span>
                         </div>
                         <div class="relative h-64 w-full">
                             <canvas id="grafikKinerja"></canvas>
                         </div>
                     </div>
 
-                    <!-- Ringkasan Status Pemeriksaan (1 Kolom) -->
+                    <!-- Status Pemeriksaan Legal (1 Kolom) -->
                     <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
                         <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
                             <h3 class="font-bold text-gray-800 text-sm">Status Pemeriksaan & Legal</h3>
-                            <span class="text-xs px-2.5 py-1 bg-amber-50 text-amber-700 font-semibold rounded-lg">Sheet 15</span>
+                            <span class="text-xs px-2.5 py-1 bg-amber-50 text-amber-700 font-semibold rounded-lg">Checks</span>
                         </div>
                         <div class="space-y-3 text-xs">
                             <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
@@ -94,6 +184,39 @@
                                 <span class="px-2 py-0.5 bg-green-100 text-green-700 font-semibold rounded">PASS</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Tabel Tren Bulanan -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <div class="mb-4 pb-3 border-b border-gray-100 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-800 text-base">Tabel Tren Kinerja Bulanan (Januari s.d. Desember 2026)</h3>
+                        <span class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">Sheet 15</span>
+                    </div>
+                    <div class="overflow-x-auto" style="max-height: 300px; overflow-y: auto;">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead class="sticky top-0 bg-white">
+                                <tr class="text-gray-400 text-xs uppercase border-b">
+                                    <th class="py-3 px-4">Bulan</th>
+                                    <th class="py-3 px-4 text-right">Pendapatan (Rp)</th>
+                                    <th class="py-3 px-4 text-right">Laba Bersih / Keuntungan (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 text-xs">
+                                <tr><td class="py-3 px-4 font-medium">Januari</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                                <tr><td class="py-3 px-4 font-medium">Februari</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                                <tr><td class="py-3 px-4 font-medium">Maret</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                                <tr><td class="py-3 px-4 font-medium">April</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                                <tr><td class="py-3 px-4 font-medium">Mei</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                                <tr><td class="py-3 px-4 font-medium">Juni</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                                <tr><td class="py-3 px-4 font-medium">Juli</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                                <tr><td class="py-3 px-4 font-medium">Agustus</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                                <tr><td class="py-3 px-4 font-medium">September</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                                <tr><td class="py-3 px-4 font-medium">Oktober</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                                <tr><td class="py-3 px-4 font-medium">November</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                                <tr><td class="py-3 px-4 font-medium">Desember</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </main>
