@@ -4,7 +4,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const CONFIG = {
+export const CONFIG = {
     // Konfigurasi Firebase PT Erapee Finance
     FIREBASE_CONFIG: {
         apiKey: "AIzaSyBAspi9107FKi1zu-2T_K0thXw7RMS40Ps",
@@ -22,4 +22,4 @@ const CONFIG = {
 
 // Inisialisasi Firebase & Firestore agar bisa diakses global di seluruh halaman
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
-const db = getFirestore(app);
+export const db = getFirestore(app);
