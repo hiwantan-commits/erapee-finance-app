@@ -23,12 +23,9 @@
 
             <main class="p-4 md:p-8 max-w-5xl mx-auto w-full">
                 <div class="dashboard-card p-6 md:p-8">
-                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
-                        <div>
-                            <h2 class="text-lg font-bold text-gray-800">Formulir Input Jurnal Akuntansi</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Pencatatan terintegrasi dengan Firebase Firestore & Standar Coretax</p>
-                        </div>
-                        <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full">Kapasitas 1.000+ Baris</span>
+                    <div class="mb-6 pb-4 border-b border-gray-100">
+                        <h2 class="text-lg font-bold text-gray-800">Formulir Input Jurnal Akuntansi</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Pencatatan terintegrasi dengan Firebase Firestore & Standar Coretax</p>
                     </div>
 
                     <form id="formJurnal" class="space-y-6">
@@ -74,7 +71,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Proyek / Komoditas</label>
-                                    <input type="text" id="proyek" placeholder="Contoh: Panen Nanas Musim 1 / Proyek Klien A" class="form-input-custom">
+                                    <input type="text" id="proyek" placeholder="Contoh: Panen Nanas Musim 1" class="form-input-custom">
                                 </div>
                             </div>
                         </div>
@@ -103,6 +100,9 @@
                                         <option value="4102 - Pendapatan Pertanian">4102 - Pendapatan Pertanian</option>
                                         <option value="5101 - Beban Gaji & Tunjangan">5101 - Beban Gaji & Tunjangan</option>
                                         <option value="5102 - Beban Sewa & Operasional">5102 - Beban Sewa & Operasional</option>
+                                        <option value="5103 - Beban Pemeliharaan">5103 - Beban Pemeliharaan</option>
+                                        <option value="5104 - Beban Transportasi">5104 - Beban Transportasi</option>
+                                        <option value="5105 - Beban Utilitas">5105 - Beban Utilitas</option>
                                     </select>
                                 </div>
                                 <div>
@@ -125,7 +125,7 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 4: Elemen Pajak Terpadu (Coretax Ready) -->
+                        <!-- Bagian 4: Elemen Pajak Terpadu -->
                         <div class="pt-4 border-t border-gray-100">
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">3. Rincian Pajak (PPN & PPh)</h3>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -188,8 +188,12 @@
 
     <!-- Skrip Utama (Menggunakan ES Module untuk Firebase) -->
     <script type="module">
-        import { CONFIG, db } from "./js/config.js";
-        import { collection, addTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { CONFIG } from "./js/config.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const app = initializeApp(CONFIG.FIREBASE_CONFIG);
+        const db = getFirestore(app);
 
         const formJurnal = document.getElementById('formJurnal');
 
@@ -224,6 +228,14 @@
 
                 await addDoc(collection(db, CONFIG.COLLECTION_NAME), dataJurnal);
                 
+                // Catat juga ke histori audit
+                await addDoc(collection(db, "histori_audit"), {
+                    aksi: "TAMBAH JURNAL",
+                    no_bukti: dataJurnal.no_bukti,
+                    detail: `Menambah jurnal ${dataJurnal.jenis_dokumen} senilai Debit Rp ${dataJurnal.debit.toLocaleString('id-ID')} / Kredit Rp ${dataJurnal.kredit.toLocaleString('id-ID')}`,
+                    waktu: new Date()
+                });
+
                 document.getElementById('alertSuccess').classList.remove('hidden');
                 formJurnal.reset();
                 setTimeout(() => document.getElementById('alertSuccess').classList.add('hidden'), 5000);
