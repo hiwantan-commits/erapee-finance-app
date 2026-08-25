@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aset Tetap & Penyusutan | PT ERAPEE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="text-gray-800 bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
+            <div id="header-container"></div>
+
+            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
+                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">Daftar Aset Tetap & Penyusutan</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Perhitungan penyusutan komersial buku dan fiskal perpajakan</p>
+                        </div>
+                        <span class="text-xs px-3 py-1 bg-green-50 text-green-700 font-semibold rounded-full">Kelompok 1 - 4 & Bangunan</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-4">ID Aset</th>
+                                    <th class="p-4">Nama Aset</th>
+                                    <th class="p-4">Kategori</th>
+                                    <th class="p-4">Kelompok Fiskal</th>
+                                    <th class="p-4 text-right">Harga Perolehan (Rp)</th>
+                                    <th class="p-4 text-right">Akum. Penyusutan</th>
+                                    <th class="p-4 text-right">Nilai Buku (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="7" class="p-8 text-center text-gray-400">Belum ada aset tetap yang didaftarkan. Data akan otomatis diperbarui setelah input perolehan aset.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script type="module" src="js/component.js"></script>
+</body>
+</html>
