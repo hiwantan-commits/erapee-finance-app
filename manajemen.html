@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Transaksi | PT ERAPEE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }</style>
+</head>
+<body class="text-gray-800">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0 hidden md:block">
+            <div class="h-16 flex items-center px-6 border-b border-gray-200">
+                <span class="text-lg font-bold text-indigo-600">ERAPEE Finance</span>
+            </div>
+            <nav class="p-4 space-y-2">
+                <a href="index.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Input Transaksi</a>
+                <a href="manajemen.html" class="block px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-medium">Manajemen Data</a>
+                <a href="laporan.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Laporan Laba Rugi</a>
+                <a href="pajak.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Rekap Pajak</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+                <h1 class="text-xl font-semibold">Kelola, Edit, & Hapus Transaksi</h1>
+                <button onclick="muatDataManajemen()" class="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition">Muat Ulang</button>
+            </header>
+            
+            <main class="p-6 md:p-8 max-w-6xl mx-auto w-full">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100">
+                        <h2 class="font-semibold text-lg">Daftar Seluruh Transaksi Database</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b">
+                                    <th class="p-4">Tanggal</th>
+                                    <th class="p-4">Ref</th>
+                                    <th class="p-4">Tipe</th>
+                                    <th class="p-4">Kategori</th>
+                                    <th class="p-4">Uraian</th>
+                                    <th class="p-4 text-right">DPP (Rp)</th>
+                                    <th class="p-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelManajemen" class="divide-y divide-gray-100 text-sm">
+                                <tr>
+                                    <td colspan="7" class="p-6 text-center text-gray-400">Memuat data dari Google Sheets...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Edit Sederhana -->
+    <div id="modalEdit" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
+            <h3 class="text-lg font-semibold mb-4">Edit Data Transaksi</h3>
+            <form id="formEdit" class="space-y-4">
+                <input type="hidden" id="editRow">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Uraian Transaksi</label>
+                    <input type="text" id="editUraian" class="w-full border rounded-lg px-3 py-2 text-sm outline-none" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Nilai DPP (Rp)</label>
+                        <input type="number" id="editDpp" class="w-full border rounded-lg px-3 py-2 text-sm outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Total (Rp)</label>
+                        <input type="number" id="editTotal" class="w-full border rounded-lg px-3 py-2 text-sm outline-none" required>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="tutupModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-lg font-medium">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg font-medium">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = 'MASUKKAN_URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI';
+
+        function muatDataManajemen() {
+            const url = `${scriptURL}?callback=handleData`;
+            const scriptTag = document.createElement('script');
+            scriptTag.src = url;
+            document.body.appendChild(scriptTag);
+        }
+
+        function handleData(data) {
+            const tbody = document.getElementById('tabelManajemen');
+            tbody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">Belum ada transaksi tercatat.</td></tr>`;
+                return;
+            }
+
+            data.forEach(row => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-4">${row.tanggal}</td>
+                    <td class="p-4 font-mono text-xs">${row.no_ref}</td>
+                    <td class="p-4"><span class="px-2 py-1 text-xs rounded-full ${row.tipe === 'Masuk' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${row.tipe}</span></td>
+                    <td class="p-4 font-medium">${row.kategori}</td>
+                    <td class="p-4 text-gray-500">${row.uraian}</td>
+                    <td class="p-4 text-right">Rp ${parseFloat(row.dpp || 0).toLocaleString('id-ID')}</td>
+                    <td class="p-4 text-center space-x-2">
+                        <button onclick='bukaEdit(${JSON.stringify(row)})' class="text-indigo-600 hover:underline font-medium text-xs">Edit</button>
+                        <button onclick='hapusData(${row.row}, "${row.no_ref}")' class="text-red-600 hover:underline font-medium text-xs">Hapus</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function hapusData(rowIdx, noRef) {
+            if (confirm(`Apakah Anda yakin ingin menghapus transaksi dengan referensi: ${noRef}?`)) {
+                fetch(scriptURL, {
+                    method: 'POST', // Menggunakan POST dengan parameter override atau fetch khusus delete
+                    mode: 'no-cors',
+                    body: JSON.stringify({ action: 'delete', row: rowIdx })
+                }).then(() => {
+                    alert('Data berhasil dihapus dari sistem!');
+                    muatDataManajemen();
+                });
+            }
+        }
+
+        function bukaEdit(row) {
+            document.getElementById('editRow').value = row.row;
+            document.getElementById('editUraian').value = row.uraian;
+            document.getElementById('editDpp').value = row.dpp;
+            document.getElementById('editTotal').value = row.total;
+            document.getElementById('modalEdit').classList.remove('hidden');
+        }
+
+        function tutupModal() {
+            document.getElementById('modalEdit').classList.add('hidden');
+        }
+
+        document.getElementById('formEdit').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const rowIdx = document.getElementById('editRow').value;
+            const updatedData = {
+                row: rowIdx,
+                uraian: document.getElementById('editUraian').value,
+                dpp: document.getElementById('editDpp').value,
+                total: document.getElementById('editTotal').value,
+                // Mempertahankan data lama untuk field lainnya
+                tanggal: '', no_ref: '', tipe: '', kategori: '', ppn: '0', pph: '0'
+            };
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(updatedData)
+            }).then(() => {
+                tutupModal();
+                alert('Data berhasil diperbarui!');
+                muatDataManajemen();
+            });
+        });
+
+        muatDataManajemen();
+    </script>
+</body>
+</html>
