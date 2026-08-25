@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Laba Rugi | PT ERAPEE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }</style>
+</head>
+<body class="text-gray-800">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0 hidden md:block">
+            <div class="h-16 flex items-center px-6 border-b border-gray-200">
+                <span class="text-lg font-bold text-indigo-600">ERAPEE Finance</span>
+            </div>
+            <nav class="p-4 space-y-2">
+                <a href="index.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Input Transaksi</a>
+                <a href="laporan.html" class="block px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-medium">Laporan Laba Rugi</a>
+                <a href="pajak.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Rekap Pajak</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+                <h1 class="text-xl font-semibold">Laporan Laba Rugi Komersial & Fiskal</h1>
+            </header>
+            <main class="p-6 md:p-8 w-full">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center h-64">
+                    <svg class="w-16 h-16 text-indigo-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <h2 class="text-xl font-semibold text-gray-700">Modul Segera Hadir</h2>
+                    <p class="text-gray-500 mt-2 max-w-md">Fitur penarikan data dari Google Sheets untuk merender tabel Laporan Laba Rugi sedang dalam tahap pengembangan (GET Request).</p>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
