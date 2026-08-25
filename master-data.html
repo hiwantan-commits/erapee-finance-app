@@ -17,15 +17,20 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Tombol Aksi Tambah -->
-                <div class="mb-6 flex justify-between items-center">
+                <!-- Tombol Aksi -->
+                <div class="mb-6 flex flex-wrap justify-between items-center gap-4">
                     <div>
                         <h2 class="text-xl font-bold text-gray-800">Manajemen Bagan Akun (COA) & Master Data</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Tambah, ubah, atau hapus akun akuntansi langsung dari Cloud Firestore</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Sinkronisasi data standar perusahaan dengan Cloud Firestore</p>
                     </div>
-                    <button onclick="bukaModalTambah()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
-                        + Tambah Akun COA Baru
-                    </button>
+                    <div class="flex gap-3">
+                        <button onclick="seedDefaultCOA()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                            📥 Muat Default COA Google Sheet
+                        </button>
+                        <button onclick="bukaModalTambah()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                            + Tambah Akun Baru
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Tabel COA Interaktif -->
@@ -99,13 +104,26 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase CRUD -->
+    <!-- Skrip Firebase CRUD & Seeder -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const COLLECTION_COA = "master_coa";
+
+        // Daftar default COA utama dari Google Sheet PT Erapee
+        const DEFAULT_COA_DATA = [
+            { kode: "1101", nama: "Kas", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
+            { kode: "1102", nama: "Bank operasional", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
+            { kode: "1103", nama: "Dompet elektronik/payment gateway", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
+            { kode: "1201", nama: "Piutang usaha", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Piutang usaha" },
+            { kode: "3101", nama: "Modal saham", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Ekuitas pemegang saham" },
+            { kode: "4101", nama: "SaaS dan lisensi perangkat lunak", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Laba Rugi" },
+            { kode: "4102", nama: "Pendapatan budidaya pertanian", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Laba Rugi" },
+            { kode: "5101", nama: "Beban gaji & tunjangan", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Laba Rugi" },
+            { kode: "5102", nama: "Beban sewa & utilitas", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Laba Rugi" }
+        ];
 
         window.muatDataCOA = async function() {
             const tbody = document.getElementById('tabelCOA');
@@ -116,7 +134,7 @@
                 tbody.innerHTML = '';
 
                 if (querySnapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada data COA. Silakan klik tombol tambah di atas.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada data COA. Klik tombol <b>"Muat Default COA Google Sheet"</b> di atas untuk mengisi data otomatis.</td></tr>`;
                     return;
                 }
 
@@ -139,6 +157,21 @@
             } catch (err) {
                 console.error("Gagal memuat COA:", err);
                 tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal terhubung ke database.</td></tr>`;
+            }
+        };
+
+        window.seedDefaultCOA = async function() {
+            if (confirm("Apakah Anda ingin memasukkan data default COA Google Sheet ke Firestore?")) {
+                try {
+                    for (let item of DEFAULT_COA_DATA) {
+                        await addDoc(collection(db, COLLECTION_COA), item);
+                    }
+                    alert("Berhasil memuat data default COA!");
+                    muatDataCOA();
+                } catch (error) {
+                    console.error("Gagal seeding:", error);
+                    alert("Terjadi kesalahan saat memuat data default.");
+                }
             }
         };
 
