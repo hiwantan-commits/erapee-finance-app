@@ -1,80 +1,104 @@
 // js/component.js
-// Mengatur Sidebar, Header, dan Responsif Mobile secara Dinamis
+// Komponen Terpusat: Sidebar dan Header Dinamis untuk PT ERAPEE
 
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Daftar Menu Navigasi
-    const menuItems = [
-        { name: "Input Transaksi", url: "index.html", icon: "📝" },
-        { name: "Manajemen Data", url: "manajemen.html", icon: "⚙️" },
-        { name: "Laporan Laba Rugi", url: "laporan.html", icon: "📊" },
-        { name: "Rekap Pajak", url: "pajak.html", icon: "💼" }
-        { name: "Histori Audit", href: 'histori.html', icon: '...' }
-    ];
-
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-
-    // 2. Render Sidebar (Desktop & Mobile Drawer)
-    const sidebarContainer = document.getElementById('sidebar-container');
-    if (sidebarContainer) {
-        sidebarContainer.innerHTML = `
-            <!-- Sidebar Desktop -->
-            <aside id="sidebarDesktop" class="w-64 bg-white border-r border-gray-200 flex-shrink-0 hidden md:block h-screen fixed top-0 left-0 z-30">
-                <div class="h-16 flex items-center px-6 border-b border-gray-200">
-                    <span class="text-lg font-bold text-indigo-600">ERAPEE Finance</span>
-                </div>
-                <nav class="p-4 space-y-2">
-                    ${menuItems.map(item => `
-                        <a href="${item.url}" class="flex items-center px-4 py-2.5 rounded-lg font-medium ${currentPage === item.url ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'}">
-                            <span class="mr-3">${item.icon}</span> ${item.name}
-                        </a>
-                    `).join('')}
-                </nav>
-            </aside>
-
-            <!-- Sidebar Mobile Overlay -->
-            <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden">
-                <div class="w-64 bg-white h-full shadow-xl p-4 space-y-2">
-                    <div class="flex justify-between items-center pb-4 border-b">
-                        <span class="font-bold text-indigo-600">ERAPEE Finance</span>
-                        <button onclick="toggleMobileMenu()" class="text-gray-500 font-bold text-lg">&times;</button>
-                    </div>
-                    ${menuItems.map(item => `
-                        <a href="${item.url}" class="flex items-center px-4 py-2.5 rounded-lg font-medium ${currentPage === item.url ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'}">
-                            <span class="mr-3">${item.icon}</span> ${item.name}
-                        </a>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    // 3. Render Header Dinamis di Setiap Halaman (jika ada elemen #header-container)
-    const headerContainer = document.getElementById('header-container');
-    if (headerContainer) {
-        const pageTitle = document.title.split('|')[0].trim();
-        headerContainer.innerHTML = `
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20">
-                <div class="flex items-center space-x-3">
-                    <button onclick="toggleMobileMenu()" class="md:hidden text-gray-600 focus:outline-none">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                    <h1 class="text-lg md:text-xl font-semibold text-gray-800">${pageTitle}</h1>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <span class="text-sm text-gray-500 hidden sm:inline">Admin PT Erapee</span>
-                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">A</div>
-                </div>
-            </header>
-        `;
-    }
+    muatSidebar();
+    muatHeader();
 });
 
-// Fungsi untuk membuka/menutup menu di HP
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobileMenu');
-    if (menu) {
-        menu.classList.toggle('hidden');
-    }
+function muatSidebar() {
+    const sidebarContainer = document.getElementById('sidebar-container');
+    if (!sidebarContainer) return;
+
+    // Tentukan halaman aktif berdasarkan URL saat ini
+    const path = window.location.pathname;
+    const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+
+    const menuItems = [
+        { name: 'Input Jurnal', href: 'index.html', icon: '📝' },
+        { name: 'Manajemen Jurnal', href: 'manajemen.html', icon: '📊' },
+        { name: 'Laporan Laba Rugi', href: 'laporan.html', icon: '📈' },
+        { name: 'Rekap Pajak', href: 'pajak.html', icon: '🏛️' },
+        { name: 'Histori Audit', href: 'histori.html', icon: '📜' }
+    ];
+
+    let menuHtml = '';
+    menuItems.forEach(item => {
+        const isActive = currentFile === item.href;
+        const activeClass = isActive 
+            ? 'bg-indigo-600 text-white font-medium shadow-sm' 
+            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900';
+
+        menuHtml += `
+            <a href="${item.href}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${activeClass}">
+                <span class="text-base">${item.icon}</span>
+                <span>${item.name}</span>
+            </a>
+        `;
+    });
+
+    sidebarContainer.innerHTML = `
+        <!-- Overlay untuk Mobile -->
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar Utama -->
+        <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+            <!-- Brand / Logo -->
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                    <h1 class="font-bold text-gray-900 text-base tracking-tight">PT ERAPEE</h1>
+                    <p class="text-xs text-gray-400 mt-0.5">Anugrah Sejahtera</p>
+                </div>
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Menu Navigasi -->
+            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+                ${menuHtml}
+            </nav>
+
+            <!-- Footer Sidebar -->
+            <div class="p-4 border-t border-gray-100 text-xs text-gray-400 text-center">
+                &copy; 2026 PT Erapee
+            </div>
+        </aside>
+    `;
 }
+
+function muatHeader() {
+    const headerContainer = document.getElementById('header-container');
+    if (!headerContainer) return;
+
+    // Ambil judul dari tag <title> halaman yang sedang dibuka
+    let pageTitle = document.title.split('|')[0].trim();
+
+    headerContainer.innerHTML = `
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+                <h2 class="text-lg font-bold text-gray-800">${pageTitle}</h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
+                    ● Terhubung ke Firebase
+                </span>
+            </div>
+        </header>
+    `;
+}
+
+// Fungsi global untuk membuka/menutup sidebar di perangkat mobile (*smartphone*)
+window.toggleSidebar = function() {
+    const sidebar = document.getElementById('app-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar && overlay) {
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+    }
+};
