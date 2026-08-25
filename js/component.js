@@ -30,12 +30,16 @@ function muatSidebar() {
     const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
 
     const menuItems = [
-        { name: 'Dashboard', href: 'index.html', icon: '🏠' },
-        { name: 'Input Jurnal', href: 'input-jurnal.html', icon: '📝' },
-        { name: 'Manajemen Jurnal', href: 'manajemen.html', icon: '📊' },
-        { name: 'Laporan Laba Rugi', href: 'laporan.html', icon: '📈' },
-        { name: 'Rekap Pajak', href: 'pajak.html', icon: '🏛️' },
-        { name: 'Histori Audit', href: 'histori.html', icon: '📜' }
+        { name: 'Dashboard & Audit', href: 'index.html', icon: '🏠' },
+        { name: 'Profil & Parameter Pajak', href: 'profil-pajak.html', icon: '🏢' },
+        { name: 'COA & Master Data', href: 'master-data.html', icon: '🗂️' },
+        { name: 'Input Jurnal (Double-Entry)', href: 'input-jurnal.html', icon: '📝' },
+        { name: 'Manajemen & Buku Besar', href: 'manajemen.html', icon: '📊' },
+        { name: 'Laporan Keuangan', href: 'laporan.html', icon: '📈' },
+        { name: 'Aset Tetap & Penyusutan', href: 'aset-tetap.html', icon: '🏭' },
+        { name: 'Rekapitulasi PPN & PPh', href: 'pajak.html', icon: '🏛️' },
+        { name: 'Rekonsiliasi Fiskal', href: 'rekonsiliasi.html', icon: '⚖️' },
+        { name: 'Histori Audit & Checks', href: 'histori.html', icon: '📜' }
     ];
 
     let menuHtml = '';
