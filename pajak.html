@@ -25,20 +25,88 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-y-auto">
             <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-                <h1 class="text-xl font-semibold">Dashboard Rekapitulasi Pajak (PPN & PPh)</h1>
-                <div class="flex items-center space-x-3">
-                    <span class="text-sm text-gray-500">Admin PT Erapee</span>
-                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">A</div>
-                </div>
+                <h1 class="text-xl font-semibold">Dashboard Rekapitulasi Pajak (Bulanan)</h1>
+                <button onclick="muatDataPajak()" class="text-sm bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-4 py-2 rounded-lg font-medium transition">Segarkan Data Pajak</button>
             </header>
-            <main class="p-6 md:p-8 w-full">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center h-64">
-                    <svg class="w-16 h-16 text-indigo-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    <h2 class="text-xl font-semibold text-gray-700">Modul Segera Hadir</h2>
-                    <p class="text-gray-500 mt-2 max-w-md">Fitur dashboard e-Faktur dan e-Bupot sedang dalam antrean pengembangan sistem.</p>
+            
+            <main class="p-6 md:p-8 max-w-5xl mx-auto w-full space-y-6">
+                <!-- Ringkasan Pajak -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <p class="text-sm text-gray-500 font-medium">Total PPN Keluaran</p>
+                        <h3 id="lblPpn" class="text-2xl font-bold text-blue-600 mt-2">Rp 0</h3>
+                        <p class="text-xs text-gray-400 mt-1">Wajib setor & lapor e-Faktur</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <p class="text-sm text-gray-500 font-medium">Total Potongan PPh</p>
+                        <h3 id="lblPph" class="text-2xl font-bold text-purple-600 mt-2">Rp 0</h3>
+                        <p class="text-xs text-gray-400 mt-1">PPh 21 / PPh 23 / PPh 4(2)</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <p class="text-sm text-gray-500 font-medium">Estimasi Volume Bruto (DPP)</p>
+                        <h3 id="lblDpp" class="text-2xl font-bold text-gray-800 mt-2">Rp 0</h3>
+                        <p class="text-xs text-gray-400 mt-1">Dasar Pengenaan Pajak Total</p>
+                    </div>
+                </div>
+
+                <!-- Keterangan Pajak Perusahaan -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h2 class="font-semibold text-lg mb-4">Panduan Pelaporan Pajak PT ERAPEE ANUGRAH SEJAHTERA</h2>
+                    <div class="space-y-3 text-sm text-gray-600">
+                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <strong>1. Sektor IT & Software (KBLI 58290 & 62199):</strong> Pendapatan dari penjualan lisensi atau jasa pemrograman wajib menerbitkan Faktur Pajak bermuatan PPN dan berpotensi dipotong PPh Pasal 23 oleh klien korporat.
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <strong>2. Sektor Pertanian (KBLI 01138, 01140, 01220):</strong> Hasil bumi/pertanian merupakan barang strategis yang dibebaskan dari pengenaan PPN, namun omzetnya tetap dilaporkan dalam SPT Tahunan Badan.
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
+
+    <script>
+        // Masukkan Spreadsheet ID Anda yang sama
+        const spreadsheetId = '1uOoTR92drWwICpKxcC6Tab2pCTCt0JTusoJnoZq5x4U';
+        const sheetName = 'Database_Transaksi';
+
+        function muatDataPajak() {
+            const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+
+            fetch(url)
+                .then(res => res.text())
+                .then(text => {
+                    const jsonString = text.substring(47).slice(0, -2);
+                    const json = JSON.parse(jsonString);
+                    const rows = json.table.rows;
+                    
+                    let totalPpn = 0;
+                    let totalPph = 0;
+                    let totalDpp = 0;
+
+                    if (rows) {
+                        rows.forEach(r => {
+                            const c = r.c;
+                            if (!c[0] || !c[5]) return;
+
+                            let dpp = c[5] ? (parseFloat(c[5].v) || 0) : 0;
+                            let ppn = c[6] ? (parseFloat(c[6].v) || 0) : 0;
+                            let pph = c[7] ? (parseFloat(c[7].v) || 0) : 0;
+
+                            totalDpp += dpp;
+                            totalPpn += ppn;
+                            totalPph += pph;
+                        });
+                    }
+
+                    document.getElementById('lblPpn').innerText = `Rp ${totalPpn.toLocaleString('id-ID')}`;
+                    document.getElementById('lblPph').innerText = `Rp ${totalPph.toLocaleString('id-ID')}`;
+                    document.getElementById('lblDpp').innerText = `Rp ${totalDpp.toLocaleString('id-ID')}`;
+                })
+                .catch(err => console.error('Gagal mengambil data pajak:', err));
+        }
+
+        muatDataPajak();
+    </script>
 </body>
 </html>
