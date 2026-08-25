@@ -19,16 +19,16 @@
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
                 <!-- Navigasi Tab Laporan -->
                 <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4">
-                    <button onclick="gantiTab('labarugi')" id="tabLabaRugi" class="px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 text-white shadow-sm transition">
+                    <button onclick="gantiTab('LabaRugi')" id="tabLabaRugi" class="px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 text-white shadow-sm transition">
                         📈 Laba Rugi
                     </button>
-                    <button onclick="gantiTab('neraca')" id="tabNeraca" class="px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-600 hover:bg-gray-100 transition border border-gray-200">
+                    <button onclick="gantiTab('Neraca')" id="tabNeraca" class="px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-600 hover:bg-gray-100 transition border border-gray-200">
                         ⚖️ Posisi Keuangan (Neraca)
                     </button>
-                    <button onclick="gantiTab('aruskas')" id="tabArusKas" class="px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-600 hover:bg-gray-100 transition border border-gray-200">
+                    <button onclick="gantiTab('ArusKas')" id="tabArusKas" class="px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-600 hover:bg-gray-100 transition border border-gray-200">
                         💰 Arus Kas
                     </button>
-                    <button onclick="gantiTab('neracasaldo')" id="tabNeracaSaldo" class="px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-600 hover:bg-gray-100 transition border border-gray-200">
+                    <button onclick="gantiTab('NeracaSaldo')" id="tabNeracaSaldo" class="px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-600 hover:bg-gray-100 transition border border-gray-200">
                         📊 Neraca Saldo (Trial Balance)
                     </button>
                 </div>
@@ -147,31 +147,31 @@
         </div>
     </div>
 
-    <!-- Skrip Pengaturan Tab (Tersambung ke Global Window) -->
+    <!-- Skrip Pengaturan Tab yang Sinkron -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Mendaftarkan fungsi gantiTab secara global ke objek window
-        window.gantiTab = function(tab) {
-            const tabs = ['labarugi', 'neraca', 'aruskas', 'neracasaldo'];
-            tabs.forEach(t => {
-                const el = document.getElementById('konten' + t.charAt(0).toUpperCase() + t.slice(1));
-                const btn = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
-                
-                if (el) el.classList.add('hidden');
-                if (btn) {
-                    btn.className = "px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-600 hover:bg-gray-100 transition border border-gray-200";
+        window.gantiTab = function(namaTab) {
+            const listTab = ['LabaRugi', 'Neraca', 'ArusKas', 'NeracaSaldo'];
+
+            listTab.forEach(t => {
+                const konten = document.getElementById('konten' + t);
+                const tombol = document.getElementById('tab' + t);
+
+                if (konten) konten.classList.add('hidden');
+                if (tombol) {
+                    tombol.className = "px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-600 hover:bg-gray-100 transition border border-gray-200";
                 }
             });
 
-            const targetKonten = document.getElementById('konten' + tab.charAt(0).toUpperCase() + tab.slice(1));
-            const targetBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+            const targetKonten = document.getElementById('konten' + namaTab);
+            const targetTombol = document.getElementById('tab' + namaTab);
 
             if (targetKonten) targetKonten.classList.remove('hidden');
-            if (targetBtn) {
-                targetBtn.className = "px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 text-white shadow-sm transition";
+            if (targetTombol) {
+                targetTombol.className = "px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 text-white shadow-sm transition";
             }
         };
     </script>
