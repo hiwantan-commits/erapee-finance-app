@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
         { name: "Manajemen Data", url: "manajemen.html", icon: "⚙️" },
         { name: "Laporan Laba Rugi", url: "laporan.html", icon: "📊" },
         { name: "Rekap Pajak", url: "pajak.html", icon: "💼" }
+        { name: 'Histori Audit', href: 'histori.html', icon: '...' }
     ];
 
     const currentPage = window.location.pathname.split("/").pop() || "index.html";
