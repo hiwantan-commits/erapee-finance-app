@@ -3,93 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap Pajak | PT ERAPEE</title>
-    <!-- Tailwind CSS -->
+    <title>Rekapitulasi PPN & PPh | PT ERAPEE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- File CSS Terpusat -->
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="text-gray-800">
+<body class="text-gray-800 bg-gray-50">
     <div class="flex h-screen overflow-hidden">
-        
-        <!-- SIDEBAR DINAMIS -->
+        <!-- SIDEBAR -->
         <div id="sidebar-container"></div>
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
-            
-            <!-- HEADER DINAMIS -->
             <div id="header-container"></div>
 
-            <main class="p-4 md:p-8 max-w-5xl mx-auto w-full space-y-6">
-                <!-- Ringkasan Pajak -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="dashboard-card p-6">
-                        <p class="text-sm text-gray-500 font-medium">Total PPN Keluaran</p>
-                        <h3 id="lblPpn" class="text-2xl font-bold text-blue-600 mt-2">Rp 0</h3>
-                        <p class="text-xs text-gray-400 mt-1">Wajib setor & lapor e-Faktur</p>
+            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+                <!-- Rekap PPN -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
+                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">Rekapitulasi PPN (Masa Pajak 2026)</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Penghitungan PPN Keluaran & Masukan Standar Coretax</p>
+                        </div>
+                        <span class="text-xs px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-full">Tarif Efektif PPN 11%</span>
                     </div>
-                    <div class="dashboard-card p-6">
-                        <p class="text-sm text-gray-500 font-medium">Total Potongan PPh</p>
-                        <h3 id="lblPph" class="text-2xl font-bold text-purple-600 mt-2">Rp 0</h3>
-                        <p class="text-xs text-gray-400 mt-1">PPh 21 / PPh 23 / PPh 4(2)</p>
-                    </div>
-                    <div class="dashboard-card p-6">
-                        <p class="text-sm text-gray-500 font-medium">Estimasi Volume Bruto (DPP)</p>
-                        <h3 id="lblDpp" class="text-2xl font-bold text-gray-800 mt-2">Rp 0</h3>
-                        <p class="text-xs text-gray-400 mt-1">Dasar Pengenaan Pajak Total</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-4">Masa Pajak</th>
+                                    <th class="p-4 text-right">DPP Penjualan</th>
+                                    <th class="p-4 text-right">PPN Keluaran</th>
+                                    <th class="p-4 text-right">DPP Pembelian</th>
+                                    <th class="p-4 text-right">PPN Masukan</th>
+                                    <th class="p-4 text-center">Kurang / (Lebih) Bayar</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr>
+                                    <td class="p-4">Januari 2026</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-center font-semibold text-gray-600">Rp 0</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4">Februari 2026</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-center font-semibold text-gray-600">Rp 0</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Keterangan Pajak Perusahaan -->
-                <div class="dashboard-card p-6">
-                    <h2 class="font-semibold text-lg mb-4 text-gray-800">Panduan Pelaporan Pajak PT ERAPEE ANUGRAH SEJAHTERA</h2>
-                    <div class="space-y-3 text-sm text-gray-600">
-                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
-                            <strong>1. Sektor IT & Software (KBLI 58290 & 62199):</strong> Pendapatan dari penjualan lisensi atau jasa pemrograman wajib menerbitkan Faktur Pajak bermuatan PPN dan berpotensi dipotong PPh Pasal 23 oleh klien korporat.
-                        </div>
-                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
-                            <strong>2. Sektor Pertanian (KBLI 01138, 01140, 01220):</strong> Hasil bumi/pertanian merupakan barang strategis yang dibebaskan dari pengenaan PPN, namun omzetnya tetap dilaporkan dalam SPT Tahunan Badan.
-                        </div>
+                <!-- Rekap PPh Potong/Pungut -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
+                    <div class="mb-6 pb-4 border-b border-gray-100">
+                        <h2 class="text-lg font-bold text-gray-800">Rekapitulasi PPh Potong / Pungut Pihak Lain</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">PPh Pasal 21, PPh Pasal 23 (2% & 15%), PPh Pasal 4(2) Final</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-4">Masa Pajak</th>
+                                    <th class="p-4 text-right">PPh 21</th>
+                                    <th class="p-4 text-right">PPh 23 (2%)</th>
+                                    <th class="p-4 text-right">PPh 4(2) Sewa</th>
+                                    <th class="p-4 text-right">Total Dipotong PT</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr>
+                                    <td class="p-4">Januari 2026</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right font-semibold text-gray-800">Rp 0</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4">Februari 2026</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right">0</td>
+                                    <td class="p-4 text-right font-semibold text-gray-800">Rp 0</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </main>
         </div>
     </div>
-
-    <!-- Skrip Utama (Menggunakan ES Module untuk Firebase) -->
-    <script type="module">
-        import { CONFIG, db } from "./js/config.js";
-        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        window.muatDataPajak = async function() {
-            try {
-                const querySnapshot = await getDocs(collection(db, CONFIG.COLLECTION_NAME));
-                
-                let totalPpn = 0;
-                let totalPph = 0;
-                let totalDpp = 0;
-
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    if (data.status !== 'POSTED') return;
-
-                    totalDpp += parseFloat(data.dpp_penjualan) || 0;
-                    totalPpn += parseFloat(data.ppn_keluaran) || 0;
-                    totalPph += parseFloat(data.pph_dipotong) || 0;
-                });
-
-                document.getElementById('lblPpn').innerText = `Rp ${totalPpn.toLocaleString('id-ID')}`;
-                document.getElementById('lblPph').innerText = `Rp ${totalPph.toLocaleString('id-ID')}`;
-                document.getElementById('lblDpp').innerText = `Rp ${totalDpp.toLocaleString('id-ID')}`;
-
-            } catch (err) {
-                console.error("Gagal mengambil data pajak:", err);
-            }
-        };
-
-        muatDataPajak();
-    </script>
     <script type="module" src="js/component.js"></script>
 </body>
 </html>
