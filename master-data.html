@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COA & Master Data | PT ERAPEE</title>
+    <title>COA & Master Data | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -17,27 +17,58 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Unit Usaha & KBLI -->
+                <!-- Unit Usaha & KBLI (Sesuai Referensi Sheet 03) -->
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
-                    <div class="mb-6 pb-4 border-b border-gray-100">
-                        <h2 class="text-lg font-bold text-gray-800">Unit Usaha & Klasifikasi KBLI</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Sektor operasional utama PT Erapee Anugrah Sejahtera</p>
+                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">Unit Usaha & Klasifikasi KBLI (Master Data)</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Segmen operasional, divisi digital, dan komoditas pertanian PT Erapee Anugrah Sejahtera</p>
+                        </div>
+                        <span class="text-xs px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">Sheet 03 Reference</span>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="p-5 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2.5 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded-lg">KBLI 58290</span>
-                            <h3 class="font-bold text-gray-800 mt-3">SaaS & Software Publishing</h3>
-                            <p class="text-xs text-gray-500 mt-1">SiPacul - Penerbitan perangkat lunak aplikasi digital dan layanan langganan.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- CORP -->
+                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 rounded font-mono">CORP</span>
+                            <h3 class="font-bold text-gray-800 text-sm mt-2">Corporate / Head Office</h3>
+                            <p class="text-xs text-gray-500 mt-1">Kantor Pusat & Administrasi Umum</p>
                         </div>
-                        <div class="p-5 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-lg">KBLI 01220 & Lainnya</span>
-                            <h3 class="font-bold text-gray-800 mt-3">Budidaya Pertanian Komoditas</h3>
-                            <p class="text-xs text-gray-500 mt-1">Wani Tani - Budidaya tanaman buah penunjang (Nanas, Cabai, Tebu).</p>
+                        <!-- MARC -->
+                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded font-mono">MARC | KBLI 62199</span>
+                            <h3 class="font-bold text-gray-800 text-sm mt-2">Marcframe</h3>
+                            <p class="text-xs text-gray-500 mt-1">Digital Services & Pemrograman</p>
                         </div>
-                        <div class="p-5 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-lg">Corporate</span>
-                            <h3 class="font-bold text-gray-800 mt-3">Head Office & Bersama</h3>
-                            <p class="text-xs text-gray-500 mt-1">Administrasi pusat, alokasi biaya bersama, dan manajemen keuangan.</p>
+                        <!-- SIP -->
+                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded font-mono">SIP | KBLI 58290</span>
+                            <h3 class="font-bold text-gray-800 text-sm mt-2">SiPacul</h3>
+                            <p class="text-xs text-gray-500 mt-1">Software Publishing & Aplikasi SaaS</p>
+                        </div>
+                        <!-- WT-NANAS -->
+                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded font-mono">WT-NANAS | KBLI 01220</span>
+                            <h3 class="font-bold text-gray-800 text-sm mt-2">Wani Tani - Nanas</h3>
+                            <p class="text-xs text-gray-500 mt-1">Budidaya Buah Tropis & Nanas</p>
+                        </div>
+                        <!-- WT-TEBU -->
+                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded font-mono">WT-TEBU | KBLI 01140</span>
+                            <h3 class="font-bold text-gray-800 text-sm mt-2">Wani Tani - Tebu</h3>
+                            <p class="text-xs text-gray-500 mt-1">Budidaya Tanaman Semusim Tebu</p>
+                        </div>
+                        <!-- WT-CABAI -->
+                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded font-mono">WT-CABAI | KBLI 01138</span>
+                            <h3 class="font-bold text-gray-800 text-sm mt-2">Wani Tani - Cabai</h3>
+                            <p class="text-xs text-gray-500 mt-1">Budidaya Sayuran & Cabai</p>
+                        </div>
+                        <!-- SHARED -->
+                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50 md:col-span-2 lg:col-span-3">
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-gray-200 text-gray-700 rounded font-mono">SHARED</span>
+                            <h3 class="font-bold text-gray-800 text-sm mt-2">Biaya Bersama (Shared Cost)</h3>
+                            <p class="text-xs text-gray-500 mt-1">Alokasi biaya operasional gabungan antar unit usaha</p>
                         </div>
                     </div>
                 </div>
@@ -53,7 +84,7 @@
                             🗑️ Bersihkan Semua
                         </button>
                         <button id="btnSeed" onclick="seedDefaultCOA()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
-                            📥 Muat Default COA 
+                            📥 Muat Default COA (101 Akun)
                         </button>
                         <button onclick="bukaModalTambah()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
                             + Tambah Akun Baru
@@ -116,7 +147,10 @@
                             <option value="Liabilitas">Liabilitas</option>
                             <option value="Ekuitas">Ekuitas</option>
                             <option value="Pendapatan">Pendapatan</option>
-                            <option value="Beban">Beban</option>
+                            <option value="Beban pokok">Beban Pokok</option>
+                            <option value="Beban operasional">Beban Operasional</option>
+                            <option value="Beban lain">Beban Lain</option>
+                            <option value="Pajak penghasilan">Pajak Penghasilan</option>
                         </select>
                     </div>
                 </div>
@@ -132,7 +166,7 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase CRUD & Seeder (Anti-Double & Reset) -->
+    <!-- Skrip Firebase CRUD & Seeder 101 COA -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -140,7 +174,6 @@
 
         const COLLECTION_COA = "master_coa";
 
-        // Daftar default COA utama dari Google Sheet PT Erapee
         // 101 Daftar Lengkap COA PT Erapee Anugrah Sejahtera
         const DEFAULT_COA_DATA = [
             { kode: "1101", nama: "Kas", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
@@ -148,100 +181,102 @@
             { kode: "1103", nama: "Dompet elektronik/payment gateway", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
             { kode: "1110", nama: "Kas dalam perjalanan/clearing", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
             { kode: "1201", nama: "Piutang usaha", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Piutang usaha" },
-            { kode: "1202", nama: "Piutang pihak berelasi", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Piutang pihak berelasi" },
-            { kode: "1203", nama: "Piutang karyawan", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Piutang lainnya" },
-            { kode: "1209", nama: "Cadangan kerugian piutang", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Piutang usaha" },
-            { kode: "1301", nama: "Persediaan bibit/benih", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Persediaan" },
-            { kode: "1302", nama: "Persediaan pupuk & obat-obatan", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Persediaan" },
+            { kode: "1202", nama: "Piutang karyawan", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Piutang lain" },
+            { kode: "1203", nama: "Piutang lain-lain", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Piutang lain" },
+            { kode: "1204", nama: "Kredit pajak PPh 23", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar dimuka" },
+            { kode: "1205", nama: "Kredit pajak PPh 22", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar dimuka" },
+            { kode: "1206", nama: "Angsuran PPh 25", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar dimuka" },
+            { kode: "1207", nama: "Kredit pajak luar negeri PPh 24", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar dimuka" },
+            { kode: "1210", nama: "Cadangan kerugian piutang", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Piutang usaha" },
+            { kode: "1301", nama: "Persediaan benih dan sarana produksi", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Persediaan" },
+            { kode: "1302", nama: "Tanaman dalam proses", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Persediaan" },
             { kode: "1303", nama: "Persediaan hasil panen", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Persediaan" },
-            { kode: "1310", nama: "Barang dalam proses (BDP) pertanian", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Persediaan" },
-            { kode: "1401", nama: "Pajak dibayar di muka (PPh 22, 23)", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar di muka" },
-            { kode: "1402", nama: "PPN Masukan (Kredit)", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar di muka" },
-            { kode: "1403", nama: "PPN Masukan (Nonkredit)", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Biaya dibayar di muka" },
-            { kode: "1409", nama: "Uang muka/Biaya dibayar di muka", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Biaya dibayar di muka" },
+            { kode: "1304", nama: "Pekerjaan digital dalam proses", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Persediaan/WIP" },
+            { kode: "1401", nama: "Sewa dibayar dimuka", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Biaya dibayar dimuka" },
+            { kode: "1402", nama: "Uang muka pembelian", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Uang muka" },
+            { kode: "1403", nama: "PPN masukan", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar dimuka" },
+            { kode: "1404", nama: "Beban dibayar dimuka lain", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Biaya dibayar dimuka" },
             { kode: "1501", nama: "Tanah", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
             { kode: "1502", nama: "Bangunan", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
-            { kode: "1503", nama: "Mesin dan peralatan berat", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
-            { kode: "1504", nama: "Kendaraan operasional", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
-            { kode: "1505", nama: "Peralatan kantor dan komputer", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
-            { kode: "1511", nama: "Akumulasi penyusutan bangunan", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
-            { kode: "1512", nama: "Akumulasi penyusutan mesin", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
-            { kode: "1513", nama: "Akumulasi penyusutan kendaraan", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
-            { kode: "1514", nama: "Akumulasi penyusutan peralatan", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
-            { kode: "1601", nama: "Aset takberwujud (Software proprietary)", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset takberwujud" },
-            { kode: "1602", nama: "Akumulasi amortisasi", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset takberwujud" },
+            { kode: "1503", nama: "Mesin dan alat pertanian", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1504", nama: "Komputer dan perangkat TI", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1505", nama: "Kendaraan", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1506", nama: "Peralatan kantor", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1592", nama: "Akumulasi penyusutan bangunan", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1593", nama: "Akumulasi penyusutan alat pertanian", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1594", nama: "Akumulasi penyusutan perangkat TI", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1595", nama: "Akumulasi penyusutan kendaraan", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1596", nama: "Akumulasi penyusutan peralatan kantor", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1701", nama: "Aset takberwujud - perangkat lunak", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset takberwujud" },
+            { kode: "1791", nama: "Akumulasi amortisasi perangkat lunak", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset takberwujud" },
             { kode: "2101", nama: "Utang usaha", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang usaha" },
-            { kode: "2102", nama: "Utang pihak berelasi", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pihak berelasi" },
-            { kode: "2201", nama: "Utang PPN Keluaran", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
-            { kode: "2202", nama: "Utang PPh Pasal 21", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
-            { kode: "2203", nama: "Utang PPh Pasal 23/26", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
-            { kode: "2204", nama: "Utang PPh Pasal 4(2) Final", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
-            { kode: "2205", nama: "Utang PPh Badan (Pasal 29)", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
-            { kode: "2206", nama: "Utang Pajak Lainnya", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
-            { kode: "2301", nama: "Beban yang masih harus dibayar (Akrual)", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Beban akrual" },
-            { kode: "2302", nama: "Utang gaji dan tunjangan", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang gaji" },
-            { kode: "2401", nama: "Pendapatan diterima di muka (SaaS)", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Pendapatan diterima di muka" },
-            { kode: "2501", nama: "Utang bank jangka pendek", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang bank jangka pendek" },
-            { kode: "2601", nama: "Utang bank jangka panjang", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang bank jangka panjang" },
-            { kode: "2602", nama: "Kewajiban imbalan kerja (PSAK 24)", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Kewajiban jangka panjang lainnya" },
-            { kode: "3101", nama: "Modal saham", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Ekuitas pemegang saham" },
-            { kode: "3102", nama: "Tambahan modal disetor (Agio/Disagio)", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Tambahan modal disetor" },
-            { kode: "3201", nama: "Dana cadangan wajib", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Dana cadangan" },
-            { kode: "3301", nama: "Saldo laba (ditahan) tahun-tahun lalu", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Saldo laba" },
-            { kode: "3302", nama: "Laba (rugi) tahun berjalan", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Saldo laba" },
-            { kode: "3401", nama: "Dividen diumumkan", saldoNormal: "Debit", kelompok: "Ekuitas", posLaporan: "Saldo laba" },
-            { kode: "4101", nama: "Pendapatan langganan SaaS", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "SaaS dan lisensi perangkat lunak" },
-            { kode: "4102", nama: "Pendapatan lisensi software", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "SaaS dan lisensi perangkat lunak" },
-            { kode: "4103", nama: "Pendapatan custom development (Marcframe)", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Jasa digital lainnya" },
-            { kode: "4201", nama: "Pendapatan penjualan nanas", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan budidaya pertanian" },
-            { kode: "4202", nama: "Pendapatan penjualan cabai", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan budidaya pertanian" },
-            { kode: "4203", nama: "Pendapatan penjualan tebu", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan budidaya pertanian" },
-            { kode: "4301", nama: "Retur dan potongan penjualan (-)", saldoNormal: "Debit", kelompok: "Pendapatan", posLaporan: "Diskon dan retur" },
-            { kode: "5101", nama: "HPP Server & Cloud (AWS/GCP)", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "HPP - Infrastruktur digital" },
-            { kode: "5102", nama: "HPP Lisensi pihak ketiga", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "HPP - Infrastruktur digital" },
-            { kode: "5201", nama: "HPP Bibit/Benih pertanian", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "HPP - Budidaya pertanian" },
-            { kode: "5202", nama: "HPP Pupuk dan obat-obatan", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "HPP - Budidaya pertanian" },
-            { kode: "5203", nama: "HPP Tenaga kerja buruh tani", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "HPP - Budidaya pertanian" },
-            { kode: "5204", nama: "HPP Sewa lahan pertanian", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "HPP - Budidaya pertanian" },
-            { kode: "6101", nama: "Gaji pokok", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Gaji dan tunjangan direksi/karyawan" },
-            { kode: "6102", nama: "Tunjangan jabatan & transportasi", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Gaji dan tunjangan direksi/karyawan" },
-            { kode: "6103", nama: "Bonus dan THR", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Gaji dan tunjangan direksi/karyawan" },
-            { kode: "6104", nama: "BPJS Ketenagakerjaan & Kesehatan (Porsi PT)", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Gaji dan tunjangan direksi/karyawan" },
-            { kode: "6201", nama: "Beban pemasaran dan promosi digital", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban pemasaran dan promosi" },
-            { kode: "6202", nama: "Beban komisi afiliasi", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban pemasaran dan promosi" },
-            { kode: "6301", nama: "Beban sewa kantor pusat", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Sewa gedung/kantor" },
-            { kode: "6302", nama: "Beban utilitas (Listrik, Air, Internet)", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Utilitas dan telekomunikasi" },
-            { kode: "6303", nama: "Beban alat tulis dan perlengkapan kantor", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Perlengkapan kantor" },
-            { kode: "6401", nama: "Beban penyusutan bangunan", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Penyusutan dan amortisasi" },
-            { kode: "6402", nama: "Beban penyusutan mesin dan peralatan", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Penyusutan dan amortisasi" },
-            { kode: "6403", nama: "Beban penyusutan kendaraan", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Penyusutan dan amortisasi" },
-            { kode: "6404", nama: "Beban amortisasi software", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Penyusutan dan amortisasi" },
-            { kode: "6501", nama: "Beban transportasi dan dinas luar kota", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Transportasi dan perjalanan dinas" },
-            { kode: "6502", nama: "Beban BBM operasional", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Transportasi dan perjalanan dinas" },
-            { kode: "6601", nama: "Beban perbaikan dan pemeliharaan", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Perbaikan dan pemeliharaan" },
-            { kode: "6701", nama: "Beban jasa profesional (Legal, Notaris, Pajak)", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Jasa profesional" },
-            { kode: "6801", nama: "Beban asuransi", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban operasional lainnya" },
-            { kode: "6802", nama: "Beban retribusi dan perizinan", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban operasional lainnya" },
-            { kode: "6803", nama: "Beban kerugian piutang", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban operasional lainnya" },
-            { kode: "6804", nama: "Beban bank dan administrasi", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban operasional lainnya" },
-            { kode: "6899", nama: "Beban operasional rupa-rupa", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban operasional lainnya" },
-            { kode: "7101", nama: "Pendapatan bunga bank", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan bunga" },
-            { kode: "7102", nama: "Pendapatan selisih kurs", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Laba (rugi) selisih kurs" },
-            { kode: "7103", nama: "Laba penjualan aset tetap", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Laba (rugi) pelepasan aset" },
-            { kode: "7199", nama: "Pendapatan lain-lain", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan lain-lain" },
-            { kode: "7201", nama: "Beban bunga pinjaman (Financing)", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban bunga pinjaman" },
-            { kode: "7202", nama: "Beban denda dan sanksi administrasi", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban di luar usaha lainnya" },
-            { kode: "7203", nama: "Rugi penjualan aset tetap", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Laba (rugi) pelepasan aset" },
-            { kode: "7204", nama: "Rugi penurunan nilai persediaan/aset", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban di luar usaha lainnya" },
-            { kode: "7299", nama: "Beban lain-lain", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban di luar usaha lainnya" },
-            { kode: "8101", nama: "Beban Pajak Penghasilan (Badan)", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban pajak penghasilan" },
-            { kode: "8102", nama: "Beban Pajak Tangguhan", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beban pajak penghasilan" },
-            { kode: "9101", nama: "Biaya jamuan tamu (Non-deductible)", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beda Tetap (Koreksi Positif)" },
-            { kode: "9102", nama: "Beban kenikmatan natura tertentu", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beda Tetap (Koreksi Positif)" },
-            { kode: "9103", nama: "Denda pajak (Koreksi fiskal)", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beda Tetap (Koreksi Positif)" },
-            { kode: "9104", nama: "Beban sumbangan (Koreksi fiskal)", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beda Tetap (Koreksi Positif)" },
-            { kode: "9201", nama: "Penyusutan selisih fiskal (Koreksi Positif/Negatif)", saldoNormal: "Debit", kelompok: "Beban", posLaporan: "Beda Waktu" },
-            { kode: "9999", nama: "Ikhtisar Laba Rugi (Clearing)", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Tidak dilaporkan" }
+            { kode: "2102", nama: "Beban akrual", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Akrual" },
+            { kode: "2103", nama: "Uang muka pelanggan", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Pendapatan diterima dimuka" },
+            { kode: "2104", nama: "Utang gaji/honorarium", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang lain" },
+            { kode: "2201", nama: "PPN keluaran", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2202", nama: "Utang PPh 21", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2203", nama: "Utang PPh 23", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2204", nama: "Utang PPh Final Pasal 4(2)", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2205", nama: "Utang PPh 22", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2206", nama: "Utang PPh 26", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2208", nama: "Utang PPh 29", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2301", nama: "Pinjaman pemegang saham", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Pinjaman pihak berelasi" },
+            { kode: "2302", nama: "Pinjaman bank", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Pinjaman" },
+            { kode: "3101", nama: "Modal saham", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Modal saham" },
+            { kode: "3102", nama: "Tambahan modal disetor", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Tambahan modal" },
+            { kode: "3201", nama: "Dana cadangan wajib", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Cadangan" },
+            { kode: "3301", nama: "Saldo laba/(rugi)", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Saldo laba" },
+            { kode: "4101", nama: "Pendapatan langganan SaaS SiPacul", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan software" },
+            { kode: "4102", nama: "Pendapatan lisensi perangkat lunak", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan software" },
+            { kode: "4201", nama: "Pendapatan pembuatan website", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pemrograman" },
+            { kode: "4202", nama: "Pendapatan template website", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pemrograman" },
+            { kode: "4203", nama: "Pendapatan pemrograman/kustomisasi", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pemrograman" },
+            { kode: "4301", nama: "Penjualan hasil panen nanas", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pertanian" },
+            { kode: "4302", nama: "Penjualan hasil panen tebu", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pertanian" },
+            { kode: "4303", nama: "Penjualan hasil panen cabai", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pertanian" },
+            { kode: "4309", nama: "Penjualan hasil pertanian lain", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pertanian" },
+            { kode: "4901", nama: "Retur dan potongan penjualan", saldoNormal: "Debit", kelompok: "Pendapatan", posLaporan: "Pengurang pendapatan" },
+            { kode: "5101", nama: "Hosting/cloud langsung", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Beban pokok digital" },
+            { kode: "5102", nama: "Freelancer/subkontrak proyek digital", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Beban pokok digital" },
+            { kode: "5103", nama: "Lisensi pihak ketiga langsung", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Beban pokok digital" },
+            { kode: "5104", nama: "Biaya langsung proyek digital lain", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Beban pokok digital" },
+            { kode: "5201", nama: "Sewa lahan budidaya", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5202", nama: "Pengolahan dan persiapan lahan", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5203", nama: "Benih/bibit dan bahan tanam", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5204", nama: "Pupuk, pestisida, dan sarana produksi", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5205", nama: "Tenaga kerja budidaya", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5206", nama: "Irigasi dan penyiraman", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5207", nama: "Panen dan pascapanen", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5208", nama: "Transportasi hasil panen", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5209", nama: "Kerugian tanaman/penghapusan", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5301", nama: "Harga pokok hasil panen terjual", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "HPP hasil panen" },
+            { kode: "6101", nama: "Gaji dan upah administrasi", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban pegawai" },
+            { kode: "6102", nama: "Gaji/honorarium direksi", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban pegawai" },
+            { kode: "6103", nama: "Sewa kantor", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6104", nama: "Listrik, air, dan internet", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6105", nama: "Perlengkapan kantor", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6106", nama: "Pemasaran dan promosi", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban penjualan" },
+            { kode: "6107", nama: "Perjalanan dinas", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6108", nama: "Notaris dan legal", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban profesional" },
+            { kode: "6109", nama: "Akuntansi dan konsultan pajak", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban profesional" },
+            { kode: "6110", nama: "Administrasi bank/payment gateway", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6111", nama: "Langganan perangkat lunak", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6112", nama: "Pemeliharaan dan perbaikan", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6113", nama: "Asuransi", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6114", nama: "Penyusutan aset tetap", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Penyusutan" },
+            { kode: "6115", nama: "Amortisasi aset takberwujud", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Amortisasi" },
+            { kode: "6116", nama: "Pelatihan dan pengembangan", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban pegawai" },
+            { kode: "6117", nama: "Overhead pertanian", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6190", nama: "Beban operasional lain", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "7101", nama: "Pendapatan bunga", saldoNormal: "Kredit", kelompok: "Beban lain", posLaporan: "Pendapatan lain" },
+            { kode: "7102", nama: "Pendapatan lain-lain", saldoNormal: "Kredit", kelompok: "Beban lain", posLaporan: "Pendapatan lain" },
+            { kode: "7201", nama: "Beban bunga", saldoNormal: "Debit", kelompok: "Beban lain", posLaporan: "Beban lain" },
+            { kode: "7202", nama: "Rugi selisih kurs", saldoNormal: "Debit", kelompok: "Beban lain", posLaporan: "Beban lain" },
+            { kode: "7203", nama: "Denda dan sanksi pajak", saldoNormal: "Debit", kelompok: "Beban lain", posLaporan: "Beban lain" },
+            { kode: "7204", nama: "Sumbangan/donasi", saldoNormal: "Debit", kelompok: "Beban lain", posLaporan: "Beban lain" },
+            { kode: "7205", nama: "Beban lain-lain", saldoNormal: "Debit", kelompok: "Beban lain", posLaporan: "Beban lain" },
+            { kode: "8101", nama: "Beban pajak penghasilan kini", saldoNormal: "Debit", kelompok: "Pajak penghasilan", posLaporan: "Pajak kini" },
+            { kode: "8102", nama: "Beban/(manfaat) pajak tangguhan", saldoNormal: "Debit", kelompok: "Pajak penghasilan", posLaporan: "Pajak tangguhan" }
         ];
 
         window.muatDataCOA = async function() {
@@ -253,11 +288,10 @@
                 tbody.innerHTML = '';
 
                 if (querySnapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada data COA. Klik tombol <br><br><b>"📥 Muat Default COA"</b> di atas.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada data COA. Klik tombol <br><br><b>"📥 Muat Default COA (101 Akun)"</b> di atas.</td></tr>`;
                     return;
                 }
 
-                // Sorting data berdasarkan kode akun agar rapi
                 let coaData = [];
                 querySnapshot.forEach((docSnap) => {
                     coaData.push({ id: docSnap.id, ...docSnap.data() });
@@ -285,44 +319,41 @@
             }
         };
 
-        // Fungsi Baru: Menghapus seluruh data untuk membersihkan duplikasi lama
         window.resetDataCOA = async function() {
-            if (confirm("⚠️ PERHATIAN: Ini akan menghapus SELURUH data COA di layar. Apakah Anda yakin ingin mengosongkan tabel?")) {
+            if (confirm("⚠️ PERHATIAN: Ini akan menghapus SELURUH data COA di database. Apakah Anda yakin?")) {
                 try {
                     const querySnapshot = await getDocs(collection(db, COLLECTION_COA));
                     const promises = [];
                     querySnapshot.forEach((docSnap) => {
                         promises.push(deleteDoc(doc(db, COLLECTION_COA, docSnap.id)));
                     });
-                    
                     await Promise.all(promises);
                     alert("Seluruh data COA berhasil dibersihkan!");
                     muatDataCOA();
                 } catch (error) {
                     console.error("Gagal mereset data:", error);
-                    alert("Terjadi kesalahan saat menghapus data: " + error.message);
+                    alert("Terjadi kesalahan: " + error.message);
                 }
             }
         };
 
         window.seedDefaultCOA = async function() {
-            if (confirm("Apakah Anda ingin memasukkan data default COA ke Firestore? (Jika sudah ada, data akan diperbarui dan tidak menjadi ganda)")) {
+            if (confirm("Apakah Anda ingin memasukkan 101 data default COA ke Firestore?")) {
                 const btn = document.getElementById('btnSeed');
                 btn.innerText = "Memuat...";
                 btn.disabled = true;
 
                 try {
                     for (let item of DEFAULT_COA_DATA) {
-                        // setDoc menggunakan item.kode sebagai ID Dokumen, mencegah duplikasi
                         await setDoc(doc(db, COLLECTION_COA, item.kode), item);
                     }
-                    alert("Berhasil memuat data default COA!");
+                    alert("Berhasil memuat 101 data default COA!");
                     muatDataCOA();
                 } catch (error) {
                     console.error("Gagal seeding:", error);
                     alert("Gagal memuat data: " + error.message);
                 } finally {
-                    btn.innerText = "📥 Muat Default COA";
+                    btn.innerText = "📥 Muat Default COA (101 Akun)";
                     btn.disabled = false;
                 }
             }
@@ -343,7 +374,7 @@
             document.getElementById('modalTitle').innerText = "Edit Akun COA";
             document.getElementById('editDocId').value = id;
             document.getElementById('kodeAkun').value = data.kode || "";
-            document.getElementById('kodeAkun').readOnly = true; // Kunci kode akun saat edit
+            document.getElementById('kodeAkun').readOnly = true;
             document.getElementById('kodeAkun').classList.add('bg-gray-100');
             document.getElementById('namaAkun').value = data.nama || "";
             document.getElementById('saldoNormal').value = data.saldoNormal || "Debit";
@@ -370,11 +401,9 @@
 
             try {
                 if (id) {
-                    // Update akun yang sudah ada
                     await updateDoc(doc(db, COLLECTION_COA, id), newData);
                     alert("Akun COA berhasil diperbarui!");
                 } else {
-                    // Tambah akun baru menggunakan kode sebagai ID untuk mencegah duplikasi
                     await setDoc(doc(db, COLLECTION_COA, kodeInput), newData);
                     alert("Akun COA baru berhasil ditambahkan!");
                 }
@@ -399,10 +428,8 @@
             }
         };
 
-        // Muat data saat halaman pertama kali dibuka
         muatDataCOA();
     </script>
-    <!-- Komponen Sidebar & Proteksi Sesi -->
     <script type="module" src="js/component.js"></script>
 </body>
 </html>
