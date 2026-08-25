@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histori Pengeditan | PT ERAPEE</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- File CSS Terpusat -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="text-gray-800">
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- SIDEBAR DINAMIS -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
+            
+            <!-- HEADER DINAMIS -->
+            <div id="header-container"></div>
+
+            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+                <div class="dashboard-card overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h2 class="font-semibold text-lg text-gray-800">Histori & Jejak Audit Pengeditan Jurnal</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Catatan transparan seluruh aktivitas tambah, edit, dan hapus data</p>
+                        </div>
+                        <button onclick="muatHistori()" class="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition">Muat Ulang Histori</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                                    <th class="p-4">Waktu Aktivitas</th>
+                                    <th class="p-4">Aksi / Jenis Aktivitas</th>
+                                    <th class="p-4">No Bukti Jurnal</th>
+                                    <th class="p-4">Keterangan / Detail Perubahan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelHistori" class="divide-y divide-gray-100 text-sm">
+                                <tr>
+                                    <td colspan="4" class="p-8 text-center text-gray-400">Memuat catatan histori dari Firebase...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Skrip Utama (Menggunakan ES Module untuk Firebase) -->
+    <script type="module">
+        import { CONFIG, db } from "./js/config.js";
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        window.muatHistori = async function() {
+            const tbody = document.getElementById('tabelHistori');
+            tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Mengambil data histori...</td></tr>`;
+
+            try {
+                // Mengambil data dari collection 'histori_audit' diurutkan berdasarkan waktu terbaru
+                const q = query(collection(db, "histori_audit"), orderBy("waktu", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                tbody.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Belum ada catatan histori aktivitas.</td></tr>`;
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    let waktuFormat = '-';
+                    if (data.waktu && data.waktu.toDate) {
+                        waktuFormat = data.waktu.toDate().toLocaleString('id-ID');
+                    }
+
+                    // Warna badge berdasarkan jenis aksi
+                    let badgeColor = 'bg-blue-100 text-blue-700';
+                    if (data.aksi === 'TAMBAH JURNAL') badgeColor = 'bg-green-100 text-green-700';
+                    if (data.aksi === 'EDIT JURNAL') badgeColor = 'bg-yellow-100 text-yellow-700';
+                    if (data.aksi === 'HAPUS JURNAL') badgeColor = 'bg-red-100 text-red-700';
+
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-4 whitespace-nowrap text-xs text-gray-500">${waktuFormat}</td>
+                        <td class="p-4 whitespace-nowrap"><span class="px-2.5 py-1 text-xs rounded-full font-semibold ${badgeColor}">${data.aksi}</span></td>
+                        <td class="p-4 font-mono text-xs font-semibold">${data.no_bukti || '-'}</td>
+                        <td class="p-4 text-gray-700">${data.detail || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Gagal memuat histori:", err);
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500">Gagal memuat histori. Pastikan indeks Firestore sudah dibuat jika diperlukan.</td></tr>`;
+            }
+        };
+
+        muatHistori();
+    </script>
+    <script src="js/component.js"></script>
+</body>
+</html>
