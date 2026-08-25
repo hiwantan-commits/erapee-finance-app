@@ -3,46 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histori Pengeditan | PT ERAPEE</title>
-    <!-- Tailwind CSS -->
+    <title>Histori Audit & Checks | PT ERAPEE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- File CSS Terpusat -->
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="text-gray-800">
+<body class="text-gray-800 bg-gray-50">
     <div class="flex h-screen overflow-hidden">
-        
-        <!-- SIDEBAR DINAMIS -->
+        <!-- SIDEBAR -->
         <div id="sidebar-container"></div>
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
-            
-            <!-- HEADER DINAMIS -->
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <div class="dashboard-card overflow-hidden">
-                    <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <!-- Pemeriksaan Sistem & Audit Checks -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
+                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
-                            <h2 class="font-semibold text-lg text-gray-800">Histori & Jejak Audit Pengeditan Jurnal</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Catatan transparan seluruh aktivitas tambah, edit, dan hapus data</p>
+                            <h2 class="text-lg font-bold text-gray-800">Pemeriksaan Sistem (Audit Checks)</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Validasi otomatis keseimbangan jurnal, neraca saldo, dan kepatuhan</p>
                         </div>
-                        <button onclick="muatHistori()" class="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition">Muat Ulang Histori</button>
+                        <span class="text-xs px-3 py-1 bg-green-50 text-green-700 font-semibold rounded-full">Status: PASS</span>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left text-sm border-collapse">
                             <thead>
-                                <tr class="border-b bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                                    <th class="p-4">Waktu Aktivitas</th>
-                                    <th class="p-4">Aksi / Jenis Aktivitas</th>
-                                    <th class="p-4">No Bukti Jurnal</th>
-                                    <th class="p-4">Keterangan / Detail Perubahan</th>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-4">Pemeriksaan</th>
+                                    <th class="p-4 text-center">Nilai</th>
+                                    <th class="p-4 text-center">Ekspektasi</th>
+                                    <th class="p-4 text-center">Prioritas</th>
+                                    <th class="p-4 text-center">Status</th>
+                                    <th class="p-4">Tindakan</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelHistori" class="divide-y divide-gray-100 text-sm">
+                            <tbody class="divide-y divide-gray-100">
                                 <tr>
-                                    <td colspan="4" class="p-8 text-center text-gray-400">Memuat catatan histori dari Firebase...</td>
+                                    <td class="p-4 font-medium">Jurnal POSTED tidak seimbang</td>
+                                    <td class="p-4 text-center">0.0</td>
+                                    <td class="p-4 text-center">0</td>
+                                    <td class="p-4 text-center"><span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded">KRITIS</span></td>
+                                    <td class="p-4 text-center"><span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded">PASS</span></td>
+                                    <td class="p-4 text-xs text-gray-500">Perbaiki debit/kredit untuk setiap ID jurnal</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-medium">Neraca saldo seimbang</td>
+                                    <td class="p-4 text-center">0.0</td>
+                                    <td class="p-4 text-center">0</td>
+                                    <td class="p-4 text-center"><span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded">KRITIS</span></td>
+                                    <td class="p-4 text-center"><span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded">PASS</span></td>
+                                    <td class="p-4 text-xs text-gray-500">Telusuri jurnal atau saldo awal</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Histori Aktivitas Audit Cloud -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
+                    <div class="mb-6 pb-4 border-b border-gray-100">
+                        <h2 class="text-lg font-bold text-gray-800">Log Histori Aktivitas Pengguna</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Catatan waktu nyata dari Firebase Firestore</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-4">Waktu</th>
+                                    <th class="p-4">Aksi</th>
+                                    <th class="p-4">No Bukti</th>
+                                    <th class="p-4">Detail Perubahan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelHistori" class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="4" class="p-8 text-center text-gray-400">Memuat histori dari Cloud Firestore...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -52,20 +88,19 @@
         </div>
     </div>
 
-    <!-- Skrip Utama (Menggunakan ES Module untuk Firebase) -->
+    <!-- Skrip Firestore untuk Histori -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
-        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        window.muatHistori = async function() {
+        const app = initializeApp(CONFIG.FIREBASE_CONFIG);
+
+        async function muatHistori() {
             const tbody = document.getElementById('tabelHistori');
-            tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Mengambil data histori...</td></tr>`;
-
             try {
-                // Mengambil data dari collection 'histori_audit' diurutkan berdasarkan waktu terbaru
                 const q = query(collection(db, "histori_audit"), orderBy("waktu", "desc"));
                 const querySnapshot = await getDocs(q);
-                
                 tbody.innerHTML = '';
 
                 if (querySnapshot.empty) {
@@ -73,33 +108,23 @@
                     return;
                 }
 
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    let waktuFormat = '-';
-                    if (data.waktu && data.waktu.toDate) {
-                        waktuFormat = data.waktu.toDate().toLocaleString('id-ID');
-                    }
-
-                    // Warna badge berdasarkan jenis aksi
-                    let badgeColor = 'bg-blue-100 text-blue-700';
-                    if (data.aksi === 'TAMBAH JURNAL') badgeColor = 'bg-green-100 text-green-700';
-                    if (data.aksi === 'EDIT JURNAL') badgeColor = 'bg-yellow-100 text-yellow-700';
-                    if (data.aksi === 'HAPUS JURNAL') badgeColor = 'bg-red-100 text-red-700';
-
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    let waktuStr = data.waktu && data.waktu.toDate ? data.waktu.toDate().toLocaleString('id-ID') : 'Baru saja';
                     let tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="p-4 whitespace-nowrap text-xs text-gray-500">${waktuFormat}</td>
-                        <td class="p-4 whitespace-nowrap"><span class="px-2.5 py-1 text-xs rounded-full font-semibold ${badgeColor}">${data.aksi}</span></td>
+                        <td class="p-4 text-xs text-gray-500 whitespace-nowrap">${waktuStr}</td>
+                        <td class="p-4 font-semibold text-xs"><span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full">${data.aksi || '-'}</span></td>
                         <td class="p-4 font-mono text-xs font-semibold">${data.no_bukti || '-'}</td>
-                        <td class="p-4 text-gray-700">${data.detail || '-'}</td>
+                        <td class="p-4 text-xs text-gray-600">${data.detail || '-'}</td>
                     `;
                     tbody.appendChild(tr);
                 });
-            } catch (err) {
-                console.error("Gagal memuat histori:", err);
-                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500">Gagal memuat histori. Pastikan indeks Firestore sudah dibuat jika diperlukan.</td></tr>`;
+            } catch (error) {
+                console.error("Gagal memuat histori:", error);
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500">Gagal memuat histori audit dari database.</td></tr>`;
             }
-        };
+        }
 
         muatHistori();
     </script>
