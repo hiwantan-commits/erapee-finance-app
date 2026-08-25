@@ -25,16 +25,108 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-y-auto">
             <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-                <h1 class="text-xl font-semibold">Laporan Laba Rugi Komersial & Fiskal</h1>
+                <h1 class="text-xl font-semibold">Laporan Laba Rugi (Real-Time Cloud)</h1>
             </header>
-            <main class="p-6 md:p-8 w-full">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center h-64">
-                    <svg class="w-16 h-16 text-indigo-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    <h2 class="text-xl font-semibold text-gray-700">Modul Segera Hadir</h2>
-                    <p class="text-gray-500 mt-2 max-w-md">Fitur penarikan data dari Google Sheets untuk merender tabel Laporan Laba Rugi sedang dalam tahap pengembangan (GET Request).</p>
+            
+            <main class="p-6 md:p-8 max-w-5xl mx-auto w-full">
+                <!-- Ringkasan Kartu -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <p class="text-sm text-gray-500 font-medium">Total Pendapatan (Bruto)</p>
+                        <h3 id="lblPendapatan" class="text-2xl font-bold text-green-600 mt-2">Rp 0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <p class="text-sm text-gray-500 font-medium">Total Beban / Pengeluaran</p>
+                        <h3 id="lblBeban" class="text-2xl font-bold text-red-600 mt-2">Rp 0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <p class="text-sm text-gray-500 font-medium">Estimasi Laba Bersih</p>
+                        <h3 id="lblLaba" class="text-2xl font-bold text-indigo-600 mt-2">Rp 0</h3>
+                    </div>
+                </div>
+
+                <!-- Tabel Data Sumber -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                        <h2 class="font-semibold text-lg">Draf Rekapitulasi Transaksi Terhubung</h2>
+                        <button onclick="muatDataLaporan()" class="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition">Muat Ulang Data</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b">
+                                    <th class="p-4">Tanggal</th>
+                                    <th class="p-4">Kategori</th>
+                                    <th class="p-4">Uraian</th>
+                                    <th class="p-4 text-right">DPP (Rp)</th>
+                                    <th class="p-4 text-right">Total (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelTransaksi" class="divide-y divide-gray-100 text-sm">
+                                <tr>
+                                    <td colspan="5" class="p-6 text-center text-gray-400">Mengambil data dari Google Sheets...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
+
+    <script>
+        // GANTI dengan URL Web App Apps Script Anda
+        const scriptURL = 'MASUKKAN_URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI';
+
+        function muatDataLaporan() {
+            fetch(scriptURL)
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById('tabelTransaksi');
+                    tbody.innerHTML = '';
+                    
+                    let totalPendapatan = 0;
+                    let totalBeban = 0;
+
+                    if (data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Belum ada data transaksi tercatat.</td></tr>`;
+                        return;
+                    }
+
+                    data.forEach(row => {
+                        let dpp = parseFloat(row.dpp) || 0;
+                        let total = parseFloat(row.total) || 0;
+
+                        if (row.tipe === "Masuk") {
+                            totalPendapatan += dpp;
+                        } else {
+                            totalBeban += dpp;
+                        }
+
+                        let tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="p-4">${row.tanggal}</td>
+                            <td class="p-4 font-medium">${row.kategori}</td>
+                            <td class="p-4 text-gray-500">${row.uraian}</td>
+                            <td class="p-4 text-right">Rp ${dpp.toLocaleString('id-ID')}</td>
+                            <td class="p-4 text-right font-semibold">Rp ${total.toLocaleString('id-ID')}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+
+                    // Update Kartu Ringkasan
+                    document.getElementById('lblPendapatan').innerText = `Rp ${totalPendapatan.toLocaleString('id-ID')}`;
+                    document.getElementById('lblBeban').innerText = `Rp ${totalBeban.toLocaleString('id-ID')}`;
+                    document.getElementById('lblLaba').innerText = `Rp ${(totalPendapatan - totalBeban).toLocaleString('id-ID')}`;
+                })
+                .catch(err => {
+                    console.error('Gagal memuat data:', err);
+                    document.getElementById('tabelTransaksi').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">Gagal menyambungkan ke Google Sheets.</td></tr>`;
+                });
+        }
+
+        // Jalankan saat halaman dibuka
+        muatDataLaporan();
+    </script>
 </body>
 </html>
