@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Data | PT ERAPEE</title>
+    <title>Manajemen Jurnal | PT ERAPEE</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- File CSS Terpusat -->
@@ -21,28 +21,32 @@
             <!-- HEADER DINAMIS -->
             <div id="header-container"></div>
 
-            <main class="p-4 md:p-8 max-w-6xl mx-auto w-full">
+            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
                 <div class="dashboard-card overflow-hidden">
                     <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <h2 class="font-semibold text-lg">Daftar Seluruh Transaksi Database</h2>
+                        <div>
+                            <h2 class="font-semibold text-lg text-gray-800">Daftar Seluruh Jurnal Akuntansi</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Sinkronisasi langsung dari database Firebase Firestore</p>
+                        </div>
                         <button onclick="muatDataManajemen()" class="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition">Muat Ulang Data</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="border-b">
+                                <tr class="border-b bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
                                     <th class="p-4">Tanggal</th>
-                                    <th class="p-4">Ref</th>
-                                    <th class="p-4">Tipe</th>
-                                    <th class="p-4">Kategori</th>
-                                    <th class="p-4">Uraian</th>
-                                    <th class="p-4 text-right">DPP (Rp)</th>
+                                    <th class="p-4">No Bukti</th>
+                                    <th class="p-4">Unit Usaha</th>
+                                    <th class="p-4">Akun & Keterangan</th>
+                                    <th class="p-4 text-right">Debit (Rp)</th>
+                                    <th class="p-4 text-right">Kredit (Rp)</th>
+                                    <th class="p-4 text-center">Status</th>
                                     <th class="p-4 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelManajemen" class="divide-y divide-gray-100 text-sm">
                                 <tr>
-                                    <td colspan="7" class="p-6 text-center text-gray-400">Memuat data dari Google Sheets...</td>
+                                    <td colspan="8" class="p-8 text-center text-gray-400">Menghubungkan ke Firebase Firestore...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -52,27 +56,34 @@
         </div>
     </div>
 
-    <!-- Modal Edit Sederhana -->
+    <!-- Modal Edit Jurnal -->
     <div id="modalEdit" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
-            <h3 class="text-lg font-semibold mb-4">Edit Data Transaksi</h3>
+            <h3 class="text-lg font-semibold mb-4 text-gray-800">Edit Jurnal Akuntansi</h3>
             <form id="formEdit" class="space-y-4">
-                <input type="hidden" id="editRow">
+                <input type="hidden" id="editId">
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Uraian Transaksi</label>
-                    <input type="text" id="editUraian" class="w-full border rounded-lg px-3 py-2 text-sm outline-none" required>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Keterangan / Uraian</label>
+                    <input type="text" id="editKeterangan" class="form-input-custom" required>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Nilai DPP (Rp)</label>
-                        <input type="number" id="editDpp" class="w-full border rounded-lg px-3 py-2 text-sm outline-none" required>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Debit (Rp)</label>
+                        <input type="number" id="editDebit" class="form-input-custom" required>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Total (Rp)</label>
-                        <input type="number" id="editTotal" class="w-full border rounded-lg px-3 py-2 text-sm outline-none" required>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Kredit (Rp)</label>
+                        <input type="number" id="editKredit" class="form-input-custom" required>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-3 pt-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Status Jurnal</label>
+                    <select id="editStatus" class="form-input-custom font-semibold">
+                        <option value="POSTED">POSTED</option>
+                        <option value="DRAFT">DRAFT</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t">
                     <button type="button" onclick="tutupModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-lg font-medium">Batal</button>
                     <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg font-medium">Simpan Perubahan</button>
                 </div>
@@ -80,117 +91,106 @@
         </div>
     </div>
 
-    <!-- Skrip Utama -->
-    <script src="js/config.js"></script>
-    <script src="js/component.js"></script>
-    <script>
-        function muatDataManajemen() {
-            document.getElementById('tabelManajemen').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">Memuat data dari Google Sheets...</td></tr>`;
-            
-            const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(CONFIG.SHEET_NAME)}`;
+    <!-- Skrip Utama (Menggunakan ES Module untuk Firebase) -->
+    <script type="module">
+        import { CONFIG, db } from "./js/config.js";
+        import { collection, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-            fetch(url)
-                .then(res => res.text())
-                .then(text => {
-                    const jsonString = text.substring(47).slice(0, -2);
-                    const json = JSON.parse(jsonString);
-                    const rows = json.table.rows;
-                    
-                    const tbody = document.getElementById('tabelManajemen');
-                    tbody.innerHTML = '';
+        window.muatDataManajemen = async function() {
+            const tbody = document.getElementById('tabelManajemen');
+            tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-400">Mengambil data dari Firebase...</td></tr>`;
 
-                    if (!rows || rows.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">Belum ada transaksi tercatat.</td></tr>`;
-                        return;
-                    }
+            try {
+                const querySnapshot = await getDocs(collection(db, CONFIG.COLLECTION_NAME));
+                tbody.innerHTML = '';
 
-                    rows.forEach((r, index) => {
-                        const c = r.c;
-                        if (!c[0] || !c[2]) return;
+                if (querySnapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-400">Belum ada jurnal tercatat dalam database.</td></tr>`;
+                    return;
+                }
 
-                        let rowNumber = index + 1; 
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const docId = docSnap.id;
 
-                        let rowData = {
-                            row: rowNumber,
-                            tanggal: c[0] ? (c[0].f || c[0].v) : '',
-                            no_ref: c[1] ? c[1].v : '',
-                            tipe: c[2] ? c[2].v : '',
-                            kategori: c[3] ? c[3].v : '',
-                            uraian: c[4] ? c[4].v : '',
-                            dpp: c[5] ? (parseFloat(c[5].v) || 0) : 0,
-                            total: c[8] ? (parseFloat(c[8].v) || 0) : 0
-                        };
-
-                        let tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="p-4">${rowData.tanggal}</td>
-                            <td class="p-4 font-mono text-xs">${rowData.no_ref}</td>
-                            <td class="p-4"><span class="px-2 py-1 text-xs rounded-full ${rowData.tipe === 'Masuk' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${rowData.tipe}</span></td>
-                            <td class="p-4 font-medium">${rowData.kategori}</td>
-                            <td class="p-4 text-gray-500">${rowData.uraian}</td>
-                            <td class="p-4 text-right">Rp ${rowData.dpp.toLocaleString('id-ID')}</td>
-                            <td class="p-4 text-center space-x-2">
-                                <button onclick='bukaEdit(${JSON.stringify(rowData)})' class="text-indigo-600 hover:underline font-medium text-xs">Edit</button>
-                                <button onclick='hapusData(${rowData.row}, "${rowData.no_ref}")' class="text-red-600 hover:underline font-medium text-xs">Hapus</button>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                })
-                .catch(err => {
-                    console.error('Error:', err);
-                    document.getElementById('tabelManajemen').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">Gagal memuat data dari Spreadsheet.</td></tr>`;
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-4 whitespace-nowrap">${data.tanggal || '-'}</td>
+                        <td class="p-4 font-mono text-xs font-semibold">${data.no_bukti || '-'}</td>
+                        <td class="p-4 text-xs text-gray-600">${data.unit_usaha || '-'}</td>
+                        <td class="p-4">
+                            <div class="font-medium text-gray-800">${data.kode_akun || ''}</div>
+                            <div class="text-xs text-gray-500">${data.keterangan || ''}</div>
+                        </td>
+                        <td class="p-4 text-right font-medium text-green-700">Rp ${(data.debit || 0).toLocaleString('id-ID')}</td>
+                        <td class="p-4 text-right font-medium text-red-700">Rp ${(data.kredit || 0).toLocaleString('id-ID')}</td>
+                        <td class="p-4 text-center">
+                            <span class="px-2.5 py-1 text-xs rounded-full font-semibold ${data.status === 'POSTED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${data.status || 'DRAFT'}</span>
+                        </td>
+                        <td class="p-4 text-center space-x-2 whitespace-nowrap">
+                            <button onclick='bukaEdit("${docId}", ${JSON.stringify(data).replace(/'/g, "&#39;")})' class="text-indigo-600 hover:underline font-medium text-xs">Edit</button>
+                            <button onclick='hapusData("${docId}", "${data.no_bukti}")' class="text-red-600 hover:underline font-medium text-xs">Hapus</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
                 });
-        }
-
-        function hapusData(rowIdx, noRef) {
-            if (confirm(`Apakah Anda yakin ingin menghapus transaksi dengan referensi: ${noRef}?`)) {
-                fetch(CONFIG.APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({ action: 'delete', row: rowIdx })
-                }).then(() => {
-                    alert('Perintah hapus dikirim! Muat ulang halaman dalam beberapa detik.');
-                    setTimeout(muatDataManajemen, 2000);
-                });
+            } catch (err) {
+                console.error("Gagal memuat data:", err);
+                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-red-500">Gagal terhubung ke Firebase Firestore. Periksa konfigurasi Anda.</td></tr>`;
             }
-        }
+        };
 
-        function bukaEdit(row) {
-            document.getElementById('editRow').value = row.row;
-            document.getElementById('editUraian').value = row.uraian;
-            document.getElementById('editDpp').value = row.dpp;
-            document.getElementById('editTotal').value = row.total;
+        window.hapusData = async function(docId, noBukti) {
+            if (confirm(`Apakah Anda yakin ingin menghapus jurnal dengan bukti: ${noBukti}?`)) {
+                try {
+                    await deleteDoc(doc(db, CONFIG.COLLECTION_NAME, docId));
+                    alert('Jurnal berhasil dihapus!');
+                    muatDataManajemen();
+                } catch (error) {
+                    console.error("Gagal menghapus:", error);
+                    alert("Gagal menghapus data.");
+                }
+            }
+        };
+
+        window.bukaEdit = function(docId, data) {
+            document.getElementById('editId').value = docId;
+            document.getElementById('editKeterangan').value = data.keterangan || '';
+            document.getElementById('editDebit').value = data.debit || 0;
+            document.getElementById('editKredit').value = data.kredit || 0;
+            document.getElementById('editStatus').value = data.status || 'POSTED';
             document.getElementById('modalEdit').classList.remove('hidden');
-        }
+        };
 
-        function tutupModal() {
+        window.tutupModal = function() {
             document.getElementById('modalEdit').classList.add('hidden');
-        }
+        };
 
-        document.getElementById('formEdit').addEventListener('submit', function(e) {
+        document.getElementById('formEdit').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const rowIdx = document.getElementById('editRow').value;
-            const updatedData = {
-                row: rowIdx,
-                uraian: document.getElementById('editUraian').value,
-                dpp: document.getElementById('editDpp').value,
-                total: document.getElementById('editTotal').value,
-                tanggal: '', no_ref: '', tipe: '', kategori: '', ppn: '0', pph: '0'
-            };
+            const docId = document.getElementById('editId').value;
+            
+            try {
+                const docRef = doc(db, CONFIG.COLLECTION_NAME, docId);
+                await updateDoc(docRef, {
+                    keterangan: document.getElementById('editKeterangan').value,
+                    debit: parseFloat(document.getElementById('editDebit').value) || 0,
+                    kredit: parseFloat(document.getElementById('editKredit').value) || 0,
+                    status: document.getElementById('editStatus').value
+                });
 
-            fetch(CONFIG.APPS_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(updatedData)
-            }).then(() => {
                 tutupModal();
-                alert('Perubahan berhasil dikirim!');
-                setTimeout(muatDataManajemen, 2000);
-            });
+                alert('Perubahan jurnal berhasil disimpan!');
+                muatDataManajemen();
+            } catch (error) {
+                console.error("Gagal memperbarui:", error);
+                alert("Gagal menyimpan perubahan.");
+            }
         });
 
+        // Panggil saat halaman dimuat
         muatDataManajemen();
     </script>
+    <script src="js/component.js"></script>
 </body>
 </html>
