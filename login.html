@@ -24,7 +24,7 @@
                 <label class="block text-xs font-medium text-gray-700 mb-1">Kata Sandi</label>
                 <div class="relative">
                     <input type="password" id="passwordLogin" placeholder="••••••••" class="form-input-custom pr-10" required>
-                    <!-- Tombol Mata Menggunakan Fungsi Global onclick -->
+                    <!-- Tombol Mata -->
                     <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer">
                         <!-- Icon Mata Tertutup (Default) -->
                         <svg id="iconEyeClosed" class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,11 +43,12 @@
                     Masuk ke Sistem
                 </button>
             </div>
+            <!-- Kotak Notifikasi Error -->
             <div id="errorLogin" class="hidden mt-3 p-3 bg-red-50 text-red-700 rounded-lg text-xs text-center font-medium border border-red-200"></div>
         </form>
     </div>
 
-    <!-- Fungsi Global Toggle Password (Diluar modul agar bisa dipanggil langsung) -->
+    <!-- Fungsi Global Toggle Password -->
     <script>
         function togglePassword() {
             const inputPassword = document.getElementById('passwordLogin');
@@ -77,10 +78,13 @@
 
         document.getElementById('formLogin').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const email = document.getElementById('emailLogin').value;
-            const password = document.getElementById('passwordLogin').value;
+            const emailInput = document.getElementById('emailLogin');
+            const passwordInput = document.getElementById('passwordLogin');
             const errDiv = document.getElementById('errorLogin');
             const btn = document.getElementById('btnLogin');
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
 
             btn.innerText = "Memeriksa...";
             btn.disabled = true;
@@ -99,10 +103,15 @@
                     pesanError = "⚠️ Terlalu banyak percobaan gagal. Silakan coba beberapa saat lagi.";
                 }
 
+                // Tampilkan pesan error pada kotak merah
                 errDiv.innerText = pesanError;
                 errDiv.classList.remove('hidden');
+
+                // Kembalikan tombol ke semula dan HANYA kosongkan password (email tetap ada)
                 btn.innerText = "Masuk ke Sistem";
                 btn.disabled = false;
+                passwordInput.value = ''; 
+                passwordInput.focus();
             }
         });
     </script>
