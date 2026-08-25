@@ -154,12 +154,12 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 5: Keterangan & Status -->
+                        <!-- Bagian 5: Keterangan & Status (Menggunakan Textarea) -->
                         <div class="pt-4 border-t border-gray-100">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Keterangan / Uraian Jurnal</label>
-                                    <input type="text" id="keterangan" placeholder="Penjelasan lengkap transaksi..." class="form-input-custom" required>
+                                    <textarea id="keterangan" rows="3" placeholder="Penjelasan lengkap transaksi dalam format paragraf..." class="form-input-custom resize-y" required></textarea>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Status Jurnal</label>
@@ -196,7 +196,7 @@
         const app = initializeApp(CONFIG.FIREBASE_CONFIG);
         const auth = getAuth(app);
 
-        // Cek Sesi: Jika belum login, otomatis arahkan ke halaman login.html
+        // Proteksi Sesi Login
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = 'login.html';
