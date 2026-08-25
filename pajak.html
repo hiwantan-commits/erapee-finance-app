@@ -43,7 +43,7 @@
 
                 <!-- Keterangan Pajak Perusahaan -->
                 <div class="dashboard-card p-6">
-                    <h2 class="font-semibold text-lg mb-4">Panduan Pelaporan Pajak PT ERAPEE ANUGRAH SEJAHTERA</h2>
+                    <h2 class="font-semibold text-lg mb-4 text-gray-800">Panduan Pelaporan Pajak PT ERAPEE ANUGRAH SEJAHTERA</h2>
                     <div class="space-y-3 text-sm text-gray-600">
                         <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
                             <strong>1. Sektor IT & Software (KBLI 58290 & 62199):</strong> Pendapatan dari penjualan lisensi atau jasa pemrograman wajib menerbitkan Faktur Pajak bermuatan PPN dan berpotensi dipotong PPh Pasal 23 oleh klien korporat.
@@ -57,47 +57,39 @@
         </div>
     </div>
 
-    <!-- Skrip Utama -->
-    <script src="js/config.js"></script>
-    <script src="js/component.js"></script>
-    <script>
-        function muatDataPajak() {
-            const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(CONFIG.SHEET_NAME)}`;
+    <!-- Skrip Utama (Menggunakan ES Module untuk Firebase) -->
+    <script type="module">
+        import { CONFIG, db } from "./js/config.js";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-            fetch(url)
-                .then(res => res.text())
-                .then(text => {
-                    const jsonString = text.substring(47).slice(0, -2);
-                    const json = JSON.parse(jsonString);
-                    const rows = json.table.rows;
-                    
-                    let totalPpn = 0;
-                    let totalPph = 0;
-                    let totalDpp = 0;
+        window.muatDataPajak = async function() {
+            try {
+                const querySnapshot = await getDocs(collection(db, CONFIG.COLLECTION_NAME));
+                
+                let totalPpn = 0;
+                let totalPph = 0;
+                let totalDpp = 0;
 
-                    if (rows) {
-                        rows.forEach(r => {
-                            const c = r.c;
-                            if (!c[0] || !c[5]) return;
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (data.status !== 'POSTED') return;
 
-                            let dpp = c[5] ? (parseFloat(c[5].v) || 0) : 0;
-                            let ppn = c[6] ? (parseFloat(c[6].v) || 0) : 0;
-                            let pph = c[7] ? (parseFloat(c[7].v) || 0) : 0;
+                    totalDpp += parseFloat(data.dpp_penjualan) || 0;
+                    totalPpn += parseFloat(data.ppn_keluaran) || 0;
+                    totalPph += parseFloat(data.pph_dipotong) || 0;
+                });
 
-                            totalDpp += dpp;
-                            totalPpn += ppn;
-                            totalPph += pph;
-                        });
-                    }
+                document.getElementById('lblPpn').innerText = `Rp ${totalPpn.toLocaleString('id-ID')}`;
+                document.getElementById('lblPph').innerText = `Rp ${totalPph.toLocaleString('id-ID')}`;
+                document.getElementById('lblDpp').innerText = `Rp ${totalDpp.toLocaleString('id-ID')}`;
 
-                    document.getElementById('lblPpn').innerText = `Rp ${totalPpn.toLocaleString('id-ID')}`;
-                    document.getElementById('lblPph').innerText = `Rp ${totalPph.toLocaleString('id-ID')}`;
-                    document.getElementById('lblDpp').innerText = `Rp ${totalDpp.toLocaleString('id-ID')}`;
-                })
-                .catch(err => console.error('Gagal mengambil data pajak:', err));
-        }
+            } catch (err) {
+                console.error("Gagal mengambil data pajak:", err);
+            }
+        };
 
         muatDataPajak();
     </script>
+    <script src="js/component.js"></script>
 </body>
 </html>
