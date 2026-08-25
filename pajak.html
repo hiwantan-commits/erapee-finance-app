@@ -11,10 +11,10 @@
 <body class="text-gray-800">
     <div class="flex h-screen overflow-hidden">
         
-        <!-- SIDEBAR DINAMIS (Otomatis dirender oleh component.js) -->
+        <!-- SIDEBAR DINAMIS -->
         <div id="sidebar-container"></div>
 
-        <!-- Main Content (md:ml-64 menjaga agar konten tidak tertutup sidebar tetap) -->
+        <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
             <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
                 <h1 class="text-xl font-semibold">Dashboard Rekapitulasi Pajak (Bulanan)</h1>
@@ -57,15 +57,13 @@
         </div>
     </div>
 
-    <!-- Skrip Komponen Dinamis & Logika Pajak -->
-    <script src="js/component.js"></script>
+    <!-- Panggil Config Pusat, Navigasi Dinamis, dan Logika Pajak -->
     <script src="js/config.js"></script>
+    <script src="js/component.js"></script>
     <script>
-        const spreadsheetId = '1uOoTR92drWwICpKxcC6Tab2pCTCt0JTusoJnoZq5x4U';
-        const sheetName = 'Database_Transaksi';
-
         function muatDataPajak() {
-            const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+            // Mengambil SPREADSHEET_ID dan SHEET_NAME secara otomatis dari CONFIG pusat
+            const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(CONFIG.SHEET_NAME)}`;
 
             fetch(url)
                 .then(res => res.text())
