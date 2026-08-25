@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Transaksi | PT ERAPEE</title>
+    <title>Manajemen Data | PT ERAPEE</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }</style>
+    <!-- File CSS Terpusat -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="text-gray-800">
     <div class="flex h-screen overflow-hidden">
@@ -16,20 +17,20 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-                <h1 class="text-xl font-semibold">Kelola, Edit, & Hapus Transaksi</h1>
-                <button onclick="muatDataManajemen()" class="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition">Muat Ulang</button>
-            </header>
             
-            <main class="p-6 md:p-8 max-w-6xl mx-auto w-full">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="p-6 border-b border-gray-100">
+            <!-- HEADER DINAMIS -->
+            <div id="header-container"></div>
+
+            <main class="p-4 md:p-8 max-w-6xl mx-auto w-full">
+                <div class="dashboard-card overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <h2 class="font-semibold text-lg">Daftar Seluruh Transaksi Database</h2>
+                        <button onclick="muatDataManajemen()" class="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition">Muat Ulang Data</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b">
+                                <tr class="border-b">
                                     <th class="p-4">Tanggal</th>
                                     <th class="p-4">Ref</th>
                                     <th class="p-4">Tipe</th>
@@ -52,7 +53,7 @@
     </div>
 
     <!-- Modal Edit Sederhana -->
-    <div id="modalEdit" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div id="modalEdit" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
             <h3 class="text-lg font-semibold mb-4">Edit Data Transaksi</h3>
             <form id="formEdit" class="space-y-4">
@@ -79,14 +80,13 @@
         </div>
     </div>
 
-    <!-- Panggil Config Pusat, Navigasi Dinamis, dan Logika Tabel -->
+    <!-- Skrip Utama -->
     <script src="js/config.js"></script>
     <script src="js/component.js"></script>
     <script>
         function muatDataManajemen() {
             document.getElementById('tabelManajemen').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">Memuat data dari Google Sheets...</td></tr>`;
             
-            // Mengambil data langsung via Google Visualization API menggunakan CONFIG pusat
             const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(CONFIG.SHEET_NAME)}`;
 
             fetch(url)
@@ -108,7 +108,6 @@
                         const c = r.c;
                         if (!c[0] || !c[2]) return;
 
-                        // Baris spreadsheet asli (index + 2 karena header di baris 1 dan index mulai dari 0)
                         let rowNumber = index + 1; 
 
                         let rowData = {
