@@ -30,7 +30,7 @@ if (formTransaksi) {
         btnSubmit.disabled = true;
 
         // PERHATIAN: Masukkan URL Web App Google Apps Script Anda di bawah ini!
-        const scriptURL = 'https://script.google.com/macros/s/GANTI_DENGAN_URL_ANDA/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbx2bCxIwIGsHeUSaEs5rXBFMg4chXhDY4AgRtbHrnWkC-3hcrwxDQVSosSnDpPSQMSKeg/exec';
         
         const data = {
             tanggal: document.getElementById('tanggal').value,
