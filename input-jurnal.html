@@ -43,7 +43,7 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 2: Klasifikasi Usaha & Unit -->
+                        <!-- Bagian 2: Klasifikasi Usaha & Unit (Sesuai Master Data) -->
                         <div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
@@ -57,11 +57,15 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Unit Usaha / Sektor</label>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Unit Usaha / Sektor (Master Data)</label>
                                     <select id="unit_usaha" class="form-input-custom">
-                                        <option value="Corporate/Head Office">Corporate / Head Office</option>
-                                        <option value="SaaS & Software (KBLI 58290)">SaaS & Software (KBLI 58290)</option>
-                                        <option value="Budidaya Pertanian (KBLI 01220/01140)">Budidaya Pertanian</option>
+                                        <option value="CORP - Corporate/Head Office">CORP - Corporate / Head Office</option>
+                                        <option value="MARC - Marcframe (Digital Services)">MARC - Marcframe (KBLI 62199)</option>
+                                        <option value="SIP - SiPacul (Software Publishing)">SIP - SiPacul (KBLI 58290)</option>
+                                        <option value="WT-NANAS - Wani Tani (Nanas)">WT-NANAS - Wani Tani (KBLI 01220)</option>
+                                        <option value="WT-TEBU - Wani Tani (Tebu)">WT-TEBU - Wani Tani (KBLI 01140)</option>
+                                        <option value="WT-CABAI - Wani Tani (Cabai)">WT-CABAI - Wani Tani (KBLI 01138)</option>
+                                        <option value="SHARED - Biaya Bersama">SHARED - Biaya Bersama (Shared Cost)</option>
                                     </select>
                                 </div>
                                 <div>
@@ -88,7 +92,6 @@
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Kode Akun (COA)</label>
-                                    <!-- Select Dinamis yang akan diisi oleh Firestore -->
                                     <select id="kode_akun" class="form-input-custom">
                                         <option value="">Memuat data akun...</option>
                                     </select>
@@ -131,7 +134,6 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Kode Pajak Ref</label>
-                                    <!-- Disusun berdasarkan standar Master Data -->
                                     <select id="kode_pajak" class="form-input-custom">
                                         <option value="NON">NON (Tanpa Pajak)</option>
                                         <option value="PPN-KEL-11">PPN-KEL-11 (Keluaran 11%)</option>
@@ -147,7 +149,7 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 5: Keterangan (Textarea Paragraf) -->
+                        <!-- Bagian 5: Keterangan -->
                         <div class="pt-4 border-t border-gray-100">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div class="md:col-span-2">
@@ -185,7 +187,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Fungsi Memuat COA Dinamis dari Master Data Firestore
         async function muatDropdownCOA() {
             const selectCOA = document.getElementById('kode_akun');
             try {
@@ -196,18 +197,16 @@
                     return;
                 }
 
-                // Masukkan ke array dan urutkan berdasarkan kode
                 let coaList = [];
                 querySnapshot.forEach(doc => {
                     coaList.push(doc.data());
                 });
                 coaList.sort((a, b) => a.kode.localeCompare(b.kode));
 
-                selectCOA.innerHTML = ''; // Kosongkan pilihan awal
+                selectCOA.innerHTML = '';
                 
                 coaList.forEach(coa => {
                     const opt = document.createElement('option');
-                    // Simpan valuenya berupa "Kode" saja, atau "Kode - Nama"
                     opt.value = coa.kode; 
                     opt.text = `${coa.kode} - ${coa.nama}`;
                     selectCOA.appendChild(opt);
@@ -218,7 +217,6 @@
             }
         }
 
-        // Panggil fungsi muat COA saat halaman dimuat
         muatDropdownCOA();
 
         const formJurnal = document.getElementById('formJurnal');
@@ -230,7 +228,6 @@
             btn.disabled = true;
 
             try {
-                // Ambil text dari dropdown COA yang dipilih (Misal: "1101 - Kas")
                 const selectCOA = document.getElementById('kode_akun');
                 const namaAkunLengkap = selectCOA.options[selectCOA.selectedIndex].text;
 
@@ -244,7 +241,7 @@
                     lawan_transaksi: document.getElementById('lawan_transaksi').value,
                     npwp_nik: document.getElementById('npwp_nik').value,
                     kode_akun: document.getElementById('kode_akun').value,
-                    nama_akun: namaAkunLengkap, // Menyimpan teks lengkap
+                    nama_akun: namaAkunLengkap,
                     kategori_arus_kas: document.getElementById('kategori_arus_kas').value,
                     debit: parseFloat(document.getElementById('debit').value) || 0,
                     kredit: parseFloat(document.getElementById('kredit').value) || 0,
@@ -257,20 +254,16 @@
                     timestamp: new Date()
                 };
 
-                // Simpan ke tabel jurnal
                 await addDoc(collection(db, CONFIG.COLLECTION_NAME), dataJurnal);
                 
-                // Simpan log ke tabel histori audit
                 await addDoc(collection(db, "histori_audit"), {
                     aksi: "TAMBAH JURNAL",
                     no_bukti: dataJurnal.no_bukti,
-                    detail: `Menambah jurnal ${dataJurnal.jenis_dokumen} [${dataJurnal.kode_akun}] senilai Debit Rp ${dataJurnal.debit.toLocaleString('id-ID')} / Kredit Rp ${dataJurnal.kredit.toLocaleString('id-ID')}`,
+                    detail: `Menambah jurnal ${dataJurnal.jenis_dokumen} [${dataJurnal.kode_akun}] segmen ${dataJurnal.unit_usaha}`,
                     waktu: new Date()
                 });
 
                 document.getElementById('alertSuccess').classList.remove('hidden');
-                
-                // Reset form tapi kembalikan ID Jurnal ke default (atau di-generate ulang nantinya)
                 formJurnal.reset();
                 setTimeout(() => document.getElementById('alertSuccess').classList.add('hidden'), 5000);
             } catch (error) {
