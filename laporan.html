@@ -94,7 +94,7 @@
                     </div>
                 </div>
 
-                <!-- Konten Tab 2: Neraca / Posisi Keuangan (Hidden by default) -->
+                <!-- Konten Tab 2: Neraca / Posisi Keuangan -->
                 <div id="kontenNeraca" class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm hidden">
                     <div class="mb-6 pb-4 border-b border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800">Laporan Posisi Keuangan (Balance Sheet)</h2>
@@ -147,16 +147,33 @@
         </div>
     </div>
 
-    <script>
-        function gantiTab(tab) {
+    <!-- Skrip Pengaturan Tab (Tersambung ke Global Window) -->
+    <script type="module">
+        import { CONFIG, db } from "./js/config.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Mendaftarkan fungsi gantiTab secara global ke objek window
+        window.gantiTab = function(tab) {
             const tabs = ['labarugi', 'neraca', 'aruskas', 'neracasaldo'];
             tabs.forEach(t => {
-                document.getElementById('konten' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('hidden');
-                document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).className = "px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-600 hover:bg-gray-100 transition border border-gray-200";
+                const el = document.getElementById('konten' + t.charAt(0).toUpperCase() + t.slice(1));
+                const btn = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+                
+                if (el) el.classList.add('hidden');
+                if (btn) {
+                    btn.className = "px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-600 hover:bg-gray-100 transition border border-gray-200";
+                }
             });
-            document.getElementById('konten' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('hidden');
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = "px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 text-white shadow-sm transition";
-        }
+
+            const targetKonten = document.getElementById('konten' + tab.charAt(0).toUpperCase() + tab.slice(1));
+            const targetBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+
+            if (targetKonten) targetKonten.classList.remove('hidden');
+            if (targetBtn) {
+                targetBtn.className = "px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 text-white shadow-sm transition";
+            }
+        };
     </script>
     <script type="module" src="js/component.js"></script>
 </body>
