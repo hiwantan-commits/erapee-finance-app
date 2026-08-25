@@ -84,40 +84,64 @@
     <script src="js/component.js"></script>
     <script>
         function muatDataManajemen() {
-            const url = `${CONFIG.APPS_SCRIPT_URL}?callback=handleData`;
-            const scriptTag = document.createElement('script');
-            scriptTag.src = url;
-            scriptTag.onerror = function() {
-                document.getElementById('tabelManajemen').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">Gagal memuat data dari Spreadsheet.</td></tr>`;
-            };
-            document.body.appendChild(scriptTag);
-        }
+            document.getElementById('tabelManajemen').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">Memuat data dari Google Sheets...</td></tr>`;
+            
+            // Mengambil data langsung via Google Visualization API menggunakan CONFIG pusat
+            const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(CONFIG.SHEET_NAME)}`;
 
-        function handleData(data) {
-            const tbody = document.getElementById('tabelManajemen');
-            tbody.innerHTML = '';
+            fetch(url)
+                .then(res => res.text())
+                .then(text => {
+                    const jsonString = text.substring(47).slice(0, -2);
+                    const json = JSON.parse(jsonString);
+                    const rows = json.table.rows;
+                    
+                    const tbody = document.getElementById('tabelManajemen');
+                    tbody.innerHTML = '';
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">Belum ada transaksi tercatat.</td></tr>`;
-                return;
-            }
+                    if (!rows || rows.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">Belum ada transaksi tercatat.</td></tr>`;
+                        return;
+                    }
 
-            data.forEach(row => {
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-4">${row.tanggal}</td>
-                    <td class="p-4 font-mono text-xs">${row.no_ref}</td>
-                    <td class="p-4"><span class="px-2 py-1 text-xs rounded-full ${row.tipe === 'Masuk' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${row.tipe}</span></td>
-                    <td class="p-4 font-medium">${row.kategori}</td>
-                    <td class="p-4 text-gray-500">${row.uraian}</td>
-                    <td class="p-4 text-right">Rp ${parseFloat(row.dpp || 0).toLocaleString('id-ID')}</td>
-                    <td class="p-4 text-center space-x-2">
-                        <button onclick='bukaEdit(${JSON.stringify(row)})' class="text-indigo-600 hover:underline font-medium text-xs">Edit</button>
-                        <button onclick='hapusData(${row.row}, "${row.no_ref}")' class="text-red-600 hover:underline font-medium text-xs">Hapus</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+                    rows.forEach((r, index) => {
+                        const c = r.c;
+                        if (!c[0] || !c[2]) return;
+
+                        // Baris spreadsheet asli (index + 2 karena header di baris 1 dan index mulai dari 0)
+                        let rowNumber = index + 1; 
+
+                        let rowData = {
+                            row: rowNumber,
+                            tanggal: c[0] ? (c[0].f || c[0].v) : '',
+                            no_ref: c[1] ? c[1].v : '',
+                            tipe: c[2] ? c[2].v : '',
+                            kategori: c[3] ? c[3].v : '',
+                            uraian: c[4] ? c[4].v : '',
+                            dpp: c[5] ? (parseFloat(c[5].v) || 0) : 0,
+                            total: c[8] ? (parseFloat(c[8].v) || 0) : 0
+                        };
+
+                        let tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="p-4">${rowData.tanggal}</td>
+                            <td class="p-4 font-mono text-xs">${rowData.no_ref}</td>
+                            <td class="p-4"><span class="px-2 py-1 text-xs rounded-full ${rowData.tipe === 'Masuk' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${rowData.tipe}</span></td>
+                            <td class="p-4 font-medium">${rowData.kategori}</td>
+                            <td class="p-4 text-gray-500">${rowData.uraian}</td>
+                            <td class="p-4 text-right">Rp ${rowData.dpp.toLocaleString('id-ID')}</td>
+                            <td class="p-4 text-center space-x-2">
+                                <button onclick='bukaEdit(${JSON.stringify(rowData)})' class="text-indigo-600 hover:underline font-medium text-xs">Edit</button>
+                                <button onclick='hapusData(${rowData.row}, "${rowData.no_ref}")' class="text-red-600 hover:underline font-medium text-xs">Hapus</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    document.getElementById('tabelManajemen').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">Gagal memuat data dari Spreadsheet.</td></tr>`;
+                });
         }
 
         function hapusData(rowIdx, noRef) {
