@@ -17,18 +17,18 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- 1. MANAJEMEN UNIT USAHA & KBLI (DINAMIS) -->
+                <!-- 1. MANAJEMEN UNIT USAHA & KBLI (DINAMIS & BISA DIEDIT) -->
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-8">
                     <div class="mb-6 pb-4 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4">
                         <div>
-                            <h2 class="text-lg font-bold text-gray-800">Unit Usaha & Klasifikasi KBLI (Master Data Dinamis)</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Kelola segmen operasional dan divisi perusahaan</p>
+                            <h2 class="text-lg font-bold text-gray-800">Unit Usaha & Klasifikasi KBLI (Master Data)</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Kelola, tambah, edit, dan hapus segmen operasional perusahaan</p>
                         </div>
                         <div class="flex gap-2">
                             <button id="btnSeedUnit" onclick="seedDefaultUnitUsaha()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition shadow-sm">
                                 📥 Muat Default Unit
                             </button>
-                            <button onclick="bukaModalUnit()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition shadow-sm">
+                            <button onclick="bukaModalUnitTambah()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition shadow-sm">
                                 + Tambah Unit Usaha
                             </button>
                         </div>
@@ -105,7 +105,7 @@
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
             <h3 id="modalUnitTitle" class="text-lg font-bold mb-4 text-gray-800">Tambah Unit Usaha</h3>
             <form id="formUnit" class="space-y-4">
-                <input type="hidden" id="editUnitId">
+                <input type="hidden" id="editUnitOriginalId">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Kode Segmen (Contoh: CORP, SIP)</label>
                     <input type="text" id="unitKode" placeholder="CORP" class="form-input-custom font-mono uppercase" required>
@@ -187,7 +187,6 @@
         const COL_UNIT = "master_unit_usaha";
         const COLLECTION_COA = "master_coa";
 
-        // Default Unit Usaha Sesuai Sheet 03
         const DEFAULT_UNIT_DATA = [
             { kode: "CORP", nama: "Corporate / Head Office", kbli: "Kantor Pusat & Administrasi", ket: "Korporat" },
             { kode: "MARC", nama: "Marcframe", kbli: "Digital Services (KBLI 62199)", ket: "Digital" },
@@ -198,7 +197,6 @@
             { kode: "SHARED", nama: "Biaya Bersama", kbli: "Alokasi Bersama (Shared Cost)", ket: "Bersama" }
         ];
 
-        // 101 Data COA
         const DEFAULT_COA_DATA = [
             { kode: "1101", nama: "Kas", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
             { kode: "1102", nama: "Bank operasional", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
@@ -303,7 +301,7 @@
             { kode: "8102", nama: "Beban/(manfaat) pajak tangguhan", saldoNormal: "Debit", kelompok: "Pajak penghasilan", posLaporan: "Pajak tangguhan" }
         ];
 
-        // --- CRUD UNIT USAHA ---
+        // --- CRUD UNIT USAHA (DINAMIS & BISA DIEDIT) ---
         window.muatDataUnit = async function() {
             const tbody = document.getElementById('tabelUnitUsaha');
             tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Memuat Unit Usaha...</td></tr>`;
@@ -354,9 +352,9 @@
             }
         };
 
-        window.bukaModalUnit = function() {
+        window.bukaModalUnitTambah = function() {
             document.getElementById('modalUnitTitle').innerText = "Tambah Unit Usaha Baru";
-            document.getElementById('editUnitId').value = "";
+            document.getElementById('editUnitOriginalId').value = "";
             document.getElementById('unitKode').value = "";
             document.getElementById('unitKode').readOnly = false;
             document.getElementById('unitKode').classList.remove('bg-gray-100');
@@ -368,10 +366,10 @@
 
         window.bukaModalEditUnit = function(id, data) {
             document.getElementById('modalUnitTitle').innerText = "Edit Unit Usaha";
-            document.getElementById('editUnitId').value = id;
+            document.getElementById('editUnitOriginalId').value = id;
             document.getElementById('unitKode').value = data.kode || "";
-            document.getElementById('unitKode').readOnly = true;
-            document.getElementById('unitKode').classList.add('bg-gray-100');
+            document.getElementById('unitKode').readOnly = false; // Boleh diedit
+            document.getElementById('unitKode').classList.remove('bg-gray-100');
             document.getElementById('unitNama').value = data.nama || "";
             document.getElementById('unitKbli').value = data.kbli || "";
             document.getElementById('unitKet').value = data.ket || "";
@@ -384,22 +382,27 @@
 
         document.getElementById('formUnit').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const id = document.getElementById('editUnitId').value;
-            const kode = document.getElementById('unitKode').value.toUpperCase();
-            const data = {
-                kode: kode,
+            const originalId = document.getElementById('editUnitOriginalId').value;
+            const kodeBaru = document.getElementById('unitKode').value.toUpperCase().trim();
+            const dataBaru = {
+                kode: kodeBaru,
                 nama: document.getElementById('unitNama').value,
                 kbli: document.getElementById('unitKbli').value,
                 ket: document.getElementById('unitKet').value
             };
 
             try {
-                await setDoc(doc(db, COL_UNIT, kode), data);
+                // Jika kode diubah saat edit dan originalId berbeda, hapus dokumen lama agar tidak ada duplikasi ID
+                if (originalId && originalId !== kodeBaru) {
+                    await deleteDoc(doc(db, COL_UNIT, originalId));
+                }
+
+                await setDoc(doc(db, COL_UNIT, kodeBaru), dataBaru);
                 alert("Unit usaha berhasil disimpan!");
                 tutupModalUnit();
                 muatDataUnit();
             } catch (err) {
-                alert("Gagal menyimpan: " + err.message);
+                alert("Gagal menyimpan unit usaha: " + err.message);
             }
         });
 
@@ -410,7 +413,7 @@
                     alert("Berhasil dihapus!");
                     muatDataUnit();
                 } catch (err) {
-                    alert("Gagal: " + err.message);
+                    alert("Gagal menghapus: " + err.message);
                 }
             }
         };
