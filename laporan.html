@@ -10,22 +10,15 @@
 </head>
 <body class="text-gray-800">
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0 hidden md:block">
-            <div class="h-16 flex items-center px-6 border-b border-gray-200">
-                <span class="text-lg font-bold text-indigo-600">ERAPEE Finance</span>
-            </div>
-            <nav class="p-4 space-y-2">
-                <a href="index.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Input Transaksi</a>
-                <a href="laporan.html" class="block px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-medium">Laporan Laba Rugi</a>
-                <a href="pajak.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Rekap Pajak</a>
-            </nav>
-        </aside>
+        
+        <!-- SIDEBAR DINAMIS (Otomatis dirender oleh component.js) -->
+        <div id="sidebar-container"></div>
 
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-y-auto">
+        <!-- Main Content (md:ml-64 menjaga agar konten tidak tertutup sidebar tetap) -->
+        <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
             <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
                 <h1 class="text-xl font-semibold">Laporan Laba Rugi (Real-Time Cloud)</h1>
+                <button onclick="muatDataLaporan()" class="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition">Muat Ulang</button>
             </header>
             
             <main class="p-6 md:p-8 max-w-5xl mx-auto w-full">
@@ -47,9 +40,8 @@
 
                 <!-- Tabel Data Sumber -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                    <div class="p-6 border-b border-gray-100">
                         <h2 class="font-semibold text-lg">Draf Rekapitulasi Transaksi Terhubung</h2>
-                        <button onclick="muatDataLaporan()" class="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition">Muat Ulang Data</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
@@ -64,8 +56,8 @@
                             </thead>
                             <tbody id="tabelTransaksi" class="divide-y divide-gray-100 text-sm">
                                 <tr>
-                                    <td colspan="5" class="p-6 text-center text-gray-400">Mengambil data dari Google Sheets...</td>
-                                  </tr>
+                                    <td colspan="5" class="p-6 text-center text-gray-400">Menghubungkan ke Google Sheets...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -74,28 +66,24 @@
         </div>
     </div>
 
+    <!-- Skrip Komponen Dinamis & Logika Laporan -->
+    <script src="js/component.js"></script>
     <script>
-        // =========================================================================
-        // MASUKKAN SPREADSHEET ID ANDA DI SINI
-        // Contoh URL Spreadsheet: https://docs.google.com/spreadsheets/d/1uOoTR.../edit
-        // Maka Spreadsheet ID-nya adalah bagian: 1uOoTR... (di antara /d/ dan /edit)
-        // =========================================================================
-        const spreadsheetId = '1259Lj222pmtMthIQ6PjuknpVlAMGjlsIyNcISENgYUU';
-        const sheetName = 'Database_Transaksi'; // Nama sheet tempat data masuk
+        const spreadsheetId = '1uOoTR92drWwICpKxcC6Tab2pCTCt0JTusoJnoZq5x4U';
+        const sheetName = 'Database_Transaksi';
 
         function muatDataLaporan() {
-            document.getElementById('tabelTransaksi').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Menghubungkan ke Google Sheets...</td></tr>`;
-
+            document.getElementById('tabelTransaksi').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Mengambil data terbaru...</td></tr>`;
+            
             const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
 
             fetch(url)
                 .then(res => res.text())
                 .then(text => {
-                    // Membersihkan format response Google Viz API
                     const jsonString = text.substring(47).slice(0, -2);
                     const json = JSON.parse(jsonString);
-                    
                     const rows = json.table.rows;
+                    
                     const tbody = document.getElementById('tabelTransaksi');
                     tbody.innerHTML = '';
                     
@@ -109,8 +97,7 @@
 
                     rows.forEach(r => {
                         const c = r.c;
-                        // Kolom sesuai urutan input: Tanggal(0), NoRef(1), Tipe(2), Kategori(3), Uraian(4), DPP(5), PPN(6), PPh(7), Total(8)
-                        if (!c[0] || !c[2]) return; // Lewati baris kosong
+                        if (!c[0] || !c[2]) return;
 
                         let tanggal = c[0] ? (c[0].f || c[0].v) : '';
                         let tipe = c[2] ? c[2].v : '';
@@ -136,14 +123,13 @@
                         tbody.appendChild(tr);
                     });
 
-                    // Update Kartu Ringkasan
                     document.getElementById('lblPendapatan').innerText = `Rp ${totalPendapatan.toLocaleString('id-ID')}`;
                     document.getElementById('lblBeban').innerText = `Rp ${totalBeban.toLocaleString('id-ID')}`;
                     document.getElementById('lblLaba').innerText = `Rp ${(totalPendapatan - totalBeban).toLocaleString('id-ID')}`;
                 })
                 .catch(err => {
                     console.error('Error:', err);
-                    document.getElementById('tabelTransaksi').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">Gagal memuat. Pastikan Spreadsheet ID sudah benar dan akses file sudah diubah menjadi "Siapa saja yang memiliki link".</td></tr>`;
+                    document.getElementById('tabelTransaksi').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">Gagal memuat data dari Spreadsheet.</td></tr>`;
                 });
         }
 
