@@ -1,16 +1,36 @@
 // js/component.js
-// Komponen Terpusat: Sidebar dan Header Dinamis untuk PT ERAPEE
+// Komponen Terpusat: Sidebar, Header, Proteksi Sesi Login, & Logout untuk PT ERAPEE
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { CONFIG } from "./config.js";
+
+const app = initializeApp(CONFIG.FIREBASE_CONFIG);
+const auth = getAuth(app);
 
 document.addEventListener("DOMContentLoaded", function() {
-    muatSidebar();
-    muatHeader();
+    const path = window.location.pathname;
+    const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+
+    // Jika bukan halaman login, wajib cek apakah pengguna sudah login atau belum
+    if (currentFile !== 'login.html') {
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // Jika belum login, tendang ke halaman login.html
+                window.location.href = 'login.html';
+            } else {
+                // Jika sudah login, muat sidebar dan header
+                muatSidebar();
+                muatHeader();
+            }
+        });
+    }
 });
 
 function muatSidebar() {
     const sidebarContainer = document.getElementById('sidebar-container');
     if (!sidebarContainer) return;
 
-    // Tentukan halaman aktif berdasarkan URL saat ini
     const path = window.location.pathname;
     const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
 
@@ -59,7 +79,7 @@ function muatSidebar() {
                 ${menuHtml}
             </nav>
 
-            <!-- Tombol Keluar / Logout -->
+            <!-- Tombol Keluar Sistem -->
             <div class="p-4 border-t border-gray-100 bg-gray-50">
                 <button onclick="prosesLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold py-2.5 px-3 rounded-lg transition flex items-center justify-center gap-2">
                     🚪 Keluar Sistem
@@ -73,7 +93,6 @@ function muatHeader() {
     const headerContainer = document.getElementById('header-container');
     if (!headerContainer) return;
 
-    // Ambil judul dari tag <title> halaman yang sedang dibuka
     let pageTitle = document.title.split('|')[0].trim();
 
     headerContainer.innerHTML = `
@@ -95,7 +114,6 @@ function muatHeader() {
     `;
 }
 
-// Fungsi global untuk membuka/menutup sidebar di perangkat mobile
 window.toggleSidebar = function() {
     const sidebar = document.getElementById('app-sidebar');
     const overlay = document.getElementById('sidebar-overlay');
@@ -107,6 +125,10 @@ window.toggleSidebar = function() {
 
 window.prosesLogout = function() {
     if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
-        window.location.href = 'login.html';
+        signOut(auth).then(() => {
+            window.location.href = 'login.html';
+        }).catch((error) => {
+            console.error('Logout error:', error);
+        });
     }
 };
