@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COA & Master Data | PT ERAPEE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="text-gray-800 bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
+            <div id="header-container"></div>
+
+            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+                <!-- Unit Usaha & KBLI -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
+                    <div class="mb-6 pb-4 border-b border-gray-100">
+                        <h2 class="text-lg font-bold text-gray-800">Unit Usaha & Klasifikasi KBLI</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Sektor operasional utama PT Erapee Anugrah Sejahtera</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="p-5 border border-gray-100 rounded-xl bg-gray-50">
+                            <span class="px-2.5 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded-lg">KBLI 58290</span>
+                            <h3 class="font-bold text-gray-800 mt-3">SaaS & Software Publishing</h3>
+                            <p class="text-xs text-gray-500 mt-1">SiPacul - Penerbitan perangkat lunak aplikasi digital dan layanan langganan.</p>
+                        </div>
+                        <div class="p-5 border border-gray-100 rounded-xl bg-gray-50">
+                            <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-lg">KBLI 01220 & Lainnya</span>
+                            <h3 class="font-bold text-gray-800 mt-3">Budidaya Pertanian Komoditas</h3>
+                            <p class="text-xs text-gray-500 mt-1">Wani Tani - Budidaya tanaman buah penunjang (Nanas, Cabai, Tebu).</p>
+                        </div>
+                        <div class="p-5 border border-gray-100 rounded-xl bg-gray-50">
+                            <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-lg">Corporate</span>
+                            <h3 class="font-bold text-gray-800 mt-3">Head Office & Bersama</h3>
+                            <p class="text-xs text-gray-500 mt-1">Administrasi pusat, alokasi biaya bersama, dan manajemen keuangan.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bagan Akun (COA) Ringkas -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
+                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">Bagan Akun (Chart of Accounts - COA)</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Struktur akun standar double-entry PT Erapee</p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-4">Kode Akun</th>
+                                    <th class="p-4">Nama Akun</th>
+                                    <th class="p-4">Kelompok</th>
+                                    <th class="p-4">Pos Laporan</th>
+                                    <th class="p-4">Arus Kas</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr>
+                                    <td class="p-4 font-mono font-semibold">1101</td>
+                                    <td class="p-4 font-medium">Kas</td>
+                                    <td class="p-4 text-gray-600">Aset</td>
+                                    <td class="p-4 text-gray-600">Kas dan setara kas</td>
+                                    <td class="p-4 text-gray-600">Operasi</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-mono font-semibold">1102</td>
+                                    <td class="p-4 font-medium">Bank operasional</td>
+                                    <td class="p-4 text-gray-600">Aset</td>
+                                    <td class="p-4 text-gray-600">Kas dan setara kas</td>
+                                    <td class="p-4 text-gray-600">Operasi</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-mono font-semibold">3101</td>
+                                    <td class="p-4 font-medium">Modal saham</td>
+                                    <td class="p-4 text-gray-600">Ekuitas</td>
+                                    <td class="p-4 text-gray-600">Ekuitas pemegang saham</td>
+                                    <td class="p-4 text-gray-600">Nonkas</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-mono font-semibold">4101</td>
+                                    <td class="p-4 font-medium">Pendapatan SaaS & perangkat lunak</td>
+                                    <td class="p-4 text-gray-600">Pendapatan</td>
+                                    <td class="p-4 text-gray-600">Laba Rugi</td>
+                                    <td class="p-4 text-gray-600">Operasi</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-mono font-semibold">4102</td>
+                                    <td class="p-4 font-medium">Pendapatan budidaya pertanian</td>
+                                    <td class="p-4 text-gray-600">Pendapatan</td>
+                                    <td class="p-4 text-gray-600">Laba Rugi</td>
+                                    <td class="p-4 text-gray-600">Operasi</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-mono font-semibold">5101</td>
+                                    <td class="p-4 font-medium">Beban gaji & tunjangan</td>
+                                    <td class="p-4 text-gray-600">Beban</td>
+                                    <td class="p-4 text-gray-600">Laba Rugi</td>
+                                    <td class="p-4 text-gray-600">Operasi</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script type="module" src="js/component.js"></script>
+</body>
+</html>
