@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Transaksi | PT ERAPEE</title>
+    <title>Input Jurnal & Transaksi | PT ERAPEE</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- File CSS Terpusat -->
@@ -21,70 +21,164 @@
             <!-- HEADER DINAMIS -->
             <div id="header-container"></div>
 
-            <main class="p-4 md:p-8 max-w-4xl mx-auto w-full">
+            <main class="p-4 md:p-8 max-w-5xl mx-auto w-full">
                 <div class="dashboard-card p-6 md:p-8">
-                    <form id="formTransaksi" class="space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Tanggal</label>
-                                <input type="date" id="tanggal" class="form-input-custom" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1.5 text-gray-700">No. Referensi</label>
-                                <input type="text" id="no_ref" placeholder="INV-2026-001" class="form-input-custom" required>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Tipe Arus</label>
-                                <select id="tipe" class="form-input-custom">
-                                    <option value="Masuk">Uang Masuk (Pendapatan)</option>
-                                    <option value="Keluar">Uang Keluar (Biaya)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Kategori Akun</label>
-                                <select id="kategori" class="form-input-custom">
-                                    <option value="Pendapatan IT & Software">Pendapatan IT & Software</option>
-                                    <option value="Pendapatan Pertanian">Pendapatan Pertanian (Cabai, Tebu, Buah)</option>
-                                    <option value="Beban Gaji">Beban Gaji & Tunjangan</option>
-                                    <option value="Beban Sewa & Operasional">Beban Sewa & Operasional</option>
-                                </select>
-                            </div>
-                        </div>
-
+                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
-                            <label class="block text-sm font-medium mb-1.5 text-gray-700">Uraian Transaksi</label>
-                            <input type="text" id="uraian" placeholder="Penjelasan singkat transaksi..." class="form-input-custom" required>
+                            <h2 class="text-lg font-bold text-gray-800">Formulir Input Jurnal Akuntansi</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Pencatatan terintegrasi dengan Firebase Firestore & Standar Coretax</p>
+                        </div>
+                        <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full">Kapasitas 1.000+ Baris</span>
+                    </div>
+
+                    <form id="formJurnal" class="space-y-6">
+                        <!-- Bagian 1: Identitas Dokumen -->
+                        <div>
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">1. Identitas & Referensi Dokumen</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">ID Jurnal</label>
+                                    <input type="text" id="id_jurnal" value="JRN-2026-001" class="form-input-custom font-mono text-xs bg-gray-50" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Tanggal Transaksi</label>
+                                    <input type="date" id="tanggal" class="form-input-custom" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">No. Bukti / Invoice</label>
+                                    <input type="text" id="no_bukti" placeholder="INV-2026-001" class="form-input-custom" required>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
-                            <div>
-                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Nilai DPP (Rp)</label>
-                                <input type="number" id="dpp" value="0" class="form-input-custom">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1.5 text-gray-700">PPN (Rp)</label>
-                                <input type="number" id="ppn" value="0" class="form-input-custom">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Pot. PPh (Rp)</label>
-                                <input type="number" id="pph" value="0" class="form-input-custom">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Total Bersih</label>
-                                <input type="number" id="total" value="0" class="form-input-custom bg-gray-50 font-semibold text-indigo-600" readonly>
+                        <!-- Bagian 2: Klasifikasi Usaha & Unit -->
+                        <div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Jenis Dokumen</label>
+                                    <select id="jenis_dokumen" class="form-input-custom">
+                                        <option value="Invoice Penjualan">Invoice Penjualan</option>
+                                        <option value="Faktur Pembelian">Faktur Pembelian</option>
+                                        <option value="Kas/Bank Masuk">Kas/Bank Masuk</option>
+                                        <option value="Kas/Bank Keluar">Kas/Bank Keluar</option>
+                                        <option value="Jurnal Umum">Jurnal Umum / Memorial</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Unit Usaha / Sektor</label>
+                                    <select id="unit_usaha" class="form-input-custom">
+                                        <option value="Corporate/Head Office">Corporate / Head Office</option>
+                                        <option value="SaaS & Software (KBLI 58290)">SaaS & Software (KBLI 58290)</option>
+                                        <option value="Budidaya Pertanian (Nanas/Cabai/Tebu)">Budidaya Pertanian (Nanas/Cabai/Tebu)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Proyek / Komoditas</label>
+                                    <input type="text" id="proyek" placeholder="Contoh: Panen Nanas Musim 1 / Proyek Klien A" class="form-input-custom">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="pt-6">
+                        <!-- Bagian 3: Lawan Transaksi & Akun Double-Entry -->
+                        <div class="pt-4 border-t border-gray-100">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">2. Akun & Nilai Jurnal (Double-Entry)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Lawan Transaksi (Klien/Vendor)</label>
+                                    <input type="text" id="lawan_transaksi" placeholder="PT Mitra Sejahtera / Toko Tani" class="form-input-custom" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">NPWP / NIK Lawan Transaksi</label>
+                                    <input type="text" id="npwp_nik" placeholder="00.000.000.0-000.000 atau NIK" class="form-input-custom">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Kode Akun (COA)</label>
+                                    <select id="kode_akun" class="form-input-custom">
+                                        <option value="1101 - Kas">1101 - Kas</option>
+                                        <option value="1102 - Bank Operasional">1102 - Bank Operasional</option>
+                                        <option value="4101 - Pendapatan Software">4101 - Pendapatan Software</option>
+                                        <option value="4102 - Pendapatan Pertanian">4102 - Pendapatan Pertanian</option>
+                                        <option value="5101 - Beban Gaji & Tunjangan">5101 - Beban Gaji & Tunjangan</option>
+                                        <option value="5102 - Beban Sewa & Operasional">5102 - Beban Sewa & Operasional</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Kategori Arus Kas</label>
+                                    <select id="kategori_arus_kas" class="form-input-custom">
+                                        <option value="Operasi">Operasi</option>
+                                        <option value="Investasi">Investasi</option>
+                                        <option value="Pendanaan">Pendanaan</option>
+                                        <option value="Nonkas">Nonkas</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Debit (Rp)</label>
+                                    <input type="number" id="debit" value="0" class="form-input-custom font-semibold text-green-700">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Kredit (Rp)</label>
+                                    <input type="number" id="kredit" value="0" class="form-input-custom font-semibold text-red-700">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bagian 4: Elemen Pajak Terpadu (Coretax Ready) -->
+                        <div class="pt-4 border-t border-gray-100">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">3. Rincian Pajak (PPN & PPh)</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">DPP Penjualan</label>
+                                    <input type="number" id="dpp_penjualan" value="0" class="form-input-custom">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">PPN Keluaran</label>
+                                    <input type="number" id="ppn_keluaran" value="0" class="form-input-custom">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">PPh Dipotong PT</label>
+                                    <input type="number" id="pph_dipotong" value="0" class="form-input-custom">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Kode Pajak Ref</label>
+                                    <select id="kode_pajak" class="form-input-custom">
+                                        <option value="NON">NON (Tanpa Pajak)</option>
+                                        <option value="PPN-11">PPN 11% Keluaran</option>
+                                        <option value="PPh23-2">PPh Pasal 23 (2%)</option>
+                                        <option value="PPh21">PPh Pasal 21</option>
+                                        <option value="PPh4(2)">PPh Pasal 4(2) Final</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bagian 5: Keterangan & Status -->
+                        <div class="pt-4 border-t border-gray-100">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Keterangan / Uraian Jurnal</label>
+                                    <input type="text" id="keterangan" placeholder="Penjelasan lengkap transaksi..." class="form-input-custom" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Status Jurnal</label>
+                                    <select id="status_jurnal" class="form-input-custom font-bold text-indigo-600">
+                                        <option value="POSTED">POSTED (Resmi Masuk Buku)</option>
+                                        <option value="DRAFT">DRAFT (Belum Diposting)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Submit -->
+                        <div class="pt-4">
                             <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg shadow-sm transition duration-200">
-                                Simpan Transaksi
+                                Simpan Jurnal ke Firebase Firestore
                             </button>
                         </div>
                         <div id="alertSuccess" class="hidden mt-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm text-center font-medium">
-                            ✓ Transaksi berhasil dikirim ke Google Sheets
+                            ✓ Jurnal akuntansi berhasil disimpan ke Cloud database Google!
                         </div>
                     </form>
                 </div>
@@ -92,9 +186,56 @@
         </div>
     </div>
 
-    <!-- Skrip Utama -->
-    <script src="js/config.js"></script>
+    <!-- Skrip Utama (Menggunakan ES Module untuk Firebase) -->
+    <script type="module">
+        import { CONFIG, db } from "./js/config.js";
+        import { collection, addTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const formJurnal = document.getElementById('formJurnal');
+
+        formJurnal.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            btn.innerText = "Menyimpan ke Cloud...";
+            btn.disabled = true;
+
+            try {
+                const dataJurnal = {
+                    id_jurnal: document.getElementById('id_jurnal').value,
+                    tanggal: document.getElementById('tanggal').value,
+                    no_bukti: document.getElementById('no_bukti').value,
+                    jenis_dokumen: document.getElementById('jenis_dokumen').value,
+                    unit_usaha: document.getElementById('unit_usaha').value,
+                    proyek: document.getElementById('proyek').value,
+                    lawan_transaksi: document.getElementById('lawan_transaksi').value,
+                    npwp_nik: document.getElementById('npwp_nik').value,
+                    kode_akun: document.getElementById('kode_akun').value,
+                    kategori_arus_kas: document.getElementById('kategori_arus_kas').value,
+                    debit: parseFloat(document.getElementById('debit').value) || 0,
+                    kredit: parseFloat(document.getElementById('kredit').value) || 0,
+                    dpp_penjualan: parseFloat(document.getElementById('dpp_penjualan').value) || 0,
+                    ppn_keluaran: parseFloat(document.getElementById('ppn_keluaran').value) || 0,
+                    pph_dipotong: parseFloat(document.getElementById('pph_dipotong').value) || 0,
+                    kode_pajak: document.getElementById('kode_pajak').value,
+                    keterangan: document.getElementById('keterangan').value,
+                    status: document.getElementById('status_jurnal').value,
+                    timestamp: new Date()
+                };
+
+                await addDoc(collection(db, CONFIG.COLLECTION_NAME), dataJurnal);
+                
+                document.getElementById('alertSuccess').classList.remove('hidden');
+                formJurnal.reset();
+                setTimeout(() => document.getElementById('alertSuccess').classList.add('hidden'), 5000);
+            } catch (error) {
+                console.error("Gagal menyimpan:", error);
+                alert("Terjadi kesalahan saat menyimpan ke database.");
+            } finally {
+                btn.innerText = "Simpan Jurnal ke Firebase Firestore";
+                btn.disabled = false;
+            }
+        });
+    </script>
     <script src="js/component.js"></script>
-    <script src="js/api.js"></script>
 </body>
 </html>
