@@ -10,21 +10,12 @@
 </head>
 <body class="text-gray-800">
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0 hidden md:block">
-            <div class="h-16 flex items-center px-6 border-b border-gray-200">
-                <span class="text-lg font-bold text-indigo-600">ERAPEE Finance</span>
-            </div>
-            <nav class="p-4 space-y-2">
-                <a href="index.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Input Transaksi</a>
-                <a href="manajemen.html" class="block px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-medium">Manajemen Data</a>
-                <a href="laporan.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Laporan Laba Rugi</a>
-                <a href="pajak.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Rekap Pajak</a>
-            </nav>
-        </aside>
+        
+        <!-- SIDEBAR DINAMIS (Otomatis dirender oleh component.js) -->
+        <div id="sidebar-container"></div>
 
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-y-auto">
+        <!-- Main Content (md:ml-64 menjaga agar konten tidak tertutup sidebar tetap) -->
+        <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
             <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
                 <h1 class="text-xl font-semibold">Kelola, Edit, & Hapus Transaksi</h1>
                 <button onclick="muatDataManajemen()" class="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition">Muat Ulang</button>
@@ -88,6 +79,8 @@
         </div>
     </div>
 
+    <!-- Skrip Komponen Dinamis & Logika Tabel -->
+    <script src="js/component.js"></script>
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbx2bCxIwIGsHeUSaEs5rXBFMg4chXhDY4AgRtbHrnWkC-3hcrwxDQVSosSnDpPSQMSKeg/exec';
 
@@ -95,6 +88,9 @@
             const url = `${scriptURL}?callback=handleData`;
             const scriptTag = document.createElement('script');
             scriptTag.src = url;
+            scriptTag.onerror = function() {
+                document.getElementById('tabelManajemen').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">Gagal memuat data dari Spreadsheet.</td></tr>`;
+            };
             document.body.appendChild(scriptTag);
         }
 
@@ -128,12 +124,12 @@
         function hapusData(rowIdx, noRef) {
             if (confirm(`Apakah Anda yakin ingin menghapus transaksi dengan referensi: ${noRef}?`)) {
                 fetch(scriptURL, {
-                    method: 'POST', // Menggunakan POST dengan parameter override atau fetch khusus delete
+                    method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify({ action: 'delete', row: rowIdx })
                 }).then(() => {
-                    alert('Data berhasil dihapus dari sistem!');
-                    muatDataManajemen();
+                    alert('Perintah hapus dikirim! Muat ulang halaman dalam beberapa detik.');
+                    setTimeout(muatDataManajemen, 2000);
                 });
             }
         }
@@ -158,7 +154,6 @@
                 uraian: document.getElementById('editUraian').value,
                 dpp: document.getElementById('editDpp').value,
                 total: document.getElementById('editTotal').value,
-                // Mempertahankan data lama untuk field lainnya
                 tanggal: '', no_ref: '', tipe: '', kategori: '', ppn: '0', pph: '0'
             };
 
@@ -168,8 +163,8 @@
                 body: JSON.stringify(updatedData)
             }).then(() => {
                 tutupModal();
-                alert('Data berhasil diperbarui!');
-                muatDataManajemen();
+                alert('Perubahan berhasil dikirim!');
+                setTimeout(muatDataManajemen, 2000);
             });
         });
 
