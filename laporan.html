@@ -65,7 +65,7 @@
                             <tbody id="tabelTransaksi" class="divide-y divide-gray-100 text-sm">
                                 <tr>
                                     <td colspan="5" class="p-6 text-center text-gray-400">Mengambil data dari Google Sheets...</td>
-                                </tr>
+                                  </tr>
                             </tbody>
                         </table>
                     </div>
@@ -74,75 +74,79 @@
         </div>
     </div>
 
-   <script>
-        // URL Web App Apps Script Anda
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbx2bCxIwIGsHeUSaEs5rXBFMg4chXhDY4AgRtbHrnWkC-3hcrwxDQVSosSnDpPSQMSKeg/exec';
+    <script>
+        // =========================================================================
+        // MASUKKAN SPREADSHEET ID ANDA DI SINI
+        // Contoh URL Spreadsheet: https://docs.google.com/spreadsheets/d/1uOoTR.../edit
+        // Maka Spreadsheet ID-nya adalah bagian: 1uOoTR... (di antara /d/ dan /edit)
+        // =========================================================================
+        const spreadsheetId = 'MASUKKAN_SPREADSHEET_ID_ANDA';
+        const sheetName = 'Database_Transaksi'; // Nama sheet tempat data masuk
 
         function muatDataLaporan() {
-            // Tampilkan loading
-            document.getElementById('tabelTransaksi').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Mengambil data secara real-time...</td></tr>`;
+            document.getElementById('tabelTransaksi').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Menghubungkan ke Google Sheets...</td></tr>`;
 
-            // Membuat fungsi callback global untuk JSONP
-            const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-            
-            window[callbackName] = function(data) {
-                delete window[callbackName];
-                document.body.removeChild(scriptTag);
-                
-                prosesDataRender(data);
-            };
+            const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
 
-            // Menyisipkan script dinamis ke HTML untuk bypass CORS
-            const scriptTag = document.createElement('script');
-            scriptTag.src = `${scriptURL}?callback=${callbackName}`;
-            
-            scriptTag.onerror = function() {
-                document.getElementById('tabelTransaksi').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">Gagal menyambungkan ke Google Sheets. Periksa kembali URL Deployment Anda.</td></tr>`;
-            };
+            fetch(url)
+                .then(res => res.text())
+                .then(text => {
+                    // Membersihkan format response Google Viz API
+                    const jsonString = text.substring(47).slice(0, -2);
+                    const json = JSON.parse(jsonString);
+                    
+                    const rows = json.table.rows;
+                    const tbody = document.getElementById('tabelTransaksi');
+                    tbody.innerHTML = '';
+                    
+                    let totalPendapatan = 0;
+                    let totalBeban = 0;
 
-            document.body.appendChild(scriptTag);
+                    if (!rows || rows.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Belum ada data transaksi tercatat.</td></tr>`;
+                        return;
+                    }
+
+                    rows.forEach(r => {
+                        const c = r.c;
+                        // Kolom sesuai urutan input: Tanggal(0), NoRef(1), Tipe(2), Kategori(3), Uraian(4), DPP(5), PPN(6), PPh(7), Total(8)
+                        if (!c[0] || !c[2]) return; // Lewati baris kosong
+
+                        let tanggal = c[0] ? (c[0].f || c[0].v) : '';
+                        let tipe = c[2] ? c[2].v : '';
+                        let kategori = c[3] ? c[3].v : '';
+                        let uraian = c[4] ? c[4].v : '';
+                        let dpp = c[5] ? (parseFloat(c[5].v) || 0) : 0;
+                        let total = c[8] ? (parseFloat(c[8].v) || 0) : 0;
+
+                        if (tipe === "Masuk") {
+                            totalPendapatan += dpp;
+                        } else {
+                            totalBeban += dpp;
+                        }
+
+                        let tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="p-4">${tanggal}</td>
+                            <td class="p-4 font-medium">${kategori}</td>
+                            <td class="p-4 text-gray-500">${uraian}</td>
+                            <td class="p-4 text-right">Rp ${dpp.toLocaleString('id-ID')}</td>
+                            <td class="p-4 text-right font-semibold">Rp ${total.toLocaleString('id-ID')}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+
+                    // Update Kartu Ringkasan
+                    document.getElementById('lblPendapatan').innerText = `Rp ${totalPendapatan.toLocaleString('id-ID')}`;
+                    document.getElementById('lblBeban').innerText = `Rp ${totalBeban.toLocaleString('id-ID')}`;
+                    document.getElementById('lblLaba').innerText = `Rp ${(totalPendapatan - totalBeban).toLocaleString('id-ID')}`;
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    document.getElementById('tabelTransaksi').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">Gagal memuat. Pastikan Spreadsheet ID sudah benar dan akses file sudah diubah menjadi "Siapa saja yang memiliki link".</td></tr>`;
+                });
         }
 
-        function prosesDataRender(data) {
-            const tbody = document.getElementById('tabelTransaksi');
-            tbody.innerHTML = '';
-            
-            let totalPendapatan = 0;
-            let totalBeban = 0;
-
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Belum ada data transaksi tercatat di Google Sheets.</td></tr>`;
-                return;
-            }
-
-            data.forEach(row => {
-                let dpp = parseFloat(row.dpp) || 0;
-                let total = parseFloat(row.total) || 0;
-
-                if (row.tipe === "Masuk") {
-                    totalPendapatan += dpp;
-                } else {
-                    totalBeban += dpp;
-                }
-
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-4">${row.tanggal}</td>
-                    <td class="p-4 font-medium">${row.kategori}</td>
-                    <td class="p-4 text-gray-500">${row.uraian}</td>
-                    <td class="p-4 text-right">Rp ${dpp.toLocaleString('id-ID')}</td>
-                    <td class="p-4 text-right font-semibold">Rp ${total.toLocaleString('id-ID')}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            // Update Kartu Ringkasan Laba Rugi
-            document.getElementById('lblPendapatan').innerText = `Rp ${totalPendapatan.toLocaleString('id-ID')}`;
-            document.getElementById('lblBeban').innerText = `Rp ${totalBeban.toLocaleString('id-ID')}`;
-            document.getElementById('lblLaba').innerText = `Rp ${(totalPendapatan - totalBeban).toLocaleString('id-ID')}`;
-        }
-
-        // Jalankan saat halaman dibuka
         muatDataLaporan();
     </script>
 </body>
