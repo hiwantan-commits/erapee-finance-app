@@ -24,7 +24,7 @@
                         <p class="text-xs text-gray-500 mt-0.5">Sinkronisasi data standar perusahaan dengan Cloud Firestore</p>
                     </div>
                     <div class="flex gap-3">
-                        <button onclick="seedDefaultCOA()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                        <button id="btnSeed" onclick="seedDefaultCOA()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
                             📥 Muat Default COA Google Sheet
                         </button>
                         <button onclick="bukaModalTambah()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
@@ -112,7 +112,6 @@
 
         const COLLECTION_COA = "master_coa";
 
-        // Daftar default COA utama dari Google Sheet PT Erapee
         const DEFAULT_COA_DATA = [
             { kode: "1101", nama: "Kas", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
             { kode: "1102", nama: "Bank operasional", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
@@ -134,7 +133,7 @@
                 tbody.innerHTML = '';
 
                 if (querySnapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada data COA. Klik tombol <b>"Muat Default COA Google Sheet"</b> di atas untuk mengisi data otomatis.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada data COA. Klik tombol <b>"Muat Default COA Google Sheet"</b> di atas.</td></tr>`;
                     return;
                 }
 
@@ -156,21 +155,28 @@
                 });
             } catch (err) {
                 console.error("Gagal memuat COA:", err);
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal terhubung ke database.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal terhubung ke database. Periksa konsol browser.</td></tr>`;
             }
         };
 
         window.seedDefaultCOA = async function() {
             if (confirm("Apakah Anda ingin memasukkan data default COA Google Sheet ke Firestore?")) {
+                const btn = document.getElementById('btnSeed');
+                btn.innerText = "Memuat...";
+                btn.disabled = true;
+
                 try {
                     for (let item of DEFAULT_COA_DATA) {
                         await addDoc(collection(db, COLLECTION_COA), item);
                     }
-                    alert("Berhasil memuat data default COA!");
+                    alert("Berhasil memuat data default COA ke Cloud Firestore!");
                     muatDataCOA();
                 } catch (error) {
                     console.error("Gagal seeding:", error);
-                    alert("Terjadi kesalahan saat memuat data default.");
+                    alert("Gagal memuat data: " + error.message);
+                } finally {
+                    btn.innerText = "📥 Muat Default COA Google Sheet";
+                    btn.disabled = false;
                 }
             }
         };
@@ -222,7 +228,7 @@
                 muatDataCOA();
             } catch (error) {
                 console.error("Gagal menyimpan COA:", error);
-                alert("Terjadi kesalahan saat menyimpan data.");
+                alert("Terjadi kesalahan: " + error.message);
             }
         });
 
@@ -234,7 +240,7 @@
                     muatDataCOA();
                 } catch (error) {
                     console.error("Gagal menghapus:", error);
-                    alert("Gagal menghapus data.");
+                    alert("Gagal menghapus data: " + error.message);
                 }
             }
         };
