@@ -1,16 +1,36 @@
 // js/component.js
-// Komponen Terpusat: Sidebar dan Header Dinamis untuk PT ERAPEE
+// Komponen Terpusat: Sidebar, Header, Proteksi Sesi, & Logout untuk PT ERAPEE
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { CONFIG } from "./config.js";
+
+const app = initializeApp(CONFIG.FIREBASE_CONFIG);
+const auth = getAuth(app);
 
 document.addEventListener("DOMContentLoaded", function() {
-    muatSidebar();
-    muatHeader();
+    // Cek apakah pengguna sudah login (kecuali di halaman login.html)
+    const path = window.location.pathname;
+    const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+
+    if (currentFile !== 'login.html') {
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // Jika belum login, lempar ke halaman login
+                window.location.href = 'login.html';
+            } else {
+                // Jika sudah login, muat komponen
+                muatSidebar(user.email);
+                muatHeader();
+            }
+        });
+    }
 });
 
-function muatSidebar() {
+function muatSidebar(userEmail) {
     const sidebarContainer = document.getElementById('sidebar-container');
     if (!sidebarContainer) return;
 
-    // Tentukan halaman aktif berdasarkan URL saat ini
     const path = window.location.pathname;
     const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
 
@@ -59,9 +79,15 @@ function muatSidebar() {
                 ${menuHtml}
             </nav>
 
-            <!-- Footer Sidebar -->
-            <div class="p-4 border-t border-gray-100 text-xs text-gray-400 text-center">
-                &copy; 2026 PT Erapee
+            <!-- User Info & Tombol Logout -->
+            <div class="p-4 border-t border-gray-100 bg-gray-50">
+                <div class="mb-3 px-2">
+                    <p class="text-xs text-gray-400">Masuk sebagai:</p>
+                    <p class="text-xs font-semibold text-gray-700 truncate">${userEmail || 'Admin'}</p>
+                </div>
+                <button onclick="prosesLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold py-2 px-3 rounded-lg transition flex items-center justify-center gap-2">
+                    🚪 Keluar Sistem
+                </button>
             </div>
         </aside>
     `;
@@ -71,7 +97,6 @@ function muatHeader() {
     const headerContainer = document.getElementById('header-container');
     if (!headerContainer) return;
 
-    // Ambil judul dari tag <title> halaman yang sedang dibuka
     let pageTitle = document.title.split('|')[0].trim();
 
     headerContainer.innerHTML = `
@@ -86,19 +111,28 @@ function muatHeader() {
             </div>
             <div class="flex items-center gap-3">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
-                    ● Terhubung ke Firebase
+                    ● Aman & Terproteksi
                 </span>
             </div>
         </header>
     `;
 }
 
-// Fungsi global untuk membuka/menutup sidebar di perangkat mobile (*smartphone*)
 window.toggleSidebar = function() {
     const sidebar = document.getElementById('app-sidebar');
     const overlay = document.getElementById('sidebar-overlay');
     if (sidebar && overlay) {
         sidebar.classList.toggle('-translate-x-full');
         overlay.classList.toggle('hidden');
+    }
+};
+
+window.prosesLogout = function() {
+    if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
+        signOut(auth).then(() => {
+            window.location.href = 'login.html';
+        }).catch((error) => {
+            console.error('Logout error:', error);
+        });
     }
 };
