@@ -17,74 +17,56 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Unit Usaha & KBLI (Sesuai Referensi Sheet 03) -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
-                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
+                <!-- 1. MANAJEMEN UNIT USAHA & KBLI (DINAMIS) -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-8">
+                    <div class="mb-6 pb-4 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4">
                         <div>
-                            <h2 class="text-lg font-bold text-gray-800">Unit Usaha & Klasifikasi KBLI (Master Data)</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Segmen operasional, divisi digital, dan komoditas pertanian PT Erapee Anugrah Sejahtera</p>
+                            <h2 class="text-lg font-bold text-gray-800">Unit Usaha & Klasifikasi KBLI (Master Data Dinamis)</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Kelola segmen operasional dan divisi perusahaan</p>
                         </div>
-                        <span class="text-xs px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">Sheet 03 Reference</span>
+                        <div class="flex gap-2">
+                            <button id="btnSeedUnit" onclick="seedDefaultUnitUsaha()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition shadow-sm">
+                                📥 Muat Default Unit
+                            </button>
+                            <button onclick="bukaModalUnit()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition shadow-sm">
+                                + Tambah Unit Usaha
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- CORP -->
-                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 rounded font-mono">CORP</span>
-                            <h3 class="font-bold text-gray-800 text-sm mt-2">Corporate / Head Office</h3>
-                            <p class="text-xs text-gray-500 mt-1">Kantor Pusat & Administrasi Umum</p>
-                        </div>
-                        <!-- MARC -->
-                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded font-mono">MARC | KBLI 62199</span>
-                            <h3 class="font-bold text-gray-800 text-sm mt-2">Marcframe</h3>
-                            <p class="text-xs text-gray-500 mt-1">Digital Services & Pemrograman</p>
-                        </div>
-                        <!-- SIP -->
-                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded font-mono">SIP | KBLI 58290</span>
-                            <h3 class="font-bold text-gray-800 text-sm mt-2">SiPacul</h3>
-                            <p class="text-xs text-gray-500 mt-1">Software Publishing & Aplikasi SaaS</p>
-                        </div>
-                        <!-- WT-NANAS -->
-                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded font-mono">WT-NANAS | KBLI 01220</span>
-                            <h3 class="font-bold text-gray-800 text-sm mt-2">Wani Tani - Nanas</h3>
-                            <p class="text-xs text-gray-500 mt-1">Budidaya Buah Tropis & Nanas</p>
-                        </div>
-                        <!-- WT-TEBU -->
-                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded font-mono">WT-TEBU | KBLI 01140</span>
-                            <h3 class="font-bold text-gray-800 text-sm mt-2">Wani Tani - Tebu</h3>
-                            <p class="text-xs text-gray-500 mt-1">Budidaya Tanaman Semusim Tebu</p>
-                        </div>
-                        <!-- WT-CABAI -->
-                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded font-mono">WT-CABAI | KBLI 01138</span>
-                            <h3 class="font-bold text-gray-800 text-sm mt-2">Wani Tani - Cabai</h3>
-                            <p class="text-xs text-gray-500 mt-1">Budidaya Sayuran & Cabai</p>
-                        </div>
-                        <!-- SHARED -->
-                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50 md:col-span-2 lg:col-span-3">
-                            <span class="px-2 py-0.5 text-xs font-semibold bg-gray-200 text-gray-700 rounded font-mono">SHARED</span>
-                            <h3 class="font-bold text-gray-800 text-sm mt-2">Biaya Bersama (Shared Cost)</h3>
-                            <p class="text-xs text-gray-500 mt-1">Alokasi biaya operasional gabungan antar unit usaha</p>
-                        </div>
+                    <!-- Tabel Unit Usaha -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-3">Kode Segmen</th>
+                                    <th class="p-3">Nama Unit Usaha</th>
+                                    <th class="p-3">KBLI / Kategori</th>
+                                    <th class="p-3">Keterangan</th>
+                                    <th class="p-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelUnitUsaha" class="divide-y divide-gray-100 text-xs">
+                                <tr>
+                                    <td colspan="5" class="p-6 text-center text-gray-400">Memuat data Unit Usaha dari Firebase...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Tombol Aksi COA -->
+                <!-- 2. MANAJEMEN BAGAN AKUN (COA) -->
                 <div class="mb-6 flex flex-wrap justify-between items-center gap-4">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-800">Manajemen Bagan Akun (COA)</h2>
+                        <h2 class="text-xl font-bold text-gray-800">Manajemen Bagan Akun (COA 101 Akun)</h2>
                         <p class="text-xs text-gray-500 mt-0.5">Sinkronisasi data standar perusahaan dengan Cloud Firestore</p>
                     </div>
                     <div class="flex gap-3">
                         <button onclick="resetDataCOA()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
-                            🗑️ Bersihkan Semua
+                            🗑️ Bersihkan COA
                         </button>
                         <button id="btnSeed" onclick="seedDefaultCOA()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
-                            📥 Muat Default COA (101 Akun)
+                            📥 Muat Default COA
                         </button>
                         <button onclick="bukaModalTambah()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
                             + Tambah Akun Baru
@@ -115,6 +97,36 @@
                     </div>
                 </div>
             </main>
+        </div>
+    </div>
+
+    <!-- Modal Tambah/Edit Unit Usaha -->
+    <div id="modalUnit" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h3 id="modalUnitTitle" class="text-lg font-bold mb-4 text-gray-800">Tambah Unit Usaha</h3>
+            <form id="formUnit" class="space-y-4">
+                <input type="hidden" id="editUnitId">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Kode Segmen (Contoh: CORP, SIP)</label>
+                    <input type="text" id="unitKode" placeholder="CORP" class="form-input-custom font-mono uppercase" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Nama Unit Usaha</label>
+                    <input type="text" id="unitNama" placeholder="Corporate / Head Office" class="form-input-custom" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Klasifikasi / KBLI</label>
+                    <input type="text" id="unitKbli" placeholder="Kantor Pusat & Administrasi" class="form-input-custom" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Keterangan / Sektor</label>
+                    <input type="text" id="unitKet" placeholder="Korporat" class="form-input-custom">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="tutupModalUnit()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-xl font-medium transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-xl font-medium transition">Simpan Unit</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -166,15 +178,27 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase CRUD & Seeder 101 COA -->
+    <!-- Skrip Firebase CRUD (Unit Usaha & COA) -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        const COL_UNIT = "master_unit_usaha";
         const COLLECTION_COA = "master_coa";
 
-        // 101 Daftar Lengkap COA PT Erapee Anugrah Sejahtera
+        // Default Unit Usaha Sesuai Sheet 03
+        const DEFAULT_UNIT_DATA = [
+            { kode: "CORP", nama: "Corporate / Head Office", kbli: "Kantor Pusat & Administrasi", ket: "Korporat" },
+            { kode: "MARC", nama: "Marcframe", kbli: "Digital Services (KBLI 62199)", ket: "Digital" },
+            { kode: "SIP", nama: "SiPacul", kbli: "Software Publishing (KBLI 58290)", ket: "Digital" },
+            { kode: "WT-NANAS", nama: "Wani Tani - Nanas", kbli: "Pertanian (KBLI 01220)", ket: "Pertanian" },
+            { kode: "WT-TEBU", nama: "Wani Tani - Tebu", kbli: "Pertanian (KBLI 01140)", ket: "Pertanian" },
+            { kode: "WT-CABAI", nama: "Wani Tani - Cabai", kbli: "Pertanian (KBLI 01138)", ket: "Pertanian" },
+            { kode: "SHARED", nama: "Biaya Bersama", kbli: "Alokasi Bersama (Shared Cost)", ket: "Bersama" }
+        ];
+
+        // 101 Data COA
         const DEFAULT_COA_DATA = [
             { kode: "1101", nama: "Kas", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
             { kode: "1102", nama: "Bank operasional", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
@@ -279,6 +303,119 @@
             { kode: "8102", nama: "Beban/(manfaat) pajak tangguhan", saldoNormal: "Debit", kelompok: "Pajak penghasilan", posLaporan: "Pajak tangguhan" }
         ];
 
+        // --- CRUD UNIT USAHA ---
+        window.muatDataUnit = async function() {
+            const tbody = document.getElementById('tabelUnitUsaha');
+            tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Memuat Unit Usaha...</td></tr>`;
+
+            try {
+                const snap = await getDocs(collection(db, COL_UNIT));
+                tbody.innerHTML = '';
+                if (snap.empty) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Belum ada unit usaha. Klik <b>"Muat Default Unit"</b> di atas.</td></tr>`;
+                    return;
+                }
+
+                let units = [];
+                snap.forEach(d => units.push({ id: d.id, ...d.data() }));
+                units.sort((a, b) => a.kode.localeCompare(b.kode));
+
+                units.forEach(u => {
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-3 font-mono font-semibold text-indigo-600">${u.kode}</td>
+                        <td class="p-3 font-medium text-gray-800">${u.nama}</td>
+                        <td class="p-3 text-gray-600">${u.kbli}</td>
+                        <td class="p-3 text-gray-500">${u.ket || '-'}</td>
+                        <td class="p-3 text-center space-x-2 whitespace-nowrap">
+                            <button onclick='bukaModalEditUnit("${u.id}", ${JSON.stringify(u).replace(/'/g, "&#39;")})' class="text-indigo-600 hover:underline text-xs font-semibold">Edit</button>
+                            <button onclick='hapusUnit("${u.id}", "${u.kode}")' class="text-red-600 hover:underline text-xs font-semibold">Hapus</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">Gagal memuat unit usaha.</td></tr>`;
+            }
+        };
+
+        window.seedDefaultUnitUsaha = async function() {
+            if (confirm("Muat default Unit Usaha & KBLI ke Firestore?")) {
+                try {
+                    for (let item of DEFAULT_UNIT_DATA) {
+                        await setDoc(doc(db, COL_UNIT, item.kode), item);
+                    }
+                    alert("Berhasil memuat Unit Usaha!");
+                    muatDataUnit();
+                } catch (err) {
+                    alert("Gagal: " + err.message);
+                }
+            }
+        };
+
+        window.bukaModalUnit = function() {
+            document.getElementById('modalUnitTitle').innerText = "Tambah Unit Usaha Baru";
+            document.getElementById('editUnitId').value = "";
+            document.getElementById('unitKode').value = "";
+            document.getElementById('unitKode').readOnly = false;
+            document.getElementById('unitKode').classList.remove('bg-gray-100');
+            document.getElementById('unitNama').value = "";
+            document.getElementById('unitKbli').value = "";
+            document.getElementById('unitKet').value = "";
+            document.getElementById('modalUnit').classList.remove('hidden');
+        };
+
+        window.bukaModalEditUnit = function(id, data) {
+            document.getElementById('modalUnitTitle').innerText = "Edit Unit Usaha";
+            document.getElementById('editUnitId').value = id;
+            document.getElementById('unitKode').value = data.kode || "";
+            document.getElementById('unitKode').readOnly = true;
+            document.getElementById('unitKode').classList.add('bg-gray-100');
+            document.getElementById('unitNama').value = data.nama || "";
+            document.getElementById('unitKbli').value = data.kbli || "";
+            document.getElementById('unitKet').value = data.ket || "";
+            document.getElementById('modalUnit').classList.remove('hidden');
+        };
+
+        window.tutupModalUnit = function() {
+            document.getElementById('modalUnit').classList.add('hidden');
+        };
+
+        document.getElementById('formUnit').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('editUnitId').value;
+            const kode = document.getElementById('unitKode').value.toUpperCase();
+            const data = {
+                kode: kode,
+                nama: document.getElementById('unitNama').value,
+                kbli: document.getElementById('unitKbli').value,
+                ket: document.getElementById('unitKet').value
+            };
+
+            try {
+                await setDoc(doc(db, COL_UNIT, kode), data);
+                alert("Unit usaha berhasil disimpan!");
+                tutupModalUnit();
+                muatDataUnit();
+            } catch (err) {
+                alert("Gagal menyimpan: " + err.message);
+            }
+        });
+
+        window.hapusUnit = async function(id, kode) {
+            if (confirm(`Hapus unit usaha [${kode}]?`)) {
+                try {
+                    await deleteDoc(doc(db, COL_UNIT, id));
+                    alert("Berhasil dihapus!");
+                    muatDataUnit();
+                } catch (err) {
+                    alert("Gagal: " + err.message);
+                }
+            }
+        };
+
+        // --- CRUD COA ---
         window.muatDataCOA = async function() {
             const tbody = document.getElementById('tabelCOA');
             tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Memuat data COA dari Firebase...</td></tr>`;
@@ -288,7 +425,7 @@
                 tbody.innerHTML = '';
 
                 if (querySnapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada data COA. Klik tombol <br><br><b>"📥 Muat Default COA (101 Akun)"</b> di atas.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada data COA. Klik tombol <b>"Muat Default COA"</b> di atas.</td></tr>`;
                     return;
                 }
 
@@ -315,12 +452,12 @@
                 });
             } catch (err) {
                 console.error("Gagal memuat COA:", err);
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal terhubung ke database. Periksa konsol browser.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal terhubung ke database.</td></tr>`;
             }
         };
 
         window.resetDataCOA = async function() {
-            if (confirm("⚠️ PERHATIAN: Ini akan menghapus SELURUH data COA di database. Apakah Anda yakin?")) {
+            if (confirm("⚠️ Hapus SELURUH data COA di database?")) {
                 try {
                     const querySnapshot = await getDocs(collection(db, COLLECTION_COA));
                     const promises = [];
@@ -328,17 +465,16 @@
                         promises.push(deleteDoc(doc(db, COLLECTION_COA, docSnap.id)));
                     });
                     await Promise.all(promises);
-                    alert("Seluruh data COA berhasil dibersihkan!");
+                    alert("COA dibersihkan!");
                     muatDataCOA();
                 } catch (error) {
-                    console.error("Gagal mereset data:", error);
-                    alert("Terjadi kesalahan: " + error.message);
+                    alert("Gagal: " + error.message);
                 }
             }
         };
 
         window.seedDefaultCOA = async function() {
-            if (confirm("Apakah Anda ingin memasukkan 101 data default COA ke Firestore?")) {
+            if (confirm("Muat 101 data default COA ke Firestore?")) {
                 const btn = document.getElementById('btnSeed');
                 btn.innerText = "Memuat...";
                 btn.disabled = true;
@@ -347,13 +483,12 @@
                     for (let item of DEFAULT_COA_DATA) {
                         await setDoc(doc(db, COLLECTION_COA, item.kode), item);
                     }
-                    alert("Berhasil memuat 101 data default COA!");
+                    alert("Berhasil memuat 101 data COA!");
                     muatDataCOA();
                 } catch (error) {
-                    console.error("Gagal seeding:", error);
-                    alert("Gagal memuat data: " + error.message);
+                    alert("Gagal: " + error.message);
                 } finally {
-                    btn.innerText = "📥 Muat Default COA (101 Akun)";
+                    btn.innerText = "📥 Muat Default COA";
                     btn.disabled = false;
                 }
             }
@@ -389,7 +524,6 @@
 
         document.getElementById('formCOA').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const id = document.getElementById('editDocId').value;
             const kodeInput = document.getElementById('kodeAkun').value;
             const newData = {
                 kode: kodeInput,
@@ -400,34 +534,29 @@
             };
 
             try {
-                if (id) {
-                    await updateDoc(doc(db, COLLECTION_COA, id), newData);
-                    alert("Akun COA berhasil diperbarui!");
-                } else {
-                    await setDoc(doc(db, COLLECTION_COA, kodeInput), newData);
-                    alert("Akun COA baru berhasil ditambahkan!");
-                }
+                await setDoc(doc(db, COLLECTION_COA, kodeInput), newData);
+                alert("Akun COA berhasil disimpan!");
                 tutupModal();
                 muatDataCOA();
             } catch (error) {
-                console.error("Gagal menyimpan COA:", error);
-                alert("Terjadi kesalahan: " + error.message);
+                alert("Kesalahan: " + error.message);
             }
         });
 
         window.hapusCOA = async function(id, kode) {
-            if (confirm(`Apakah Anda yakin ingin menghapus akun COA [${kode}]?`)) {
+            if (confirm(`Hapus akun COA [${kode}]?`)) {
                 try {
                     await deleteDoc(doc(db, COLLECTION_COA, id));
-                    alert("Akun COA berhasil dihapus!");
+                    alert("Berhasil dihapus!");
                     muatDataCOA();
                 } catch (error) {
-                    console.error("Gagal menghapus:", error);
-                    alert("Gagal menghapus data: " + error.message);
+                    alert("Gagal: " + error.message);
                 }
             }
         };
 
+        // Inisialisasi Load
+        muatDataUnit();
         muatDataCOA();
     </script>
     <script type="module" src="js/component.js"></script>
