@@ -1,13 +1,25 @@
 // js/config.js
-// Pusat konfigurasi aplikasi (Hanya atur di sini untuk seluruh halaman)
+// Pusat Konfigurasi Firebase Firestore & Aplikasi PT ERAPEE
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const CONFIG = {
-    // Masukkan Spreadsheet ID Anda di sini (di antara /d/ dan /edit pada link Google Sheets)
-    SPREADSHEET_ID: "1259Lj222pmtMthIQ6PjuknpVlAMGjlsIyNcISENgYUU",
+    // Konfigurasi Firebase PT Erapee Finance
+    FIREBASE_CONFIG: {
+        apiKey: "AIzaSyBAspi9107FKi1zu-2T_K0thXw7RMS40Ps",
+        authDomain: "pt-erapee-finance.firebaseapp.com",
+        projectId: "pt-erapee-finance",
+        storageBucket: "pt-erapee-finance.firebasestorage.app",
+        messagingSenderId: "839880121530",
+        appId: "1:839880121530:web:4e271ca82d8a7936a43683",
+        measurementId: "G-JYMREYJ1JF"
+    },
     
-    // Masukkan URL Web App Google Apps Script Anda di sini
-    APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx2bCxIwIGsHeUSaEs5rXBFMg4chXhDY4AgRtbHrnWkC-3hcrwxDQVSosSnDpPSQMSKeg/exec",
-    
-    // Nama sheet database transaksi
-    SHEET_NAME: "Database_Transaksi"
+    // Nama koleksi database di Firestore untuk mencatat jurnal akuntansi
+    COLLECTION_NAME: "jurnal_transaksi"
 };
+
+// Inisialisasi Firebase & Firestore agar bisa diakses global di seluruh halaman
+const app = initializeApp(CONFIG.FIREBASE_CONFIG);
+const db = getFirestore(app);
