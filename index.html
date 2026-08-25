@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Keuangan | PT ERAPEE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0 hidden md:block">
+            <div class="h-16 flex items-center px-6 border-b border-gray-200">
+                <span class="text-lg font-bold text-indigo-600">ERAPEE Finance</span>
+            </div>
+            <nav class="p-4 space-y-2">
+                <a href="#" class="block px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-medium">Input Transaksi</a>
+                <a href="#" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Laporan Laba Rugi</a>
+                <a href="#" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Rekap Pajak</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+                <h1 class="text-xl font-semibold">Form Input Transaksi Real-Time</h1>
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm text-gray-500">Admin PT Erapee</span>
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">A</div>
+                </div>
+            </header>
+
+            <main class="p-6 md:p-8 max-w-4xl mx-auto w-full">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+                    <h2 class="text-lg font-semibold mb-6 border-b pb-4">Catat Transaksi Baru (Komersial & Pajak)</h2>
+                    
+                    <form id="formTransaksi" class="space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                                <input type="date" id="tanggal" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">No. Referensi (Invoice/Bukti)</label>
+                                <input type="text" id="no_ref" placeholder="INV-202609-01" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Arus</label>
+                                <select id="tipe" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none">
+                                    <option value="Uang Masuk">Uang Masuk (Pendapatan)</option>
+                                    <option value="Uang Keluar">Uang Keluar (Biaya/Beli)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Akun (KBLI)</label>
+                                <select id="kategori" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none">
+                                    <option value="Pendapatan IT & Software">Pendapatan IT & Software (KBLI 58290/62199)</option>
+                                    <option value="Pendapatan Pertanian">Pendapatan Hasil Tani (KBLI 01138/01140)</option>
+                                    <option value="Beban Gaji">Beban Gaji & Tunjangan</option>
+                                    <option value="Beban Operasional">Beban Operasional Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Uraian Transaksi</label>
+                            <input type="text" id="uraian" placeholder="Contoh: Pembuatan Website Klien A" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none" required>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nilai DPP (Rp)</label>
+                                <input type="number" id="dpp" value="0" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">PPN (Rp)</label>
+                                <input type="number" id="ppn" value="0" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Potongan PPh (Rp)</label>
+                                <input type="number" id="pph" value="0" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Total Bersih (Rp)</label>
+                                <input type="number" id="total" value="0" class="w-full border border-gray-300 bg-gray-50 rounded-lg px-4 py-2 outline-none" readonly>
+                            </div>
+                        </div>
+
+                        <div class="pt-6">
+                            <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
+                                Simpan Transaksi ke Database
+                            </button>
+                        </div>
+                        <div id="alertSuccess" class="hidden mt-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm text-center">
+                            Data berhasil disimpan secara real-time ke Google Sheets!
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Hitung otomatis Total Bersih = DPP + PPN - PPh
+        const dppInput = document.getElementById('dpp');
+        const ppnInput = document.getElementById('ppn');
+        const pphInput = document.getElementById('pph');
+        const totalInput = document.getElementById('total');
+
+        function hitungTotal() {
+            const dpp = parseFloat(dppInput.value) || 0;
+            const ppn = parseFloat(ppnInput.value) || 0;
+            const pph = parseFloat(pphInput.value) || 0;
+            totalInput.value = dpp + ppn - pph;
+        }
+
+        dppInput.addEventListener('input', hitungTotal);
+        ppnInput.addEventListener('input', hitungTotal);
+        pphInput.addEventListener('input', hitungTotal);
+
+        // Fungsi Submit Data ke Google Sheets
+        document.getElementById('formTransaksi').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btnSubmit = document.getElementById('btnSubmit');
+            btnSubmit.innerText = "Menyimpan...";
+            btnSubmit.disabled = true;
+
+            // GANTI URL DI BAWAH INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbx2bCxIwIGsHeUSaEs5rXBFMg4chXhDY4AgRtbHrnWkC-3hcrwxDQVSosSnDpPSQMSKeg/exec';
+            
+            const data = {
+                tanggal: document.getElementById('tanggal').value,
+                no_ref: document.getElementById('no_ref').value,
+                tipe: document.getElementById('tipe').value,
+                kategori: document.getElementById('kategori').value,
+                uraian: document.getElementById('uraian').value,
+                dpp: document.getElementById('dpp').value,
+                ppn: document.getElementById('ppn').value,
+                pph: document.getElementById('pph').value,
+                total: document.getElementById('total').value
+            };
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                document.getElementById('alertSuccess').classList.remove('hidden');
+                document.getElementById('formTransaksi').reset();
+                setTimeout(() => document.getElementById('alertSuccess').classList.add('hidden'), 5000);
+            })
+            .catch(error => console.error('Error!', error.message))
+            .finally(() => {
+                btnSubmit.innerText = "Simpan Transaksi ke Database";
+                btnSubmit.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
