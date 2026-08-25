@@ -55,28 +55,26 @@
         const app = initializeApp(CONFIG.FIREBASE_CONFIG);
         const auth = getAuth(app);
 
-        // Pastikan elemen dimuat sempurna
-        document.addEventListener("DOMContentLoaded", function() {
-            const btnToggle = document.getElementById('btnTogglePassword');
-            const inputPassword = document.getElementById('passwordLogin');
-            const iconClosed = document.getElementById('iconEyeClosed');
-            const iconOpen = document.getElementById('iconEyeOpen');
+        // Eksekusi langsung fungsi tombol mata karena skrip bertipe module sudah deferred
+        const btnToggle = document.getElementById('btnTogglePassword');
+        const inputPassword = document.getElementById('passwordLogin');
+        const iconClosed = document.getElementById('iconEyeClosed');
+        const iconOpen = document.getElementById('iconEyeOpen');
 
-            if (btnToggle && inputPassword) {
-                btnToggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if (inputPassword.type === 'password') {
-                        inputPassword.type = 'text';
-                        iconClosed.classList.add('hidden');
-                        iconOpen.classList.remove('hidden');
-                    } else {
-                        inputPassword.type = 'password';
-                        iconOpen.classList.add('hidden');
-                        iconClosed.classList.remove('hidden');
-                    }
-                });
-            }
-        });
+        if (btnToggle && inputPassword) {
+            btnToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (inputPassword.type === 'password') {
+                    inputPassword.type = 'text';
+                    iconClosed.classList.add('hidden');
+                    iconOpen.classList.remove('hidden');
+                } else {
+                    inputPassword.type = 'password';
+                    iconOpen.classList.add('hidden');
+                    iconClosed.classList.remove('hidden');
+                }
+            });
+        }
 
         // Proses Login & Penanganan Error
         document.getElementById('formLogin').addEventListener('submit', async function(e) {
