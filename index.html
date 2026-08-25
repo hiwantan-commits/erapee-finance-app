@@ -186,14 +186,22 @@
         </div>
     </div>
 
-    <!-- Skrip Utama (Menggunakan ES Module untuk Firebase) -->
+    <!-- Skrip Utama & Proteksi Sesi Login -->
     <script type="module">
-        import { CONFIG } from "./js/config.js";
+        import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const app = initializeApp(CONFIG.FIREBASE_CONFIG);
-        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Cek Sesi: Jika belum login, otomatis arahkan ke halaman login.html
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
 
         const formJurnal = document.getElementById('formJurnal');
 
@@ -228,7 +236,6 @@
 
                 await addDoc(collection(db, CONFIG.COLLECTION_NAME), dataJurnal);
                 
-                // Catat juga ke histori audit
                 await addDoc(collection(db, "histori_audit"), {
                     aksi: "TAMBAH JURNAL",
                     no_bukti: dataJurnal.no_bukti,
