@@ -49,6 +49,9 @@
                         <p class="text-xs text-gray-500 mt-0.5">Sinkronisasi data standar perusahaan dengan Cloud Firestore</p>
                     </div>
                     <div class="flex gap-3">
+                        <button onclick="resetDataCOA()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                            🗑️ Bersihkan Semua
+                        </button>
                         <button id="btnSeed" onclick="seedDefaultCOA()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
                             📥 Muat Default COA 
                         </button>
@@ -129,7 +132,7 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase CRUD & Seeder (Anti-Double) -->
+    <!-- Skrip Firebase CRUD & Seeder (Anti-Double & Reset) -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -188,6 +191,26 @@
             } catch (err) {
                 console.error("Gagal memuat COA:", err);
                 tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal terhubung ke database. Periksa konsol browser.</td></tr>`;
+            }
+        };
+
+        // Fungsi Baru: Menghapus seluruh data untuk membersihkan duplikasi lama
+        window.resetDataCOA = async function() {
+            if (confirm("⚠️ PERHATIAN: Ini akan menghapus SELURUH data COA di layar. Apakah Anda yakin ingin mengosongkan tabel?")) {
+                try {
+                    const querySnapshot = await getDocs(collection(db, COLLECTION_COA));
+                    const promises = [];
+                    querySnapshot.forEach((docSnap) => {
+                        promises.push(deleteDoc(doc(db, COLLECTION_COA, docSnap.id)));
+                    });
+                    
+                    await Promise.all(promises);
+                    alert("Seluruh data COA berhasil dibersihkan!");
+                    muatDataCOA();
+                } catch (error) {
+                    console.error("Gagal mereset data:", error);
+                    alert("Terjadi kesalahan saat menghapus data: " + error.message);
+                }
             }
         };
 
