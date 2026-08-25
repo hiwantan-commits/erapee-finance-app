@@ -23,8 +23,8 @@
                         <h2 class="text-xl font-bold text-gray-800">Kertas Kerja Rekonsiliasi Fiskal</h2>
                         <p class="text-xs text-gray-500 mt-0.5">Penyesuaian Laba Komersial menjadi Laba Kena Pajak (Tahun Buku 2026)</p>
                     </div>
-                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition shadow-sm">
-                        🖨️ Cetak Draft SPT
+                    <button onclick="cetakDraftSPT()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition shadow-sm">
+                        🖨️ Cetak Draft SPT / PDF
                     </button>
                 </div>
 
@@ -136,15 +136,18 @@
         </div>
     </div>
 
-    <!-- Firebase Script Placeholder untuk Kalkulasi Masa Depan -->
+    <!-- Skrip Firebase & Aksi Cetak PDF -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Fungsi ini nantinya akan secara otomatis membaca dari Firestore 
-        // dan menghitung nilai laba serta koreksi fiskal secara real-time.
-        console.log("Halaman Rekonsiliasi Fiskal siap dikembangkan untuk otomatisasi dengan Cloud Firestore.");
+        // Fungsi Tombol Cetak / Simpan ke PDF
+        window.cetakDraftSPT = function() {
+            window.print();
+        };
+
+        console.log("Halaman Rekonsiliasi Fiskal siap.");
     </script>
     <script type="module" src="js/component.js"></script>
 </body>
