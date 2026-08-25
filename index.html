@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js untuk Grafik Interaktif -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="text-gray-800 bg-gray-50">
@@ -18,100 +20,129 @@
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
                 <!-- Selamat Datang Banner -->
-                <div class="dashboard-card p-6 md:p-8 mb-6 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold mb-2">Dashboard Eksekutif PT ERAPEE</h2>
-                        <p class="text-indigo-100 text-sm max-w-2xl mb-4">Ringkasan Keuangan, Pajak, dan Status Pemeriksaan (Sheet 15 Dashboard).</p>
-                        <div class="flex flex-wrap gap-3">
-                            <a href="input-jurnal.html" class="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold px-4 py-2.5 rounded-xl text-sm transition shadow-sm">
-                                + Input Jurnal Baru
-                            </a>
-                            <a href="profil-pajak.html" class="bg-indigo-700 hover:bg-indigo-600 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition border border-indigo-500">
-                                🏢 Kelola Profil & Pajak
-                            </a>
-                        </div>
-                    </div>
-                    <div class="bg-indigo-900 bg-opacity-40 p-4 rounded-2xl border border-indigo-400 border-opacity-30 text-right w-full md:w-auto">
-                        <span class="text-xs text-indigo-200 uppercase font-semibold">Periode Laporan</span>
-                        <h3 class="text-base font-bold mt-1">2026-01-01 s.d. 2026-12-31</h3>
-                        <span class="inline-block mt-2 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">Status: Aktif</span>
+                <div class="dashboard-card p-6 md:p-8 mb-6 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-2xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-2">Selamat Datang di Dashboard PT ERAPEE</h2>
+                    <p class="text-indigo-100 text-sm max-w-2xl mb-6">Sistem Informasi Keuangan, Akuntansi Terpadu, dan Kepatuhan Pajak Standar Coretax.</p>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="input-jurnal.html" class="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
+                            + Input Jurnal Baru
+                        </a>
+                        <a href="manajemen.html" class="bg-indigo-700 hover:bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition border border-indigo-500">
+                            📊 Lihat Manajemen Jurnal
+                        </a>
                     </div>
                 </div>
 
-                <!-- Grid Utama: Pemeriksaan & Tabel Bulanan (Sesuai Sheet 15) -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Tabel 1: Pemeriksaan / Checks (Bagian Atas Sheet 15) -->
+                <!-- Statistik Ringkas & Keuangan Utama -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <div class="mb-4 pb-3 border-b border-gray-100 flex justify-between items-center">
-                            <h3 class="text-base font-bold text-gray-800">Pemeriksaan & Legalitas</h3>
-                            <span class="text-xs px-2.5 py-1 bg-amber-50 text-amber-700 font-semibold rounded-lg">Sheet 15</span>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Unit Usaha Utama</p>
+                        <h3 class="text-base font-bold text-gray-800 mt-2">SaaS & Pertanian</h3>
+                        <p class="text-xs text-indigo-600 mt-1 font-medium">KBLI 58290 & Komoditas Unggulan</p>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Keuntungan (Laba YTD)</p>
+                        <h3 class="text-lg font-bold text-green-600 mt-2">Rp 0</h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium">Bersih Setelah Pajak</p>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Utang (Liabilitas)</p>
+                        <h3 class="text-lg font-bold text-red-600 mt-2">Rp 0</h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium">Usaha & Pajak Terutang</p>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Akumulasi Pajak</p>
+                        <h3 class="text-lg font-bold text-amber-600 mt-2">Rp 0</h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium">PPN & PPh Terutang</p>
+                    </div>
+                </div>
+
+                <!-- Bagian Grafik & Detail Analisis -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Grafik Tren Keuangan (2 Kolom) -->
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
+                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800 text-sm">Grafik Kinerja Pendapatan & Keuntungan 2026</h3>
+                            <span class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">Bulanan</span>
                         </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm border-collapse">
-                                <thead>
-                                    <tr class="text-gray-400 text-xs uppercase border-b">
-                                        <th class="py-2">Pemeriksaan</th>
-                                        <th class="py-2 text-center">Status</th>
-                                        <th class="py-2">Tindakan</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100 text-xs">
-                                    <tr>
-                                        <td class="py-3 font-medium">Nomor & tanggal akta terisi</td>
-                                        <td class="py-3 text-center"><span class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full font-semibold">WARNING</span></td>
-                                        <td class="py-3 text-gray-500">Isi setelah salinan akta final tersedia</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3 font-medium">NPWP perusahaan terisi</td>
-                                        <td class="py-3 text-center"><span class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full font-semibold">WARNING</span></td>
-                                        <td class="py-3 text-gray-500">Isi NPWP badan</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3 font-medium">Status PKP dikonfirmasi</td>
-                                        <td class="py-3 text-center"><span class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full font-semibold">WARNING</span></td>
-                                        <td class="py-3 text-gray-500">Konfirmasi status PKP sebelum memakai rekap PPN</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="relative h-64 w-full">
+                            <canvas id="grafikKinerja"></canvas>
                         </div>
                     </div>
 
-                    <!-- Tabel 2: Pendapatan & Laba Bersih Bulanan (Sesuai Sheet 15) -->
+                    <!-- Ringkasan Status Pemeriksaan (1 Kolom) -->
                     <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <div class="mb-4 pb-3 border-b border-gray-100 flex justify-between items-center">
-                            <h3 class="text-base font-bold text-gray-800">Ringkasan Keuangan & Pajak (Bulanan)</h3>
-                            <span class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">YTD 2026</span>
+                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800 text-sm">Status Pemeriksaan & Legal</h3>
+                            <span class="text-xs px-2.5 py-1 bg-amber-50 text-amber-700 font-semibold rounded-lg">Sheet 15</span>
                         </div>
-                        <div class="overflow-x-auto" style="max-height: 250px; overflow-y: auto;">
-                            <table class="w-full text-left text-sm border-collapse">
-                                <thead class="sticky top-0 bg-white">
-                                    <tr class="text-gray-400 text-xs uppercase border-b">
-                                        <th class="py-2">Bulan</th>
-                                        <th class="py-2 text-right">Pendapatan (Rp)</th>
-                                        <th class="py-2 text-right">Laba Bersih (Rp)</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100 text-xs">
-                                    <tr><td class="py-2 font-medium">Jan</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                    <tr><td class="py-2 font-medium">Feb</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                    <tr><td class="py-2 font-medium">Mar</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                    <tr><td class="py-2 font-medium">Apr</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                    <tr><td class="py-2 font-medium">Mei</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                    <tr><td class="py-2 font-medium">Jun</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                    <tr><td class="py-2 font-medium">Jul</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                    <tr><td class="py-2 font-medium">Agu</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                    <tr><td class="py-2 font-medium">Sep</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                    <tr><td class="py-2 font-medium">Okt</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                    <tr><td class="py-2 font-medium">Nov</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                    <tr><td class="py-2 font-medium">Des</td><td class="py-2 text-right">0</td><td class="py-2 text-right">0</td></tr>
-                                </tbody>
-                            </table>
+                        <div class="space-y-3 text-xs">
+                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
+                                <span class="font-medium text-gray-700">Akta Pendirian</span>
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 font-semibold rounded">WARNING</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
+                                <span class="font-medium text-gray-700">NPWP Perseroan</span>
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 font-semibold rounded">WARNING</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
+                                <span class="font-medium text-gray-700">Status PKP</span>
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 font-semibold rounded">WARNING</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
+                                <span class="font-medium text-gray-700">Keseimbangan Jurnal</span>
+                                <span class="px-2 py-0.5 bg-green-100 text-green-700 font-semibold rounded">PASS</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
+
+    <!-- Skrip Grafik Chart.js -->
+    <script>
+        const ctx = document.getElementById('grafikKinerja').getContext('2d');
+        const grafikKinerja = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                datasets: [
+                    {
+                        label: 'Pendapatan (Rp)',
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Keuntungan / Laba (Rp)',
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 11 } }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f3f4f6' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    </script>
     <script type="module" src="js/component.js"></script>
 </body>
 </html>
