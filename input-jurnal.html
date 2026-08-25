@@ -61,7 +61,7 @@
                                     <select id="unit_usaha" class="form-input-custom">
                                         <option value="Corporate/Head Office">Corporate / Head Office</option>
                                         <option value="SaaS & Software (KBLI 58290)">SaaS & Software (KBLI 58290)</option>
-                                        <option value="Budidaya Pertanian (Nanas/Cabai/Tebu)">Budidaya Pertanian (Nanas/Cabai/Tebu)</option>
+                                        <option value="Budidaya Pertanian (KBLI 01220/01140)">Budidaya Pertanian</option>
                                     </select>
                                 </div>
                                 <div>
@@ -88,16 +88,9 @@
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Kode Akun (COA)</label>
+                                    <!-- Select Dinamis yang akan diisi oleh Firestore -->
                                     <select id="kode_akun" class="form-input-custom">
-                                        <option value="1101 - Kas">1101 - Kas</option>
-                                        <option value="1102 - Bank Operasional">1102 - Bank Operasional</option>
-                                        <option value="4101 - Pendapatan Software">4101 - Pendapatan Software</option>
-                                        <option value="4102 - Pendapatan Pertanian">4102 - Pendapatan Pertanian</option>
-                                        <option value="5101 - Beban Gaji & Tunjangan">5101 - Beban Gaji & Tunjangan</option>
-                                        <option value="5102 - Beban Sewa & Operasional">5102 - Beban Sewa & Operasional</option>
-                                        <option value="5103 - Beban Pemeliharaan">5103 - Beban Pemeliharaan</option>
-                                        <option value="5104 - Beban Transportasi">5104 - Beban Transportasi</option>
-                                        <option value="5105 - Beban Utilitas">5105 - Beban Utilitas</option>
+                                        <option value="">Memuat data akun...</option>
                                     </select>
                                 </div>
                                 <div>
@@ -138,12 +131,17 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Kode Pajak Ref</label>
+                                    <!-- Disusun berdasarkan standar Master Data -->
                                     <select id="kode_pajak" class="form-input-custom">
                                         <option value="NON">NON (Tanpa Pajak)</option>
-                                        <option value="PPN-11">PPN 11% Keluaran</option>
-                                        <option value="PPh23-2">PPh Pasal 23 (2%)</option>
-                                        <option value="PPh21">PPh Pasal 21</option>
-                                        <option value="PPh4(2)">PPh Pasal 4(2) Final</option>
+                                        <option value="PPN-KEL-11">PPN-KEL-11 (Keluaran 11%)</option>
+                                        <option value="PPN-KEL-12">PPN-KEL-12 (Keluaran 12%)</option>
+                                        <option value="PPN-MAS-KREDIT">PPN-MAS-KREDIT (Masukan)</option>
+                                        <option value="PPN-MAS-NK">PPN-MAS-NK (Masukan Nonkredit)</option>
+                                        <option value="PPH21">PPH21 (PPh Pasal 21)</option>
+                                        <option value="PPH23-2">PPH23-2 (PPh Pasal 23 - 2%)</option>
+                                        <option value="PPH4-2-SEWA10">PPH4-2-SEWA (Final 10%)</option>
+                                        <option value="PPH22">PPH22 (PPh Pasal 22)</option>
                                     </select>
                                 </div>
                             </div>
@@ -185,7 +183,43 @@
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Fungsi Memuat COA Dinamis dari Master Data Firestore
+        async function muatDropdownCOA() {
+            const selectCOA = document.getElementById('kode_akun');
+            try {
+                const querySnapshot = await getDocs(collection(db, "master_coa"));
+                
+                if (querySnapshot.empty) {
+                    selectCOA.innerHTML = '<option value="">(COA Kosong, harap isi di Master Data)</option>';
+                    return;
+                }
+
+                // Masukkan ke array dan urutkan berdasarkan kode
+                let coaList = [];
+                querySnapshot.forEach(doc => {
+                    coaList.push(doc.data());
+                });
+                coaList.sort((a, b) => a.kode.localeCompare(b.kode));
+
+                selectCOA.innerHTML = ''; // Kosongkan pilihan awal
+                
+                coaList.forEach(coa => {
+                    const opt = document.createElement('option');
+                    // Simpan valuenya berupa "Kode" saja, atau "Kode - Nama"
+                    opt.value = coa.kode; 
+                    opt.text = `${coa.kode} - ${coa.nama}`;
+                    selectCOA.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Gagal memuat COA:", error);
+                selectCOA.innerHTML = '<option value="">Gagal memuat data akun</option>';
+            }
+        }
+
+        // Panggil fungsi muat COA saat halaman dimuat
+        muatDropdownCOA();
 
         const formJurnal = document.getElementById('formJurnal');
 
@@ -196,6 +230,10 @@
             btn.disabled = true;
 
             try {
+                // Ambil text dari dropdown COA yang dipilih (Misal: "1101 - Kas")
+                const selectCOA = document.getElementById('kode_akun');
+                const namaAkunLengkap = selectCOA.options[selectCOA.selectedIndex].text;
+
                 const dataJurnal = {
                     id_jurnal: document.getElementById('id_jurnal').value,
                     tanggal: document.getElementById('tanggal').value,
@@ -206,6 +244,7 @@
                     lawan_transaksi: document.getElementById('lawan_transaksi').value,
                     npwp_nik: document.getElementById('npwp_nik').value,
                     kode_akun: document.getElementById('kode_akun').value,
+                    nama_akun: namaAkunLengkap, // Menyimpan teks lengkap
                     kategori_arus_kas: document.getElementById('kategori_arus_kas').value,
                     debit: parseFloat(document.getElementById('debit').value) || 0,
                     kredit: parseFloat(document.getElementById('kredit').value) || 0,
@@ -218,16 +257,20 @@
                     timestamp: new Date()
                 };
 
+                // Simpan ke tabel jurnal
                 await addDoc(collection(db, CONFIG.COLLECTION_NAME), dataJurnal);
                 
+                // Simpan log ke tabel histori audit
                 await addDoc(collection(db, "histori_audit"), {
                     aksi: "TAMBAH JURNAL",
                     no_bukti: dataJurnal.no_bukti,
-                    detail: `Menambah jurnal ${dataJurnal.jenis_dokumen} senilai Debit Rp ${dataJurnal.debit.toLocaleString('id-ID')} / Kredit Rp ${dataJurnal.kredit.toLocaleString('id-ID')}`,
+                    detail: `Menambah jurnal ${dataJurnal.jenis_dokumen} [${dataJurnal.kode_akun}] senilai Debit Rp ${dataJurnal.debit.toLocaleString('id-ID')} / Kredit Rp ${dataJurnal.kredit.toLocaleString('id-ID')}`,
                     waktu: new Date()
                 });
 
                 document.getElementById('alertSuccess').classList.remove('hidden');
+                
+                // Reset form tapi kembalikan ID Jurnal ke default (atau di-generate ulang nantinya)
                 formJurnal.reset();
                 setTimeout(() => document.getElementById('alertSuccess').classList.add('hidden'), 5000);
             } catch (error) {
