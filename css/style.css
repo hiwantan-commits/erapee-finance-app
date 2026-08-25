@@ -1,0 +1,32 @@
+/* css/style.css */
+/* Pengaturan Global & Kustomisasi Desain PT ERAPEE */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #F9FAFB;
+    color: #1F2937;
+}
+
+/* Transisi halus untuk interaksi tombol & menu */
+a, button {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Kustomisasi Tabel Responsif */
+table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6B7280;
+    background-color: #F9FAFB;
+}
+
+/* Bayangan lembut untuk kartu dashboard */
+.dashboard-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
