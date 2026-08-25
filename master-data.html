@@ -17,92 +17,34 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Unit Usaha & KBLI -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
-                    <div class="mb-6 pb-4 border-b border-gray-100">
-                        <h2 class="text-lg font-bold text-gray-800">Unit Usaha & Klasifikasi KBLI</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Sektor operasional utama PT Erapee Anugrah Sejahtera</p>
+                <!-- Tombol Aksi Tambah -->
+                <div class="mb-6 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Manajemen Bagan Akun (COA) & Master Data</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Tambah, ubah, atau hapus akun akuntansi langsung dari Cloud Firestore</p>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="p-5 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2.5 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded-lg">KBLI 58290</span>
-                            <h3 class="font-bold text-gray-800 mt-3">SaaS & Software Publishing</h3>
-                            <p class="text-xs text-gray-500 mt-1">SiPacul - Penerbitan perangkat lunak aplikasi digital dan layanan langganan.</p>
-                        </div>
-                        <div class="p-5 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-lg">KBLI 01220 & Lainnya</span>
-                            <h3 class="font-bold text-gray-800 mt-3">Budidaya Pertanian Komoditas</h3>
-                            <p class="text-xs text-gray-500 mt-1">Wani Tani - Budidaya tanaman buah penunjang (Nanas, Cabai, Tebu).</p>
-                        </div>
-                        <div class="p-5 border border-gray-100 rounded-xl bg-gray-50">
-                            <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-lg">Corporate</span>
-                            <h3 class="font-bold text-gray-800 mt-3">Head Office & Bersama</h3>
-                            <p class="text-xs text-gray-500 mt-1">Administrasi pusat, alokasi biaya bersama, dan manajemen keuangan.</p>
-                        </div>
-                    </div>
+                    <button onclick="bukaModalTambah()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                        + Tambah Akun COA Baru
+                    </button>
                 </div>
 
-                <!-- Bagan Akun (COA) Ringkas -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
-                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
-                        <div>
-                            <h2 class="text-lg font-bold text-gray-800">Bagan Akun (Chart of Accounts - COA)</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Struktur akun standar double-entry PT Erapee</p>
-                        </div>
-                    </div>
+                <!-- Tabel COA Interaktif -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
                                     <th class="p-4">Kode Akun</th>
                                     <th class="p-4">Nama Akun</th>
+                                    <th class="p-4">Saldo Normal</th>
                                     <th class="p-4">Kelompok</th>
                                     <th class="p-4">Pos Laporan</th>
-                                    <th class="p-4">Arus Kas</th>
+                                    <th class="p-4 text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
+                            <tbody id="tabelCOA" class="divide-y divide-gray-100">
                                 <tr>
-                                    <td class="p-4 font-mono font-semibold">1101</td>
-                                    <td class="p-4 font-medium">Kas</td>
-                                    <td class="p-4 text-gray-600">Aset</td>
-                                    <td class="p-4 text-gray-600">Kas dan setara kas</td>
-                                    <td class="p-4 text-gray-600">Operasi</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 font-mono font-semibold">1102</td>
-                                    <td class="p-4 font-medium">Bank operasional</td>
-                                    <td class="p-4 text-gray-600">Aset</td>
-                                    <td class="p-4 text-gray-600">Kas dan setara kas</td>
-                                    <td class="p-4 text-gray-600">Operasi</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 font-mono font-semibold">3101</td>
-                                    <td class="p-4 font-medium">Modal saham</td>
-                                    <td class="p-4 text-gray-600">Ekuitas</td>
-                                    <td class="p-4 text-gray-600">Ekuitas pemegang saham</td>
-                                    <td class="p-4 text-gray-600">Nonkas</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 font-mono font-semibold">4101</td>
-                                    <td class="p-4 font-medium">Pendapatan SaaS & perangkat lunak</td>
-                                    <td class="p-4 text-gray-600">Pendapatan</td>
-                                    <td class="p-4 text-gray-600">Laba Rugi</td>
-                                    <td class="p-4 text-gray-600">Operasi</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 font-mono font-semibold">4102</td>
-                                    <td class="p-4 font-medium">Pendapatan budidaya pertanian</td>
-                                    <td class="p-4 text-gray-600">Pendapatan</td>
-                                    <td class="p-4 text-gray-600">Laba Rugi</td>
-                                    <td class="p-4 text-gray-600">Operasi</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 font-mono font-semibold">5101</td>
-                                    <td class="p-4 font-medium">Beban gaji & tunjangan</td>
-                                    <td class="p-4 text-gray-600">Beban</td>
-                                    <td class="p-4 text-gray-600">Laba Rugi</td>
-                                    <td class="p-4 text-gray-600">Operasi</td>
+                                    <td colspan="6" class="p-8 text-center text-gray-400">Menghubungkan ke Firebase Firestore...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -111,6 +53,161 @@
             </main>
         </div>
     </div>
+
+    <!-- Modal Tambah/Edit COA -->
+    <div id="modalCOA" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h3 id="modalTitle" class="text-lg font-bold mb-4 text-gray-800">Tambah Akun COA</h3>
+            <form id="formCOA" class="space-y-4">
+                <input type="hidden" id="editDocId">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Kode Akun</label>
+                    <input type="text" id="kodeAkun" placeholder="Contoh: 1104" class="form-input-custom font-mono" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Nama Akun</label>
+                    <input type="text" id="namaAkun" placeholder="Contoh: Kas Kecil Cabang" class="form-input-custom" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Saldo Normal</label>
+                        <select id="saldoNormal" class="form-input-custom">
+                            <option value="Debit">Debit</option>
+                            <option value="Kredit">Kredit</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Kelompok</label>
+                        <select id="kelompokAkun" class="form-input-custom">
+                            <option value="Aset">Aset</option>
+                            <option value="Liabilitas">Liabilitas</option>
+                            <option value="Ekuitas">Ekuitas</option>
+                            <option value="Pendapatan">Pendapatan</option>
+                            <option value="Beban">Beban</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Pos Laporan</label>
+                    <input type="text" id="posLaporan" placeholder="Kas dan setara kas / Laba Rugi" class="form-input-custom" required>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t">
+                    <button type="button" onclick="tutupModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-xl font-medium">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-xl font-medium">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Skrip Firebase CRUD -->
+    <script type="module">
+        import { CONFIG, db } from "./js/config.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const COLLECTION_COA = "master_coa";
+
+        window.muatDataCOA = async function() {
+            const tbody = document.getElementById('tabelCOA');
+            tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Memuat data COA dari Firebase...</td></tr>`;
+
+            try {
+                const querySnapshot = await getDocs(collection(db, COLLECTION_COA));
+                tbody.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada data COA. Silakan klik tombol tambah di atas.</td></tr>`;
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-4 font-mono font-semibold text-indigo-600">${data.kode || '-'}</td>
+                        <td class="p-4 font-medium text-gray-800">${data.nama || '-'}</td>
+                        <td class="p-4 text-gray-600">${data.saldoNormal || '-'}</td>
+                        <td class="p-4 text-gray-600">${data.kelompok || '-'}</td>
+                        <td class="p-4 text-gray-600">${data.posLaporan || '-'}</td>
+                        <td class="p-4 text-center space-x-2 whitespace-nowrap">
+                            <button onclick='bukaModalEdit("${docSnap.id}", ${JSON.stringify(data).replace(/'/g, "&#39;")})' class="text-indigo-600 hover:underline text-xs font-semibold">Edit</button>
+                            <button onclick='hapusCOA("${docSnap.id}", "${data.kode}")' class="text-red-600 hover:underline text-xs font-semibold">Hapus</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Gagal memuat COA:", err);
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal terhubung ke database.</td></tr>`;
+            }
+        };
+
+        window.bukaModalTambah = function() {
+            document.getElementById('modalTitle').innerText = "Tambah Akun COA Baru";
+            document.getElementById('editDocId').value = "";
+            document.getElementById('kodeAkun').value = "";
+            document.getElementById('namaAkun').value = "";
+            document.getElementById('posLaporan').value = "";
+            document.getElementById('modalCOA').classList.remove('hidden');
+        };
+
+        window.bukaModalEdit = function(id, data) {
+            document.getElementById('modalTitle').innerText = "Edit Akun COA";
+            document.getElementById('editDocId').value = id;
+            document.getElementById('kodeAkun').value = data.kode || "";
+            document.getElementById('namaAkun').value = data.nama || "";
+            document.getElementById('saldoNormal').value = data.saldoNormal || "Debit";
+            document.getElementById('kelompokAkun').value = data.kelompok || "Aset";
+            document.getElementById('posLaporan').value = data.posLaporan || "";
+            document.getElementById('modalCOA').classList.remove('hidden');
+        };
+
+        window.tutupModal = function() {
+            document.getElementById('modalCOA').classList.add('hidden');
+        };
+
+        document.getElementById('formCOA').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('editDocId').value;
+            const newData = {
+                kode: document.getElementById('kodeAkun').value,
+                nama: document.getElementById('namaAkun').value,
+                saldoNormal: document.getElementById('saldoNormal').value,
+                kelompok: document.getElementById('kelompokAkun').value,
+                posLaporan: document.getElementById('posLaporan').value
+            };
+
+            try {
+                if (id) {
+                    await updateDoc(doc(db, COLLECTION_COA, id), newData);
+                    alert("Akun COA berhasil diperbarui!");
+                } else {
+                    await addDoc(collection(db, COLLECTION_COA), newData);
+                    alert("Akun COA baru berhasil ditambahkan!");
+                }
+                tutupModal();
+                muatDataCOA();
+            } catch (error) {
+                console.error("Gagal menyimpan COA:", error);
+                alert("Terjadi kesalahan saat menyimpan data.");
+            }
+        });
+
+        window.hapusCOA = async function(id, kode) {
+            if (confirm(`Apakah Anda yakin ingin menghapus akun COA [${kode}]?`)) {
+                try {
+                    await deleteDoc(doc(db, COLLECTION_COA, id));
+                    alert("Akun COA berhasil dihapus!");
+                    muatDataCOA();
+                } catch (error) {
+                    console.error("Gagal menghapus:", error);
+                    alert("Gagal menghapus data.");
+                }
+            }
+        };
+
+        muatDataCOA();
+    </script>
     <script type="module" src="js/component.js"></script>
 </body>
 </html>
