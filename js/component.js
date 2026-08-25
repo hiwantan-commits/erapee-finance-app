@@ -1,6 +1,4 @@
 // js/component.js
-// Komponen Terpusat: Sidebar, Header, Proteksi Sesi Login, & Logout untuk PT ERAPEE
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { CONFIG } from "./config.js";
@@ -12,14 +10,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const path = window.location.pathname;
     const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
 
-    // Jika bukan halaman login, wajib cek apakah pengguna sudah login atau belum
     if (currentFile !== 'login.html') {
         onAuthStateChanged(auth, (user) => {
             if (!user) {
-                // Jika belum login, tendang ke halaman login.html
                 window.location.href = 'login.html';
             } else {
-                // Jika sudah login, muat sidebar dan header
                 muatSidebar();
                 muatHeader();
             }
@@ -35,7 +30,8 @@ function muatSidebar() {
     const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
 
     const menuItems = [
-        { name: 'Input Jurnal', href: 'index.html', icon: '📝' },
+        { name: 'Dashboard', href: 'index.html', icon: '🏠' },
+        { name: 'Input Jurnal', href: 'input-jurnal.html', icon: '📝' },
         { name: 'Manajemen Jurnal', href: 'manajemen.html', icon: '📊' },
         { name: 'Laporan Laba Rugi', href: 'laporan.html', icon: '📈' },
         { name: 'Rekap Pajak', href: 'pajak.html', icon: '🏛️' },
@@ -58,28 +54,18 @@ function muatSidebar() {
     });
 
     sidebarContainer.innerHTML = `
-        <!-- Overlay untuk Mobile -->
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
-
-        <!-- Sidebar Utama -->
         <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-            <!-- Brand / Logo -->
             <div class="p-6 border-b border-gray-100 flex items-center justify-between">
                 <div>
                     <h1 class="font-bold text-gray-900 text-base tracking-tight">PT ERAPEE</h1>
                     <p class="text-xs text-gray-400 mt-0.5">Anugrah Sejahtera</p>
                 </div>
-                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700">
-                    ✕
-                </button>
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700">✕</button>
             </div>
-
-            <!-- Menu Navigasi -->
             <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
                 ${menuHtml}
             </nav>
-
-            <!-- Tombol Keluar Sistem -->
             <div class="p-4 border-t border-gray-100 bg-gray-50">
                 <button onclick="prosesLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold py-2.5 px-3 rounded-lg transition flex items-center justify-center gap-2">
                     🚪 Keluar Sistem
@@ -92,7 +78,6 @@ function muatSidebar() {
 function muatHeader() {
     const headerContainer = document.getElementById('header-container');
     if (!headerContainer) return;
-
     let pageTitle = document.title.split('|')[0].trim();
 
     headerContainer.innerHTML = `
