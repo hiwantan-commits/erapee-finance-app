@@ -26,26 +26,26 @@
                     <form id="formTransaksi" class="space-y-5">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm font-medium mb-1">Tanggal</label>
-                                <input type="date" id="tanggal" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Tanggal</label>
+                                <input type="date" id="tanggal" class="form-input-custom" required>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">No. Referensi</label>
-                                <input type="text" id="no_ref" placeholder="INV-2026-001" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                <label class="block text-sm font-medium mb-1.5 text-gray-700">No. Referensi</label>
+                                <input type="text" id="no_ref" placeholder="INV-2026-001" class="form-input-custom" required>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm font-medium mb-1">Tipe Arus</label>
-                                <select id="tipe" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none">
+                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Tipe Arus</label>
+                                <select id="tipe" class="form-input-custom">
                                     <option value="Masuk">Uang Masuk (Pendapatan)</option>
                                     <option value="Keluar">Uang Keluar (Biaya)</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">Kategori Akun</label>
-                                <select id="kategori" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none">
+                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Kategori Akun</label>
+                                <select id="kategori" class="form-input-custom">
                                     <option value="Pendapatan IT & Software">Pendapatan IT & Software</option>
                                     <option value="Pendapatan Pertanian">Pendapatan Pertanian (Cabai, Tebu, Buah)</option>
                                     <option value="Beban Gaji">Beban Gaji & Tunjangan</option>
@@ -55,31 +55,31 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium mb-1">Uraian Transaksi</label>
-                            <input type="text" id="uraian" placeholder="Penjelasan singkat..." class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500" required>
+                            <label class="block text-sm font-medium mb-1.5 text-gray-700">Uraian Transaksi</label>
+                            <input type="text" id="uraian" placeholder="Penjelasan singkat transaksi..." class="form-input-custom" required>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
                             <div>
-                                <label class="block text-sm font-medium mb-1">Nilai DPP (Rp)</label>
-                                <input type="number" id="dpp" value="0" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none">
+                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Nilai DPP (Rp)</label>
+                                <input type="number" id="dpp" value="0" class="form-input-custom">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">PPN (Rp)</label>
-                                <input type="number" id="ppn" value="0" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none">
+                                <label class="block text-sm font-medium mb-1.5 text-gray-700">PPN (Rp)</label>
+                                <input type="number" id="ppn" value="0" class="form-input-custom">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">Pot. PPh (Rp)</label>
-                                <input type="number" id="pph" value="0" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none">
+                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Pot. PPh (Rp)</label>
+                                <input type="number" id="pph" value="0" class="form-input-custom">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">Total Bersih</label>
-                                <input type="number" id="total" value="0" class="w-full border border-gray-300 bg-gray-50 rounded-lg px-4 py-2 outline-none" readonly>
+                                <label class="block text-sm font-medium mb-1.5 text-gray-700">Total Bersih</label>
+                                <input type="number" id="total" value="0" class="form-input-custom bg-gray-50 font-semibold text-indigo-600" readonly>
                             </div>
                         </div>
 
                         <div class="pt-6">
-                            <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
+                            <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg shadow-sm transition duration-200">
                                 Simpan Transaksi
                             </button>
                         </div>
