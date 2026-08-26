@@ -1,27 +1,16 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=31536000; includeSubDomains; preload"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        }
-      ]
-    }
+  "rewrites": [
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/master-data", "destination": "/master-data.html" },
+    { "source": "/input-jurnal", "destination": "/input-jurnal.html" },
+    { "source": "/manajemen", "destination": "/manajemen.html" },
+    { "source": "/laporan", "destination": "/laporan.html" },
+    { "source": "/aset-tetap", "destination": "/aset-tetap.html" },
+    { "source": "/pajak", "destination": "/pajak.html" },
+    { "source": "/rekonsiliasi", "destination": "/rekonsiliasi.html" },
+    { "source": "/closing", "destination": "/closing.html" },
+    { "source": "/histori", "destination": "/histori.html" },
+    { "source": "/profil-pajak", "destination": "/profil-pajak.html" },
+    { "source": "/((?!availability).*)", "destination": "/index.html" }
   ]
 }
