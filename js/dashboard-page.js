@@ -1,19 +1,35 @@
 // js/dashboard-page.js - Controller untuk index.html
+import { db } from "./config.js";
 import { ambilSemuaJurnalPusat } from "./db.js";
-
-const unitUsahaMaster = [
-    { kode: "CORP", nama: "Corporate / Head Office", klasifikasi: "Kantor Pusat & Administrasi", color: "blue" },
-    { kode: "MARC", nama: "Marcframe", klasifikasi: "Digital Services (KBLI 62199)", color: "indigo" },
-    { kode: "SIP", nama: "SiPacul", klasifikasi: "Software Publishing (KBLI 58290)", color: "indigo" },
-    { kode: "WT-NANAS", nama: "Wani Tani - Nanas", klasifikasi: "Pertanian (KBLI 01220)", color: "green" },
-    { kode: "WT-TEBU", nama: "Wani Tani - Tebu", klasifikasi: "Pertanian (KBLI 01140)", color: "green" },
-    { kode: "WT-CABAI", nama: "Wani Tani - Cabai", klasifikasi: "Pertanian (KBLI 01138)", color: "green" },
-    { kode: "SHARED", nama: "Biaya Bersama", klasifikasi: "Alokasi Bersama (Shared Cost)", color: "gray" }
-];
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 async function muatDashboard() {
     try {
-        // Ambil data dari Single Source of Truth
+        // 1. AMBIL MASTER UNIT USAHA DARI DATABASE (DINAMIS)
+        const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
+        const unitUsahaMaster = [];
+        
+        snapUnit.forEach(docSnap => {
+            const u = docSnap.data();
+            unitUsahaMaster.push({
+                kode: u.kode,
+                nama: u.nama,
+                klasifikasi: u.klasifikasi || "Tidak ada klasifikasi",
+                color: "indigo" // Warna default badge
+            });
+        });
+
+        // Penampung cadangan untuk transaksi yang unitnya sudah dihapus / alokasi bersama
+        if (!unitUsahaMaster.find(u => u.kode === "SHARED")) {
+            unitUsahaMaster.push({ 
+                kode: "SHARED", 
+                nama: "Biaya Bersama / Lainnya", 
+                klasifikasi: "Alokasi Bersama (Shared Cost)", 
+                color: "gray" 
+            });
+        }
+
+        // 2. AMBIL DATA JURNAL
         const semuaJurnal = await ambilSemuaJurnalPusat();
 
         let totalPendapatanGlobal = 0;
@@ -34,6 +50,8 @@ async function muatDashboard() {
             if (jurnal.total_debit !== jurnal.total_kredit) isSemuaBalance = false;
 
             const bulanIndex = jurnal.tanggal ? parseInt(jurnal.tanggal.split("-")[1]) - 1 : 0;
+            
+            // Ambil kode unit dari string "KODE - NAMA"
             let kodeUnit = "SHARED";
             if (jurnal.unit_usaha) {
                 kodeUnit = jurnal.unit_usaha.split(" - ")[0].trim();
@@ -70,7 +88,7 @@ async function muatDashboard() {
 
         const labaBersihGlobal = totalPendapatanGlobal - totalBebanGlobal;
 
-        // 1. Render Angka Kartu Statistik (Atas)
+        // 3. Render Angka Kartu Statistik (Atas)
         const elPendapatan = document.getElementById('valPendapatanTotal');
         const elLaba = document.getElementById('valLabaBersih');
         const elUtang = document.getElementById('valTotalUtang');
@@ -81,7 +99,7 @@ async function muatDashboard() {
         if (elUtang) elUtang.innerText = "Rp " + totalUtangGlobal.toLocaleString('id-ID');
         if (elPajak) elPajak.innerText = "Rp " + totalPajakGlobal.toLocaleString('id-ID');
 
-        // 2. Render Status Keseimbangan
+        // 4. Render Status Keseimbangan
         const elStatusBalance = document.getElementById('statusBalanceGlobal');
         if (elStatusBalance) {
             if (semuaJurnal.length > 0 && isSemuaBalance) {
@@ -96,24 +114,31 @@ async function muatDashboard() {
             }
         }
 
-        // 3. Render Tabel Unit Usaha
+        // 5. Render Tabel Unit Usaha (Dinamis dari Firestore)
         const tbodyUnit = document.getElementById('tabelUnitUsaha');
         if (tbodyUnit) {
-            tbodyUnit.innerHTML = ""; // Bersihkan tabel kosong
-            unitUsahaMaster.forEach(u => {
-                const dataU = dataPerUnit[u.kode] || { pendapatan: 0, beban: 0, utang: 0 };
-                const labaU = dataU.pendapatan - dataU.beban;
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-${u.color}-100 text-${u.color}-700 rounded mr-1 font-mono">${u.kode}</span> ${u.nama}</td>
-                    <td class="p-3 text-gray-500">${u.klasifikasi}</td>
-                    <td class="p-3 text-right">${dataU.pendapatan === 0 ? '-' : dataU.pendapatan.toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-right">${dataU.beban === 0 ? '-' : dataU.beban.toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-right ${labaU > 0 ? 'text-green-600 font-semibold' : (labaU < 0 ? 'text-red-600 font-semibold' : '')}">${labaU === 0 ? '-' : labaU.toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-right ${dataU.utang > 0 ? 'text-red-600' : ''}">${dataU.utang === 0 ? '-' : dataU.utang.toLocaleString('id-ID')}</td>
-                `;
-                tbodyUnit.appendChild(tr);
-            });
+            tbodyUnit.innerHTML = ""; 
+            
+            if (unitUsahaMaster.length === 1 && unitUsahaMaster[0].kode === "SHARED") {
+                 tbodyUnit.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">Belum ada master data unit usaha.</td></tr>`;
+            } else {
+                unitUsahaMaster.forEach(u => {
+                    const dataU = dataPerUnit[u.kode] || { pendapatan: 0, beban: 0, utang: 0 };
+                    const labaU = dataU.pendapatan - dataU.beban;
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-${u.color}-100 text-${u.color}-700 rounded mr-1 font-mono">${u.kode}</span> ${u.nama}</td>
+                        <td class="p-3 text-gray-500">${u.klasifikasi}</td>
+                        <td class="p-3 text-right">${dataU.pendapatan === 0 ? '-' : dataU.pendapatan.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right">${dataU.beban === 0 ? '-' : dataU.beban.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right ${labaU > 0 ? 'text-green-600 font-semibold' : (labaU < 0 ? 'text-red-600 font-semibold' : '')}">${labaU === 0 ? '-' : labaU.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right ${dataU.utang > 0 ? 'text-red-600' : ''}">${dataU.utang === 0 ? '-' : dataU.utang.toLocaleString('id-ID')}</td>
+                    `;
+                    tbodyUnit.appendChild(tr);
+                });
+            }
+
+            // Baris Total Bawah
             tbodyUnit.innerHTML += `
                 <tr class="bg-indigo-50 font-bold text-indigo-900 border-t-2 border-indigo-200 text-sm">
                     <td colspan="2" class="p-3">TOTAL KESELURUHAN (KONSOLIDASI)</td>
@@ -125,7 +150,7 @@ async function muatDashboard() {
             `;
         }
 
-        // 4. Render Tabel Tren Bulanan
+        // 6. Render Tabel Tren Bulanan
         const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         const tbodyTren = document.getElementById('tabelTrenBulanan');
         const arrayPendapatanChart = [];
@@ -148,7 +173,7 @@ async function muatDashboard() {
             });
         }
 
-        // 5. Render Grafik Chart.js
+        // 7. Render Grafik Chart.js
         const canvasElement = document.getElementById('grafikKinerja');
         if (canvasElement && window.Chart) {
             const ctx = canvasElement.getContext('2d');
@@ -175,5 +200,4 @@ async function muatDashboard() {
     }
 }
 
-// Pemanggilan Fungsi yang Benar
 muatDashboard();
