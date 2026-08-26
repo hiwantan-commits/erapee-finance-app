@@ -31,10 +31,13 @@
                     <!-- KOLOM 1: MASTER UNIT USAHA -->
                     <!-- ============================== -->
                     <div class="space-y-6">
-                        <!-- Form Tambah Unit Usaha -->
+                        <!-- Form Tambah/Edit Unit Usaha -->
                         <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                            <h3 class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">1. Tambah Unit Usaha (Divisi)</h3>
+                            <h3 class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">1. Form Unit Usaha (Divisi)</h3>
                             <form id="formUnitUsaha" class="space-y-4">
+                                <!-- Input tersembunyi untuk menyimpan ID saat mode edit -->
+                                <input type="hidden" id="editIdUnit" value="">
+                                
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Kode Unit (Cth: CORP, WT-NANAS)</label>
                                     <input type="text" id="kodeUnit" placeholder="KODE" class="form-input-custom text-sm font-mono" required>
@@ -47,9 +50,14 @@
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Keterangan / Klasifikasi KBLI</label>
                                     <input type="text" id="klasifikasiUnit" placeholder="Kantor Pusat & Administrasi" class="form-input-custom text-sm">
                                 </div>
-                                <button type="submit" id="btnSimpanUnit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition">
-                                    Simpan Unit Usaha
-                                </button>
+                                <div class="flex gap-3">
+                                    <button type="submit" id="btnSimpanUnit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition">
+                                        Simpan Unit Usaha
+                                    </button>
+                                    <button type="button" id="btnBatalUnit" onclick="window.batalEditUnit()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2.5 px-6 rounded-xl text-sm transition">
+                                        Batal
+                                    </button>
+                                </div>
                             </form>
                         </div>
 
@@ -78,10 +86,13 @@
                     <!-- KOLOM 2: MASTER COA (AKUN) -->
                     <!-- ============================== -->
                     <div class="space-y-6">
-                        <!-- Form Tambah COA -->
+                        <!-- Form Tambah/Edit COA -->
                         <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                            <h3 class="text-sm font-bold text-blue-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">2. Tambah Kode Akun (COA)</h3>
+                            <h3 class="text-sm font-bold text-blue-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">2. Form Kode Akun (COA)</h3>
                             <form id="formCOA" class="space-y-4">
+                                <!-- Input tersembunyi untuk menyimpan ID saat mode edit -->
+                                <input type="hidden" id="editIdCOA" value="">
+
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="col-span-1">
                                         <label class="block text-xs font-medium mb-1 text-gray-700">Kode Akun (Cth: 1101)</label>
@@ -95,9 +106,14 @@
                                 <div class="text-[11px] text-gray-500 mb-2">
                                     <b>Aturan:</b> Awalan 1 (Aset), 2 (Liabilitas), 3 (Ekuitas), 4 (Pendapatan), 5 (HPP), 6 (Beban).
                                 </div>
-                                <button type="submit" id="btnSimpanCOA" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition">
-                                    Simpan COA
-                                </button>
+                                <div class="flex gap-3">
+                                    <button type="submit" id="btnSimpanCOA" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition">
+                                        Simpan COA
+                                    </button>
+                                    <button type="button" id="btnBatalCOA" onclick="window.batalEditCOA()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2.5 px-6 rounded-xl text-sm transition">
+                                        Batal
+                                    </button>
+                                </div>
                             </form>
                         </div>
 
