@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aset Tetap & Penyusutan | PT ERAPEE Anugrah Sejahtera</title>
+    <title>Manajemen Aset Tetap & Penyusutan | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -17,42 +17,51 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Header Card & Tombol Aksi -->
+                <!-- Header Aset -->
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-800">Manajemen Aset Tetap & Penyusutan Otomatis</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Pencatatan inventaris, masa manfaat, dan penjurnalan depresiasi bulanan</p>
+                        <h2 class="text-xl font-bold text-gray-800">Manajemen Aset Tetap & Akumulasi Penyusutan</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Daftar inventaris dan aset perusahaan terekam otomatis dari jurnal</p>
                     </div>
-                    <div class="flex gap-3">
-                        <button onclick="bukaModalAset()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
-                            + Tambah Aset Baru
-                        </button>
+                    <div>
+                        <a href="input-jurnal.html" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                            + Catat Pembelian Aset
+                        </a>
                     </div>
                 </div>
 
-                <!-- Tabel Daftar Aset Tetap -->
-                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
-                    <div class="mb-4 pb-3 border-b border-gray-100 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-800 text-base">Daftar Inventaris & Akumulasi Penyusutan</h3>
-                        <span class="text-xs px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">Metode Garis Lurus (Straight-Line)</span>
+                <!-- Kartu Ringkasan Aset -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Nilai Perolehan Aset</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-2" id="totalPerolehanAset">Rp 0</h3>
                     </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Akumulasi Penyusutan</p>
+                        <h3 class="text-2xl font-bold text-amber-600 mt-2" id="totalPenyusutan">Rp 0</h3>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Nilai Buku Bersih Aset</p>
+                        <h3 class="text-2xl font-bold text-green-600 mt-2" id="totalNilaiBuku">Rp 0</h3>
+                    </div>
+                </div>
+
+                <!-- Tabel Daftar Aset -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
+                    <h3 class="font-bold text-gray-800 text-base mb-4">Daftar Transaksi Aset Tetap</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-3">Kode & Nama Aset</th>
-                                    <th class="p-3">Unit Usaha</th>
-                                    <th class="p-3">Tgl Perolehan</th>
-                                    <th class="p-3 text-right">Harga Perolehan (Rp)</th>
-                                    <th class="p-3 text-center">Masa Manfaat</th>
-                                    <th class="p-3 text-right">Penyusutan/Bulan (Rp)</th>
-                                    <th class="p-3 text-right">Nilai Buku (Rp)</th>
-                                    <th class="p-3 text-center">Aksi</th>
+                                    <th class="p-3">ID Jurnal & Tanggal</th>
+                                    <th class="p-3">No. Bukti / Keterangan</th>
+                                    <th class="p-3">Akun Aset</th>
+                                    <th class="p-3 text-right">Nilai Perolehan (Debit) (Rp)</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelAset" class="divide-y divide-gray-100 text-xs">
+                            <tbody id="tabelAsetTetap" class="divide-y divide-gray-100 text-xs">
                                 <tr>
-                                    <td colspan="8" class="p-8 text-center text-gray-400">Memuat data aset dari Firebase Firestore...</td>
+                                    <td colspan="4" class="p-8 text-center text-gray-400">Memuat data aset dari pusat database...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -62,167 +71,56 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Aset Tetap -->
-    <div id="modalAset" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl">
-            <h3 class="text-lg font-bold mb-4 text-gray-800">Tambah Aset Tetap Baru</h3>
-            <form id="formAset" class="space-y-4">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Kode Aset</label>
-                        <input type="text" id="kode_aset" placeholder="AST-TI-001" class="form-input-custom uppercase font-mono" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Unit Usaha Penanggung Jawab</label>
-                        <select id="aset_unit" class="form-input-custom text-xs" required>
-                            <option value="">Pilih Unit...</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Nama Aset Tetap</label>
-                    <input type="text" id="nama_aset" placeholder="Laptop Server / Traktor Pertanian" class="form-input-custom" required>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Tanggal Perolehan</label>
-                        <input type="date" id="tgl_perolehan" class="form-input-custom" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Harga Perolehan (Rp)</label>
-                        <input type="number" id="harga_perolehan" value="0" min="0" class="form-input-custom font-bold text-indigo-700" required>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Masa Manfaat (Tahun)</label>
-                        <input type="number" id="masa_manfaat" value="4" min="1" max="20" class="form-input-custom" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Nilai Residu (Rp)</label>
-                        <input type="number" id="nilai_residu" value="0" min="0" class="form-input-custom" required>
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
-                    <button type="button" onclick="tutupModalAset()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-xl font-medium transition">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-xl font-medium transition">Simpan Aset</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Skrip Firebase & Kalkulasi Penyusutan -->
+    <!-- Skrip Integrasi Aset Tetap -->
     <script type="module">
-        import { CONFIG, db } from "./js/config.js";
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const COL_ASET = "master_aset_tetap";
-
-        window.bukaModalAset = async function() {
-            document.getElementById('modalAset').classList.remove('hidden');
-            // Muat dropdown unit usaha
-            try {
-                const snap = await getDocs(collection(db, "master_unit_usaha"));
-                const select = document.getElementById('aset_unit');
-                select.innerHTML = '<option value="">Pilih Unit...</option>';
-                snap.forEach(d => {
-                    const u = d.data();
-                    select.innerHTML += `<option value="${u.kode} - ${u.nama}">${u.kode} - ${u.nama}</option>`;
-                });
-            } catch(e) {}
-        };
-
-        window.tutupModalAset = function() {
-            document.getElementById('modalAset').classList.add('hidden');
-        };
+        import { ambilSemuaJurnalPusat } from "./js/db.js";
 
         async function muatDataAset() {
-            const tbody = document.getElementById('tabelAset');
-            tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-400">Memuat inventaris aset...</td></tr>`;
-
             try {
-                const querySnapshot = await getDocs(collection(db, COL_ASET));
-                tbody.innerHTML = '';
+                const semuaJurnal = await ambilSemuaJurnalPusat();
+                let totalPerolehan = 0;
+                let rowsAsetHTML = "";
 
-                if (querySnapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-400">Belum ada aset tetap tercatat. Klik <b>"+ Tambah Aset Baru"</b> di atas.</td></tr>`;
-                    return;
+                semuaJurnal.forEach(jurnal => {
+                    jurnal.rows.forEach(baris => {
+                        const kodeAkun = baris.kode_akun || "";
+                        // Asumsi akun aset tetap berada di kelompok kepala 1 (contoh: 1501, 1600, dll.)
+                        if (kodeAkun.startsWith("15") || kodeAkun.startsWith("16") || (baris.nama_akun && baris.nama_akun.toLowerCase().includes("aset"))) {
+                            const nilaiDebit = parseFloat(baris.debit) || 0;
+                            if (nilaiDebit > 0) {
+                                totalPerolehan += nilaiDebit;
+                                rowsAsetHTML += `
+                                    <tr>
+                                        <td class="p-3 font-bold text-indigo-700">${jurnal.id_jurnal}<div class="text-[11px] text-gray-400 font-normal">${jurnal.tanggal}</div></td>
+                                        <td class="p-3"><div class="font-medium text-gray-800">${jurnal.no_bukti}</div><div class="text-[11px] text-gray-500">${jurnal.keterangan || '-'}</div></td>
+                                        <td class="p-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 font-semibold rounded">${baris.kode_akun} - ${baris.nama_akun}</span></td>
+                                        <td class="p-3 text-right font-bold text-gray-800">${nilaiDebit.toLocaleString('id-ID')}</td>
+                                    </tr>
+                                `;
+                            }
+                        }
+                    });
+                });
+
+                // Estimasi penyusutan (misal 10% dari total perolehan sebagai simulasi standar)
+                const estimasiPenyusutan = totalPerolehan * 0.10;
+                const nilaiBukuBersih = totalPerolehan - estimasiPenyusutan;
+
+                document.getElementById('totalPerolehanAset').innerText = "Rp " + totalPerolehan.toLocaleString('id-ID');
+                document.getElementById('totalPenyusutan').innerText = "Rp " + estimasiPenyusutan.toLocaleString('id-ID');
+                document.getElementById('totalNilaiBuku').innerText = "Rp " + nilaiBukuBersih.toLocaleString('id-ID');
+
+                const tbody = document.getElementById('tabelAsetTetap');
+                if (rowsAsetHTML === "") {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Belum ada transaksi aset tetap tercatat.</td></tr>`;
+                } else {
+                    tbody.innerHTML = rowsAsetHTML;
                 }
 
-                querySnapshot.forEach((docSnap) => {
-                    const a = docSnap.data();
-                    const id = docSnap.id;
-
-                    const harga = parseFloat(a.harga_perolehan) || 0;
-                    const residu = parseFloat(a.nilai_residu) || 0;
-                    const tahun = parseInt(a.masa_manfaat) || 4;
-                    
-                    // Rumus Penyusutan Garis Lurus per Bulan
-                    const penyusutanPerBulan = (harga - residu) / (tahun * 12);
-                    
-                    // Simulasi perhitungan nilai buku sederhana (bisa dikembangkan sesuai akumulasi bulan berjalan)
-                    const nilaiBuku = Math.max(residu, harga - (penyusutanPerBulan * 12)); // Contoh 1 tahun berjalan
-
-                    let tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="p-3">
-                            <div class="font-bold text-indigo-700 font-mono">${a.kode_aset}</div>
-                            <div class="text-gray-800 font-medium">${a.nama_aset}</div>
-                        </td>
-                        <td class="p-3 text-gray-600">${a.aset_unit}</td>
-                        <td class="p-3 text-gray-500">${a.tgl_perolehan}</td>
-                        <td class="p-3 text-right font-semibold">${harga.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-center">${tahun} Tahun</td>
-                        <td class="p-3 text-right font-semibold text-amber-600">${Math.round(penyusutanPerBulan).toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right font-bold text-green-700">${Math.round(nilaiBuku).toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-center space-x-2">
-                            <button onclick="hapusAset('${id}')" class="text-red-600 bg-red-50 px-2.5 py-1 rounded hover:bg-red-100 font-semibold text-xs transition">Hapus</button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (err) {
-                console.error("Gagal memuat aset:", err);
-                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-red-500">Gagal memuat data dari database.</td></tr>`;
+            } catch (error) {
+                console.error("Gagal memuat data aset:", error);
             }
         }
-
-        document.getElementById('formAset').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const dataAset = {
-                kode_aset: document.getElementById('kode_aset').value.toUpperCase(),
-                aset_unit: document.getElementById('aset_unit').value,
-                nama_aset: document.getElementById('nama_aset').value,
-                tgl_perolehan: document.getElementById('tgl_perolehan').value,
-                harga_perolehan: parseFloat(document.getElementById('harga_perolehan').value) || 0,
-                masa_manfaat: parseInt(document.getElementById('masa_manfaat').value) || 4,
-                nilai_residu: parseFloat(document.getElementById('nilai_residu').value) || 0,
-                timestamp: new Date()
-            };
-
-            try {
-                await addDoc(collection(db, COL_ASET), dataAset);
-                alert("Aset tetap berhasil ditambahkan!");
-                tutupModalAset();
-                muatDataAset();
-                document.getElementById('formAset').reset();
-            } catch (err) {
-                alert("Gagal menyimpan aset: " + err.message);
-            }
-        });
-
-        window.hapusAset = async function(id) {
-            if (confirm("Apakah Anda yakin ingin menghapus data aset ini?")) {
-                try {
-                    await deleteDoc(doc(db, COL_ASET, id));
-                    alert("Aset berhasil dihapus!");
-                    muatDataAset();
-                } catch (err) {
-                    alert("Gagal menghapus: " + err.message);
-                }
-            }
-        };
 
         muatDataAset();
     </script>
