@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekonsiliasi Fiskal | PT ERAPEE</title>
+    <title>Rekonsiliasi Fiskal | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -116,7 +116,7 @@
                                 <tr>
                                     <td class="p-4 pl-8 text-gray-600">Dikurangi: Kredit Pajak PPh 22, 23, 24</td>
                                     <td class="p-4 text-right">( 0 )</td>
-                                    <td class="p-4 text-right text-xs text-gray-500">Dari akun 1401 / Rekap PPh</td>
+                                    <td class="p-4 text-right text-xs text-gray-500">Dari akun rekap PPh</td>
                                 </tr>
                                 <tr>
                                     <td class="p-4 pl-8 text-gray-600">Dikurangi: Angsuran PPh Pasal 25</td>
@@ -142,7 +142,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Fungsi Tombol Cetak / Simpan ke PDF
         window.cetakDraftSPT = function() {
             window.print();
         };
