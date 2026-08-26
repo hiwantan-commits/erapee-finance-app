@@ -21,14 +21,14 @@
                     <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
                             <h2 id="judulForm" class="text-lg font-bold text-gray-800">Formulir Input Jurnal (Double-Entry)</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Dilengkapi template instan dan validasi keseimbangan otomatis</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Terhubung ke pusat data tunggal perusahaan</p>
                         </div>
                         <div id="statusBalance" class="px-4 py-1.5 bg-amber-50 text-amber-700 text-sm font-bold rounded-xl border border-amber-200 shadow-sm">
                             ⚠️ Belum Balance
                         </div>
                     </div>
 
-                    <!-- Pintasan Template Transaksi Cepat (Single-Entry Feel) -->
+                    <!-- Template Cepat -->
                     <div class="mb-6 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
                         <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-2">⚡ Pintasan Template Transaksi Cepat (Opsional)</label>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -171,7 +171,7 @@
                         </div>
 
                         <div id="alertSuccess" class="hidden p-4 bg-green-50 text-green-700 rounded-xl text-sm text-center font-bold border border-green-200">
-                            ✓ Transaksi Jurnal Berhasil Disimpan!
+                            ✓ Transaksi Jurnal Berhasil Disimpan ke Pusat Data!
                         </div>
                     </form>
                 </div>
@@ -179,14 +179,12 @@
         </div>
     </div>
 
-    <!-- Skrip Utama -->
+    <!-- Skrip Utama Menggunakan Modul Pusat db.js -->
     <script type="module">
         import { db } from "./js/config.js";
+        import { simpanJurnalPusat, ambilSemuaJurnalPusat } from "./js/db.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // Nama koleksi diseragamkan secara eksplisit
-        const NAMA_KOLEKSI = "jurnal_transaksi";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         let coaOptionsHTML = '<option value="">Pilih Akun...</option>';
         const urlParams = new URLSearchParams(window.location.search);
@@ -262,7 +260,6 @@
             }
         };
 
-        // Fungsi Template Transaksi Cepat
         window.terapkanTemplate = function() {
             const jenis = document.getElementById('pilihTemplate').value;
             const tbody = document.getElementById('tbodyJurnal');
@@ -317,31 +314,28 @@
                 document.getElementById('btnSubmit').innerText = "Simpan Perubahan";
                 
                 try {
-                    const q = query(collection(db, NAMA_KOLEKSI), where("id_jurnal", "==", editIdJurnal));
-                    const querySnapshot = await getDocs(q);
+                    // Ambil data menggunakan fungsi terpusat
+                    const semuaData = await ambilSemuaJurnalPusat();
+                    const jurnalTarget = semuaData.find(j => j.id_jurnal === editIdJurnal);
 
-                    if (!querySnapshot.empty) {
+                    if (jurnalTarget) {
+                        document.getElementById('id_jurnal').value = jurnalTarget.id_jurnal;
+                        document.getElementById('tanggal').value = jurnalTarget.tanggal || '';
+                        document.getElementById('no_bukti').value = jurnalTarget.no_bukti || '';
+                        document.getElementById('sifat_transaksi').value = jurnalTarget.sifat_transaksi || 'Tunai';
+                        document.getElementById('unit_usaha').value = jurnalTarget.unit_usaha || '';
+                        document.getElementById('lawan_transaksi').value = jurnalTarget.lawan_transaksi || '';
+                        document.getElementById('jatuh_tempo').value = jurnalTarget.jatuh_tempo || '';
+                        document.getElementById('link_bukti').value = jurnalTarget.link_bukti || '';
+                        document.getElementById('kode_pajak').value = jurnalTarget.kode_pajak || 'NON';
+                        document.getElementById('dpp_penjualan').value = jurnalTarget.dpp_penjualan || 0;
+                        document.getElementById('keterangan').value = jurnalTarget.keterangan || '';
+                        document.getElementById('status_jurnal').value = jurnalTarget.status || 'POSTED';
+                        toggleDueDate();
+
                         const tbody = document.getElementById('tbodyJurnal');
                         tbody.innerHTML = "";
-                        let isFirst = true;
-                        querySnapshot.forEach(docSnap => {
-                            const d = docSnap.data();
-                            if (isFirst) {
-                                document.getElementById('id_jurnal').value = d.id_jurnal;
-                                document.getElementById('tanggal').value = d.tanggal || '';
-                                document.getElementById('no_bukti').value = d.no_bukti || '';
-                                document.getElementById('sifat_transaksi').value = d.sifat_transaksi || 'Tunai';
-                                document.getElementById('unit_usaha').value = d.unit_usaha || '';
-                                document.getElementById('lawan_transaksi').value = d.lawan_transaksi || '';
-                                document.getElementById('jatuh_tempo').value = d.jatuh_tempo || '';
-                                document.getElementById('link_bukti').value = d.link_bukti || '';
-                                document.getElementById('kode_pajak').value = d.kode_pajak || 'NON';
-                                document.getElementById('dpp_penjualan').value = d.dpp_penjualan || 0;
-                                document.getElementById('keterangan').value = d.keterangan || '';
-                                document.getElementById('status_jurnal').value = d.status || 'POSTED';
-                                toggleDueDate();
-                                isFirst = false;
-                            }
+                        jurnalTarget.rows.forEach(d => {
                             tambahBaris(d.kode_akun, d.memo_baris, d.debit, d.kredit);
                         });
                     } else {
@@ -377,22 +371,13 @@
             }
 
             const btn = document.getElementById('btnSubmit');
-            btn.innerText = "Memproses...";
+            btn.innerText = "Memproses... Penyimpanan Terpusat";
             btn.disabled = true;
 
             try {
                 const targetIdJurnal = document.getElementById('id_jurnal').value;
 
-                if (editIdJurnal) {
-                    const qOld = query(collection(db, NAMA_KOLEKSI), where("id_jurnal", "==", editIdJurnal));
-                    const oldSnap = await getDocs(qOld);
-                    const deletePromises = [];
-                    oldSnap.forEach(dSnap => deletePromises.push(deleteDoc(doc(db, NAMA_KOLEKSI, dSnap.id))));
-                    await Promise.all(deletePromises);
-                }
-
-                const batchPromises = [];
-                const commonData = {
+                const headerData = {
                     id_jurnal: targetIdJurnal,
                     tanggal: document.getElementById('tanggal').value,
                     no_bukti: document.getElementById('no_bukti').value,
@@ -404,38 +389,38 @@
                     kode_pajak: document.getElementById('kode_pajak').value,
                     dpp_penjualan: parseFloat(document.getElementById('dpp_penjualan').value) || 0,
                     keterangan: document.getElementById('keterangan').value,
-                    status: document.getElementById('status_jurnal').value,
-                    timestamp: new Date()
+                    status: document.getElementById('status_jurnal').value
                 };
 
+                let rowsData = [];
                 rows.forEach(row => {
                     const selectCOA = row.querySelector('.kode_akun');
-                    const debitVal = parseFloat(row.querySelector('.debit').value) || 0;
-                    const kreditVal = parseFloat(row.querySelector('.kredit').value) || 0;
-
-                    if (debitVal > 0 || kreditVal > 0) {
-                        const rowData = {
-                            ...commonData,
-                            kode_akun: selectCOA.value,
-                            nama_akun: selectCOA.options[selectCOA.selectedIndex]?.text || '',
-                            memo_baris: row.querySelector('.memo_baris').value || '',
-                            debit: debitVal,
-                            kredit: kreditVal
-                        };
-                        batchPromises.push(addDoc(collection(db, NAMA_KOLEKSI), rowData));
-                    }
+                    rowsData.push({
+                        kode_akun: selectCOA.value,
+                        nama_akun: selectCOA.options[selectCOA.selectedIndex]?.text || '',
+                        memo_baris: row.querySelector('.memo_baris').value || '',
+                        debit: parseFloat(row.querySelector('.debit').value) || 0,
+                        kredit: parseFloat(row.querySelector('.kredit').value) || 0
+                    });
                 });
 
-                await Promise.all(batchPromises);
+                // Simpan menggunakan modul pusat tunggal
+                const hasil = await simpanJurnalPusat(headerData, rowsData, editIdJurnal ? targetIdJurnal : null);
 
-                document.getElementById('alertSuccess').classList.remove('hidden');
-                setTimeout(() => {
-                    window.location.href = 'manajemen';
-                }, 1500);
+                if (hasil.success) {
+                    document.getElementById('alertSuccess').classList.remove('hidden');
+                    setTimeout(() => {
+                        window.location.href = 'manajemen';
+                    }, 1500);
+                } else {
+                    alert("Gagal menyimpan: " + hasil.error);
+                    btn.innerText = "Simpan Jurnal";
+                    btn.disabled = false;
+                }
 
             } catch (error) {
                 console.error("Gagal menyimpan:", error);
-                alert("Kesalahan saat menyimpan data ke database.");
+                alert("Kesalahan sistem saat menyimpan data.");
                 btn.innerText = "Simpan Jurnal";
                 btn.disabled = false;
             }
