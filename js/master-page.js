@@ -23,15 +23,22 @@ async function muatUnitUsaha() {
             const data = docSnap.data();
             const klasifikasiTeks = data.klasifikasi || '-';
             
-            // Perhatikan pengiriman parameter ke fungsi edit
+            // Encode data agar aman dilempar ke atribut onclick HTML
+            const encKode = encodeURIComponent(data.kode || '');
+            const encNama = encodeURIComponent(data.nama || '');
+            const encKlas = encodeURIComponent(klasifikasiTeks);
+
+            // Perbaikan layout: Tambahkan div flex justify-center gap-2 pada kolom Aksi
             tbody.innerHTML += `
                 <tr class="border-b border-gray-100 hover:bg-gray-50">
                     <td class="p-3"><span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-mono font-bold text-xs">${data.kode}</span></td>
                     <td class="p-3 font-medium text-gray-800 text-sm">${data.nama}</td>
                     <td class="p-3 text-gray-500 text-sm">${klasifikasiTeks}</td>
-                    <td class="p-3 text-center space-x-1">
-                        <button onclick="window.editUnitUsaha('${docSnap.id}', '${data.kode}', '${data.nama}', '${klasifikasiTeks}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded text-xs font-bold transition">Edit</button>
-                        <button onclick="window.hapusUnitUsaha('${docSnap.id}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded text-xs font-bold transition">Hapus</button>
+                    <td class="p-3 text-center">
+                        <div class="flex justify-center items-center gap-2">
+                            <button onclick="window.editUnitUsaha('${docSnap.id}', '${encKode}', '${encNama}', '${encKlas}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Edit</button>
+                            <button onclick="window.hapusUnitUsaha('${docSnap.id}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Hapus</button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -42,13 +49,15 @@ async function muatUnitUsaha() {
     }
 }
 
-window.editUnitUsaha = function(id, kode, nama, klasifikasi) {
+window.editUnitUsaha = function(id, encKode, encNama, encKlas) {
+    const klasifikasi = decodeURIComponent(encKlas);
+    
     document.getElementById('editIdUnit').value = id;
-    document.getElementById('kodeUnit').value = kode;
-    document.getElementById('namaUnit').value = nama;
+    document.getElementById('kodeUnit').value = decodeURIComponent(encKode);
+    document.getElementById('namaUnit').value = decodeURIComponent(encNama);
     document.getElementById('klasifikasiUnit').value = klasifikasi === '-' ? '' : klasifikasi;
     
-    document.getElementById('btnSimpanUnit').innerText = 'Update Data Unit';
+    document.getElementById('btnSimpanUnit').innerText = 'Update Data';
     document.getElementById('btnSimpanUnit').classList.replace('bg-indigo-600', 'bg-amber-500');
     document.getElementById('btnSimpanUnit').classList.replace('hover:bg-indigo-700', 'hover:bg-amber-600');
     document.getElementById('btnBatalUnit').classList.remove('hidden');
@@ -101,13 +110,18 @@ async function muatCOA() {
         }
 
         coaList.forEach(data => {
+            const encKode = encodeURIComponent(data.kode || '');
+            const encNama = encodeURIComponent(data.nama || '');
+
             tbody.innerHTML += `
                 <tr class="border-b border-gray-100 hover:bg-gray-50">
                     <td class="p-3"><span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-mono font-bold text-xs">${data.kode}</span></td>
                     <td class="p-3 font-medium text-gray-800 text-sm">${data.nama}</td>
-                    <td class="p-3 text-center space-x-1">
-                        <button onclick="window.editCOA('${data.id}', '${data.kode}', '${data.nama}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded text-xs font-bold transition">Edit</button>
-                        <button onclick="window.hapusCOA('${data.id}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded text-xs font-bold transition">Hapus</button>
+                    <td class="p-3 text-center">
+                        <div class="flex justify-center items-center gap-2">
+                            <button onclick="window.editCOA('${data.id}', '${encKode}', '${encNama}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Edit</button>
+                            <button onclick="window.hapusCOA('${data.id}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Hapus</button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -118,10 +132,10 @@ async function muatCOA() {
     }
 }
 
-window.editCOA = function(id, kode, nama) {
+window.editCOA = function(id, encKode, encNama) {
     document.getElementById('editIdCOA').value = id;
-    document.getElementById('kodeCOA').value = kode;
-    document.getElementById('namaCOA').value = nama;
+    document.getElementById('kodeCOA').value = decodeURIComponent(encKode);
+    document.getElementById('namaCOA').value = decodeURIComponent(encNama);
     
     document.getElementById('btnSimpanCOA').innerText = 'Update COA';
     document.getElementById('btnSimpanCOA').classList.replace('bg-blue-600', 'bg-amber-500');
@@ -158,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
     muatUnitUsaha();
     muatCOA();
 
-    // Submit Unit Usaha (Bisa Tambah atau Update)
     const formUnit = document.getElementById('formUnitUsaha');
     if (formUnit) {
         formUnit.addEventListener('submit', async (e) => {
@@ -178,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (editId) {
                     await updateDoc(doc(db, "master_unit_usaha", editId), payload);
-                    window.batalEditUnit(); // Reset form & tombol
+                    window.batalEditUnit(); 
                 } else {
                     await addDoc(collection(db, "master_unit_usaha"), payload);
                     formUnit.reset();
@@ -187,12 +200,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 alert('Gagal menyimpan Unit Usaha: ' + error.message);
                 btn.disabled = false;
-                btn.innerText = editId ? 'Update Data Unit' : 'Simpan Unit Usaha';
+                btn.innerText = editId ? 'Update Data' : 'Simpan Unit Usaha';
             }
         });
     }
 
-    // Submit COA (Bisa Tambah atau Update)
     const formCOA = document.getElementById('formCOA');
     if (formCOA) {
         formCOA.addEventListener('submit', async (e) => {
