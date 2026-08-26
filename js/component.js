@@ -1,4 +1,4 @@
-// Data Komponen Sidebar
+// Data Komponen Sidebar (Desain Awal yang Anda Sukai)
 const sidebarHTML = `
     <!-- Sidebar Mobile Toggle -->
     <div class="md:hidden flex justify-between items-center bg-indigo-900 text-white p-4 z-50 fixed top-0 w-full shadow-md">
@@ -27,7 +27,7 @@ const sidebarHTML = `
             <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-3 px-3 mt-6">Siklus Akuntansi</p>
             <a href="input-jurnal" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-indigo-800 hover:text-white transition duration-200">
                 <span class="mr-3 text-lg opacity-80">📝</span>
-                <span class="text-sm font-medium">Input Jurnal (Double-Entry)</span>
+                <span class="text-sm font-medium">Input Jurnal</span>
             </a>
             <a href="manajemen" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-indigo-800 hover:text-white transition duration-200">
                 <span class="mr-3 text-lg opacity-80">📚</span>
