@@ -1,14 +1,8 @@
-// ==========================================
-// PUSAT PENGATURAN DATABASE (SINGLE SOURCE OF TRUTH)
-// ==========================================
 import { CONFIG, db } from "./config.js";
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const KOLEKSI_UTAMA = CONFIG.COLLECTION_NAME || "jurnal_transaksi";
 
-/**
- * 1. Simpan atau Perbarui Jurnal ke Pusat Database
- */
 export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = null) {
     try {
         if (editIdJurnal) {
@@ -42,9 +36,6 @@ export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = nul
     }
 }
 
-/**
- * 2. Ambil Seluruh Data Jurnal
- */
 export async function ambilSemuaJurnalPusat() {
     try {
         const querySnapshot = await getDocs(collection(db, KOLEKSI_UTAMA));
@@ -89,9 +80,6 @@ export async function ambilSemuaJurnalPusat() {
     }
 }
 
-/**
- * 3. Hapus Jurnal Berdasarkan ID Jurnal
- */
 export async function hapusJurnalPusat(id_jurnal) {
     try {
         const q = query(collection(db, KOLEKSI_UTAMA), where("id_jurnal", "==", id_jurnal));
