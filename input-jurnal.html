@@ -21,15 +21,32 @@
                     <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
                             <h2 id="judulForm" class="text-lg font-bold text-gray-800">Formulir Input Jurnal (Double-Entry)</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Sistem multi-baris dengan validasi keseimbangan otomatis</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Dilengkapi template instan dan validasi keseimbangan otomatis</p>
                         </div>
                         <div id="statusBalance" class="px-4 py-1.5 bg-amber-50 text-amber-700 text-sm font-bold rounded-xl border border-amber-200 shadow-sm">
                             ⚠️ Belum Balance
                         </div>
                     </div>
 
+                    <!-- Pintasan Template Transaksi Cepat (Single-Entry Feel) -->
+                    <div class="mb-6 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+                        <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-2">⚡ Pintasan Template Transaksi Cepat (Opsional)</label>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <select id="pilihTemplate" onchange="terapkanTemplate()" class="form-input-custom text-xs bg-white font-semibold text-indigo-700">
+                                <option value="">-- Pilih Jenis Transaksi Instan --</option>
+                                <option value="GAJI">Bayar Gaji Karyawan</option>
+                                <option value="OPERASIONAL">Biaya Operasional / Listrik / Air</option>
+                                <option value="PENDAPATAN">Pendapatan Penjualan Tunai</option>
+                                <option value="PEMBELIAN_ASET">Beli Aset Tetap Tunai</option>
+                            </select>
+                            <div class="md:col-span-3 flex items-center">
+                                <p class="text-[11px] text-gray-500">Pilih pintasan untuk mengisi akun otomatis, atau susun baris secara manual di bawah.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <form id="formJurnal" class="space-y-6">
-                        <!-- Bagian 1: Identitas & Dokumen -->
+                        <!-- Bagian 1: Referensi Transaksi -->
                         <div>
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">1. Referensi Transaksi</h3>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -100,7 +117,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="tbodyJurnal" class="divide-y divide-gray-100">
-                                        <!-- Baris dinamis akan dimuat di sini -->
+                                        <!-- Baris dinamis -->
                                     </tbody>
                                     <tfoot>
                                         <tr class="bg-gray-100 font-bold text-gray-800 text-sm border-t-2 border-gray-300">
@@ -114,7 +131,7 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 4: Parameter Pajak & Keterangan -->
+                        <!-- Bagian 4: Parameter Pajak & Eksekusi -->
                         <div class="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">3. Parameter Pajak Coretax</h3>
@@ -147,7 +164,7 @@
                                         <option value="DRAFT">DRAFT</option>
                                     </select>
                                     <button type="submit" id="btnSubmit" class="w-2/3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-sm transition">
-                                        Simpan Perubahan Jurnal
+                                        Simpan Jurnal
                                     </button>
                                 </div>
                             </div>
@@ -162,7 +179,7 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase & Logika Edit / Input -->
+    <!-- Skrip Utama -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -170,7 +187,7 @@
 
         let coaOptionsHTML = '<option value="">Pilih Akun...</option>';
         const urlParams = new URLSearchParams(window.location.search);
-        const editIdJurnal = urlParams.get('edit'); // Cek apakah ada parameter ?edit=JRN-...
+        const editIdJurnal = urlParams.get('edit');
 
         window.toggleDueDate = function() {
             const sifat = document.getElementById('sifat_transaksi').value;
@@ -216,7 +233,7 @@
             }
         };
 
-        window.tambahBaris = function(akunVal = "", memoVal = "", debitVal = 0, kreditVal = 0, arusKasVal = "Nonkas") {
+        window.tambahBaris = function(akunVal = "", memoVal = "", debitVal = 0, kreditVal = 0) {
             const tbody = document.getElementById('tbodyJurnal');
             const tr = document.createElement('tr');
             tr.className = 'jurnal-row hover:bg-gray-50';
@@ -228,11 +245,7 @@
                 <td class="p-2 text-center"><button type="button" onclick="hapusBaris(this)" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-200 transition">X</button></td>
             `;
             tbody.appendChild(tr);
-
-            // Set selected value for COA dropdown if editing
-            if (akunVal) {
-                tr.querySelector('.kode_akun').value = akunVal;
-            }
+            if (akunVal) tr.querySelector('.kode_akun').value = akunVal;
             hitungTotal();
         };
 
@@ -246,24 +259,44 @@
             }
         };
 
+        // Fungsi Template Transaksi Cepat
+        window.terapkanTemplate = function() {
+            const jenis = document.getElementById('pilihTemplate').value;
+            const tbody = document.getElementById('tbodyJurnal');
+            if (!jenis) return;
+
+            tbody.innerHTML = "";
+            if (jenis === "GAJI") {
+                document.getElementById('keterangan').value = "Pembayaran gaji karyawan periode berjalan";
+                tambahBaris("6101", "Beban Gaji & Tunjangan", 0, 0);
+                tambahBaris("1101", "Kas / Bank Operasional", 0, 0);
+            } else if (jenis === "OPERASIONAL") {
+                document.getElementById('keterangan').value = "Pembayaran beban operasional kantor";
+                tambahBaris("6102", "Beban Operasional Lainnya", 0, 0);
+                tambahBaris("1101", "Kas / Bank Operasional", 0, 0);
+            } else if (jenis === "PENDAPATAN") {
+                document.getElementById('keterangan').value = "Penerimaan pendapatan penjualan tunai";
+                tambahBaris("1101", "Kas / Bank Operasional", 0, 0);
+                tambahBaris("4101", "Pendapatan Usaha", 0, 0);
+            } else if (jenis === "PEMBELIAN_ASET") {
+                document.getElementById('keterangan').value = "Pembelian aset tetap secara tunai";
+                tambahBaris("1501", "Aset Tetap", 0, 0);
+                tambahBaris("1101", "Kas / Bank Operasional", 0, 0);
+            }
+        };
+
         async function inisialisasiData() {
-            // Muat Unit Usaha
             try {
                 const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
                 const selectUnit = document.getElementById('unit_usaha');
                 let units = [];
                 snapUnit.forEach(d => units.push(d.data()));
-                units.sort((a, b) => a.kode.localeCompare(b.kode));
                 selectUnit.innerHTML = '<option value="">Pilih Unit...</option>';
                 units.forEach(u => {
-                    const opt = document.createElement('option');
-                    opt.value = `${u.kode} - ${u.nama}`;
-                    opt.text = `${u.kode} - ${u.nama}`;
-                    selectUnit.appendChild(opt);
+                    selectUnit.innerHTML += `<option value="${u.kode} - ${u.nama}">${u.kode} - ${u.nama}</option>`;
                 });
             } catch (err) {}
 
-            // Muat COA
             try {
                 const snapCOA = await getDocs(collection(db, "master_coa"));
                 let coaList = [];
@@ -276,7 +309,6 @@
                 });
             } catch (err) {}
 
-            // Jika Mode Edit (Ada parameter ?edit=...)
             if (editIdJurnal) {
                 document.getElementById('judulForm').innerText = `Edit Jurnal Akuntansi (${editIdJurnal})`;
                 document.getElementById('btnSubmit').innerText = "Simpan Perubahan";
@@ -287,8 +319,7 @@
 
                     if (!querySnapshot.empty) {
                         const tbody = document.getElementById('tbodyJurnal');
-                        tbody.innerHTML = ""; // Bersihkan baris default
-
+                        tbody.innerHTML = "";
                         let isFirst = true;
                         querySnapshot.forEach(docSnap => {
                             const d = docSnap.data();
@@ -308,11 +339,10 @@
                                 toggleDueDate();
                                 isFirst = false;
                             }
-                            // Tambahkan baris akun dari data lama
                             tambahBaris(d.kode_akun, d.memo_baris, d.debit, d.kredit);
                         });
                     } else {
-                        alert("Data jurnal tidak ditemukan untuk diedit.");
+                        alert("Data jurnal tidak ditemukan.");
                         window.location.href = 'manajemen';
                     }
                 } catch (err) {
@@ -327,7 +357,6 @@
 
         inisialisasiData();
 
-        // Submit (Simpan / Perbarui)
         const formJurnal = document.getElementById('formJurnal');
         formJurnal.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -351,7 +380,6 @@
             try {
                 const targetIdJurnal = document.getElementById('id_jurnal').value;
 
-                // Jika mode edit, hapus dulu data lama di Firestore berdasarkan id_jurnal, lalu buat baru
                 if (editIdJurnal) {
                     const qOld = query(collection(db, CONFIG.COLLECTION_NAME), where("id_jurnal", "==", editIdJurnal));
                     const oldSnap = await getDocs(qOld);
@@ -399,13 +427,13 @@
 
                 document.getElementById('alertSuccess').classList.remove('hidden');
                 setTimeout(() => {
-                    window.location.href = 'manajemen'; // Kembalikan ke halaman manajemen setelah sukses
+                    window.location.href = 'manajemen';
                 }, 1500);
 
             } catch (error) {
                 console.error("Gagal menyimpan:", error);
                 alert("Kesalahan saat menyimpan data ke database.");
-                btn.innerText = "Simpan Perubahan Jurnal";
+                btn.innerText = "Simpan Jurnal";
                 btn.disabled = false;
             }
         });
