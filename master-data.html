@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COA & Master Data | PT ERAPEE Anugrah Sejahtera</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="text-gray-800 bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
+            <div id="header-container"></div>
+
+            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+                <!-- 1. MANAJEMEN UNIT USAHA & KBLI (DINAMIS & BISA DIEDIT) -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-8">
+                    <div class="mb-6 pb-4 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">Unit Usaha & Klasifikasi KBLI (Master Data)</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Kelola, tambah, edit, dan hapus segmen operasional perusahaan</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="btnSeedUnit" onclick="seedDefaultUnitUsaha()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition shadow-sm">
+                                📥 Muat Default Unit
+                            </button>
+                            <button onclick="bukaModalUnitTambah()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition shadow-sm">
+                                + Tambah Unit Usaha
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Unit Usaha -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-3">Kode Segmen</th>
+                                    <th class="p-3">Nama Unit Usaha</th>
+                                    <th class="p-3">KBLI / Kategori</th>
+                                    <th class="p-3">Keterangan</th>
+                                    <th class="p-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelUnitUsaha" class="divide-y divide-gray-100 text-xs">
+                                <tr>
+                                    <td colspan="5" class="p-6 text-center text-gray-400">Memuat data Unit Usaha dari Firebase...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 2. MANAJEMEN BAGAN AKUN (COA) -->
+                <div class="mb-6 flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Manajemen Bagan Akun (COA 101 Akun)</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Sinkronisasi data standar perusahaan dengan Cloud Firestore</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="resetDataCOA()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                            🗑️ Bersihkan COA
+                        </button>
+                        <button id="btnSeed" onclick="seedDefaultCOA()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                            📥 Muat Default COA
+                        </button>
+                        <button onclick="bukaModalTambah()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                            + Tambah Akun Baru
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabel COA Interaktif -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-4">Kode Akun</th>
+                                    <th class="p-4">Nama Akun</th>
+                                    <th class="p-4">Saldo Normal</th>
+                                    <th class="p-4">Kelompok</th>
+                                    <th class="p-4">Pos Laporan</th>
+                                    <th class="p-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelCOA" class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="6" class="p-8 text-center text-gray-400">Menghubungkan ke Firebase Firestore...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Tambah/Edit Unit Usaha -->
+    <div id="modalUnit" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h3 id="modalUnitTitle" class="text-lg font-bold mb-4 text-gray-800">Tambah Unit Usaha</h3>
+            <form id="formUnit" class="space-y-4">
+                <input type="hidden" id="editUnitOriginalId">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Kode Segmen (Contoh: CORP, SIP)</label>
+                    <input type="text" id="unitKode" placeholder="CORP" class="form-input-custom font-mono uppercase" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Nama Unit Usaha</label>
+                    <input type="text" id="unitNama" placeholder="Corporate / Head Office" class="form-input-custom" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Klasifikasi / KBLI</label>
+                    <input type="text" id="unitKbli" placeholder="Kantor Pusat & Administrasi" class="form-input-custom" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Keterangan / Sektor</label>
+                    <input type="text" id="unitKet" placeholder="Korporat" class="form-input-custom">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="tutupModalUnit()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-xl font-medium transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-xl font-medium transition">Simpan Unit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Tambah/Edit COA -->
+    <div id="modalCOA" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h3 id="modalTitle" class="text-lg font-bold mb-4 text-gray-800">Tambah Akun COA</h3>
+            <form id="formCOA" class="space-y-4">
+                <input type="hidden" id="editDocId">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Kode Akun</label>
+                    <input type="text" id="kodeAkun" placeholder="Contoh: 1104" class="form-input-custom font-mono" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Nama Akun</label>
+                    <input type="text" id="namaAkun" placeholder="Contoh: Kas Kecil Cabang" class="form-input-custom" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Saldo Normal</label>
+                        <select id="saldoNormal" class="form-input-custom">
+                            <option value="Debit">Debit</option>
+                            <option value="Kredit">Kredit</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Kelompok</label>
+                        <select id="kelompokAkun" class="form-input-custom">
+                            <option value="Aset">Aset</option>
+                            <option value="Liabilitas">Liabilitas</option>
+                            <option value="Ekuitas">Ekuitas</option>
+                            <option value="Pendapatan">Pendapatan</option>
+                            <option value="Beban pokok">Beban Pokok</option>
+                            <option value="Beban operasional">Beban Operasional</option>
+                            <option value="Beban lain">Beban Lain</option>
+                            <option value="Pajak penghasilan">Pajak Penghasilan</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Pos Laporan</label>
+                    <input type="text" id="posLaporan" placeholder="Kas dan setara kas / Laba Rugi" class="form-input-custom" required>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="tutupModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-xl font-medium transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-xl font-medium transition">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Skrip Firebase CRUD (Unit Usaha & COA) -->
+    <script type="module">
+        import { CONFIG, db } from "./js/config.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const COL_UNIT = "master_unit_usaha";
+        const COLLECTION_COA = "master_coa";
+
+        const DEFAULT_UNIT_DATA = [
+            { kode: "CORP", nama: "Corporate / Head Office", kbli: "Kantor Pusat & Administrasi", ket: "Korporat" },
+            { kode: "MARC", nama: "Marcframe", kbli: "Digital Services (KBLI 62199)", ket: "Digital" },
+            { kode: "SIP", nama: "SiPacul", kbli: "Software Publishing (KBLI 58290)", ket: "Digital" },
+            { kode: "WT-NANAS", nama: "Wani Tani - Nanas", kbli: "Pertanian (KBLI 01220)", ket: "Pertanian" },
+            { kode: "WT-TEBU", nama: "Wani Tani - Tebu", kbli: "Pertanian (KBLI 01140)", ket: "Pertanian" },
+            { kode: "WT-CABAI", nama: "Wani Tani - Cabai", kbli: "Pertanian (KBLI 01138)", ket: "Pertanian" },
+            { kode: "SHARED", nama: "Biaya Bersama", kbli: "Alokasi Bersama (Shared Cost)", ket: "Bersama" }
+        ];
+
+        const DEFAULT_COA_DATA = [
+            { kode: "1101", nama: "Kas", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
+            { kode: "1102", nama: "Bank operasional", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
+            { kode: "1103", nama: "Dompet elektronik/payment gateway", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
+            { kode: "1110", nama: "Kas dalam perjalanan/clearing", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Kas dan setara kas" },
+            { kode: "1201", nama: "Piutang usaha", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Piutang usaha" },
+            { kode: "1202", nama: "Piutang karyawan", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Piutang lain" },
+            { kode: "1203", nama: "Piutang lain-lain", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Piutang lain" },
+            { kode: "1204", nama: "Kredit pajak PPh 23", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar dimuka" },
+            { kode: "1205", nama: "Kredit pajak PPh 22", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar dimuka" },
+            { kode: "1206", nama: "Angsuran PPh 25", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar dimuka" },
+            { kode: "1207", nama: "Kredit pajak luar negeri PPh 24", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar dimuka" },
+            { kode: "1210", nama: "Cadangan kerugian piutang", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Piutang usaha" },
+            { kode: "1301", nama: "Persediaan benih dan sarana produksi", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Persediaan" },
+            { kode: "1302", nama: "Tanaman dalam proses", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Persediaan" },
+            { kode: "1303", nama: "Persediaan hasil panen", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Persediaan" },
+            { kode: "1304", nama: "Pekerjaan digital dalam proses", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Persediaan/WIP" },
+            { kode: "1401", nama: "Sewa dibayar dimuka", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Biaya dibayar dimuka" },
+            { kode: "1402", nama: "Uang muka pembelian", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Uang muka" },
+            { kode: "1403", nama: "PPN masukan", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Pajak dibayar dimuka" },
+            { kode: "1404", nama: "Beban dibayar dimuka lain", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Biaya dibayar dimuka" },
+            { kode: "1501", nama: "Tanah", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1502", nama: "Bangunan", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1503", nama: "Mesin dan alat pertanian", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1504", nama: "Komputer dan perangkat TI", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1505", nama: "Kendaraan", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1506", nama: "Peralatan kantor", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1592", nama: "Akumulasi penyusutan bangunan", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1593", nama: "Akumulasi penyusutan alat pertanian", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1594", nama: "Akumulasi penyusutan perangkat TI", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1595", nama: "Akumulasi penyusutan kendaraan", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1596", nama: "Akumulasi penyusutan peralatan kantor", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset tetap" },
+            { kode: "1701", nama: "Aset takberwujud - perangkat lunak", saldoNormal: "Debit", kelompok: "Aset", posLaporan: "Aset takberwujud" },
+            { kode: "1791", nama: "Akumulasi amortisasi perangkat lunak", saldoNormal: "Kredit", kelompok: "Aset", posLaporan: "Aset takberwujud" },
+            { kode: "2101", nama: "Utang usaha", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang usaha" },
+            { kode: "2102", nama: "Beban akrual", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Akrual" },
+            { kode: "2103", nama: "Uang muka pelanggan", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Pendapatan diterima dimuka" },
+            { kode: "2104", nama: "Utang gaji/honorarium", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang lain" },
+            { kode: "2201", nama: "PPN keluaran", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2202", nama: "Utang PPh 21", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2203", nama: "Utang PPh 23", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2204", nama: "Utang PPh Final Pasal 4(2)", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2205", nama: "Utang PPh 22", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2206", nama: "Utang PPh 26", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2208", nama: "Utang PPh 29", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Utang pajak" },
+            { kode: "2301", nama: "Pinjaman pemegang saham", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Pinjaman pihak berelasi" },
+            { kode: "2302", nama: "Pinjaman bank", saldoNormal: "Kredit", kelompok: "Liabilitas", posLaporan: "Pinjaman" },
+            { kode: "3101", nama: "Modal saham", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Modal saham" },
+            { kode: "3102", nama: "Tambahan modal disetor", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Tambahan modal" },
+            { kode: "3201", nama: "Dana cadangan wajib", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Cadangan" },
+            { kode: "3301", nama: "Saldo laba/(rugi)", saldoNormal: "Kredit", kelompok: "Ekuitas", posLaporan: "Saldo laba" },
+            { kode: "4101", nama: "Pendapatan langganan SaaS SiPacul", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan software" },
+            { kode: "4102", nama: "Pendapatan lisensi perangkat lunak", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan software" },
+            { kode: "4201", nama: "Pendapatan pembuatan website", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pemrograman" },
+            { kode: "4202", nama: "Pendapatan template website", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pemrograman" },
+            { kode: "4203", nama: "Pendapatan pemrograman/kustomisasi", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pemrograman" },
+            { kode: "4301", nama: "Penjualan hasil panen nanas", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pertanian" },
+            { kode: "4302", nama: "Penjualan hasil panen tebu", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pertanian" },
+            { kode: "4303", nama: "Penjualan hasil panen cabai", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pertanian" },
+            { kode: "4309", nama: "Penjualan hasil pertanian lain", saldoNormal: "Kredit", kelompok: "Pendapatan", posLaporan: "Pendapatan pertanian" },
+            { kode: "4901", nama: "Retur dan potongan penjualan", saldoNormal: "Debit", kelompok: "Pendapatan", posLaporan: "Pengurang pendapatan" },
+            { kode: "5101", nama: "Hosting/cloud langsung", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Beban pokok digital" },
+            { kode: "5102", nama: "Freelancer/subkontrak proyek digital", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Beban pokok digital" },
+            { kode: "5103", nama: "Lisensi pihak ketiga langsung", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Beban pokok digital" },
+            { kode: "5104", nama: "Biaya langsung proyek digital lain", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Beban pokok digital" },
+            { kode: "5201", nama: "Sewa lahan budidaya", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5202", nama: "Pengolahan dan persiapan lahan", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5203", nama: "Benih/bibit dan bahan tanam", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5204", nama: "Pupuk, pestisida, dan sarana produksi", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5205", nama: "Tenaga kerja budidaya", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5206", nama: "Irigasi dan penyiraman", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5207", nama: "Panen dan pascapanen", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5208", nama: "Transportasi hasil panen", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5209", nama: "Kerugian tanaman/penghapusan", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "Biaya budidaya" },
+            { kode: "5301", nama: "Harga pokok hasil panen terjual", saldoNormal: "Debit", kelompok: "Beban pokok", posLaporan: "HPP hasil panen" },
+            { kode: "6101", nama: "Gaji dan upah administrasi", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban pegawai" },
+            { kode: "6102", nama: "Gaji/honorarium direksi", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban pegawai" },
+            { kode: "6103", nama: "Sewa kantor", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6104", nama: "Listrik, air, dan internet", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6105", nama: "Perlengkapan kantor", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6106", nama: "Pemasaran dan promosi", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban penjualan" },
+            { kode: "6107", nama: "Perjalanan dinas", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6108", nama: "Notaris dan legal", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban profesional" },
+            { kode: "6109", nama: "Akuntansi dan konsultan pajak", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban profesional" },
+            { kode: "6110", nama: "Administrasi bank/payment gateway", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6111", nama: "Langganan perangkat lunak", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6112", nama: "Pemeliharaan dan perbaikan", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6113", nama: "Asuransi", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6114", nama: "Penyusutan aset tetap", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Penyusutan" },
+            { kode: "6115", nama: "Amortisasi aset takberwujud", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Amortisasi" },
+            { kode: "6116", nama: "Pelatihan dan pengembangan", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban pegawai" },
+            { kode: "6117", nama: "Overhead pertanian", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "6190", nama: "Beban operasional lain", saldoNormal: "Debit", kelompok: "Beban operasional", posLaporan: "Beban umum" },
+            { kode: "7101", nama: "Pendapatan bunga", saldoNormal: "Kredit", kelompok: "Beban lain", posLaporan: "Pendapatan lain" },
+            { kode: "7102", nama: "Pendapatan lain-lain", saldoNormal: "Kredit", kelompok: "Beban lain", posLaporan: "Pendapatan lain" },
+            { kode: "7201", nama: "Beban bunga", saldoNormal: "Debit", kelompok: "Beban lain", posLaporan: "Beban lain" },
+            { kode: "7202", nama: "Rugi selisih kurs", saldoNormal: "Debit", kelompok: "Beban lain", posLaporan: "Beban lain" },
+            { kode: "7203", nama: "Denda dan sanksi pajak", saldoNormal: "Debit", kelompok: "Beban lain", posLaporan: "Beban lain" },
+            { kode: "7204", nama: "Sumbangan/donasi", saldoNormal: "Debit", kelompok: "Beban lain", posLaporan: "Beban lain" },
+            { kode: "7205", nama: "Beban lain-lain", saldoNormal: "Debit", kelompok: "Beban lain", posLaporan: "Beban lain" },
+            { kode: "8101", nama: "Beban pajak penghasilan kini", saldoNormal: "Debit", kelompok: "Pajak penghasilan", posLaporan: "Pajak kini" },
+            { kode: "8102", nama: "Beban/(manfaat) pajak tangguhan", saldoNormal: "Debit", kelompok: "Pajak penghasilan", posLaporan: "Pajak tangguhan" }
+        ];
+
+        // --- CRUD UNIT USAHA (DINAMIS & BISA DIEDIT) ---
+        window.muatDataUnit = async function() {
+            const tbody = document.getElementById('tabelUnitUsaha');
+            tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Memuat Unit Usaha...</td></tr>`;
+
+            try {
+                const snap = await getDocs(collection(db, COL_UNIT));
+                tbody.innerHTML = '';
+                if (snap.empty) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Belum ada unit usaha. Klik <b>"Muat Default Unit"</b> di atas.</td></tr>`;
+                    return;
+                }
+
+                let units = [];
+                snap.forEach(d => units.push({ id: d.id, ...d.data() }));
+                units.sort((a, b) => a.kode.localeCompare(b.kode));
+
+                units.forEach(u => {
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-3 font-mono font-semibold text-indigo-600">${u.kode}</td>
+                        <td class="p-3 font-medium text-gray-800">${u.nama}</td>
+                        <td class="p-3 text-gray-600">${u.kbli}</td>
+                        <td class="p-3 text-gray-500">${u.ket || '-'}</td>
+                        <td class="p-3 text-center space-x-2 whitespace-nowrap">
+                            <button onclick='bukaModalEditUnit("${u.id}", ${JSON.stringify(u).replace(/'/g, "&#39;")})' class="text-indigo-600 hover:underline text-xs font-semibold">Edit</button>
+                            <button onclick='hapusUnit("${u.id}", "${u.kode}")' class="text-red-600 hover:underline text-xs font-semibold">Hapus</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">Gagal memuat unit usaha.</td></tr>`;
+            }
+        };
+
+        window.seedDefaultUnitUsaha = async function() {
+            if (confirm("Muat default Unit Usaha & KBLI ke Firestore?")) {
+                try {
+                    for (let item of DEFAULT_UNIT_DATA) {
+                        await setDoc(doc(db, COL_UNIT, item.kode), item);
+                    }
+                    alert("Berhasil memuat Unit Usaha!");
+                    muatDataUnit();
+                } catch (err) {
+                    alert("Gagal: " + err.message);
+                }
+            }
+        };
+
+        window.bukaModalUnitTambah = function() {
+            document.getElementById('modalUnitTitle').innerText = "Tambah Unit Usaha Baru";
+            document.getElementById('editUnitOriginalId').value = "";
+            document.getElementById('unitKode').value = "";
+            document.getElementById('unitKode').readOnly = false;
+            document.getElementById('unitKode').classList.remove('bg-gray-100');
+            document.getElementById('unitNama').value = "";
+            document.getElementById('unitKbli').value = "";
+            document.getElementById('unitKet').value = "";
+            document.getElementById('modalUnit').classList.remove('hidden');
+        };
+
+        window.bukaModalEditUnit = function(id, data) {
+            document.getElementById('modalUnitTitle').innerText = "Edit Unit Usaha";
+            document.getElementById('editUnitOriginalId').value = id;
+            document.getElementById('unitKode').value = data.kode || "";
+            document.getElementById('unitKode').readOnly = false; // Boleh diedit
+            document.getElementById('unitKode').classList.remove('bg-gray-100');
+            document.getElementById('unitNama').value = data.nama || "";
+            document.getElementById('unitKbli').value = data.kbli || "";
+            document.getElementById('unitKet').value = data.ket || "";
+            document.getElementById('modalUnit').classList.remove('hidden');
+        };
+
+        window.tutupModalUnit = function() {
+            document.getElementById('modalUnit').classList.add('hidden');
+        };
+
+        document.getElementById('formUnit').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const originalId = document.getElementById('editUnitOriginalId').value;
+            const kodeBaru = document.getElementById('unitKode').value.toUpperCase().trim();
+            const dataBaru = {
+                kode: kodeBaru,
+                nama: document.getElementById('unitNama').value,
+                kbli: document.getElementById('unitKbli').value,
+                ket: document.getElementById('unitKet').value
+            };
+
+            try {
+                // Jika kode diubah saat edit dan originalId berbeda, hapus dokumen lama agar tidak ada duplikasi ID
+                if (originalId && originalId !== kodeBaru) {
+                    await deleteDoc(doc(db, COL_UNIT, originalId));
+                }
+
+                await setDoc(doc(db, COL_UNIT, kodeBaru), dataBaru);
+                alert("Unit usaha berhasil disimpan!");
+                tutupModalUnit();
+                muatDataUnit();
+            } catch (err) {
+                alert("Gagal menyimpan unit usaha: " + err.message);
+            }
+        });
+
+        window.hapusUnit = async function(id, kode) {
+            if (confirm(`Hapus unit usaha [${kode}]?`)) {
+                try {
+                    await deleteDoc(doc(db, COL_UNIT, id));
+                    alert("Berhasil dihapus!");
+                    muatDataUnit();
+                } catch (err) {
+                    alert("Gagal menghapus: " + err.message);
+                }
+            }
+        };
+
+        // --- CRUD COA ---
+        window.muatDataCOA = async function() {
+            const tbody = document.getElementById('tabelCOA');
+            tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Memuat data COA dari Firebase...</td></tr>`;
+
+            try {
+                const querySnapshot = await getDocs(collection(db, COLLECTION_COA));
+                tbody.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada data COA. Klik tombol <b>"Muat Default COA"</b> di atas.</td></tr>`;
+                    return;
+                }
+
+                let coaData = [];
+                querySnapshot.forEach((docSnap) => {
+                    coaData.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                coaData.sort((a, b) => a.kode.localeCompare(b.kode));
+
+                coaData.forEach((data) => {
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-4 font-mono font-semibold text-indigo-600">${data.kode || '-'}</td>
+                        <td class="p-4 font-medium text-gray-800">${data.nama || '-'}</td>
+                        <td class="p-4 text-gray-600">${data.saldoNormal || '-'}</td>
+                        <td class="p-4 text-gray-600">${data.kelompok || '-'}</td>
+                        <td class="p-4 text-gray-600">${data.posLaporan || '-'}</td>
+                        <td class="p-4 text-center space-x-2 whitespace-nowrap">
+                            <button onclick='bukaModalEdit("${data.id}", ${JSON.stringify(data).replace(/'/g, "&#39;")})' class="text-indigo-600 hover:underline text-xs font-semibold">Edit</button>
+                            <button onclick='hapusCOA("${data.id}", "${data.kode}")' class="text-red-600 hover:underline text-xs font-semibold">Hapus</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Gagal memuat COA:", err);
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal terhubung ke database.</td></tr>`;
+            }
+        };
+
+        window.resetDataCOA = async function() {
+            if (confirm("⚠️ Hapus SELURUH data COA di database?")) {
+                try {
+                    const querySnapshot = await getDocs(collection(db, COLLECTION_COA));
+                    const promises = [];
+                    querySnapshot.forEach((docSnap) => {
+                        promises.push(deleteDoc(doc(db, COLLECTION_COA, docSnap.id)));
+                    });
+                    await Promise.all(promises);
+                    alert("COA dibersihkan!");
+                    muatDataCOA();
+                } catch (error) {
+                    alert("Gagal: " + error.message);
+                }
+            }
+        };
+
+        window.seedDefaultCOA = async function() {
+            if (confirm("Muat 101 data default COA ke Firestore?")) {
+                const btn = document.getElementById('btnSeed');
+                btn.innerText = "Memuat...";
+                btn.disabled = true;
+
+                try {
+                    for (let item of DEFAULT_COA_DATA) {
+                        await setDoc(doc(db, COLLECTION_COA, item.kode), item);
+                    }
+                    alert("Berhasil memuat 101 data COA!");
+                    muatDataCOA();
+                } catch (error) {
+                    alert("Gagal: " + error.message);
+                } finally {
+                    btn.innerText = "📥 Muat Default COA";
+                    btn.disabled = false;
+                }
+            }
+        };
+
+        window.bukaModalTambah = function() {
+            document.getElementById('modalTitle').innerText = "Tambah Akun COA Baru";
+            document.getElementById('editDocId').value = "";
+            document.getElementById('kodeAkun').value = "";
+            document.getElementById('kodeAkun').readOnly = false;
+            document.getElementById('kodeAkun').classList.remove('bg-gray-100');
+            document.getElementById('namaAkun').value = "";
+            document.getElementById('posLaporan').value = "";
+            document.getElementById('modalCOA').classList.remove('hidden');
+        };
+
+        window.bukaModalEdit = function(id, data) {
+            document.getElementById('modalTitle').innerText = "Edit Akun COA";
+            document.getElementById('editDocId').value = id;
+            document.getElementById('kodeAkun').value = data.kode || "";
+            document.getElementById('kodeAkun').readOnly = true;
+            document.getElementById('kodeAkun').classList.add('bg-gray-100');
+            document.getElementById('namaAkun').value = data.nama || "";
+            document.getElementById('saldoNormal').value = data.saldoNormal || "Debit";
+            document.getElementById('kelompokAkun').value = data.kelompok || "Aset";
+            document.getElementById('posLaporan').value = data.posLaporan || "";
+            document.getElementById('modalCOA').classList.remove('hidden');
+        };
+
+        window.tutupModal = function() {
+            document.getElementById('modalCOA').classList.add('hidden');
+        };
+
+        document.getElementById('formCOA').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const kodeInput = document.getElementById('kodeAkun').value;
+            const newData = {
+                kode: kodeInput,
+                nama: document.getElementById('namaAkun').value,
+                saldoNormal: document.getElementById('saldoNormal').value,
+                kelompok: document.getElementById('kelompokAkun').value,
+                posLaporan: document.getElementById('posLaporan').value
+            };
+
+            try {
+                await setDoc(doc(db, COLLECTION_COA, kodeInput), newData);
+                alert("Akun COA berhasil disimpan!");
+                tutupModal();
+                muatDataCOA();
+            } catch (error) {
+                alert("Kesalahan: " + error.message);
+            }
+        });
+
+        window.hapusCOA = async function(id, kode) {
+            if (confirm(`Hapus akun COA [${kode}]?`)) {
+                try {
+                    await deleteDoc(doc(db, COLLECTION_COA, id));
+                    alert("Berhasil dihapus!");
+                    muatDataCOA();
+                } catch (error) {
+                    alert("Gagal: " + error.message);
+                }
+            }
+        };
+
+        // Inisialisasi Load
+        muatDataUnit();
+        muatDataCOA();
+    </script>
+    <script type="module" src="js/component.js"></script>
+</body>
+</html>
