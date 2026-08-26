@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekonsiliasi Fiskal | PT ERAPEE Anugrah Sejahtera</title>
+    <title>Rekonsiliasi Bank & Keuangan | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -17,116 +17,47 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Header Laporan -->
+                <!-- Header Rekonsiliasi -->
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-800">Kertas Kerja Rekonsiliasi Fiskal</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Penyesuaian Laba Komersial menjadi Laba Kena Pajak (Tahun Buku 2026)</p>
+                        <h2 class="text-xl font-bold text-gray-800">Rekonsiliasi Kas & Bank Terpadu</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Analisis kesesuaian saldo akun kas/bank dari pusat jurnal</p>
                     </div>
-                    <button onclick="cetakDraftSPT()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition shadow-sm">
-                        🖨️ Cetak Draft SPT / PDF
-                    </button>
                 </div>
 
-                <!-- Tabel Rekonsiliasi Fiskal -->
+                <!-- Kartu Ringkasan Rekonsiliasi -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Kas Masuk (Debit)</p>
+                        <h3 class="text-2xl font-bold text-green-600 mt-2" id="rekonsiliasiKasMasuk">Rp 0</h3>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Kas Keluar (Kredit)</p>
+                        <h3 class="text-2xl font-bold text-red-600 mt-2" id="rekonsiliasiKasKeluar">Rp 0</h3>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Saldo Bersih Kas / Bank</p>
+                        <h3 class="text-2xl font-bold text-indigo-600 mt-2" id="rekonsiliasiSaldoBersih">Rp 0</h3>
+                    </div>
+                </div>
+
+                <!-- Tabel Mutasi Kas -->
                 <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
+                    <h3 class="font-bold text-gray-800 text-base mb-4">Mutasi Akun Kas & Bank (Kepala 11)</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-4 w-1/2">Uraian / Keterangan</th>
-                                    <th class="p-4 text-right">Nilai (Rp)</th>
-                                    <th class="p-4 text-right">Dasar / Catatan</th>
+                                    <th class="p-3">ID Jurnal & Tanggal</th>
+                                    <th class="p-3">No. Bukti / Lawan Transaksi</th>
+                                    <th class="p-3">Keterangan</th>
+                                    <th class="p-3 text-right">Masuk (Debit) (Rp)</th>
+                                    <th class="p-3 text-right">Keluar (Kredit) (Rp)</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                <!-- LABA KOMERSIAL -->
-                                <tr class="bg-indigo-50 font-bold text-indigo-900 border-t-2 border-indigo-200">
-                                    <td class="p-4">LABA KOMERSIAL SEBELUM PAJAK</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right text-xs font-normal text-indigo-700">Basis rekonsiliasi fiskal</td>
-                                </tr>
-
-                                <!-- KOREKSI POSITIF -->
-                                <tr class="bg-gray-50 font-bold text-gray-700">
-                                    <td colspan="3" class="p-4">KOREKSI FISKAL POSITIF (+)</td>
-                                </tr>
+                            <tbody id="tabelRekonsiliasi" class="divide-y divide-gray-100 text-xs">
                                 <tr>
-                                    <td class="p-4 pl-8 text-gray-600">Denda dan sanksi pajak (Beda Tetap)</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right text-xs text-gray-500">Akun 7203</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 pl-8 text-gray-600">Sumbangan non-deductible (Beda Tetap)</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right text-xs text-gray-500">Akun 7204</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 pl-8 text-gray-600">Penyusutan komersial melebihi fiskal (Beda Waktu)</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right text-xs text-gray-500">Register Aset Tetap</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 pl-8 text-gray-600">Biaya non-deductible / Koreksi positif lainnya</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right text-xs text-gray-500">Input Manual / Review</td>
-                                </tr>
-                                <tr class="font-semibold text-gray-800 bg-gray-50">
-                                    <td class="p-4 text-right">TOTAL KOREKSI POSITIF</td>
-                                    <td class="p-4 text-right text-red-600">0</td>
-                                    <td class="p-4 text-right"></td>
-                                </tr>
-
-                                <!-- KOREKSI NEGATIF -->
-                                <tr class="bg-gray-50 font-bold text-gray-700 border-t border-gray-200">
-                                    <td colspan="3" class="p-4">KOREKSI FISKAL NEGATIF (-)</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 pl-8 text-gray-600">Penyusutan fiskal melebihi komersial (Beda Waktu)</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right text-xs text-gray-500">Register Aset Tetap</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 pl-8 text-gray-600">Penghasilan bukan objek pajak</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right text-xs text-gray-500">Ketentuan UU PPh</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 pl-8 text-gray-600">Penghasilan yang telah dikenai PPh Final (Ps 4 ayat 2)</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right text-xs text-gray-500">Dikoreksi agar tidak dipajaki 2x</td>
-                                </tr>
-                                <tr class="font-semibold text-gray-800 bg-gray-50">
-                                    <td class="p-4 text-right">TOTAL KOREKSI NEGATIF</td>
-                                    <td class="p-4 text-right text-green-600">( 0 )</td>
-                                    <td class="p-4 text-right"></td>
-                                </tr>
-
-                                <!-- PKP & PPH BADAN -->
-                                <tr class="bg-green-50 font-bold text-green-900 border-t-2 border-green-200">
-                                    <td class="p-4">LABA FISKAL (PENGHASILAN KENA PAJAK / PKP)</td>
-                                    <td class="p-4 text-right text-lg">0</td>
-                                    <td class="p-4 text-right text-xs font-normal text-green-700">Dasar Pengenaan PPh Badan</td>
-                                </tr>
-                                <tr class="font-bold text-gray-800">
-                                    <td class="p-4">PPh Badan Terutang (Tarif 22% / Fasilitas Ps 31E)</td>
-                                    <td class="p-4 text-right text-indigo-700">0</td>
-                                    <td class="p-4 text-right text-xs text-gray-500 font-normal">Sesuai Profil Pajak</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 pl-8 text-gray-600">Dikurangi: Kredit Pajak PPh 22, 23, 24</td>
-                                    <td class="p-4 text-right">( 0 )</td>
-                                    <td class="p-4 text-right text-xs text-gray-500">Dari akun rekap PPh</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 pl-8 text-gray-600">Dikurangi: Angsuran PPh Pasal 25</td>
-                                    <td class="p-4 text-right">( 0 )</td>
-                                    <td class="p-4 text-right text-xs text-gray-500">Telah disetor bulanan</td>
-                                </tr>
-                                <tr class="bg-gray-800 text-white font-bold">
-                                    <td class="p-4">PPh PASAL 29 (KURANG BAYAR) / PPh PASAL 28A (LEBIH BAYAR)</td>
-                                    <td class="p-4 text-right text-lg">Rp 0</td>
-                                    <td class="p-4 text-right text-xs text-gray-300 font-normal">Status Akhir SPT Tahunan</td>
+                                    <td colspan="5" class="p-8 text-center text-gray-400">Memuat data rekonsiliasi dari pusat database...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -136,17 +67,60 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase & Aksi Cetak PDF -->
+    <!-- Skrip Integrasi Rekonsiliasi -->
     <script type="module">
-        import { CONFIG, db } from "./js/config.js";
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { ambilSemuaJurnalPusat } from "./js/db.js";
 
-        window.cetakDraftSPT = function() {
-            window.print();
-        };
+        async function muatDataRekonsiliasi() {
+            try {
+                const semuaJurnal = await ambilSemuaJurnalPusat();
+                let totalMasuk = 0;
+                let totalKeluar = 0;
+                let rowsHTML = "";
 
-        console.log("Halaman Rekonsiliasi Fiskal siap.");
+                semuaJurnal.forEach(jurnal => {
+                    jurnal.rows.forEach(baris => {
+                        const kodeAkun = baris.kode_akun || "";
+                        // Asumsi akun kas/bank berawalan 11 (contoh: 1101 Kas, 1102 Bank)
+                        if (kodeAkun.startsWith("11")) {
+                            const debit = parseFloat(baris.debit) || 0;
+                            const kredit = parseFloat(baris.kredit) || 0;
+
+                            totalMasuk += debit;
+                            totalKeluar += kredit;
+
+                            rowsHTML += `
+                                <tr>
+                                    <td class="p-3 font-bold text-indigo-700">${jurnal.id_jurnal}<div class="text-[11px] text-gray-400 font-normal">${jurnal.tanggal}</div></td>
+                                    <td class="p-3"><div class="font-medium text-gray-800">${jurnal.no_bukti}</div><div class="text-[11px] text-gray-500">${jurnal.lawan_transaksi || '-'}</div></td>
+                                    <td class="p-3 text-gray-600 truncate max-w-xs">${baris.memo_baris || jurnal.keterangan || '-'}</td>
+                                    <td class="p-3 text-right font-bold text-green-600">${debit === 0 ? '-' : debit.toLocaleString('id-ID')}</td>
+                                    <td class="p-3 text-right font-bold text-red-600">${kredit === 0 ? '-' : kredit.toLocaleString('id-ID')}</td>
+                                </tr>
+                            `;
+                        }
+                    });
+                });
+
+                const saldoBersih = totalMasuk - totalKeluar;
+
+                document.getElementById('rekonsiliasiKasMasuk').innerText = "Rp " + totalMasuk.toLocaleString('id-ID');
+                document.getElementById('rekonsiliasiKasKeluar').innerText = "Rp " + totalKeluar.toLocaleString('id-ID');
+                document.getElementById('rekonsiliasiSaldoBersih').innerText = "Rp " + saldoBersih.toLocaleString('id-ID');
+
+                const tbody = document.getElementById('tabelRekonsiliasi');
+                if (rowsHTML === "") {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">Belum ada mutasi kas/bank tercatat pada akun kepala 11.</td></tr>`;
+                } else {
+                    tbody.innerHTML = rowsHTML;
+                }
+
+            } catch (error) {
+                console.error("Gagal memuat data rekonsiliasi:", error);
+            }
+        }
+
+        muatDataRekonsiliasi();
     </script>
     <script type="module" src="js/component.js"></script>
 </body>
