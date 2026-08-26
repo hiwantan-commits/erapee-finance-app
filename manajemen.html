@@ -21,7 +21,7 @@
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h2 class="text-xl font-bold text-gray-800">Manajemen Jurnal & Buku Besar</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Draf, riwayat, dan verifikasi posting jurnal akuntansi</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Draf, riwayat, cetak bukti voucher, dan verifikasi posting jurnal</p>
                     </div>
                     <div class="flex gap-3">
                         <a href="input-jurnal.html" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
@@ -36,18 +36,16 @@
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-3">Tanggal / Bukti</th>
-                                    <th class="p-3">Unit Usaha</th>
-                                    <th class="p-3">Akun & Keterangan</th>
-                                    <th class="p-3 text-right">Debit (Rp)</th>
-                                    <th class="p-3 text-right">Kredit (Rp)</th>
+                                    <th class="p-3">ID Jurnal & Tanggal</th>
+                                    <th class="p-3">No. Bukti / Keterangan Umum</th>
+                                    <th class="p-3 text-right">Total Transaksi (Rp)</th>
                                     <th class="p-3 text-center">Status</th>
                                     <th class="p-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelManajemenJurnal" class="divide-y divide-gray-100 text-xs">
                                 <tr>
-                                    <td colspan="7" class="p-8 text-center text-gray-400">Memuat data transaksi dari Firebase Firestore...</td>
+                                    <td colspan="5" class="p-8 text-center text-gray-400">Memuat data transaksi dari Firebase Firestore...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -57,75 +55,232 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase untuk Manajemen Jurnal -->
+    <!-- Skrip Firebase & Logika Cetak Jurnal -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Variabel global untuk menyimpan data jurnal agar bisa diakses oleh tombol cetak
+        window.dataJurnalGlobal = {};
+
         async function muatManajemenJurnal() {
             const tbody = document.getElementById('tabelManajemenJurnal');
-            tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Memuat data transaksi...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">Memuat data transaksi...</td></tr>`;
 
             try {
                 const querySnapshot = await getDocs(collection(db, CONFIG.COLLECTION_NAME));
                 tbody.innerHTML = '';
 
                 if (querySnapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat. Silakan buat melalui menu <b>Input Jurnal</b>.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat. Silakan buat melalui menu <b>Input Jurnal</b>.</td></tr>`;
                     return;
                 }
 
-                let listJurnal = [];
+                // Object untuk mengelompokkan baris berdasarkan id_jurnal
+                let groupedJurnal = {};
+
                 querySnapshot.forEach((docSnap) => {
-                    listJurnal.push({ id: docSnap.id, ...docSnap.data() });
+                    const data = docSnap.data();
+                    const docId = docSnap.id;
+                    const id_jurnal = data.id_jurnal || 'NO-ID';
+
+                    if (!groupedJurnal[id_jurnal]) {
+                        groupedJurnal[id_jurnal] = {
+                            id_jurnal: id_jurnal,
+                            tanggal: data.tanggal,
+                            no_bukti: data.no_bukti,
+                            keterangan: data.keterangan,
+                            status: data.status,
+                            unit_usaha: data.unit_usaha,
+                            lawan_transaksi: data.lawan_transaksi,
+                            total_debit: 0,
+                            total_kredit: 0,
+                            rows: [],
+                            docIds: [] // Menyimpan ID dokumen Firebase untuk keperluan hapus
+                        };
+                    }
+
+                    // Tambahkan baris ke grup dan hitung total
+                    groupedJurnal[id_jurnal].rows.push(data);
+                    groupedJurnal[id_jurnal].docIds.push(docId);
+                    groupedJurnal[id_jurnal].total_debit += parseFloat(data.debit) || 0;
+                    groupedJurnal[id_jurnal].total_kredit += parseFloat(data.kredit) || 0;
                 });
 
-                // Urutkan berdasarkan tanggal terbaru
-                listJurnal.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                // Simpan ke variabel global untuk fitur cetak
+                window.dataJurnalGlobal = groupedJurnal;
+
+                // Ubah object ke array dan urutkan berdasarkan ID Jurnal (terbaru di atas)
+                let listJurnal = Object.values(groupedJurnal).sort((a, b) => {
+                    if(a.id_jurnal > b.id_jurnal) return -1;
+                    if(a.id_jurnal < b.id_jurnal) return 1;
+                    return 0;
+                });
 
                 listJurnal.forEach((jurnal) => {
                     let tr = document.createElement('tr');
                     let badgeStatus = jurnal.status === 'POSTED' 
                         ? '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded font-semibold">POSTED</span>' 
                         : '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold">DRAFT</span>';
+                    
+                    let balanceStatus = (jurnal.total_debit === jurnal.total_kredit && jurnal.total_debit > 0)
+                        ? `<span class="text-xs text-green-600 font-semibold mt-1 block">✓ Seimbang</span>`
+                        : `<span class="text-xs text-red-500 font-semibold mt-1 block">⚠️ Selisih</span>`;
 
                     tr.innerHTML = `
-                        <td class="p-3 font-medium text-gray-800">
-                            <div>${jurnal.tanggal || '-'}</div>
-                            <div class="text-xs text-gray-400 font-mono">${jurnal.no_bukti || '-'}</div>
-                        </td>
-                        <td class="p-3 text-gray-600">${jurnal.unit_usaha || '-'}</td>
                         <td class="p-3">
-                            <div class="font-semibold text-indigo-600">${jurnal.nama_akun || jurnal.kode_akun || '-'}</div>
-                            <div class="text-gray-500 truncate max-w-xs">${jurnal.keterangan || '-'}</div>
+                            <div class="font-bold text-indigo-700">${jurnal.id_jurnal}</div>
+                            <div class="text-xs text-gray-500 mt-0.5">${jurnal.tanggal}</div>
                         </td>
-                        <td class="p-3 text-right font-semibold text-green-700">${Number(jurnal.debit || 0).toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right font-semibold text-red-700">${Number(jurnal.kredit || 0).toLocaleString('id-ID')}</td>
+                        <td class="p-3">
+                            <div class="font-semibold text-gray-800">${jurnal.no_bukti}</div>
+                            <div class="text-xs text-gray-500 truncate max-w-xs mt-0.5">${jurnal.keterangan || '-'}</div>
+                        </td>
+                        <td class="p-3 text-right">
+                            <div class="font-bold text-gray-800">${jurnal.total_debit.toLocaleString('id-ID')}</div>
+                            ${balanceStatus}
+                        </td>
                         <td class="p-3 text-center">${badgeStatus}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="hapusJurnal('${jurnal.id}')" class="text-red-600 hover:underline font-semibold text-xs">Hapus</button>
+                        <td class="p-3 text-center space-x-2">
+                            <button onclick="cetakVoucher('${jurnal.id_jurnal}')" class="text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100 font-semibold text-xs transition">🖨️ Cetak</button>
+                            <button onclick="hapusJurnalGrup('${jurnal.id_jurnal}')" class="text-red-600 bg-red-50 px-2 py-1 rounded hover:bg-red-100 font-semibold text-xs transition">🗑️ Hapus</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
             } catch (err) {
                 console.error("Gagal memuat manajemen jurnal:", err);
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500">Gagal memuat data dari database.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500">Gagal memuat data dari database.</td></tr>`;
             }
         }
 
-        window.hapusJurnal = async function(id) {
-            if (confirm("Apakah Anda yakin ingin menghapus catatan jurnal ini?")) {
+        // Fungsi Menghapus Keseluruhan Transaksi Jurnal (Semua Baris)
+        window.hapusJurnalGrup = async function(id_jurnal) {
+            if (confirm(`Apakah Anda yakin ingin menghapus SELURUH transaksi dengan ID ${id_jurnal}?`)) {
                 try {
-                    await deleteDoc(doc(db, CONFIG.COLLECTION_NAME, id));
-                    alert("Jurnal berhasil dihapus!");
+                    const grup = window.dataJurnalGlobal[id_jurnal];
+                    if (!grup) return;
+
+                    // Hapus setiap dokumen yang terkait dengan id_jurnal ini secara paralel
+                    const hapusPromises = grup.docIds.map(docId => deleteDoc(doc(db, CONFIG.COLLECTION_NAME, docId)));
+                    await Promise.all(hapusPromises);
+
+                    alert("Transaksi jurnal berhasil dihapus sepenuhnya!");
                     muatManajemenJurnal();
                 } catch (error) {
                     console.error("Gagal menghapus:", error);
                     alert("Gagal menghapus jurnal: " + error.message);
                 }
             }
+        };
+
+        // Fungsi Cetak Bukti Jurnal (Voucher)
+        window.cetakVoucher = function(id_jurnal) {
+            const jurnal = window.dataJurnalGlobal[id_jurnal];
+            if (!jurnal) return alert("Data jurnal tidak ditemukan!");
+
+            let rowsHTML = "";
+            jurnal.rows.forEach((row, index) => {
+                rowsHTML += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${row.kode_akun} - ${row.nama_akun}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${row.memo_baris || '-'}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${(parseFloat(row.debit)||0).toLocaleString('id-ID')}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${(parseFloat(row.kredit)||0).toLocaleString('id-ID')}</td>
+                    </tr>
+                `;
+            });
+
+            const templateCetak = `
+                <html>
+                <head>
+                    <title>Bukti Jurnal - ${jurnal.id_jurnal}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; font-size: 12px; color: #333; margin: 40px; }
+                        h2 { text-align: center; margin-bottom: 5px; text-transform: uppercase; }
+                        .subtitle { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 30px; }
+                        .info-table { width: 100%; margin-bottom: 20px; }
+                        .info-table td { padding: 4px; vertical-align: top; }
+                        .info-table td:nth-child(1) { width: 15%; font-weight: bold; }
+                        .info-table td:nth-child(2) { width: 35%; }
+                        .info-table td:nth-child(3) { width: 15%; font-weight: bold; }
+                        .info-table td:nth-child(4) { width: 35%; }
+                        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                        .data-table th { background-color: #f3f4f6; padding: 10px; border: 1px solid #ddd; text-align: center; }
+                        .data-table td { padding: 8px; border: 1px solid #ddd; }
+                        .total-row { font-weight: bold; background-color: #f9fafb; }
+                        .signature-table { width: 100%; margin-top: 50px; text-align: center; }
+                        .signature-table td { width: 33%; }
+                        .signature-space { height: 80px; }
+                        @media print {
+                            @page { size: A4; margin: 15mm; }
+                            body { margin: 0; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h2>PT ERAPEE Anugrah Sejahtera</h2>
+                    <div class="subtitle">BUKTI JURNAL (VOUCHER)</div>
+
+                    <table class="info-table">
+                        <tr>
+                            <td>ID Jurnal</td><td>: ${jurnal.id_jurnal}</td>
+                            <td>Tanggal</td><td>: ${jurnal.tanggal}</td>
+                        </tr>
+                        <tr>
+                            <td>No. Bukti</td><td>: ${jurnal.no_bukti}</td>
+                            <td>Status</td><td>: ${jurnal.status}</td>
+                        </tr>
+                        <tr>
+                            <td>Unit Usaha</td><td>: ${jurnal.unit_usaha || '-'}</td>
+                            <td>Lawan Trx</td><td>: ${jurnal.lawan_transaksi || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td>Keterangan</td><td colspan="3">: ${jurnal.keterangan || '-'}</td>
+                        </tr>
+                    </table>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Kode & Nama Akun</th>
+                                <th>Memo</th>
+                                <th>Debit (Rp)</th>
+                                <th>Kredit (Rp)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHTML}
+                            <tr class="total-row">
+                                <td colspan="3" style="text-align: right; padding: 10px; border: 1px solid #ddd;">TOTAL</td>
+                                <td style="text-align: right; padding: 10px; border: 1px solid #ddd;">${jurnal.total_debit.toLocaleString('id-ID')}</td>
+                                <td style="text-align: right; padding: 10px; border: 1px solid #ddd;">${jurnal.total_kredit.toLocaleString('id-ID')}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="signature-table">
+                        <tr>
+                            <td>Dibuat Oleh,<br><div class="signature-space"></div>(_________________)</td>
+                            <td>Diperiksa Oleh,<br><div class="signature-space"></div>(_________________)</td>
+                            <td>Disetujui Oleh,<br><div class="signature-space"></div>(_________________)</td>
+                        </tr>
+                    </table>
+
+                    <script>
+                        window.onload = function() { window.print(); window.close(); }
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            // Buka tab baru dan tulis HTML cetak
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(templateCetak);
+            printWindow.document.close();
         };
 
         muatManajemenJurnal();
