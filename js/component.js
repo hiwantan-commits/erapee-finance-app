@@ -1,24 +1,30 @@
-// js/component.js
+// js/component.js - Komponen Global (Sidebar, Header, dan Proteksi Sesi)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { CONFIG } from "./config.js";
+import { cekSesiLogin } from "./auth.js";
 
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
 const auth = getAuth(app);
 
 document.addEventListener("DOMContentLoaded", function() {
+    // Jalankan pemeriksaan sesi dari auth.js
+    cekSesiLogin();
+
     const path = window.location.pathname;
-    // Mendukung clean URL (tanpa .html) maupun dengan .html
     let currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index';
     if (currentFile.endsWith('.html')) {
         currentFile = currentFile.replace('.html', '');
     }
     if (currentFile === '') currentFile = 'index';
 
+    // Jika bukan halaman login, verifikasi status autentikasi Firebase
     if (currentFile !== 'login') {
         onAuthStateChanged(auth, (user) => {
             if (!user) {
-                window.location.href = 'login';
+                // Hapus sesi lokal lalu arahkan ke login jika token Firebase tidak valid
+                sessionStorage.removeItem("erapee_user_session");
+                window.location.href = 'login.html';
             } else {
                 muatSidebar();
                 muatHeader();
@@ -53,13 +59,14 @@ function muatSidebar() {
 
     let menuHtml = '';
     menuItems.forEach(item => {
-        const isActive = currentFile === item.href;
+        // Mendukung pencocokan nama file dengan atau tanpa ekstensi .html di URL
+        const isActive = currentFile === item.href || currentFile === item.href + '.html';
         const activeClass = isActive 
             ? 'bg-indigo-600 text-white font-medium shadow-sm' 
             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900';
 
         menuHtml += `
-            <a href="${item.href}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${activeClass}">
+            <a href="${item.href}.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${activeClass}">
                 <span class="text-base">${item.icon}</span>
                 <span>${item.name}</span>
             </a>
@@ -123,10 +130,12 @@ window.toggleSidebar = function() {
 
 window.prosesLogout = function() {
     if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
+        sessionStorage.removeItem("erapee_user_session");
         signOut(auth).then(() => {
-            window.location.href = 'login';
+            window.location.href = 'login.html';
         }).catch((error) => {
             console.error('Logout error:', error);
+            window.location.href = 'login.html';
         });
     }
 };
