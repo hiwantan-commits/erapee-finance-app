@@ -18,9 +18,15 @@
 
             <main class="p-4 md:p-8 max-w-5xl mx-auto w-full">
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
-                    <div class="mb-6 pb-4 border-b border-gray-100">
-                        <h2 class="text-lg font-bold text-gray-800">Formulir Input Jurnal Akuntansi</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Pencatatan terintegrasi dengan Firebase Firestore & Standar Coretax</p>
+                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">Formulir Input Jurnal Akuntansi</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Pencatatan terintegrasi dengan Firebase Firestore & Standar Coretax</p>
+                        </div>
+                        <!-- Indikator Status Balance -->
+                        <div id="statusBalance" class="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-lg">
+                            ⚠️ Belum Balance
+                        </div>
                     </div>
 
                     <form id="formJurnal" class="space-y-6">
@@ -43,7 +49,7 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 2: Klasifikasi Usaha & Unit (Dinamis dari Firestore) -->
+                        <!-- Bagian 2: Klasifikasi Usaha & Unit -->
                         <div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
@@ -69,17 +75,21 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 3: Lawan Transaksi & Akun Double-Entry -->
+                        <!-- Bagian 3: Lawan Transaksi, Akun & Link Bukti Transaksi -->
                         <div class="pt-4 border-t border-gray-100">
-                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">2. Akun & Nilai Jurnal (Double-Entry)</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">2. Akun, Nilai Jurnal & Bukti Lampiran</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Lawan Transaksi (Klien/Vendor)</label>
-                                    <input type="text" id="lawan_transaksi" placeholder="PT Mitra Sejahtera / Toko Tani" class="form-input-custom" required>
+                                    <input type="text" id="lawan_transaksi" placeholder="PT Mitra Sejahtera" class="form-input-custom" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">NPWP / NIK Lawan Transaksi</label>
-                                    <input type="text" id="npwp_nik" placeholder="00.000.000.0-000.000 atau NIK" class="form-input-custom">
+                                    <input type="text" id="npwp_nik" placeholder="00.000.000.0-000.000" class="form-input-custom">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">🔗 Link / URL Bukti Transaksi</label>
+                                    <input type="url" id="link_bukti" placeholder="https://drive.google.com/..." class="form-input-custom font-mono text-xs">
                                 </div>
                             </div>
 
@@ -101,11 +111,11 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Debit (Rp)</label>
-                                    <input type="number" id="debit" value="0" class="form-input-custom font-semibold text-green-700">
+                                    <input type="number" id="debit" value="0" class="form-input-custom font-semibold text-green-700" oninput="cekBalance()">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Kredit (Rp)</label>
-                                    <input type="number" id="kredit" value="0" class="form-input-custom font-semibold text-red-700">
+                                    <input type="number" id="kredit" value="0" class="form-input-custom font-semibold text-red-700" oninput="cekBalance()">
                                 </div>
                             </div>
                         </div>
@@ -133,11 +143,9 @@
                                         <option value="PPN-KEL-11">PPN-KEL-11 (Keluaran 11%)</option>
                                         <option value="PPN-KEL-12">PPN-KEL-12 (Keluaran 12%)</option>
                                         <option value="PPN-MAS-KREDIT">PPN-MAS-KREDIT (Masukan)</option>
-                                        <option value="PPN-MAS-NK">PPN-MAS-NK (Masukan Nonkredit)</option>
                                         <option value="PPH21">PPH21 (PPh Pasal 21)</option>
                                         <option value="PPH23-2">PPH23-2 (PPh Pasal 23 - 2%)</option>
                                         <option value="PPH4-2-SEWA10">PPH4-2-SEWA (Final 10%)</option>
-                                        <option value="PPH22">PPH22 (PPh Pasal 22)</option>
                                     </select>
                                 </div>
                             </div>
@@ -175,19 +183,32 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase & Load Dinamis Unit Usaha + COA -->
+    <!-- Skrip Firebase & Validasi Balance -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Muat Dropdown Unit Usaha dari Firestore (Master Unit Usaha)
+        window.cekBalance = function() {
+            const debit = parseFloat(document.getElementById('debit').value) || 0;
+            const kredit = parseFloat(document.getElementById('kredit').value) || 0;
+            const statusEl = document.getElementById('statusBalance');
+
+            if (debit === kredit && debit > 0) {
+                statusEl.className = "px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-lg";
+                statusEl.innerText = "✓ Balance (Seimbang)";
+            } else {
+                statusEl.className = "px-3 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-lg";
+                statusEl.innerText = "⚠️ Belum Balance";
+            }
+        };
+
         async function muatDropdownUnitUsaha() {
             const selectUnit = document.getElementById('unit_usaha');
             try {
                 const snap = await getDocs(collection(db, "master_unit_usaha"));
                 if (snap.empty) {
-                    selectUnit.innerHTML = '<option value="">(Unit Usaha kosong, harap muat di Master Data)</option>';
+                    selectUnit.innerHTML = '<option value="">(Unit Usaha kosong)</option>';
                     return;
                 }
                 let units = [];
@@ -203,11 +224,9 @@
                 });
             } catch (err) {
                 console.error("Gagal memuat unit usaha:", err);
-                selectUnit.innerHTML = '<option value="">Gagal memuat unit usaha</option>';
             }
         }
 
-        // Muat Dropdown COA dari Firestore
         async function muatDropdownCOA() {
             const selectCOA = document.getElementById('kode_akun');
             try {
@@ -229,7 +248,6 @@
                 });
             } catch (error) {
                 console.error("Gagal memuat COA:", error);
-                selectCOA.innerHTML = '<option value="">Gagal memuat akun</option>';
             }
         }
 
@@ -256,6 +274,7 @@
                     proyek: document.getElementById('proyek').value,
                     lawan_transaksi: document.getElementById('lawan_transaksi').value,
                     npwp_nik: document.getElementById('npwp_nik').value,
+                    link_bukti: document.getElementById('link_bukti').value, // Kolom Link Bukti Transaksi
                     kode_akun: document.getElementById('kode_akun').value,
                     nama_akun: namaAkunLengkap,
                     kategori_arus_kas: document.getElementById('kategori_arus_kas').value,
