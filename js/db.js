@@ -1,11 +1,11 @@
-// js/db.js - Pusat Operasi Database Terpadu
+// js/db.js - Pusat Pengaturan Database (Single Source of Truth)
 import { CONFIG, db } from "./config.js";
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const KOLEKSI_UTAMA = CONFIG.COLLECTION_NAME || "jurnal_transaksi";
 
 /**
- * Menyimpan atau memperbarui data jurnal transaksi (Double-Entry)
+ * Menyimpan atau Memperbarui Jurnal (Double-Entry)
  */
 export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = null) {
     try {
@@ -41,7 +41,7 @@ export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = nul
 }
 
 /**
- * Mengambil seluruh data jurnal dan mengelompokkannya berdasarkan ID Jurnal
+ * Mengambil Seluruh Data Jurnal untuk Semua Halaman
  */
 export async function ambilSemuaJurnalPusat() {
     try {
@@ -88,7 +88,7 @@ export async function ambilSemuaJurnalPusat() {
 }
 
 /**
- * Menghapus transaksi jurnal berdasarkan ID Jurnal
+ * Menghapus Jurnal Berdasarkan ID Jurnal
  */
 export async function hapusJurnalPusat(id_jurnal) {
     try {
