@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Jurnal | PT ERAPEE Anugrah Sejahtera</title>
+    <title>Input / Edit Jurnal | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -20,7 +20,7 @@
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
                     <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
-                            <h2 class="text-lg font-bold text-gray-800">Formulir Input Jurnal (Double-Entry)</h2>
+                            <h2 id="judulForm" class="text-lg font-bold text-gray-800">Formulir Input Jurnal (Double-Entry)</h2>
                             <p class="text-xs text-gray-500 mt-0.5">Sistem multi-baris dengan validasi keseimbangan otomatis</p>
                         </div>
                         <div id="statusBalance" class="px-4 py-1.5 bg-amber-50 text-amber-700 text-sm font-bold rounded-xl border border-amber-200 shadow-sm">
@@ -34,7 +34,7 @@
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">1. Referensi Transaksi</h3>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">ID Jurnal (Otomatis)</label>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">ID Jurnal</label>
                                     <input type="text" id="id_jurnal" class="form-input-custom font-mono text-xs bg-gray-100 text-gray-500 cursor-not-allowed" readonly>
                                 </div>
                                 <div>
@@ -70,7 +70,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Tanggal Jatuh Tempo</label>
-                                    <input type="date" id="jatuh_tempo" class="form-input-custom bg-gray-100 cursor-not-allowed" disabled title="Hanya aktif jika Non-Tunai">
+                                    <input type="date" id="jatuh_tempo" class="form-input-custom bg-gray-100 cursor-not-allowed" disabled>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">🔗 Link Bukti (G-Drive / PDF)</label>
@@ -100,34 +100,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="tbodyJurnal" class="divide-y divide-gray-100">
-                                        <!-- Baris Pertama -->
-                                        <tr class="jurnal-row hover:bg-gray-50">
-                                            <td class="p-2">
-                                                <select class="form-input-custom kode_akun text-xs font-medium" required>
-                                                    <option value="">Memuat akun...</option>
-                                                </select>
-                                            </td>
-                                            <td class="p-2">
-                                                <input type="text" class="form-input-custom memo_baris text-xs" placeholder="Memo...">
-                                            </td>
-                                            <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
-                                            <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
-                                            <td class="p-2 text-center"></td>
-                                        </tr>
-                                        <!-- Baris Kedua -->
-                                        <tr class="jurnal-row hover:bg-gray-50">
-                                            <td class="p-2">
-                                                <select class="form-input-custom kode_akun text-xs font-medium" required>
-                                                    <option value="">Memuat akun...</option>
-                                                </select>
-                                            </td>
-                                            <td class="p-2">
-                                                <input type="text" class="form-input-custom memo_baris text-xs" placeholder="Memo...">
-                                            </td>
-                                            <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
-                                            <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
-                                            <td class="p-2 text-center"></td>
-                                        </tr>
+                                        <!-- Baris dinamis akan dimuat di sini -->
                                     </tbody>
                                     <tfoot>
                                         <tr class="bg-gray-100 font-bold text-gray-800 text-sm border-t-2 border-gray-300">
@@ -174,14 +147,14 @@
                                         <option value="DRAFT">DRAFT</option>
                                     </select>
                                     <button type="submit" id="btnSubmit" class="w-2/3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-sm transition">
-                                        Simpan Jurnal (Multi-Row)
+                                        Simpan Perubahan Jurnal
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         <div id="alertSuccess" class="hidden p-4 bg-green-50 text-green-700 rounded-xl text-sm text-center font-bold border border-green-200">
-                            ✓ Transaksi Jurnal Berhasil Diposting ke Buku Besar!
+                            ✓ Transaksi Jurnal Berhasil Disimpan!
                         </div>
                     </form>
                 </div>
@@ -189,15 +162,16 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase & Logika -->
+    <!-- Skrip Firebase & Logika Edit / Input -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         let coaOptionsHTML = '<option value="">Pilih Akun...</option>';
+        const urlParams = new URLSearchParams(window.location.search);
+        const editIdJurnal = urlParams.get('edit'); // Cek apakah ada parameter ?edit=JRN-...
 
-        // Toggle Tanggal Jatuh Tempo
         window.toggleDueDate = function() {
             const sifat = document.getElementById('sifat_transaksi').value;
             const tglJatuhTempo = document.getElementById('jatuh_tempo');
@@ -242,18 +216,24 @@
             }
         };
 
-        window.tambahBaris = function() {
+        window.tambahBaris = function(akunVal = "", memoVal = "", debitVal = 0, kreditVal = 0, arusKasVal = "Nonkas") {
             const tbody = document.getElementById('tbodyJurnal');
             const tr = document.createElement('tr');
             tr.className = 'jurnal-row hover:bg-gray-50';
             tr.innerHTML = `
                 <td class="p-2"><select class="form-input-custom kode_akun text-xs font-medium" required>${coaOptionsHTML}</select></td>
-                <td class="p-2"><input type="text" class="form-input-custom memo_baris text-xs" placeholder="Memo..."></td>
-                <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
-                <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
+                <td class="p-2"><input type="text" class="form-input-custom memo_baris text-xs" value="${memoVal}" placeholder="Memo..."></td>
+                <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="${debitVal}" min="0" step="any" oninput="hitungTotal()" required></td>
+                <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="${kreditVal}" min="0" step="any" oninput="hitungTotal()" required></td>
                 <td class="p-2 text-center"><button type="button" onclick="hapusBaris(this)" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-200 transition">X</button></td>
             `;
             tbody.appendChild(tr);
+
+            // Set selected value for COA dropdown if editing
+            if (akunVal) {
+                tr.querySelector('.kode_akun').value = akunVal;
+            }
+            hitungTotal();
         };
 
         window.hapusBaris = function(btn) {
@@ -262,13 +242,12 @@
                 btn.closest('tr').remove();
                 hitungTotal();
             } else {
-                alert("Minimal harus ada 2 baris (Debit & Kredit)!");
+                alert("Minimal harus ada 2 baris!");
             }
         };
 
         async function inisialisasiData() {
-            generateIdJurnal();
-
+            // Muat Unit Usaha
             try {
                 const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
                 const selectUnit = document.getElementById('unit_usaha');
@@ -284,6 +263,7 @@
                 });
             } catch (err) {}
 
+            // Muat COA
             try {
                 const snapCOA = await getDocs(collection(db, "master_coa"));
                 let coaList = [];
@@ -294,13 +274,60 @@
                 coaList.forEach(coa => {
                     coaOptionsHTML += `<option value="${coa.kode}">${coa.kode} - ${coa.nama}</option>`;
                 });
-
-                document.querySelectorAll('.kode_akun').forEach(select => select.innerHTML = coaOptionsHTML);
             } catch (err) {}
+
+            // Jika Mode Edit (Ada parameter ?edit=...)
+            if (editIdJurnal) {
+                document.getElementById('judulForm').innerText = `Edit Jurnal Akuntansi (${editIdJurnal})`;
+                document.getElementById('btnSubmit').innerText = "Simpan Perubahan";
+                
+                try {
+                    const q = query(collection(db, CONFIG.COLLECTION_NAME), where("id_jurnal", "==", editIdJurnal));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        const tbody = document.getElementById('tbodyJurnal');
+                        tbody.innerHTML = ""; // Bersihkan baris default
+
+                        let isFirst = true;
+                        querySnapshot.forEach(docSnap => {
+                            const d = docSnap.data();
+                            if (isFirst) {
+                                document.getElementById('id_jurnal').value = d.id_jurnal;
+                                document.getElementById('tanggal').value = d.tanggal || '';
+                                document.getElementById('no_bukti').value = d.no_bukti || '';
+                                document.getElementById('sifat_transaksi').value = d.sifat_transaksi || 'Tunai';
+                                document.getElementById('unit_usaha').value = d.unit_usaha || '';
+                                document.getElementById('lawan_transaksi').value = d.lawan_transaksi || '';
+                                document.getElementById('jatuh_tempo').value = d.jatuh_tempo || '';
+                                document.getElementById('link_bukti').value = d.link_bukti || '';
+                                document.getElementById('kode_pajak').value = d.kode_pajak || 'NON';
+                                document.getElementById('dpp_penjualan').value = d.dpp_penjualan || 0;
+                                document.getElementById('keterangan').value = d.keterangan || '';
+                                document.getElementById('status_jurnal').value = d.status || 'POSTED';
+                                toggleDueDate();
+                                isFirst = false;
+                            }
+                            // Tambahkan baris akun dari data lama
+                            tambahBaris(d.kode_akun, d.memo_baris, d.debit, d.kredit);
+                        });
+                    } else {
+                        alert("Data jurnal tidak ditemukan untuk diedit.");
+                        window.location.href = 'manajemen';
+                    }
+                } catch (err) {
+                    console.error("Gagal memuat data edit:", err);
+                }
+            } else {
+                generateIdJurnal();
+                tambahBaris();
+                tambahBaris();
+            }
         }
 
         inisialisasiData();
 
+        // Submit (Simpan / Perbarui)
         const formJurnal = document.getElementById('formJurnal');
         formJurnal.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -322,9 +349,20 @@
             btn.disabled = true;
 
             try {
+                const targetIdJurnal = document.getElementById('id_jurnal').value;
+
+                // Jika mode edit, hapus dulu data lama di Firestore berdasarkan id_jurnal, lalu buat baru
+                if (editIdJurnal) {
+                    const qOld = query(collection(db, CONFIG.COLLECTION_NAME), where("id_jurnal", "==", editIdJurnal));
+                    const oldSnap = await getDocs(qOld);
+                    const deletePromises = [];
+                    oldSnap.forEach(dSnap => deletePromises.push(deleteDoc(doc(db, CONFIG.COLLECTION_NAME, dSnap.id))));
+                    await Promise.all(deletePromises);
+                }
+
                 const batchPromises = [];
                 const commonData = {
-                    id_jurnal: document.getElementById('id_jurnal').value,
+                    id_jurnal: targetIdJurnal,
                     tanggal: document.getElementById('tanggal').value,
                     no_bukti: document.getElementById('no_bukti').value,
                     sifat_transaksi: document.getElementById('sifat_transaksi').value,
@@ -360,22 +398,14 @@
                 await Promise.all(batchPromises);
 
                 document.getElementById('alertSuccess').classList.remove('hidden');
-                formJurnal.reset();
-                generateIdJurnal(); 
-                hitungTotal();      
-                toggleDueDate();    
+                setTimeout(() => {
+                    window.location.href = 'manajemen'; // Kembalikan ke halaman manajemen setelah sukses
+                }, 1500);
 
-                const tbody = document.getElementById('tbodyJurnal');
-                while(tbody.children.length > 2) {
-                    tbody.removeChild(tbody.lastChild);
-                }
-
-                setTimeout(() => document.getElementById('alertSuccess').classList.add('hidden'), 5000);
             } catch (error) {
                 console.error("Gagal menyimpan:", error);
                 alert("Kesalahan saat menyimpan data ke database.");
-            } finally {
-                btn.innerText = "Simpan Jurnal (Multi-Row)";
+                btn.innerText = "Simpan Perubahan Jurnal";
                 btn.disabled = false;
             }
         });
