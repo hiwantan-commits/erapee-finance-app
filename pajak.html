@@ -22,9 +22,9 @@
                     <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
                             <h2 class="text-lg font-bold text-gray-800">Rekapitulasi PPN (Masa Pajak 2026)</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Penghitungan PPN Keluaran & Masukan Standar Coretax</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Penghitungan PPN Keluaran & Masukan Standar Coretax (Otomatis dari Database)</p>
                         </div>
-                        <span class="text-xs px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-full">Tarif Efektif PPN 11%</span>
+                        <span class="text-xs px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-full">Tarif Efektif PPN 11% / 12%</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
@@ -38,22 +38,9 @@
                                     <th class="p-4 text-center">Kurang / (Lebih) Bayar</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
+                            <tbody id="tabelRekapPPN" class="divide-y divide-gray-100 text-xs">
                                 <tr>
-                                    <td class="p-4">Januari 2026</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-center font-semibold text-gray-600">Rp 0</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4">Februari 2026</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-center font-semibold text-gray-600">Rp 0</td>
+                                    <td colspan="6" class="p-6 text-center text-gray-400">Memuat data rekapitulasi PPN dari Firebase...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -64,7 +51,7 @@
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
                     <div class="mb-6 pb-4 border-b border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800">Rekapitulasi PPh Potong / Pungut Pihak Lain</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">PPh Pasal 21, PPh Pasal 23 (2% & 15%), PPh Pasal 4(2) Final</p>
+                        <p class="text-xs text-gray-500 mt-0.5">PPh Pasal 21, PPh Pasal 23 (2%), PPh Pasal 4(2) Final</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
@@ -77,20 +64,9 @@
                                     <th class="p-4 text-right">Total Dipotong PT</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
+                            <tbody id="tabelRekapPPh" class="divide-y divide-gray-100 text-xs">
                                 <tr>
-                                    <td class="p-4">Januari 2026</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right font-semibold text-gray-800">Rp 0</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4">Februari 2026</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right">0</td>
-                                    <td class="p-4 text-right font-semibold text-gray-800">Rp 0</td>
+                                    <td colspan="5" class="p-6 text-center text-gray-400">Memuat data rekapitulasi PPh dari Firebase...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -99,6 +75,113 @@
             </main>
         </div>
     </div>
+
+    <!-- Skrip Firebase untuk Mengisi Tabel Secara Dinamis -->
+    <script type="module">
+        import { CONFIG, db } from "./js/config.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const namaBulan = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni", 
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
+        async function muatDataPajakBulanan() {
+            try {
+                const querySnapshot = await getDocs(collection(db, CONFIG.COLLECTION_NAME));
+                
+                // Inisialisasi penampung data per bulan (index 0 = Januari, dst.)
+                let rekapPPN = Array.from({length: 12}, () => ({ dppJual: 0, ppnKeluaran: 0, dppBeli: 0, ppnMasukan: 0 }));
+                let rekapPPh = Array.from({length: 12}, () => ({ pph21: 0, pph23: 0, pph42: 0 }));
+
+                querySnapshot.forEach((docSnap) => {
+                    const d = docSnap.data();
+                    const tanggal = d.tanggal || "";
+                    if (!tanggal.startsWith("2026")) return; // Fokus tahun 2026
+
+                    const bulanIndex = parseInt(tanggal.split("-")[1], 10) - 1;
+                    if (bulanIndex < 0 || bulanIndex > 11) return;
+
+                    const kodePajak = d.kode_pajak || "NON";
+                    const dpp = parseFloat(d.dpp_penjualan) || 0;
+                    const debit = parseFloat(d.debit) || 0;
+                    const kredit = parseFloat(d.kredit) || 0;
+                    const nilaiTrx = debit > 0 ? debit : kredit;
+
+                    // Akumulasi PPN
+                    if (kodePajak.includes("PPN-KEL")) {
+                        rekapPPN[bulanIndex].dppJual += dpp;
+                        rekapPPN[bulanIndex].ppnKeluaran += (dpp * 0.11); // Tarif efektif PPN
+                    } else if (kodePajak.includes("PPN-MAS")) {
+                        rekapPPN[bulanIndex].dppBeli += dpp;
+                        rekapPPN[bulanIndex].ppnMasukan += (dpp * 0.11);
+                    }
+
+                    // Akumulasi PPh
+                    if (kodePajak.includes("PPH21")) {
+                        rekapPPh[bulanIndex].pph21 += nilaiTrx;
+                    } else if (kodePajak.includes("PPH23")) {
+                        rekapPPh[bulanIndex].pph23 += nilaiTrx;
+                    } else if (kodePajak.includes("PPH4-2")) {
+                        rekapPPh[bulanIndex].pph42 += nilaiTrx;
+                    }
+                });
+
+                // Render Tabel PPN
+                const tbodyPPN = document.getElementById('tabelRekapPPN');
+                tbodyPPN.innerHTML = "";
+                namaBulan.forEach((bulan, idx) => {
+                    const row = rekapPPN[idx];
+                    const netBayar = row.ppnKeluaran - row.ppnMasukan;
+                    let statusWarna = "text-gray-600";
+                    let statusTeks = `Rp ${Math.round(netBayar).toLocaleString('id-ID')}`;
+
+                    if (netBayar > 0) {
+                        statusWarna = "text-red-600 font-bold";
+                        statusTeks = `Kurang Bayar Rp ${Math.round(netBayar).toLocaleString('id-ID')}`;
+                    } else if (netBayar < 0) {
+                        statusWarna = "text-green-600 font-bold";
+                        statusTeks = `Lebih Bayar Rp ${Math.abs(Math.round(netBayar)).toLocaleString('id-ID')}`;
+                    }
+
+                    tbodyPPN.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-4 font-medium">${bulan} 2026</td>
+                            <td class="p-4 text-right">${row.dppJual.toLocaleString('id-ID')}</td>
+                            <td class="p-4 text-right font-semibold text-indigo-600">${Math.round(row.ppnKeluaran).toLocaleString('id-ID')}</td>
+                            <td class="p-4 text-right">${row.dppBeli.toLocaleString('id-ID')}</td>
+                            <td class="p-4 text-right font-semibold text-green-600">${Math.round(row.ppnMasukan).toLocaleString('id-ID')}</td>
+                            <td class="p-4 text-center ${statusWarna}">${statusTeks}</td>
+                        </tr>
+                    `;
+                });
+
+                // Render Tabel PPh
+                const tbodyPPh = document.getElementById('tabelRekapPPh');
+                tbodyPPh.innerHTML = "";
+                namaBulan.forEach((bulan, idx) => {
+                    const row = rekapPPh[idx];
+                    const totalPPh = row.pph21 + row.pph23 + row.pph42;
+
+                    tbodyPPh.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-4 font-medium">${bulan} 2026</td>
+                            <td class="p-4 text-right">${row.pph21.toLocaleString('id-ID')}</td>
+                            <td class="p-4 text-right">${row.pph23.toLocaleString('id-ID')}</td>
+                            <td class="p-4 text-right">${row.pph42.toLocaleString('id-ID')}</td>
+                            <td class="p-4 text-right font-bold text-gray-900">Rp ${totalPPh.toLocaleString('id-ID')}</td>
+                        </tr>
+                    `;
+                });
+
+            } catch (err) {
+                console.error("Gagal memuat rekap pajak bulanan:", err);
+            }
+        }
+
+        muatDataPajakBulanan();
+    </script>
     <script type="module" src="js/component.js"></script>
 </body>
 </html>
