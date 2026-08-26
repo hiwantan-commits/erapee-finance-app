@@ -75,9 +75,11 @@
 
     <!-- Skrip Firebase & Logika Manajemen -->
     <script type="module">
-        import { CONFIG, db } from "./js/config.js";
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { db } from "./js/config.js";
         import { collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Gunakan nama koleksi secara langsung agar konsisten
+        const NAMA_KOLEKSI = "jurnal_transaksi";
 
         window.dataJurnalGlobal = {};
         let listJurnalCache = [];
@@ -97,8 +99,8 @@
                 });
                 selectFilter.innerHTML = unitOptions;
 
-                // Mengambil data dari koleksi yang sama dengan input-jurnal (CONFIG.COLLECTION_NAME)
-                const querySnapshot = await getDocs(collection(db, CONFIG.COLLECTION_NAME));
+                // Mengambil data langsung dari koleksi "jurnal_transaksi"
+                const querySnapshot = await getDocs(collection(db, NAMA_KOLEKSI));
                 if (querySnapshot.empty) {
                     tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat. Silakan buat melalui menu <b>Input Jurnal</b>.</td></tr>`;
                     return;
@@ -138,7 +140,7 @@
                 renderTabel(listJurnalCache);
             } catch (err) {
                 console.error("Gagal memuat manajemen jurnal:", err);
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal memuat data dari database. Periksa konsistensi koleksi Firestore Anda.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal memuat data dari database. Periksa koneksi atau konsistensi koleksi Firestore.</td></tr>`;
             }
         }
 
@@ -242,7 +244,7 @@
                 try {
                     const grup = window.dataJurnalGlobal[id_jurnal];
                     if (!grup) return;
-                    const hapusPromises = grup.docIds.map(docId => deleteDoc(doc(db, CONFIG.COLLECTION_NAME, docId)));
+                    const hapusPromises = grup.docIds.map(docId => deleteDoc(doc(db, NAMA_KOLEKSI, docId)));
                     await Promise.all(hapusPromises);
                     alert("Transaksi jurnal berhasil dihapus sepenuhnya!");
                     muatManajemenJurnal();
