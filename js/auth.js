@@ -4,7 +4,8 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 
 export async function cekSesiLogin() {
     const pathAktif = window.location.pathname;
-    if (pathAktif.includes("login.html")) {
+    // Mendukung pengecekan pada jalur bersih maupun dengan .html
+    if (pathAktif.includes("login")) {
         return;
     }
 
@@ -47,7 +48,7 @@ function terapkanBatasanAksesRole(role) {
 
     if (role === "Auditor" && isRestrictedForAuditor) {
         alert("⚠️ Akses Dibatasi: Peran Anda sebagai Auditor bersifat Read-Only dan tidak diizinkan mengakses halaman input atau pengaturan.");
-        window.location.href = "index.html";
+        window.location.href = "/index";
     }
 }
 
@@ -65,7 +66,8 @@ export function ambilUserAktif() {
 
 export function logoutSistem() {
     sessionStorage.removeItem("erapee_user_session");
-    window.location.href = "login.html";
+    window.location.href = "/login";
 }
 
+// Jalankan pemeriksaan sesi secara otomatis saat modul dimuat di halaman internal
 cekSesiLogin();
