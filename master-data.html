@@ -35,7 +35,6 @@
                         <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
                             <h3 class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">1. Form Unit Usaha (Divisi)</h3>
                             <form id="formUnitUsaha" class="space-y-4">
-                                <!-- Input tersembunyi untuk menyimpan ID saat mode edit -->
                                 <input type="hidden" id="editIdUnit" value="">
                                 
                                 <div>
@@ -68,10 +67,10 @@
                                 <table class="w-full text-left border-collapse">
                                     <thead>
                                         <tr class="bg-gray-50 text-gray-400 text-[10px] uppercase border-b border-gray-200">
-                                            <th class="p-3 w-1/4">Kode</th>
+                                            <th class="p-3 w-24">Kode</th>
                                             <th class="p-3">Nama Unit</th>
                                             <th class="p-3">Klasifikasi</th>
-                                            <th class="p-3 text-center">Aksi</th>
+                                            <th class="p-3 w-32 text-center">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tabelUnitUsaha" class="divide-y divide-gray-100">
@@ -90,13 +89,12 @@
                         <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
                             <h3 class="text-sm font-bold text-blue-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">2. Form Kode Akun (COA)</h3>
                             <form id="formCOA" class="space-y-4">
-                                <!-- Input tersembunyi untuk menyimpan ID saat mode edit -->
                                 <input type="hidden" id="editIdCOA" value="">
 
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="col-span-1">
                                         <label class="block text-xs font-medium mb-1 text-gray-700">Kode Akun (Cth: 1101)</label>
-                                        <input type="number" id="kodeCOA" placeholder="1000" class="form-input-custom text-sm font-mono" required>
+                                        <input type="text" id="kodeCOA" placeholder="1000" class="form-input-custom text-sm font-mono" required>
                                     </div>
                                     <div class="col-span-2">
                                         <label class="block text-xs font-medium mb-1 text-gray-700">Nama Akun Lengkap</label>
@@ -124,9 +122,9 @@
                                 <table class="w-full text-left border-collapse">
                                     <thead class="sticky top-0 bg-white shadow-sm">
                                         <tr class="bg-gray-50 text-gray-400 text-[10px] uppercase border-b border-gray-200">
-                                            <th class="p-3 w-1/4">Kode Akun</th>
+                                            <th class="p-3 w-24">Kode Akun</th>
                                             <th class="p-3">Nama Akun (COA)</th>
-                                            <th class="p-3 text-center">Aksi</th>
+                                            <th class="p-3 w-32 text-center">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tabelCOA" class="divide-y divide-gray-100">
