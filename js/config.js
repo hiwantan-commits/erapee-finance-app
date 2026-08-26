@@ -1,10 +1,12 @@
-// js/config.js - Konfigurasi Utama Firebase PT ERAPEE Anugrah Sejahtera
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"; // Diperlukan untuk inisialisasi
+// js/config.js
+// Pusat Konfigurasi Firebase Firestore & Aplikasi PT ERAPEE
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 export const CONFIG = {
-    firebaseConfig: {
+    // Konfigurasi Firebase PT Erapee Finance
+    FIREBASE_CONFIG: {
         apiKey: "AIzaSyBAspi9107FKi1zu-2T_K0thXw7RMS40Ps",
         authDomain: "pt-erapee-finance.firebaseapp.com",
         projectId: "pt-erapee-finance",
@@ -13,12 +15,11 @@ export const CONFIG = {
         appId: "1:839880121530:web:4e271ca82d8a7936a43683",
         measurementId: "G-JYMREYJ1JF"
     },
+    
+    // Nama koleksi database di Firestore untuk mencatat jurnal akuntansi
     COLLECTION_NAME: "jurnal_transaksi"
 };
 
-// Inisialisasi Firebase SDK
-import { initializeApp as initApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-
-const app = initApp(CONFIG.firebaseConfig);
+// Inisialisasi Firebase & Firestore agar bisa diakses global di seluruh halaman
+const app = initializeApp(CONFIG.FIREBASE_CONFIG);
 export const db = getFirestore(app);
-export const storage = getStorage(app);
