@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js untuk Grafik Interaktif -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="text-gray-800 bg-gray-50">
@@ -18,253 +16,164 @@
         <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
             <div id="header-container"></div>
 
-            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Selamat Datang Banner -->
-                <div class="dashboard-card p-6 md:p-8 mb-6 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-2xl shadow-sm">
-                    <h2 class="text-2xl font-bold mb-2">Dashboard Eksekutif PT ERAPEE Anugrah Sejahtera</h2>
-                    <p class="text-indigo-100 text-sm max-w-2xl mb-6">Sistem Informasi Keuangan, Akuntansi Terpadu, dan Kepatuhan Pajak Standar Coretax (Tahun Buku 2026).</p>
-                    <div class="flex flex-wrap gap-3">
-                        <a href="input-jurnal.html" class="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
-                            + Input Jurnal Baru
-                        </a>
-                        <a href="manajemen.html" class="bg-indigo-700 hover:bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition border border-indigo-500">
-                            📊 Lihat Manajemen Jurnal
-                        </a>
+            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full space-y-6">
+                <!-- Header Dashboard -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Ikhtisar Keuangan</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Ringkasan data real-time dari pusat database perusahaan</p>
+                    </div>
+                    <div class="px-4 py-2 bg-indigo-50 text-indigo-700 font-bold rounded-xl text-sm border border-indigo-100 shadow-sm">
+                        Periode: <span id="labelPeriode">Memuat...</span>
                     </div>
                 </div>
 
-                <!-- Statistik Ringkas (Total Keseluruhan) -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Pendapatan (YTD)</p>
-                        <h3 class="text-xl font-bold text-gray-800 mt-2">Rp 0</h3>
-                        <p class="text-xs text-indigo-600 mt-1 font-medium">Konsolidasi Segmen</p>
+                <!-- Kartu Metrik Utama -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Metrik 1 -->
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border-l-4 border-blue-500">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Transaksi</p>
+                        <h3 class="text-2xl font-black text-gray-800" id="dashTotalTrx">0</h3>
+                        <p class="text-[11px] text-gray-400 mt-2">Seluruh jurnal tercatat</p>
                     </div>
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Keuntungan (Laba Bersih)</p>
-                        <h3 class="text-xl font-bold text-green-600 mt-2">Rp 0</h3>
-                        <p class="text-xs text-gray-500 mt-1 font-medium">Setelah Pajak</p>
+                    
+                    <!-- Metrik 2 -->
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border-l-4 border-green-500">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Volume Perputaran (Rp)</p>
+                        <h3 class="text-2xl font-black text-gray-800" id="dashVolumeTrx">0</h3>
+                        <p class="text-[11px] text-gray-400 mt-2">Total perputaran uang (Debit/Kredit)</p>
                     </div>
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Utang (Liabilitas)</p>
-                        <h3 class="text-xl font-bold text-red-600 mt-2">Rp 0</h3>
-                        <p class="text-xs text-gray-500 mt-1 font-medium">Usaha & Akrual</p>
+
+                    <!-- Metrik 3 -->
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border-l-4 border-indigo-500">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Pendapatan Terinput</p>
+                        <h3 class="text-2xl font-black text-green-600" id="dashPendapatan">0</h3>
+                        <p class="text-[11px] text-gray-400 mt-2">Akun Kepala 4 (Kredit - Debit)</p>
                     </div>
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Akumulasi Pajak</p>
-                        <h3 class="text-xl font-bold text-amber-600 mt-2">Rp 0</h3>
-                        <p class="text-xs text-gray-500 mt-1 font-medium">PPN & PPh Terutang</p>
+
+                    <!-- Metrik 4 -->
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border-l-4 border-rose-500">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Beban/Biaya Terinput</p>
+                        <h3 class="text-2xl font-black text-rose-600" id="dashBeban">0</h3>
+                        <p class="text-[11px] text-gray-400 mt-2">Akun Kepala 6 (Debit - Kredit)</p>
                     </div>
                 </div>
 
-                <!-- Detail Keuangan Berdasarkan Master Data Unit Usaha -->
-                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 mb-8">
-                    <div class="mb-4 pb-3 border-b border-gray-100 flex justify-between items-center">
-                        <div>
-                            <h3 class="font-bold text-gray-800 text-base">Detail Keuangan Per Unit Usaha (Sesuai Master Data)</h3>
-                            <p class="text-xs text-gray-500 mt-0.5">Klasifikasi divisi digital, pertanian, korporat, dan biaya bersama</p>
-                        </div>
-                        <span class="text-xs px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">Master Data 03</span>
+                <!-- Tabel 5 Transaksi Terakhir -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">5 Transaksi Jurnal Terakhir</h3>
+                        <a href="manajemen.html" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">Lihat Semua &rarr;</a>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-3">Kode & Unit Usaha</th>
-                                    <th class="p-3">Klasifikasi / KBLI</th>
-                                    <th class="p-3 text-right">Pendapatan (Rp)</th>
-                                    <th class="p-3 text-right">Beban (Rp)</th>
-                                    <th class="p-3 text-right">Keuntungan / Laba (Rp)</th>
-                                    <th class="p-3 text-right">Utang & Pajak (Rp)</th>
+                                    <th class="p-3">ID Jurnal & Tanggal</th>
+                                    <th class="p-3">Keterangan</th>
+                                    <th class="p-3 text-right">Nilai (Rp)</th>
+                                    <th class="p-3 text-center">Status</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100 text-xs">
+                            <tbody id="tabelJurnalTerbaru" class="divide-y divide-gray-100 text-xs">
                                 <tr>
-                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded mr-1 font-mono">CORP</span> Corporate / Head Office</td>
-                                    <td class="p-3 text-gray-500">Kantor Pusat & Administrasi</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
-                                    <td class="p-3 text-right text-red-600">0</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded mr-1 font-mono">MARC</span> Marcframe</td>
-                                    <td class="p-3 text-gray-500">Digital Services (KBLI 62199)</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
-                                    <td class="p-3 text-right text-red-600">0</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded mr-1 font-mono">SIP</span> SiPacul</td>
-                                    <td class="p-3 text-gray-500">Software Publishing (KBLI 58290)</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
-                                    <td class="p-3 text-right text-red-600">0</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-green-100 text-green-700 rounded mr-1 font-mono">WT-NANAS</span> Wani Tani - Nanas</td>
-                                    <td class="p-3 text-gray-500">Pertanian (KBLI 01220)</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
-                                    <td class="p-3 text-right text-red-600">0</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-green-100 text-green-700 rounded mr-1 font-mono">WT-TEBU</span> Wani Tani - Tebu</td>
-                                    <td class="p-3 text-gray-500">Pertanian (KBLI 01140)</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
-                                    <td class="p-3 text-right text-red-600">0</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-green-100 text-green-700 rounded mr-1 font-mono">WT-CABAI</span> Wani Tani - Cabai</td>
-                                    <td class="p-3 text-gray-500">Pertanian (KBLI 01138)</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right text-green-600 font-semibold">0</td>
-                                    <td class="p-3 text-right text-red-600">0</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-gray-200 text-gray-700 rounded mr-1 font-mono">SHARED</span> Biaya Bersama</td>
-                                    <td class="p-3 text-gray-500">Alokasi Bersama (Shared Cost)</td>
-                                    <td class="p-3 text-right">-</td>
-                                    <td class="p-3 text-right">0</td>
-                                    <td class="p-3 text-right">-</td>
-                                    <td class="p-3 text-right">0</td>
-                                </tr>
-                                <tr class="bg-indigo-50 font-bold text-indigo-900 border-t-2 border-indigo-200 text-sm">
-                                    <td colspan="2" class="p-3">TOTAL KESELURUHAN (KONSOLIDASI)</td>
-                                    <td class="p-3 text-right">Rp 0</td>
-                                    <td class="p-3 text-right">Rp 0</td>
-                                    <td class="p-3 text-right text-green-700">Rp 0</td>
-                                    <td class="p-3 text-right text-red-700">Rp 0</td>
+                                    <td colspan="4" class="p-8 text-center text-gray-400">Memuat data sinkronisasi...</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Bagian Grafik & Tren Bulanan -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                    <!-- Grafik Tren Keuangan (2 Kolom) -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
-                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
-                            <h3 class="font-bold text-gray-800 text-sm">Grafik Kinerja Pendapatan & Keuntungan Bulanan</h3>
-                            <span class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">2026</span>
-                        </div>
-                        <div class="relative h-64 w-full">
-                            <canvas id="grafikKinerja"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Status Pemeriksaan Legal (1 Kolom) -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
-                            <h3 class="font-bold text-gray-800 text-sm">Status Pemeriksaan & Legal</h3>
-                            <span class="text-xs px-2.5 py-1 bg-amber-50 text-amber-700 font-semibold rounded-lg">Checks</span>
-                        </div>
-                        <div class="space-y-3 text-xs">
-                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
-                                <span class="font-medium text-gray-700">Akta Pendirian</span>
-                                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 font-semibold rounded">WARNING</span>
-                            </div>
-                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
-                                <span class="font-medium text-gray-700">NPWP Perseroan</span>
-                                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 font-semibold rounded">WARNING</span>
-                            </div>
-                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
-                                <span class="font-medium text-gray-700">Status PKP</span>
-                                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 font-semibold rounded">WARNING</span>
-                            </div>
-                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
-                                <span class="font-medium text-gray-700">Keseimbangan Jurnal</span>
-                                <span class="px-2 py-0.5 bg-green-100 text-green-700 font-semibold rounded">PASS</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tabel Tren Bulanan -->
-                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                    <div class="mb-4 pb-3 border-b border-gray-100 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-800 text-base">Tabel Tren Kinerja Bulanan (Januari s.d. Desember 2026)</h3>
-                        <span class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">Sheet 15</span>
-                    </div>
-                    <div class="overflow-x-auto" style="max-height: 300px; overflow-y: auto;">
-                        <table class="w-full text-left text-sm border-collapse">
-                            <thead class="sticky top-0 bg-white">
-                                <tr class="text-gray-400 text-xs uppercase border-b">
-                                    <th class="py-3 px-4">Bulan</th>
-                                    <th class="py-3 px-4 text-right">Pendapatan (Rp)</th>
-                                    <th class="py-3 px-4 text-right">Laba Bersih / Keuntungan (Rp)</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 text-xs">
-                                <tr><td class="py-3 px-4 font-medium">Januari</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                                <tr><td class="py-3 px-4 font-medium">Februari</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                                <tr><td class="py-3 px-4 font-medium">Maret</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                                <tr><td class="py-3 px-4 font-medium">April</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                                <tr><td class="py-3 px-4 font-medium">Mei</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                                <tr><td class="py-3 px-4 font-medium">Juni</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                                <tr><td class="py-3 px-4 font-medium">Juli</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                                <tr><td class="py-3 px-4 font-medium">Agustus</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                                <tr><td class="py-3 px-4 font-medium">September</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                                <tr><td class="py-3 px-4 font-medium">Oktober</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                                <tr><td class="py-3 px-4 font-medium">November</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                                <tr><td class="py-3 px-4 font-medium">Desember</td><td class="py-3 px-4 text-right">0</td><td class="py-3 px-4 text-right text-green-600 font-semibold">0</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </main>
         </div>
     </div>
 
-    <!-- Skrip Grafik Chart.js -->
-    <script>
-        const ctx = document.getElementById('grafikKinerja').getContext('2d');
-        const grafikKinerja = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-                datasets: [
-                    {
-                        label: 'Pendapatan (Rp)',
-                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Keuntungan / Laba (Rp)',
-                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(34, 197, 94, 0.8)',
-                        borderRadius: 6
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { boxWidth: 12, font: { size: 11 } }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#f3f4f6' }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
+    <!-- Skrip Dashboard Terpusat -->
+    <script type="module">
+        import { ambilSemuaJurnalPusat } from "./js/db.js";
+
+        // Tampilkan Bulan dan Tahun Saat Ini
+        const now = new Date();
+        const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        document.getElementById('labelPeriode').innerText = `${namaBulan[now.getMonth()]} ${now.getFullYear()}`;
+
+        async function muatDashboard() {
+            try {
+                // 1. Panggil data dari satu fungsi pusat!
+                const semuaJurnal = await ambilSemuaJurnalPusat();
+                
+                // Variabel perhitungan metrik
+                let volumeTrx = 0;
+                let pendapatan = 0;
+                let beban = 0;
+
+                semuaJurnal.forEach(jurnal => {
+                    // Tambah Volume
+                    volumeTrx += jurnal.total_debit;
+
+                    // Hitung Pendapatan & Beban dari rincian akun
+                    jurnal.rows.forEach(baris => {
+                        const kode = baris.kode_akun || "";
+                        
+                        // Akun Pendapatan (Kepala 4) -> Saldo normal Kredit
+                        if (kode.startsWith("4")) {
+                            pendapatan += (baris.kredit - baris.debit);
+                        }
+                        // Akun Beban (Kepala 6) -> Saldo normal Debit
+                        if (kode.startsWith("6")) {
+                            beban += (baris.debit - baris.kredit);
+                        }
+                    });
+                });
+
+                // Update UI Metrik
+                document.getElementById('dashTotalTrx').innerText = semuaJurnal.length.toLocaleString('id-ID');
+                document.getElementById('dashVolumeTrx').innerText = volumeTrx.toLocaleString('id-ID');
+                document.getElementById('dashPendapatan').innerText = pendapatan.toLocaleString('id-ID');
+                document.getElementById('dashBeban').innerText = beban.toLocaleString('id-ID');
+
+                // Render 5 Transaksi Terakhir
+                const tbody = document.getElementById('tabelJurnalTerbaru');
+                tbody.innerHTML = '';
+                
+                if (semuaJurnal.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Belum ada transaksi di database.</td></tr>`;
+                    return;
                 }
+
+                // Ambil 5 teratas (karena data dari fungsi ambilSemuaJurnalPusat sudah di-sortir dari terbaru)
+                const limaTerbaru = semuaJurnal.slice(0, 5);
+                
+                limaTerbaru.forEach(jurnal => {
+                    let tr = document.createElement('tr');
+                    let badgeStatus = jurnal.status === 'POSTED' 
+                        ? '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded font-semibold">POSTED</span>' 
+                        : '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold">DRAFT</span>';
+                    
+                    tr.innerHTML = `
+                        <td class="p-3">
+                            <div class="font-bold text-indigo-700">${jurnal.id_jurnal}</div>
+                            <div class="text-[11px] text-gray-500 mt-0.5">${jurnal.tanggal}</div>
+                        </td>
+                        <td class="p-3">
+                            <div class="font-medium text-gray-800 truncate max-w-sm">${jurnal.keterangan || '-'}</div>
+                            <div class="text-[11px] text-gray-500 mt-0.5">${jurnal.lawan_transaksi || ''}</div>
+                        </td>
+                        <td class="p-3 text-right font-bold text-gray-800">
+                            ${jurnal.total_debit.toLocaleString('id-ID')}
+                        </td>
+                        <td class="p-3 text-center">${badgeStatus}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error("Gagal memuat dashboard:", error);
             }
-        });
+        }
+
+        // Eksekusi pemuatan data
+        muatDashboard();
     </script>
     <script type="module" src="js/component.js"></script>
 </body>
