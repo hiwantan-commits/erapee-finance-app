@@ -1,19 +1,19 @@
-// js/management-page.js - Controller untuk manajemen.html
+// js/management-page.js - Controller untuk manajemen.html dengan Pagination
 import { db } from "./config.js";
 import { ambilSemuaJurnalPusat, hapusJurnalPusat } from "./db.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// State Global untuk pencarian dan ekspor
 window.dataJurnalGlobal = {};
 let listJurnalCache = [];
+let halamanAktif = 1;
+const dataPerHalaman = 10;
 
 async function muatManajemenJurnal() {
     const tbody = document.getElementById('tabelManajemenJurnal');
     if (!tbody) return;
-    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Memuat data dari pusat...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Memuat data teroptimasi dari pusat...</td></tr>`;
 
     try {
-        // Ambil Master Unit Usaha untuk Filter
         const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
         const selectFilter = document.getElementById('filterUnit');
         if (selectFilter) {
@@ -25,11 +25,10 @@ async function muatManajemenJurnal() {
             selectFilter.innerHTML = unitOptions;
         }
 
-        // Ambil Data Jurnal Terpusat
         const listJurnal = await ambilSemuaJurnalPusat();
         
         if (listJurnal.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat. Silakan buat melalui menu <b>Input Jurnal</b>.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat.</td></tr>`;
             return;
         }
 
@@ -39,24 +38,35 @@ async function muatManajemenJurnal() {
         });
         listJurnalCache = listJurnal;
 
-        renderTabel(listJurnalCache);
+        halamanAktif = 1;
+        renderTabelDenganPagination(listJurnalCache);
     } catch (err) {
         console.error("Gagal memuat manajemen jurnal:", err);
         tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal memuat data dari pusat database.</td></tr>`;
     }
 }
 
-function renderTabel(dataList) {
+function renderTabelDenganPagination(dataList) {
     const tbody = document.getElementById('tabelManajemenJurnal');
     if (!tbody) return;
     tbody.innerHTML = '';
 
     if (dataList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Tidak ada transaksi yang cocok.</td></tr>`;
+        hapusKontrolPagination();
         return;
     }
 
-    dataList.forEach((jurnal) => {
+    // Hitung Pagination
+    const totalHalaman = Math.ceil(dataList.length / dataPerHalaman);
+    if (halamanAktif > totalHalaman) halamanAktif = totalHalaman;
+    if (halamanAktif < 1) halamanAktif = 1;
+
+    const indeksAwal = (halamanAktif - 1) * dataPerHalaman;
+    const indeksAkhir = indeksAwal + dataPerHalaman;
+    const dataHalamanIni = dataList.slice(indeksAwal, indeksAkhir);
+
+    dataHalamanIni.forEach((jurnal) => {
         let tr = document.createElement('tr');
         let badgeStatus = jurnal.status === 'POSTED' 
             ? '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded font-semibold">POSTED</span>' 
@@ -92,10 +102,41 @@ function renderTabel(dataList) {
         `;
         tbody.appendChild(tr);
     });
+
+    renderKontrolPagination(totalHalaman);
 }
 
-// Global scope binding agar bisa dipanggil oleh `onclick` di HTML
-window.filterTabelJurnal = function() {
+function renderKontrolPagination(totalHalaman) {
+    let containerPagination = document.getElementById('pagination-container');
+    if (!containerPagination) {
+        containerPagination = document.createElement('div');
+        containerPagination.id = 'pagination-container';
+        containerPagination.className = 'flex justify-between items-center mt-4 px-2 py-3 border-t border-gray-100 text-xs text-gray-600';
+        const cardTabel = document.querySelector('#tabelManajemenJurnal').closest('.dashboard-card');
+        if (cardTabel) cardTabel.appendChild(containerPagination);
+    }
+
+    if (totalHalaman <= 1) {
+        containerPagination.innerHTML = `<span>Menampilkan seluruh data transaksi</span>`;
+        return;
+    }
+
+    containerPagination.innerHTML = `
+        <span>Halaman <b>${halamanAktif}</b> dari <b>${totalHalaman}</b></span>
+        <div class="space-x-1">
+            <button onclick="window.ubahHalaman(${halamanAktif - 1})" ${halamanAktif === 1 ? 'disabled class="px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded hover:bg-indigo-100 transition"'}>Sebelumnya</button>
+            <button onclick="window.ubahHalaman(${halamanAktif + 1})" ${halamanAktif === totalHalaman ? 'disabled class="px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded hover:bg-indigo-100 transition"'}>Berikutnya</button>
+        </div>
+    `;
+}
+
+function hapusKontrolPagination() {
+    const containerPagination = document.getElementById('pagination-container');
+    if (containerPagination) containerPagination.remove();
+}
+
+window.ubahHalaman = function(targetHalaman) {
+    halamanAktif = targetHalaman;
     const keyword = document.getElementById('inputPencarian').value.toLowerCase();
     const selectedUnit = document.getElementById('filterUnit').value;
 
@@ -110,7 +151,26 @@ window.filterTabelJurnal = function() {
         return matchUnit && matchKeyword;
     });
 
-    renderTabel(filtered);
+    renderTabelDenganPagination(filtered);
+};
+
+window.filterTabelJurnal = function() {
+    halamanAktif = 1; // Reset ke halaman pertama saat memfilter
+    const keyword = document.getElementById('inputPencarian').value.toLowerCase();
+    const selectedUnit = document.getElementById('filterUnit').value;
+
+    const filtered = listJurnalCache.filter(j => {
+        const matchUnit = (selectedUnit === 'ALL' || j.unit_usaha === selectedUnit);
+        const matchKeyword = (
+            j.id_jurnal.toLowerCase().includes(keyword) ||
+            j.no_bukti.toLowerCase().includes(keyword) ||
+            j.lawan_transaksi.toLowerCase().includes(keyword) ||
+            (j.keterangan && j.keterangan.toLowerCase().includes(keyword))
+        );
+        return matchUnit && matchKeyword;
+    });
+
+    renderTabelDenganPagination(filtered);
 };
 
 window.editJurnal = function(id_jurnal) {
