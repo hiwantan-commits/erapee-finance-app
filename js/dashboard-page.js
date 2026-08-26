@@ -11,8 +11,9 @@ const unitUsahaMaster = [
     { kode: "SHARED", nama: "Biaya Bersama", klasifikasi: "Alokasi Bersama (Shared Cost)", color: "gray" }
 ];
 
-async function muاتDashboard() {
+async function muatDashboard() {
     try {
+        // Ambil data dari Single Source of Truth
         const semuaJurnal = await ambilSemuaJurnalPusat();
 
         let totalPendapatanGlobal = 0;
@@ -28,6 +29,7 @@ async function muاتDashboard() {
 
         const dataBulanan = Array.from({length: 12}, () => ({ pendapatan: 0, beban: 0 }));
 
+        // Kalkulasi Data
         semuaJurnal.forEach(jurnal => {
             if (jurnal.total_debit !== jurnal.total_kredit) isSemuaBalance = false;
 
@@ -68,7 +70,7 @@ async function muاتDashboard() {
 
         const labaBersihGlobal = totalPendapatanGlobal - totalBebanGlobal;
 
-        // Update Kartu Statistik Dashboard
+        // 1. Render Angka Kartu Statistik (Atas)
         const elPendapatan = document.getElementById('valPendapatanTotal');
         const elLaba = document.getElementById('valLabaBersih');
         const elUtang = document.getElementById('valTotalUtang');
@@ -79,7 +81,7 @@ async function muاتDashboard() {
         if (elUtang) elUtang.innerText = "Rp " + totalUtangGlobal.toLocaleString('id-ID');
         if (elPajak) elPajak.innerText = "Rp " + totalPajakGlobal.toLocaleString('id-ID');
 
-        // Status Keseimbangan
+        // 2. Render Status Keseimbangan
         const elStatusBalance = document.getElementById('statusBalanceGlobal');
         if (elStatusBalance) {
             if (semuaJurnal.length > 0 && isSemuaBalance) {
@@ -94,10 +96,10 @@ async function muاتDashboard() {
             }
         }
 
-        // Render Tabel Unit Usaha
+        // 3. Render Tabel Unit Usaha
         const tbodyUnit = document.getElementById('tabelUnitUsaha');
         if (tbodyUnit) {
-            tbodyUnit.innerHTML = "";
+            tbodyUnit.innerHTML = ""; // Bersihkan tabel kosong
             unitUsahaMaster.forEach(u => {
                 const dataU = dataPerUnit[u.kode] || { pendapatan: 0, beban: 0, utang: 0 };
                 const labaU = dataU.pendapatan - dataU.beban;
@@ -123,7 +125,7 @@ async function muاتDashboard() {
             `;
         }
 
-        // Render Tren Bulanan & Grafik
+        // 4. Render Tabel Tren Bulanan
         const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         const tbodyTren = document.getElementById('tabelTrenBulanan');
         const arrayPendapatanChart = [];
@@ -146,6 +148,7 @@ async function muاتDashboard() {
             });
         }
 
+        // 5. Render Grafik Chart.js
         const canvasElement = document.getElementById('grafikKinerja');
         if (canvasElement && window.Chart) {
             const ctx = canvasElement.getContext('2d');
@@ -172,4 +175,5 @@ async function muاتDashboard() {
     }
 }
 
+// Pemanggilan Fungsi yang Benar
 muatDashboard();
