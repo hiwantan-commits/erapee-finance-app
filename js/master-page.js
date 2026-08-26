@@ -23,12 +23,10 @@ async function muatUnitUsaha() {
             const data = docSnap.data();
             const klasifikasiTeks = data.klasifikasi || '-';
             
-            // Encode data agar aman dilempar ke atribut onclick HTML
             const encKode = encodeURIComponent(data.kode || '');
             const encNama = encodeURIComponent(data.nama || '');
             const encKlas = encodeURIComponent(klasifikasiTeks);
 
-            // Perbaikan layout: Tambahkan div flex justify-center gap-2 pada kolom Aksi
             tbody.innerHTML += `
                 <tr class="border-b border-gray-100 hover:bg-gray-50">
                     <td class="p-3"><span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-mono font-bold text-xs">${data.kode}</span></td>
@@ -57,9 +55,11 @@ window.editUnitUsaha = function(id, encKode, encNama, encKlas) {
     document.getElementById('namaUnit').value = decodeURIComponent(encNama);
     document.getElementById('klasifikasiUnit').value = klasifikasi === '-' ? '' : klasifikasi;
     
-    document.getElementById('btnSimpanUnit').innerText = 'Update Data';
-    document.getElementById('btnSimpanUnit').classList.replace('bg-indigo-600', 'bg-amber-500');
-    document.getElementById('btnSimpanUnit').classList.replace('hover:bg-indigo-700', 'hover:bg-amber-600');
+    const btn = document.getElementById('btnSimpanUnit');
+    btn.innerText = 'Update Data';
+    btn.disabled = false; // Pastikan tombol aktif
+    btn.classList.replace('bg-indigo-600', 'bg-amber-500');
+    btn.classList.replace('hover:bg-indigo-700', 'hover:bg-amber-600');
     document.getElementById('btnBatalUnit').classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -68,9 +68,11 @@ window.batalEditUnit = function() {
     document.getElementById('formUnitUsaha').reset();
     document.getElementById('editIdUnit').value = '';
     
-    document.getElementById('btnSimpanUnit').innerText = 'Simpan Unit Usaha';
-    document.getElementById('btnSimpanUnit').classList.replace('bg-amber-500', 'bg-indigo-600');
-    document.getElementById('btnSimpanUnit').classList.replace('hover:bg-amber-600', 'hover:bg-indigo-700');
+    const btn = document.getElementById('btnSimpanUnit');
+    btn.innerText = 'Simpan Unit Usaha';
+    btn.disabled = false; // Pastikan tombol aktif kembali
+    btn.classList.replace('bg-amber-500', 'bg-indigo-600');
+    btn.classList.replace('hover:bg-amber-600', 'hover:bg-indigo-700');
     document.getElementById('btnBatalUnit').classList.add('hidden');
 }
 
@@ -137,9 +139,11 @@ window.editCOA = function(id, encKode, encNama) {
     document.getElementById('kodeCOA').value = decodeURIComponent(encKode);
     document.getElementById('namaCOA').value = decodeURIComponent(encNama);
     
-    document.getElementById('btnSimpanCOA').innerText = 'Update COA';
-    document.getElementById('btnSimpanCOA').classList.replace('bg-blue-600', 'bg-amber-500');
-    document.getElementById('btnSimpanCOA').classList.replace('hover:bg-blue-700', 'hover:bg-amber-600');
+    const btn = document.getElementById('btnSimpanCOA');
+    btn.innerText = 'Update COA';
+    btn.disabled = false; // Pastikan tombol aktif
+    btn.classList.replace('bg-blue-600', 'bg-amber-500');
+    btn.classList.replace('hover:bg-blue-700', 'hover:bg-amber-600');
     document.getElementById('btnBatalCOA').classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -148,9 +152,11 @@ window.batalEditCOA = function() {
     document.getElementById('formCOA').reset();
     document.getElementById('editIdCOA').value = '';
     
-    document.getElementById('btnSimpanCOA').innerText = 'Simpan COA';
-    document.getElementById('btnSimpanCOA').classList.replace('bg-amber-500', 'bg-blue-600');
-    document.getElementById('btnSimpanCOA').classList.replace('hover:bg-amber-600', 'hover:bg-blue-700');
+    const btn = document.getElementById('btnSimpanCOA');
+    btn.innerText = 'Simpan COA';
+    btn.disabled = false; // Pastikan tombol aktif kembali
+    btn.classList.replace('bg-amber-500', 'bg-blue-600');
+    btn.classList.replace('hover:bg-amber-600', 'hover:bg-blue-700');
     document.getElementById('btnBatalCOA').classList.add('hidden');
 }
 
@@ -172,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     muatUnitUsaha();
     muatCOA();
 
+    // Event Listener Tambah/Edit Unit Usaha
     const formUnit = document.getElementById('formUnitUsaha');
     if (formUnit) {
         formUnit.addEventListener('submit', async (e) => {
@@ -191,10 +198,12 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (editId) {
                     await updateDoc(doc(db, "master_unit_usaha", editId), payload);
-                    window.batalEditUnit(); 
+                    window.batalEditUnit(); // Ini sekarang sudah mengembalikan btn.disabled = false
                 } else {
                     await addDoc(collection(db, "master_unit_usaha"), payload);
                     formUnit.reset();
+                    btn.disabled = false; // Nyalakan kembali tombol untuk mode tambah
+                    btn.innerText = 'Simpan Unit Usaha';
                 }
                 muatUnitUsaha();
             } catch (error) {
@@ -205,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Event Listener Tambah/Edit COA
     const formCOA = document.getElementById('formCOA');
     if (formCOA) {
         formCOA.addEventListener('submit', async (e) => {
@@ -223,10 +233,12 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (editId) {
                     await updateDoc(doc(db, "master_coa", editId), payload);
-                    window.batalEditCOA();
+                    window.batalEditCOA(); // Ini sekarang sudah mengembalikan btn.disabled = false
                 } else {
                     await addDoc(collection(db, "master_coa"), payload);
                     formCOA.reset();
+                    btn.disabled = false; // Nyalakan kembali tombol untuk mode tambah
+                    btn.innerText = 'Simpan COA';
                 }
                 muatCOA();
             } catch (error) {
