@@ -21,7 +21,7 @@
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h2 class="text-xl font-bold text-gray-800">Manajemen Jurnal & Buku Besar</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Draf, riwayat, cetak bukti voucher, ekspor Excel, dan verifikasi posting jurnal</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Draf, riwayat, edit, cetak voucher, dan verifikasi posting jurnal</p>
                     </div>
                     <div class="flex gap-3">
                         <button onclick="eksporKeExcel()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm flex items-center gap-2">
@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase & Logika Ekspor Excel / Cetak -->
+    <!-- Skrip Firebase & Logika Manajemen -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -140,7 +140,8 @@
                             ${balanceStatus}
                         </td>
                         <td class="p-3 text-center">${badgeStatus}</td>
-                        <td class="p-3 text-center space-x-2">
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="editJurnal('${jurnal.id_jurnal}')" class="text-amber-600 bg-amber-50 px-2 py-1 rounded hover:bg-amber-100 font-semibold text-xs transition">✏️ Edit</button>
                             <button onclick="cetakVoucher('${jurnal.id_jurnal}')" class="text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100 font-semibold text-xs transition">🖨️ Cetak</button>
                             <button onclick="hapusJurnalGrup('${jurnal.id_jurnal}')" class="text-red-600 bg-red-50 px-2 py-1 rounded hover:bg-red-100 font-semibold text-xs transition">🗑️ Hapus</button>
                         </td>
@@ -153,28 +154,24 @@
             }
         }
 
-        // Fungsi Ekspor Data ke Format CSV (Bisa dibuka langsung dengan Microsoft Excel)
+        // Fungsi untuk mengarahkan ke halaman input dengan membawa ID Jurnal yang mau diedit
+        window.editJurnal = function(id_jurnal) {
+            window.location.href = `input-jurnal?edit=${id_jurnal}`;
+        };
+
         window.eksporKeExcel = function() {
             const listJurnal = Object.values(window.dataJurnalGlobal);
-            if (listJurnal.length === 0) {
-                alert("Tidak ada data untuk diekspor!");
-                return;
-            }
+            if (listJurnal.length === 0) return alert("Tidak ada data untuk diekspor!");
 
             let csvContent = "data:text/csv;charset=utf-8,";
             csvContent += "ID Jurnal,Tanggal,No Bukti,Unit Usaha,Lawan Transaksi,Keterangan,Status,Total Debit,Total Kredit\r\n";
 
             listJurnal.forEach(j => {
                 let row = [
-                    `"${j.id_jurnal}"`,
-                    `"${j.tanggal}"`,
-                    `"${j.no_bukti}"`,
-                    `"${j.unit_usaha || ''}"`,
-                    `"${j.lawan_transaksi || ''}"`,
-                    `"${(j.keterangan || '').replace(/"/g, '""')}"`,
-                    `"${j.status}"`,
-                    j.total_debit,
-                    j.total_kredit
+                    `"${j.id_jurnal}"`, `"${j.tanggal}"`, `"${j.no_bukti}"`, 
+                    `"${j.unit_usaha || ''}"`, `"${j.lawan_transaksi || ''}"`, 
+                    `"${(j.keterangan || '').replace(/"/g, '""')}"`, `"${j.status}"`, 
+                    j.total_debit, j.total_kredit
                 ];
                 csvContent += row.join(",") + "\r\n";
             });
@@ -182,7 +179,7 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Laporan_Jurnal_Erapee_${new Date().toISOString().slice(0,10)}.csv`);
+            link.setAttribute("download", `Laporan_Jurnal_${new Date().toISOString().slice(0,10)}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
