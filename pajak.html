@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekapitulasi PPN & PPh | PT ERAPEE</title>
+    <title>Rekapitulasi Pajak Coretax | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -17,56 +17,52 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Rekap PPN -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
-                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
-                        <div>
-                            <h2 class="text-lg font-bold text-gray-800">Rekapitulasi PPN (Masa Pajak 2026)</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Penghitungan PPN Keluaran & Masukan Standar Coretax (Otomatis dari Database)</p>
-                        </div>
-                        <span class="text-xs px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-full">Tarif Efektif PPN 11% / 12%</span>
+                <!-- Header Pajak -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Rekapitulasi Pajak Standar Coretax</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Daftar transaksi PPN dan PPh terekam secara otomatis dari pusat jurnal</p>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-4">Masa Pajak</th>
-                                    <th class="p-4 text-right">DPP Penjualan</th>
-                                    <th class="p-4 text-right">PPN Keluaran</th>
-                                    <th class="p-4 text-right">DPP Pembelian</th>
-                                    <th class="p-4 text-right">PPN Masukan</th>
-                                    <th class="p-4 text-center">Kurang / (Lebih) Bayar</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelRekapPPN" class="divide-y divide-gray-100 text-xs">
-                                <tr>
-                                    <td colspan="6" class="p-6 text-center text-gray-400">Memuat data rekapitulasi PPN dari Firebase...</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div>
+                        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                            🖨️ Cetak Laporan Pajak
+                        </button>
                     </div>
                 </div>
 
-                <!-- Rekap PPh Potong/Pungut -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
-                    <div class="mb-6 pb-4 border-b border-gray-100">
-                        <h2 class="text-lg font-bold text-gray-800">Rekapitulasi PPh Potong / Pungut Pihak Lain</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">PPh Pasal 21, PPh Pasal 23 (2%), PPh Pasal 4(2) Final</p>
+                <!-- Kartu Ringkasan Pajak -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total DPP Penjualan</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-2" id="rekapTotalDPP">Rp 0</h3>
                     </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total PPN Terutang</p>
+                        <h3 class="text-2xl font-bold text-indigo-600 mt-2" id="rekapTotalPPN">Rp 0</h3>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Pemotongan PPh</p>
+                        <h3 class="text-2xl font-bold text-amber-600 mt-2" id="rekapTotalPPh">Rp 0</h3>
+                    </div>
+                </div>
+
+                <!-- Tabel Transaksi Pajak -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
+                    <h3 class="font-bold text-gray-800 text-base mb-4">Daftar Transaksi Berparameter Pajak</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-4">Masa Pajak</th>
-                                    <th class="p-4 text-right">PPh 21</th>
-                                    <th class="p-4 text-right">PPh 23 (2%)</th>
-                                    <th class="p-4 text-right">PPh 4(2) Sewa</th>
-                                    <th class="p-4 text-right">Total Dipotong PT</th>
+                                    <th class="p-3">ID Jurnal & Tanggal</th>
+                                    <th class="p-3">No. Bukti / Keterangan</th>
+                                    <th class="p-3">Kode Pajak</th>
+                                    <th class="p-3 text-right">DPP (Rp)</th>
+                                    <th class="p-3 text-right">Nilai Transaksi (Rp)</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelRekapPPh" class="divide-y divide-gray-100 text-xs">
+                            <tbody id="tabelRekapPajak" class="divide-y divide-gray-100 text-xs">
                                 <tr>
-                                    <td colspan="5" class="p-6 text-center text-gray-400">Memuat data rekapitulasi PPh dari Firebase...</td>
+                                    <td colspan="5" class="p-8 text-center text-gray-400">Memuat data rekapitulasi pajak dari pusat...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -76,111 +72,64 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase untuk Mengisi Tabel Secara Dinamis -->
+    <!-- Skrip Integrasi Rekapitulasi Pajak -->
     <script type="module">
-        import { CONFIG, db } from "./js/config.js";
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { ambilSemuaJurnalPusat } from "./js/db.js";
 
-        const namaBulan = [
-            "Januari", "Februari", "Maret", "April", "Mei", "Juni", 
-            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-        ];
-
-        async function muatDataPajakBulanan() {
+        async function muatRekapPajak() {
             try {
-                const querySnapshot = await getDocs(collection(db, CONFIG.COLLECTION_NAME));
+                const semuaJurnal = await ambilSemuaJurnalPusat();
                 
-                // Inisialisasi penampung data per bulan (index 0 = Januari, dst.)
-                let rekapPPN = Array.from({length: 12}, () => ({ dppJual: 0, ppnKeluaran: 0, dppBeli: 0, ppnMasukan: 0 }));
-                let rekapPPh = Array.from({length: 12}, () => ({ pph21: 0, pph23: 0, pph42: 0 }));
+                let akumulasiDPP = 0;
+                let akumulasiPPN = 0;
+                let akumulasiPPh = 0;
 
-                querySnapshot.forEach((docSnap) => {
-                    const d = docSnap.data();
-                    const tanggal = d.tanggal || "";
-                    if (!tanggal.startsWith("2026")) return; // Fokus tahun 2026
+                // Saring jurnal yang memiliki kode pajak selain 'NON'
+                const jurnalPajak = semuaJurnal.filter(j => j.kode_pajak && j.kode_pajak !== "NON");
 
-                    const bulanIndex = parseInt(tanggal.split("-")[1], 10) - 1;
-                    if (bulanIndex < 0 || bulanIndex > 11) return;
+                const tbody = document.getElementById('tabelRekapPajak');
+                tbody.innerHTML = "";
 
-                    const kodePajak = d.kode_pajak || "NON";
-                    const dpp = parseFloat(d.dpp_penjualan) || 0;
-                    const debit = parseFloat(d.debit) || 0;
-                    const kredit = parseFloat(d.kredit) || 0;
-                    const nilaiTrx = debit > 0 ? debit : kredit;
+                if (jurnalPajak.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">Belum ada transaksi berparameter pajak tercatat.</td></tr>`;
+                    document.getElementById('rekapTotalDPP').innerText = "Rp 0";
+                    document.getElementById('rekapTotalPPN').innerText = "Rp 0";
+                    document.getElementById('rekapTotalPPh').innerText = "Rp 0";
+                    return;
+                }
 
-                    // Akumulasi PPN
-                    if (kodePajak.includes("PPN-KEL")) {
-                        rekapPPN[bulanIndex].dppJual += dpp;
-                        rekapPPN[bulanIndex].ppnKeluaran += (dpp * 0.11); // Tarif efektif PPN
-                    } else if (kodePajak.includes("PPN-MAS")) {
-                        rekapPPN[bulanIndex].dppBeli += dpp;
-                        rekapPPN[bulanIndex].ppnMasukan += (dpp * 0.11);
+                jurnalPajak.forEach(jurnal => {
+                    const dpp = parseFloat(jurnal.dpp_penjualan) || 0;
+                    akumulasiDPP += dpp;
+
+                    // Estimasi perhitungan sederhana berdasarkan jenis kode pajak
+                    if (jurnal.kode_pajak.includes("PPN")) {
+                        akumulasiPPN += dpp * 0.11; // Estimasi PPN standar
+                    } else if (jurnal.kode_pajak.includes("PPH")) {
+                        akumulasiPPh += dpp * 0.02; // Estimasi rata-rata PPh pemotongan
                     }
 
-                    // Akumulasi PPh
-                    if (kodePajak.includes("PPH21")) {
-                        rekapPPh[bulanIndex].pph21 += nilaiTrx;
-                    } else if (kodePajak.includes("PPH23")) {
-                        rekapPPh[bulanIndex].pph23 += nilaiTrx;
-                    } else if (kodePajak.includes("PPH4-2")) {
-                        rekapPPh[bulanIndex].pph42 += nilaiTrx;
-                    }
-                });
-
-                // Render Tabel PPN
-                const tbodyPPN = document.getElementById('tabelRekapPPN');
-                tbodyPPN.innerHTML = "";
-                namaBulan.forEach((bulan, idx) => {
-                    const row = rekapPPN[idx];
-                    const netBayar = row.ppnKeluaran - row.ppnMasukan;
-                    let statusWarna = "text-gray-600";
-                    let statusTeks = `Rp ${Math.round(netBayar).toLocaleString('id-ID')}`;
-
-                    if (netBayar > 0) {
-                        statusWarna = "text-red-600 font-bold";
-                        statusTeks = `Kurang Bayar Rp ${Math.round(netBayar).toLocaleString('id-ID')}`;
-                    } else if (netBayar < 0) {
-                        statusWarna = "text-green-600 font-bold";
-                        statusTeks = `Lebih Bayar Rp ${Math.abs(Math.round(netBayar)).toLocaleString('id-ID')}`;
-                    }
-
-                    tbodyPPN.innerHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="p-4 font-medium">${bulan} 2026</td>
-                            <td class="p-4 text-right">${row.dppJual.toLocaleString('id-ID')}</td>
-                            <td class="p-4 text-right font-semibold text-indigo-600">${Math.round(row.ppnKeluaran).toLocaleString('id-ID')}</td>
-                            <td class="p-4 text-right">${row.dppBeli.toLocaleString('id-ID')}</td>
-                            <td class="p-4 text-right font-semibold text-green-600">${Math.round(row.ppnMasukan).toLocaleString('id-ID')}</td>
-                            <td class="p-4 text-center ${statusWarna}">${statusTeks}</td>
-                        </tr>
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold text-indigo-700">${jurnal.id_jurnal}<div class="text-[11px] text-gray-400 font-normal">${jurnal.tanggal}</div></td>
+                        <td class="p-3"><div class="font-medium text-gray-800">${jurnal.no_bukti}</div><div class="text-[11px] text-gray-500 truncate max-w-xs">${jurnal.keterangan || '-'}</div></td>
+                        <td class="p-3"><span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 font-semibold rounded">${jurnal.kode_pajak}</span></td>
+                        <td class="p-3 text-right font-medium">${dpp === 0 ? '-' : dpp.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right font-bold text-gray-800">${jurnal.total_debit.toLocaleString('id-ID')}</td>
                     `;
+                    tbody.appendChild(tr);
                 });
 
-                // Render Tabel PPh
-                const tbodyPPh = document.getElementById('tabelRekapPPh');
-                tbodyPPh.innerHTML = "";
-                namaBulan.forEach((bulan, idx) => {
-                    const row = rekapPPh[idx];
-                    const totalPPh = row.pph21 + row.pph23 + row.pph42;
+                document.getElementById('rekapTotalDPP').innerText = "Rp " + akumulasiDPP.toLocaleString('id-ID');
+                document.getElementById('rekapTotalPPN').innerText = "Rp " + akumulasiPPN.toLocaleString('id-ID');
+                document.getElementById('rekapTotalPPh').innerText = "Rp " + akumulasiPPh.toLocaleString('id-ID');
 
-                    tbodyPPh.innerHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="p-4 font-medium">${bulan} 2026</td>
-                            <td class="p-4 text-right">${row.pph21.toLocaleString('id-ID')}</td>
-                            <td class="p-4 text-right">${row.pph23.toLocaleString('id-ID')}</td>
-                            <td class="p-4 text-right">${row.pph42.toLocaleString('id-ID')}</td>
-                            <td class="p-4 text-right font-bold text-gray-900">Rp ${totalPPh.toLocaleString('id-ID')}</td>
-                        </tr>
-                    `;
-                });
-
-            } catch (err) {
-                console.error("Gagal memuat rekap pajak bulanan:", err);
+            } catch (error) {
+                console.error("Gagal memuat rekapitulasi pajak:", error);
             }
         }
 
-        muatDataPajakBulanan();
+        muatRekapPajak();
     </script>
     <script type="module" src="js/component.js"></script>
 </body>
