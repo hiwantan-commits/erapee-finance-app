@@ -1,123 +1,117 @@
-// js/component.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { CONFIG } from "./config.js";
+// Data Komponen Sidebar
+const sidebarHTML = `
+    <!-- Sidebar Mobile Toggle -->
+    <div class="md:hidden flex justify-between items-center bg-indigo-900 text-white p-4 z-50 fixed top-0 w-full shadow-md">
+        <div class="font-bold text-lg tracking-wider">ERAPEE <span class="font-light">FINANCE</span></div>
+        <button id="mobile-menu-btn" class="focus:outline-none p-1 bg-indigo-800 rounded-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
 
-const app = initializeApp(CONFIG.FIREBASE_CONFIG);
-const auth = getAuth(app);
+    <!-- Sidebar Core -->
+    <aside id="sidebar" class="bg-indigo-900 text-indigo-100 w-64 h-screen fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-40 overflow-y-auto flex flex-col pt-16 md:pt-0">
+        <!-- Logo Area -->
+        <div class="p-6 border-b border-indigo-800 hidden md:block mt-2">
+            <h1 class="text-2xl font-bold tracking-wider text-white">ERAPEE <span class="font-light text-indigo-300">FIN</span></h1>
+            <p class="text-xs text-indigo-400 mt-1">Sistem Keuangan & Pajak</p>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="p-4 space-y-1.5 flex-1 mt-4">
+            <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-3 px-3">Dashboard Utama</p>
+            <a href="index" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-indigo-800 hover:text-white transition duration-200">
+                <span class="mr-3 text-lg opacity-80">📊</span>
+                <span class="text-sm font-medium">Dashboard Eksekutif</span>
+            </a>
+            
+            <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-3 px-3 mt-6">Siklus Akuntansi</p>
+            <a href="input-jurnal" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-indigo-800 hover:text-white transition duration-200">
+                <span class="mr-3 text-lg opacity-80">📝</span>
+                <span class="text-sm font-medium">Input Jurnal (Double-Entry)</span>
+            </a>
+            <a href="manajemen" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-indigo-800 hover:text-white transition duration-200">
+                <span class="mr-3 text-lg opacity-80">📚</span>
+                <span class="text-sm font-medium">Manajemen & Buku Besar</span>
+            </a>
 
-document.addEventListener("DOMContentLoaded", function() {
-    const path = window.location.pathname;
-    const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+            <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-3 px-3 mt-6">Pelaporan & Perpajakan</p>
+            <a href="laporan" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-indigo-800 hover:text-white transition duration-200">
+                <span class="mr-3 text-lg opacity-80">📈</span>
+                <span class="text-sm font-medium">Laporan Keuangan</span>
+            </a>
+            <a href="rekonsiliasi" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-indigo-800 hover:text-white transition duration-200">
+                <span class="mr-3 text-lg opacity-80">⚖️</span>
+                <span class="text-sm font-medium">Rekonsiliasi Fiskal & SPT</span>
+            </a>
 
-    if (currentFile !== 'login.html') {
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-            } else {
-                muatSidebar();
-                muatHeader();
+            <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-3 px-3 mt-6">Data Induk (Master)</p>
+            <a href="master-data" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-indigo-800 hover:text-white transition duration-200">
+                <span class="mr-3 text-lg opacity-80">🗂️</span>
+                <span class="text-sm font-medium">COA & Unit Usaha</span>
+            </a>
+            <a href="profil-pajak" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-indigo-800 hover:text-white transition duration-200">
+                <span class="mr-3 text-lg opacity-80">🏢</span>
+                <span class="text-sm font-medium">Profil PT & Legalitas</span>
+            </a>
+        </nav>
+
+        <!-- User Profile Area -->
+        <div class="p-4 border-t border-indigo-800 mt-auto bg-indigo-950/30 m-4 rounded-2xl mb-8">
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white shadow-inner">
+                    PT
+                </div>
+                <div class="ml-3">
+                    <p class="text-xs font-bold text-white leading-tight">Admin Keuangan</p>
+                    <p class="text-[10px] text-indigo-400">Tahun Buku 2026</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Overlay untuk mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-30 hidden md:hidden transition-opacity"></div>
+`;
+
+// Fungsi inisialisasi Sidebar
+function initSidebar() {
+    const container = document.getElementById('sidebar-container');
+    if (container) {
+        container.innerHTML = sidebarHTML;
+
+        // Logic Active Menu
+        const path = window.location.pathname;
+        const navItems = document.querySelectorAll('.nav-item');
+        
+        navItems.forEach(item => {
+            const href = item.getAttribute('href');
+            // Cek jika path berakhiran nama href (menghindari masalah .html atau clean URL)
+            if (path.endsWith(href) || path.endsWith(href + '.html') || (path === '/' && href === 'index')) {
+                item.classList.add('bg-indigo-700', 'text-white', 'shadow-inner', 'font-bold');
+                item.classList.remove('hover:bg-indigo-800');
             }
         });
+
+        // Mobile Menu Logic
+        const btn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        if(btn && sidebar && overlay) {
+            btn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            });
+
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            });
+        }
     }
+}
+
+// Inisialisasi komponen saat halaman selesai dimuat
+document.addEventListener('DOMContentLoaded', () => {
+    initSidebar();
 });
-
-function muatSidebar() {
-    const sidebarContainer = document.getElementById('sidebar-container');
-    if (!sidebarContainer) return;
-
-    const path = window.location.pathname;
-    const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
-
-    const menuItems = [
-        { name: 'Dashboard & Audit', href: 'index.html', icon: '🏠' },
-        { name: 'Profil & Parameter Pajak', href: 'profil-pajak.html', icon: '🏢' },
-        { name: 'COA & Master Data', href: 'master-data.html', icon: '🗂️' },
-        { name: 'Input Jurnal (Double-Entry)', href: 'input-jurnal.html', icon: '📝' },
-        { name: 'Manajemen & Buku Besar', href: 'manajemen.html', icon: '📊' },
-        { name: 'Laporan Keuangan', href: 'laporan.html', icon: '📈' },
-        { name: 'Aset Tetap & Penyusutan', href: 'aset-tetap.html', icon: '🏭' },
-        { name: 'Rekapitulasi PPN & PPh', href: 'pajak.html', icon: '🏛️' },
-        { name: 'Rekonsiliasi Fiskal', href: 'rekonsiliasi.html', icon: '⚖️' },
-        { name: 'Histori Audit & Checks', href: 'histori.html', icon: '📜' }
-    ];
-
-    let menuHtml = '';
-    menuItems.forEach(item => {
-        const isActive = currentFile === item.href;
-        const activeClass = isActive 
-            ? 'bg-indigo-600 text-white font-medium shadow-sm' 
-            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900';
-
-        menuHtml += `
-            <a href="${item.href}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${activeClass}">
-                <span class="text-base">${item.icon}</span>
-                <span>${item.name}</span>
-            </a>
-        `;
-    });
-
-    sidebarContainer.innerHTML = `
-        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
-        <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-                <div>
-                    <h1 class="font-bold text-gray-900 text-base tracking-tight">PT ERAPEE</h1>
-                    <p class="text-xs text-gray-400 mt-0.5">Anugrah Sejahtera</p>
-                </div>
-                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700">✕</button>
-            </div>
-            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-                ${menuHtml}
-            </nav>
-            <div class="p-4 border-t border-gray-100 bg-gray-50">
-                <button onclick="prosesLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold py-2.5 px-3 rounded-lg transition flex items-center justify-center gap-2">
-                    🚪 Keluar Sistem
-                </button>
-            </div>
-        </aside>
-    `;
-}
-
-function muatHeader() {
-    const headerContainer = document.getElementById('header-container');
-    if (!headerContainer) return;
-    let pageTitle = document.title.split('|')[0].trim();
-
-    headerContainer.innerHTML = `
-        <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-                <h2 class="text-lg font-bold text-gray-800">${pageTitle}</h2>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
-                    ● Terhubung ke Firebase
-                </span>
-            </div>
-        </header>
-    `;
-}
-
-window.toggleSidebar = function() {
-    const sidebar = document.getElementById('app-sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    if (sidebar && overlay) {
-        sidebar.classList.toggle('-translate-x-full');
-        overlay.classList.toggle('hidden');
-    }
-};
-
-window.prosesLogout = function() {
-    if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
-        signOut(auth).then(() => {
-            window.location.href = 'login.html';
-        }).catch((error) => {
-            console.error('Logout error:', error);
-        });
-    }
-};
