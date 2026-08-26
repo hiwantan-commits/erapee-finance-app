@@ -46,13 +46,10 @@
                                     <input type="text" id="no_bukti" placeholder="INV/2026/001" class="form-input-custom" required>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Jenis Dokumen</label>
-                                    <select id="jenis_dokumen" class="form-input-custom">
-                                        <option value="Jurnal Umum">Jurnal Umum / Memorial</option>
-                                        <option value="Invoice Penjualan">Invoice Penjualan</option>
-                                        <option value="Faktur Pembelian">Faktur Pembelian</option>
-                                        <option value="Kas/Bank Masuk">Kas/Bank Masuk</option>
-                                        <option value="Kas/Bank Keluar">Kas/Bank Keluar</option>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Sifat Transaksi</label>
+                                    <select id="sifat_transaksi" class="form-input-custom font-bold text-indigo-700" onchange="toggleDueDate()">
+                                        <option value="Tunai">💵 Tunai (Cash/Bank)</option>
+                                        <option value="Non-Tunai">💳 Non-Tunai (Kredit/Akrual)</option>
                                     </select>
                                 </div>
                             </div>
@@ -72,8 +69,8 @@
                                     <input type="text" id="lawan_transaksi" placeholder="PT Mitra Sejahtera" class="form-input-custom">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">NPWP / NIK</label>
-                                    <input type="text" id="npwp_nik" placeholder="00.000.000.0-000.000" class="form-input-custom font-mono text-xs">
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Tanggal Jatuh Tempo</label>
+                                    <input type="date" id="jatuh_tempo" class="form-input-custom bg-gray-100 cursor-not-allowed" disabled title="Hanya aktif jika Non-Tunai">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">🔗 Link Bukti (G-Drive / PDF)</label>
@@ -82,7 +79,7 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 3: Tabel Akun Multi-Row (Krusial) -->
+                        <!-- Bagian 3: Tabel Akun Multi-Row -->
                         <div class="pt-4 border-t border-gray-100">
                             <div class="flex justify-between items-center mb-3">
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">2. Rincian Jurnal (Multi-Akun)</h3>
@@ -95,8 +92,8 @@
                                 <table class="w-full text-left text-sm border-collapse bg-white">
                                     <thead>
                                         <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                            <th class="p-3 w-1/3">Kode & Nama Akun (COA)</th>
-                                            <th class="p-3 w-1/5">Arus Kas</th>
+                                            <th class="p-3 w-1/4">Kode & Nama Akun (COA)</th>
+                                            <th class="p-3 w-1/5">Catatan Per Baris (Opsional)</th>
                                             <th class="p-3 text-right">Debit (Rp)</th>
                                             <th class="p-3 text-right">Kredit (Rp)</th>
                                             <th class="p-3 text-center w-12">Hapus</th>
@@ -111,12 +108,7 @@
                                                 </select>
                                             </td>
                                             <td class="p-2">
-                                                <select class="form-input-custom kategori_arus_kas text-xs">
-                                                    <option value="Nonkas">Nonkas</option>
-                                                    <option value="Operasi">Operasi</option>
-                                                    <option value="Investasi">Investasi</option>
-                                                    <option value="Pendanaan">Pendanaan</option>
-                                                </select>
+                                                <input type="text" class="form-input-custom memo_baris text-xs" placeholder="Memo...">
                                             </td>
                                             <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
                                             <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
@@ -130,12 +122,7 @@
                                                 </select>
                                             </td>
                                             <td class="p-2">
-                                                <select class="form-input-custom kategori_arus_kas text-xs">
-                                                    <option value="Nonkas">Nonkas</option>
-                                                    <option value="Operasi">Operasi</option>
-                                                    <option value="Investasi">Investasi</option>
-                                                    <option value="Pendanaan">Pendanaan</option>
-                                                </select>
+                                                <input type="text" class="form-input-custom memo_baris text-xs" placeholder="Memo...">
                                             </td>
                                             <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
                                             <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
@@ -157,7 +144,7 @@
                         <!-- Bagian 4: Parameter Pajak & Keterangan -->
                         <div class="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">3. Parameter Pajak Tambahan</h3>
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">3. Parameter Pajak Coretax</h3>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-medium mb-1 text-gray-700">Kode Pajak Coretax</label>
@@ -172,15 +159,15 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-medium mb-1 text-gray-700">DPP Penjualan (Opsi)</label>
+                                        <label class="block text-xs font-medium mb-1 text-gray-700">DPP Penjualan (Opsional)</label>
                                         <input type="number" id="dpp_penjualan" value="0" class="form-input-custom">
                                     </div>
                                 </div>
                             </div>
                             
                             <div>
-                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">4. Keterangan & Eksekusi</h3>
-                                <textarea id="keterangan" rows="2" placeholder="Uraian lengkap tujuan transaksi..." class="form-input-custom resize-y mb-3" required></textarea>
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">4. Keterangan Induk & Eksekusi</h3>
+                                <textarea id="keterangan" rows="2" placeholder="Keterangan umum jurnal..." class="form-input-custom resize-y mb-3" required></textarea>
                                 <div class="flex gap-3">
                                     <select id="status_jurnal" class="form-input-custom font-bold text-indigo-600 w-1/3">
                                         <option value="POSTED">POSTED</option>
@@ -202,7 +189,7 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase & Logika Multi-Row -->
+    <!-- Skrip Firebase & Logika -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -210,7 +197,22 @@
 
         let coaOptionsHTML = '<option value="">Pilih Akun...</option>';
 
-        // Generator ID Unik
+        // Toggle Tanggal Jatuh Tempo
+        window.toggleDueDate = function() {
+            const sifat = document.getElementById('sifat_transaksi').value;
+            const tglJatuhTempo = document.getElementById('jatuh_tempo');
+            if (sifat === 'Non-Tunai') {
+                tglJatuhTempo.disabled = false;
+                tglJatuhTempo.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                tglJatuhTempo.required = true;
+            } else {
+                tglJatuhTempo.disabled = true;
+                tglJatuhTempo.classList.add('bg-gray-100', 'cursor-not-allowed');
+                tglJatuhTempo.value = "";
+                tglJatuhTempo.required = false;
+            }
+        };
+
         function generateIdJurnal() {
             const date = new Date();
             const yyyy = date.getFullYear();
@@ -218,12 +220,9 @@
             const dd = String(date.getDate()).padStart(2, '0');
             const time = date.getTime().toString().slice(-5);
             document.getElementById('id_jurnal').value = `JRN-${yyyy}${mm}${dd}-${time}`;
-            
-            // Set default date to today
             document.getElementById('tanggal').value = `${yyyy}-${mm}-${dd}`;
         }
 
-        // Hitung Keseimbangan Total
         window.hitungTotal = function() {
             let totDebit = 0;
             let totKredit = 0;
@@ -243,21 +242,13 @@
             }
         };
 
-        // Tambah Baris Baru
         window.tambahBaris = function() {
             const tbody = document.getElementById('tbodyJurnal');
             const tr = document.createElement('tr');
             tr.className = 'jurnal-row hover:bg-gray-50';
             tr.innerHTML = `
                 <td class="p-2"><select class="form-input-custom kode_akun text-xs font-medium" required>${coaOptionsHTML}</select></td>
-                <td class="p-2">
-                    <select class="form-input-custom kategori_arus_kas text-xs">
-                        <option value="Nonkas">Nonkas</option>
-                        <option value="Operasi">Operasi</option>
-                        <option value="Investasi">Investasi</option>
-                        <option value="Pendanaan">Pendanaan</option>
-                    </select>
-                </td>
+                <td class="p-2"><input type="text" class="form-input-custom memo_baris text-xs" placeholder="Memo..."></td>
                 <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
                 <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
                 <td class="p-2 text-center"><button type="button" onclick="hapusBaris(this)" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-200 transition">X</button></td>
@@ -265,25 +256,22 @@
             tbody.appendChild(tr);
         };
 
-        // Hapus Baris
         window.hapusBaris = function(btn) {
             const rowCount = document.querySelectorAll('.jurnal-row').length;
             if(rowCount > 2) {
                 btn.closest('tr').remove();
                 hitungTotal();
             } else {
-                alert("Minimal harus ada 2 baris (Debit & Kredit) dalam satu jurnal!");
+                alert("Minimal harus ada 2 baris (Debit & Kredit)!");
             }
         };
 
-        // Muat Dropdown API (Firestore)
         async function inisialisasiData() {
             generateIdJurnal();
 
-            // Muat Unit Usaha
-            const selectUnit = document.getElementById('unit_usaha');
             try {
                 const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
+                const selectUnit = document.getElementById('unit_usaha');
                 let units = [];
                 snapUnit.forEach(d => units.push(d.data()));
                 units.sort((a, b) => a.kode.localeCompare(b.kode));
@@ -294,11 +282,8 @@
                     opt.text = `${u.kode} - ${u.nama}`;
                     selectUnit.appendChild(opt);
                 });
-            } catch (err) {
-                selectUnit.innerHTML = '<option value="">Gagal memuat unit</option>';
-            }
+            } catch (err) {}
 
-            // Muat COA
             try {
                 const snapCOA = await getDocs(collection(db, "master_coa"));
                 let coaList = [];
@@ -310,22 +295,16 @@
                     coaOptionsHTML += `<option value="${coa.kode}">${coa.kode} - ${coa.nama}</option>`;
                 });
 
-                document.querySelectorAll('.kode_akun').forEach(select => {
-                    select.innerHTML = coaOptionsHTML;
-                });
-            } catch (err) {
-                console.error("Gagal memuat COA");
-            }
+                document.querySelectorAll('.kode_akun').forEach(select => select.innerHTML = coaOptionsHTML);
+            } catch (err) {}
         }
 
         inisialisasiData();
 
-        // Submit Multi-Row ke Firestore
         const formJurnal = document.getElementById('formJurnal');
         formJurnal.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Validasi Keseimbangan
             let totDebit = 0, totKredit = 0;
             const rows = document.querySelectorAll('.jurnal-row');
             rows.forEach(row => {
@@ -348,19 +327,18 @@
                     id_jurnal: document.getElementById('id_jurnal').value,
                     tanggal: document.getElementById('tanggal').value,
                     no_bukti: document.getElementById('no_bukti').value,
-                    jenis_dokumen: document.getElementById('jenis_dokumen').value,
+                    sifat_transaksi: document.getElementById('sifat_transaksi').value,
                     unit_usaha: document.getElementById('unit_usaha').value,
                     lawan_transaksi: document.getElementById('lawan_transaksi').value,
-                    npwp_nik: document.getElementById('npwp_nik').value,
+                    jatuh_tempo: document.getElementById('jatuh_tempo').value,
                     link_bukti: document.getElementById('link_bukti').value,
-                    dpp_penjualan: parseFloat(document.getElementById('dpp_penjualan').value) || 0,
                     kode_pajak: document.getElementById('kode_pajak').value,
+                    dpp_penjualan: parseFloat(document.getElementById('dpp_penjualan').value) || 0,
                     keterangan: document.getElementById('keterangan').value,
                     status: document.getElementById('status_jurnal').value,
                     timestamp: new Date()
                 };
 
-                // Looping per baris, simpan sebagai dokumen individual untuk buku besar
                 rows.forEach(row => {
                     const selectCOA = row.querySelector('.kode_akun');
                     const debitVal = parseFloat(row.querySelector('.debit').value) || 0;
@@ -371,7 +349,7 @@
                             ...commonData,
                             kode_akun: selectCOA.value,
                             nama_akun: selectCOA.options[selectCOA.selectedIndex]?.text || '',
-                            kategori_arus_kas: row.querySelector('.kategori_arus_kas').value,
+                            memo_baris: row.querySelector('.memo_baris').value || '',
                             debit: debitVal,
                             kredit: kreditVal
                         };
@@ -383,10 +361,10 @@
 
                 document.getElementById('alertSuccess').classList.remove('hidden');
                 formJurnal.reset();
-                generateIdJurnal(); // Generate ID baru
-                hitungTotal();      // Reset balance status
+                generateIdJurnal(); 
+                hitungTotal();      
+                toggleDueDate();    
 
-                // Reset tabel ke 2 baris awal saja
                 const tbody = document.getElementById('tbodyJurnal');
                 while(tbody.children.length > 2) {
                     tbody.removeChild(tbody.lastChild);
@@ -395,7 +373,7 @@
                 setTimeout(() => document.getElementById('alertSuccess').classList.add('hidden'), 5000);
             } catch (error) {
                 console.error("Gagal menyimpan:", error);
-                alert("Terjadi kesalahan sistem saat menyimpan ke database.");
+                alert("Kesalahan saat menyimpan data ke database.");
             } finally {
                 btn.innerText = "Simpan Jurnal (Multi-Row)";
                 btn.disabled = false;
