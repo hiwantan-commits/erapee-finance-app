@@ -88,7 +88,6 @@
             tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Memuat data dari pusat...</td></tr>`;
 
             try {
-                // Muat dropdown unit usaha untuk filter
                 const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
                 const selectFilter = document.getElementById('filterUnit');
                 let unitOptions = '<option value="ALL">Semua Unit Usaha</option>';
@@ -98,7 +97,6 @@
                 });
                 selectFilter.innerHTML = unitOptions;
 
-                // Mengambil data menggunakan fungsi pusat terpadu
                 const listJurnal = await ambilSemuaJurnalPusat();
                 
                 if (listJurnal.length === 0) {
@@ -106,7 +104,6 @@
                     return;
                 }
 
-                // Ubah array kembali ke objek global untuk kebutuhan cetak/edit
                 window.dataJurnalGlobal = {};
                 listJurnal.forEach(j => {
                     window.dataJurnalGlobal[j.id_jurnal] = j;
