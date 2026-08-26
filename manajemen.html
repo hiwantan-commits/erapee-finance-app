@@ -73,7 +73,7 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase & Logika Pencarian -->
+    <!-- Skrip Firebase & Logika Manajemen -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -97,9 +97,10 @@
                 });
                 selectFilter.innerHTML = unitOptions;
 
+                // Mengambil data dari koleksi yang sama dengan input-jurnal (CONFIG.COLLECTION_NAME)
                 const querySnapshot = await getDocs(collection(db, CONFIG.COLLECTION_NAME));
                 if (querySnapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat. Silakan buat melalui menu <b>Input Jurnal</b>.</td></tr>`;
                     return;
                 }
 
@@ -137,11 +138,10 @@
                 renderTabel(listJurnalCache);
             } catch (err) {
                 console.error("Gagal memuat manajemen jurnal:", err);
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal memuat data dari database.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal memuat data dari database. Periksa konsistensi koleksi Firestore Anda.</td></tr>`;
             }
         }
 
-        // Render tabel berdasarkan data
         function renderTabel(dataList) {
             const tbody = document.getElementById('tabelManajemenJurnal');
             tbody.innerHTML = '';
@@ -189,7 +189,6 @@
             });
         }
 
-        // Fungsi Filter & Pencarian Interaktif
         window.filterTabelJurnal = function() {
             const keyword = document.getElementById('inputPencarian').value.toLowerCase();
             const selectedUnit = document.getElementById('filterUnit').value;
