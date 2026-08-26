@@ -1,6 +1,7 @@
-// js/journal-page.js - Controller untuk input-jurnal.html
+// js/journal-page.js - Controller untuk input-jurnal.html dengan Proteksi Tutup Buku
 import { db } from "./config.js";
 import { simpanJurnalPusat, ambilSemuaJurnalPusat } from "./db.js";
+import { cekApakahPeriodeTerkunci } from "./closing-period.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 let coaOptionsHTML = '<option value="">Pilih Akun...</option>';
@@ -171,7 +172,6 @@ async function inisialisasiData() {
     }
 }
 
-// Pasang event listener ke form saat DOM siap
 document.addEventListener('DOMContentLoaded', () => {
     inisialisasiData();
 
@@ -180,6 +180,15 @@ document.addEventListener('DOMContentLoaded', () => {
         formJurnal.addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const tanggalInput = document.getElementById('tanggal').value;
+            
+            // Pengecekan Periode Tutup Buku
+            const isTerkunci = await cekApakahPeriodeTerkunci(tanggalInput);
+            if (isTerkunci) {
+                alert("❌ Transaksi ditolak! Periode bulan untuk tanggal ini telah ditutup (Closed Period). Anda tidak dapat menambah atau mengubah jurnal pada periode tersebut.");
+                return;
+            }
+
             let totDebit = 0, totKredit = 0;
             const rows = document.querySelectorAll('.jurnal-row');
             rows.forEach(row => {
@@ -201,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const headerData = {
                     id_jurnal: targetIdJurnal,
-                    tanggal: document.getElementById('tanggal').value,
+                    tanggal: tanggalInput,
                     no_bukti: document.getElementById('no_bukti').value,
                     sifat_transaksi: document.getElementById('sifat_transaksi').value,
                     unit_usaha: document.getElementById('unit_usaha').value,
