@@ -22,7 +22,7 @@
                     <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
                             <h2 class="text-lg font-bold text-gray-800">Edit Identitas Perseroan & Legalitas Akta</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Perbarui nomor akta, NPWP, dan status PKP untuk menghilangkan status Warning di Dashboard</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Perbarui nomor akta, NPWP, dan status PKP untuk kepatuhan sistem Coretax</p>
                         </div>
                     </div>
 
@@ -54,7 +54,7 @@
                             </button>
                         </div>
                         <div id="alertProfilSuccess" class="hidden p-3 bg-green-50 text-green-700 rounded-lg text-sm text-center font-medium">
-                            ✓ Profil legalitas berhasil diperbarui ke Cloud Firestore! Status Warning di Dashboard akan otomatis berubah menjadi PASS.
+                            ✓ Profil legalitas berhasil diperbarui ke Cloud Firestore!
                         </div>
                     </form>
                 </div>
@@ -83,7 +83,7 @@
                                 <tr>
                                     <td class="p-4 font-medium">Fasilitas Pasal 31E</td>
                                     <td class="p-4 font-semibold text-indigo-600">Omzet s.d. Rp 50 Miliar</td>
-                                    <td class="p-4 text-xs text-gray-500">Fasilitas pengurangan tarif untuk bagian peredaran bruto s.d. Rp 4,8 Miliar</td>
+                                    <td class="p-4 text-xs text-gray-500">Fasilitas pengurangan tarif untuk peredaran bruto s.d. Rp 4,8 Miliar</td>
                                 </tr>
                                 <tr>
                                     <td class="p-4 font-medium">Tarif PPN Undang-Undang</td>
@@ -93,7 +93,7 @@
                                 <tr>
                                     <td class="p-4 font-medium">Tarif Efektif PPN Non-Mewah</td>
                                     <td class="p-4 font-semibold text-green-700">11,0% (DPP Nilai Lain 91,7%)</td>
-                                    <td class="p-4 text-xs text-gray-500">PMK 131 / 2024 (12% x 11/12)</td>
+                                    <td class="p-4 text-xs text-gray-500">PMK Terbaru</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -111,7 +111,6 @@
 
         const DOC_ID = "profil_perusahaan";
 
-        // Muat data profil saat halaman dibuka
         async function muatProfil() {
             try {
                 const docSnap = await getDoc(doc(db, "pengaturan", DOC_ID));
@@ -129,7 +128,6 @@
 
         muatProfil();
 
-        // Simpan profil ke Firestore
         document.getElementById('formProfil').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanProfil');
