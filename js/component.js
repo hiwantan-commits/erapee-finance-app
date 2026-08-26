@@ -54,6 +54,7 @@ function muatSidebar() {
         { name: 'Aset Tetap & Penyusutan', href: 'aset-tetap', icon: '🏭' },
         { name: 'Rekapitulasi PPN & PPh', href: 'pajak', icon: '🏛️' },
         { name: 'Rekonsiliasi Fiskal', href: 'rekonsiliasi', icon: '⚖️' },
+        { name: 'Tutup Buku Bulanan', href: 'closing', icon: '🔒' },
         { name: 'Histori Audit & Checks', href: 'histori', icon: '📜' }
     ];
 
