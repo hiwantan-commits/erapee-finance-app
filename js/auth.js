@@ -10,7 +10,7 @@ export async function cekSesiLogin() {
 
     const sesiUser = sessionStorage.getItem("erapee_user_session");
     if (!sesiUser) {
-        window.location.href = "login.html";
+        window.location.href = "/login";
         return;
     }
 
