@@ -16,27 +16,26 @@
         <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
             <div id="header-container"></div>
 
-            <main class="p-4 md:p-8 max-w-5xl mx-auto w-full">
+            <main class="p-4 md:p-8 max-w-6xl mx-auto w-full">
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
                     <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
-                            <h2 class="text-lg font-bold text-gray-800">Formulir Input Jurnal Akuntansi</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Pencatatan terintegrasi dengan Firebase Firestore & Standar Coretax</p>
+                            <h2 class="text-lg font-bold text-gray-800">Formulir Input Jurnal (Double-Entry)</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Sistem multi-baris dengan validasi keseimbangan otomatis</p>
                         </div>
-                        <!-- Indikator Status Balance -->
-                        <div id="statusBalance" class="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-lg">
+                        <div id="statusBalance" class="px-4 py-1.5 bg-amber-50 text-amber-700 text-sm font-bold rounded-xl border border-amber-200 shadow-sm">
                             ⚠️ Belum Balance
                         </div>
                     </div>
 
                     <form id="formJurnal" class="space-y-6">
-                        <!-- Bagian 1: Identitas Dokumen -->
+                        <!-- Bagian 1: Identitas & Dokumen -->
                         <div>
-                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">1. Identitas & Referensi Dokumen</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">1. Referensi Transaksi</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">ID Jurnal</label>
-                                    <input type="text" id="id_jurnal" value="JRN-2026-001" class="form-input-custom font-mono text-xs bg-gray-50" readonly>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">ID Jurnal (Otomatis)</label>
+                                    <input type="text" id="id_jurnal" class="form-input-custom font-mono text-xs bg-gray-100 text-gray-500 cursor-not-allowed" readonly>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Tanggal Transaksi</label>
@@ -44,138 +43,158 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">No. Bukti / Invoice</label>
-                                    <input type="text" id="no_bukti" placeholder="INV-2026-001" class="form-input-custom" required>
+                                    <input type="text" id="no_bukti" placeholder="INV/2026/001" class="form-input-custom" required>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Bagian 2: Klasifikasi Usaha & Unit -->
-                        <div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Jenis Dokumen</label>
                                     <select id="jenis_dokumen" class="form-input-custom">
+                                        <option value="Jurnal Umum">Jurnal Umum / Memorial</option>
                                         <option value="Invoice Penjualan">Invoice Penjualan</option>
                                         <option value="Faktur Pembelian">Faktur Pembelian</option>
                                         <option value="Kas/Bank Masuk">Kas/Bank Masuk</option>
                                         <option value="Kas/Bank Keluar">Kas/Bank Keluar</option>
-                                        <option value="Jurnal Umum">Jurnal Umum / Memorial</option>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Bagian 2: Klasifikasi & Lawan Transaksi -->
+                        <div>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Unit Usaha / Sektor (Master Data)</label>
-                                    <select id="unit_usaha" class="form-input-custom">
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Unit Usaha (Master Data)</label>
+                                    <select id="unit_usaha" class="form-input-custom" required>
                                         <option value="">Memuat unit usaha...</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Proyek / Komoditas</label>
-                                    <input type="text" id="proyek" placeholder="Contoh: Panen Nanas Musim 1" class="form-input-custom">
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">Lawan Transaksi (Vendor/Klien)</label>
+                                    <input type="text" id="lawan_transaksi" placeholder="PT Mitra Sejahtera" class="form-input-custom">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">NPWP / NIK</label>
+                                    <input type="text" id="npwp_nik" placeholder="00.000.000.0-000.000" class="form-input-custom font-mono text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 text-gray-700">🔗 Link Bukti (G-Drive / PDF)</label>
+                                    <input type="url" id="link_bukti" placeholder="https://..." class="form-input-custom text-xs text-blue-600">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Bagian 3: Lawan Transaksi, Akun & Link Bukti Transaksi -->
+                        <!-- Bagian 3: Tabel Akun Multi-Row (Krusial) -->
                         <div class="pt-4 border-t border-gray-100">
-                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">2. Akun, Nilai Jurnal & Bukti Lampiran</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Lawan Transaksi (Klien/Vendor)</label>
-                                    <input type="text" id="lawan_transaksi" placeholder="PT Mitra Sejahtera" class="form-input-custom" required>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">NPWP / NIK Lawan Transaksi</label>
-                                    <input type="text" id="npwp_nik" placeholder="00.000.000.0-000.000" class="form-input-custom">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">🔗 Link / URL Bukti Transaksi</label>
-                                    <input type="url" id="link_bukti" placeholder="https://drive.google.com/..." class="form-input-custom font-mono text-xs">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">2. Rincian Jurnal (Multi-Akun)</h3>
+                                <button type="button" onclick="tambahBaris()" class="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-bold px-3 py-1.5 rounded-lg transition border border-indigo-200">
+                                    + Tambah Baris Akun
+                                </button>
+                            </div>
+                            
+                            <div class="overflow-x-auto rounded-xl border border-gray-200">
+                                <table class="w-full text-left text-sm border-collapse bg-white">
+                                    <thead>
+                                        <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                            <th class="p-3 w-1/3">Kode & Nama Akun (COA)</th>
+                                            <th class="p-3 w-1/5">Arus Kas</th>
+                                            <th class="p-3 text-right">Debit (Rp)</th>
+                                            <th class="p-3 text-right">Kredit (Rp)</th>
+                                            <th class="p-3 text-center w-12">Hapus</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyJurnal" class="divide-y divide-gray-100">
+                                        <!-- Baris Pertama -->
+                                        <tr class="jurnal-row hover:bg-gray-50">
+                                            <td class="p-2">
+                                                <select class="form-input-custom kode_akun text-xs font-medium" required>
+                                                    <option value="">Memuat akun...</option>
+                                                </select>
+                                            </td>
+                                            <td class="p-2">
+                                                <select class="form-input-custom kategori_arus_kas text-xs">
+                                                    <option value="Nonkas">Nonkas</option>
+                                                    <option value="Operasi">Operasi</option>
+                                                    <option value="Investasi">Investasi</option>
+                                                    <option value="Pendanaan">Pendanaan</option>
+                                                </select>
+                                            </td>
+                                            <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
+                                            <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
+                                            <td class="p-2 text-center"></td>
+                                        </tr>
+                                        <!-- Baris Kedua -->
+                                        <tr class="jurnal-row hover:bg-gray-50">
+                                            <td class="p-2">
+                                                <select class="form-input-custom kode_akun text-xs font-medium" required>
+                                                    <option value="">Memuat akun...</option>
+                                                </select>
+                                            </td>
+                                            <td class="p-2">
+                                                <select class="form-input-custom kategori_arus_kas text-xs">
+                                                    <option value="Nonkas">Nonkas</option>
+                                                    <option value="Operasi">Operasi</option>
+                                                    <option value="Investasi">Investasi</option>
+                                                    <option value="Pendanaan">Pendanaan</option>
+                                                </select>
+                                            </td>
+                                            <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
+                                            <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
+                                            <td class="p-2 text-center"></td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="bg-gray-100 font-bold text-gray-800 text-sm border-t-2 border-gray-300">
+                                            <td colspan="2" class="p-3 text-right uppercase text-xs text-gray-500">Total Keseimbangan:</td>
+                                            <td class="p-3 text-right text-green-700" id="totalDebit">0</td>
+                                            <td class="p-3 text-right text-red-700" id="totalKredit">0</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Bagian 4: Parameter Pajak & Keterangan -->
+                        <div class="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">3. Parameter Pajak Tambahan</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1 text-gray-700">Kode Pajak Coretax</label>
+                                        <select id="kode_pajak" class="form-input-custom">
+                                            <option value="NON">NON (Tanpa Pajak)</option>
+                                            <option value="PPN-KEL-11">PPN-KEL-11 (Keluaran 11%)</option>
+                                            <option value="PPN-KEL-12">PPN-KEL-12 (Keluaran 12%)</option>
+                                            <option value="PPN-MAS-KREDIT">PPN-MAS-KREDIT (Masukan)</option>
+                                            <option value="PPH21">PPH21 (PPh Pasal 21)</option>
+                                            <option value="PPH23-2">PPH23-2 (PPh Pasal 23 - 2%)</option>
+                                            <option value="PPH4-2-SEWA">PPH4-2-SEWA (Final 10%)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1 text-gray-700">DPP Penjualan (Opsi)</label>
+                                        <input type="number" id="dpp_penjualan" value="0" class="form-input-custom">
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Kode Akun (COA)</label>
-                                    <select id="kode_akun" class="form-input-custom">
-                                        <option value="">Memuat akun...</option>
+                            
+                            <div>
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">4. Keterangan & Eksekusi</h3>
+                                <textarea id="keterangan" rows="2" placeholder="Uraian lengkap tujuan transaksi..." class="form-input-custom resize-y mb-3" required></textarea>
+                                <div class="flex gap-3">
+                                    <select id="status_jurnal" class="form-input-custom font-bold text-indigo-600 w-1/3">
+                                        <option value="POSTED">POSTED</option>
+                                        <option value="DRAFT">DRAFT</option>
                                     </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Kategori Arus Kas</label>
-                                    <select id="kategori_arus_kas" class="form-input-custom">
-                                        <option value="Operasi">Operasi</option>
-                                        <option value="Investasi">Investasi</option>
-                                        <option value="Pendanaan">Pendanaan</option>
-                                        <option value="Nonkas">Nonkas</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Debit (Rp)</label>
-                                    <input type="number" id="debit" value="0" class="form-input-custom font-semibold text-green-700" oninput="cekBalance()">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Kredit (Rp)</label>
-                                    <input type="number" id="kredit" value="0" class="form-input-custom font-semibold text-red-700" oninput="cekBalance()">
+                                    <button type="submit" id="btnSubmit" class="w-2/3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-sm transition">
+                                        Simpan Jurnal (Multi-Row)
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Bagian 4: Elemen Pajak Terpadu -->
-                        <div class="pt-4 border-t border-gray-100">
-                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">3. Rincian Pajak (PPN & PPh)</h3>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">DPP Penjualan</label>
-                                    <input type="number" id="dpp_penjualan" value="0" class="form-input-custom">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">PPN Keluaran</label>
-                                    <input type="number" id="ppn_keluaran" value="0" class="form-input-custom">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">PPh Dipotong PT</label>
-                                    <input type="number" id="pph_dipotong" value="0" class="form-input-custom">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Kode Pajak Ref</label>
-                                    <select id="kode_pajak" class="form-input-custom">
-                                        <option value="NON">NON (Tanpa Pajak)</option>
-                                        <option value="PPN-KEL-11">PPN-KEL-11 (Keluaran 11%)</option>
-                                        <option value="PPN-KEL-12">PPN-KEL-12 (Keluaran 12%)</option>
-                                        <option value="PPN-MAS-KREDIT">PPN-MAS-KREDIT (Masukan)</option>
-                                        <option value="PPH21">PPH21 (PPh Pasal 21)</option>
-                                        <option value="PPH23-2">PPH23-2 (PPh Pasal 23 - 2%)</option>
-                                        <option value="PPH4-2-SEWA10">PPH4-2-SEWA (Final 10%)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Bagian 5: Keterangan -->
-                        <div class="pt-4 border-t border-gray-100">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="md:col-span-2">
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Keterangan / Uraian Jurnal</label>
-                                    <textarea id="keterangan" rows="3" placeholder="Penjelasan lengkap transaksi..." class="form-input-custom resize-y" required></textarea>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Status Jurnal</label>
-                                    <select id="status_jurnal" class="form-input-custom font-bold text-indigo-600">
-                                        <option value="POSTED">POSTED (Resmi Masuk Buku)</option>
-                                        <option value="DRAFT">DRAFT (Belum Diposting)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tombol Submit -->
-                        <div class="pt-4">
-                            <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg shadow-sm transition duration-200">
-                                Simpan Jurnal ke Firebase Firestore
-                            </button>
-                        </div>
-                        <div id="alertSuccess" class="hidden mt-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm text-center font-medium">
-                            ✓ Jurnal akuntansi berhasil disimpan ke Cloud database!
+                        <div id="alertSuccess" class="hidden p-4 bg-green-50 text-green-700 rounded-xl text-sm text-center font-bold border border-green-200">
+                            ✓ Transaksi Jurnal Berhasil Diposting ke Buku Besar!
                         </div>
                     </form>
                 </div>
@@ -183,123 +202,202 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase & Validasi Balance -->
+    <!-- Skrip Firebase & Logika Multi-Row -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        window.cekBalance = function() {
-            const debit = parseFloat(document.getElementById('debit').value) || 0;
-            const kredit = parseFloat(document.getElementById('kredit').value) || 0;
-            const statusEl = document.getElementById('statusBalance');
+        let coaOptionsHTML = '<option value="">Pilih Akun...</option>';
 
-            if (debit === kredit && debit > 0) {
-                statusEl.className = "px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-lg";
-                statusEl.innerText = "✓ Balance (Seimbang)";
+        // Generator ID Unik
+        function generateIdJurnal() {
+            const date = new Date();
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const time = date.getTime().toString().slice(-5);
+            document.getElementById('id_jurnal').value = `JRN-${yyyy}${mm}${dd}-${time}`;
+            
+            // Set default date to today
+            document.getElementById('tanggal').value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        // Hitung Keseimbangan Total
+        window.hitungTotal = function() {
+            let totDebit = 0;
+            let totKredit = 0;
+            document.querySelectorAll('.debit').forEach(el => totDebit += (parseFloat(el.value) || 0));
+            document.querySelectorAll('.kredit').forEach(el => totKredit += (parseFloat(el.value) || 0));
+
+            document.getElementById('totalDebit').innerText = totDebit.toLocaleString('id-ID');
+            document.getElementById('totalKredit').innerText = totKredit.toLocaleString('id-ID');
+
+            const statusEl = document.getElementById('statusBalance');
+            if (totDebit === totKredit && totDebit > 0) {
+                statusEl.className = "px-4 py-1.5 bg-green-100 text-green-700 text-sm font-bold rounded-xl border border-green-300 shadow-sm";
+                statusEl.innerText = "✓ SEIMBANG (BALANCE)";
             } else {
-                statusEl.className = "px-3 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-lg";
-                statusEl.innerText = "⚠️ Belum Balance";
+                statusEl.className = "px-4 py-1.5 bg-amber-50 text-amber-700 text-sm font-bold rounded-xl border border-amber-200 shadow-sm";
+                statusEl.innerText = "⚠️ BELUM BALANCE";
             }
         };
 
-        async function muatDropdownUnitUsaha() {
+        // Tambah Baris Baru
+        window.tambahBaris = function() {
+            const tbody = document.getElementById('tbodyJurnal');
+            const tr = document.createElement('tr');
+            tr.className = 'jurnal-row hover:bg-gray-50';
+            tr.innerHTML = `
+                <td class="p-2"><select class="form-input-custom kode_akun text-xs font-medium" required>${coaOptionsHTML}</select></td>
+                <td class="p-2">
+                    <select class="form-input-custom kategori_arus_kas text-xs">
+                        <option value="Nonkas">Nonkas</option>
+                        <option value="Operasi">Operasi</option>
+                        <option value="Investasi">Investasi</option>
+                        <option value="Pendanaan">Pendanaan</option>
+                    </select>
+                </td>
+                <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
+                <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="0" min="0" step="any" oninput="hitungTotal()" required></td>
+                <td class="p-2 text-center"><button type="button" onclick="hapusBaris(this)" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-200 transition">X</button></td>
+            `;
+            tbody.appendChild(tr);
+        };
+
+        // Hapus Baris
+        window.hapusBaris = function(btn) {
+            const rowCount = document.querySelectorAll('.jurnal-row').length;
+            if(rowCount > 2) {
+                btn.closest('tr').remove();
+                hitungTotal();
+            } else {
+                alert("Minimal harus ada 2 baris (Debit & Kredit) dalam satu jurnal!");
+            }
+        };
+
+        // Muat Dropdown API (Firestore)
+        async function inisialisasiData() {
+            generateIdJurnal();
+
+            // Muat Unit Usaha
             const selectUnit = document.getElementById('unit_usaha');
             try {
-                const snap = await getDocs(collection(db, "master_unit_usaha"));
-                if (snap.empty) {
-                    selectUnit.innerHTML = '<option value="">(Unit Usaha kosong)</option>';
-                    return;
-                }
+                const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
                 let units = [];
-                snap.forEach(d => units.push(d.data()));
+                snapUnit.forEach(d => units.push(d.data()));
                 units.sort((a, b) => a.kode.localeCompare(b.kode));
-
-                selectUnit.innerHTML = '';
+                selectUnit.innerHTML = '<option value="">Pilih Unit...</option>';
                 units.forEach(u => {
                     const opt = document.createElement('option');
                     opt.value = `${u.kode} - ${u.nama}`;
-                    opt.text = `${u.kode} - ${u.nama} (${u.kbli})`;
+                    opt.text = `${u.kode} - ${u.nama}`;
                     selectUnit.appendChild(opt);
                 });
             } catch (err) {
-                console.error("Gagal memuat unit usaha:", err);
+                selectUnit.innerHTML = '<option value="">Gagal memuat unit</option>';
             }
-        }
 
-        async function muatDropdownCOA() {
-            const selectCOA = document.getElementById('kode_akun');
+            // Muat COA
             try {
-                const querySnapshot = await getDocs(collection(db, "master_coa"));
-                if (querySnapshot.empty) {
-                    selectCOA.innerHTML = '<option value="">(COA Kosong)</option>';
-                    return;
-                }
+                const snapCOA = await getDocs(collection(db, "master_coa"));
                 let coaList = [];
-                querySnapshot.forEach(doc => coaList.push(doc.data()));
+                snapCOA.forEach(d => coaList.push(d.data()));
                 coaList.sort((a, b) => a.kode.localeCompare(b.kode));
-
-                selectCOA.innerHTML = '';
+                
+                coaOptionsHTML = '<option value="">Pilih Akun...</option>';
                 coaList.forEach(coa => {
-                    const opt = document.createElement('option');
-                    opt.value = coa.kode; 
-                    opt.text = `${coa.kode} - ${coa.nama}`;
-                    selectCOA.appendChild(opt);
+                    coaOptionsHTML += `<option value="${coa.kode}">${coa.kode} - ${coa.nama}</option>`;
                 });
-            } catch (error) {
-                console.error("Gagal memuat COA:", error);
+
+                document.querySelectorAll('.kode_akun').forEach(select => {
+                    select.innerHTML = coaOptionsHTML;
+                });
+            } catch (err) {
+                console.error("Gagal memuat COA");
             }
         }
 
-        muatDropdownUnitUsaha();
-        muatDropdownCOA();
+        inisialisasiData();
 
+        // Submit Multi-Row ke Firestore
         const formJurnal = document.getElementById('formJurnal');
         formJurnal.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // Validasi Keseimbangan
+            let totDebit = 0, totKredit = 0;
+            const rows = document.querySelectorAll('.jurnal-row');
+            rows.forEach(row => {
+                totDebit += parseFloat(row.querySelector('.debit').value) || 0;
+                totKredit += parseFloat(row.querySelector('.kredit').value) || 0;
+            });
+
+            if (totDebit !== totKredit || totDebit === 0) {
+                alert("❌ Transaksi ditolak! Total Debit dan Kredit harus SEIMBANG dan tidak boleh 0.");
+                return;
+            }
+
             const btn = document.getElementById('btnSubmit');
-            btn.innerText = "Menyimpan ke Cloud...";
+            btn.innerText = "Memproses...";
             btn.disabled = true;
 
             try {
-                const selectCOA = document.getElementById('kode_akun');
-                const namaAkunLengkap = selectCOA.options[selectCOA.selectedIndex]?.text || '';
-
-                const dataJurnal = {
+                const batchPromises = [];
+                const commonData = {
                     id_jurnal: document.getElementById('id_jurnal').value,
                     tanggal: document.getElementById('tanggal').value,
                     no_bukti: document.getElementById('no_bukti').value,
                     jenis_dokumen: document.getElementById('jenis_dokumen').value,
                     unit_usaha: document.getElementById('unit_usaha').value,
-                    proyek: document.getElementById('proyek').value,
                     lawan_transaksi: document.getElementById('lawan_transaksi').value,
                     npwp_nik: document.getElementById('npwp_nik').value,
-                    link_bukti: document.getElementById('link_bukti').value, // Kolom Link Bukti Transaksi
-                    kode_akun: document.getElementById('kode_akun').value,
-                    nama_akun: namaAkunLengkap,
-                    kategori_arus_kas: document.getElementById('kategori_arus_kas').value,
-                    debit: parseFloat(document.getElementById('debit').value) || 0,
-                    kredit: parseFloat(document.getElementById('kredit').value) || 0,
+                    link_bukti: document.getElementById('link_bukti').value,
                     dpp_penjualan: parseFloat(document.getElementById('dpp_penjualan').value) || 0,
-                    ppn_keluaran: parseFloat(document.getElementById('ppn_keluaran').value) || 0,
-                    pph_dipotong: parseFloat(document.getElementById('pph_dipotong').value) || 0,
                     kode_pajak: document.getElementById('kode_pajak').value,
                     keterangan: document.getElementById('keterangan').value,
                     status: document.getElementById('status_jurnal').value,
                     timestamp: new Date()
                 };
 
-                await addDoc(collection(db, CONFIG.COLLECTION_NAME), dataJurnal);
+                // Looping per baris, simpan sebagai dokumen individual untuk buku besar
+                rows.forEach(row => {
+                    const selectCOA = row.querySelector('.kode_akun');
+                    const debitVal = parseFloat(row.querySelector('.debit').value) || 0;
+                    const kreditVal = parseFloat(row.querySelector('.kredit').value) || 0;
+
+                    if (debitVal > 0 || kreditVal > 0) {
+                        const rowData = {
+                            ...commonData,
+                            kode_akun: selectCOA.value,
+                            nama_akun: selectCOA.options[selectCOA.selectedIndex]?.text || '',
+                            kategori_arus_kas: row.querySelector('.kategori_arus_kas').value,
+                            debit: debitVal,
+                            kredit: kreditVal
+                        };
+                        batchPromises.push(addDoc(collection(db, CONFIG.COLLECTION_NAME), rowData));
+                    }
+                });
+
+                await Promise.all(batchPromises);
+
                 document.getElementById('alertSuccess').classList.remove('hidden');
                 formJurnal.reset();
-                muatDropdownUnitUsaha();
-                muatDropdownCOA();
+                generateIdJurnal(); // Generate ID baru
+                hitungTotal();      // Reset balance status
+
+                // Reset tabel ke 2 baris awal saja
+                const tbody = document.getElementById('tbodyJurnal');
+                while(tbody.children.length > 2) {
+                    tbody.removeChild(tbody.lastChild);
+                }
+
                 setTimeout(() => document.getElementById('alertSuccess').classList.add('hidden'), 5000);
             } catch (error) {
                 console.error("Gagal menyimpan:", error);
-                alert("Terjadi kesalahan saat menyimpan ke database.");
+                alert("Terjadi kesalahan sistem saat menyimpan ke database.");
             } finally {
-                btn.innerText = "Simpan Jurnal ke Firebase Firestore";
+                btn.innerText = "Simpan Jurnal (Multi-Row)";
                 btn.disabled = false;
             }
         });
