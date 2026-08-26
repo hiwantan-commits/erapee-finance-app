@@ -1,6 +1,6 @@
 // js/master-page.js - Controller untuk master-data.html
 import { db } from "./config.js";
-import { collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ==========================================
 // 1. MODUL MASTER DATA UNIT USAHA
@@ -21,13 +21,17 @@ async function muatUnitUsaha() {
 
         snap.forEach(docSnap => {
             const data = docSnap.data();
+            const klasifikasiTeks = data.klasifikasi || '-';
+            
+            // Perhatikan pengiriman parameter ke fungsi edit
             tbody.innerHTML += `
                 <tr class="border-b border-gray-100 hover:bg-gray-50">
                     <td class="p-3"><span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-mono font-bold text-xs">${data.kode}</span></td>
                     <td class="p-3 font-medium text-gray-800 text-sm">${data.nama}</td>
-                    <td class="p-3 text-gray-500 text-sm">${data.klasifikasi || '-'}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="window.hapusUnitUsaha('${docSnap.id}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg text-xs font-bold transition">Hapus</button>
+                    <td class="p-3 text-gray-500 text-sm">${klasifikasiTeks}</td>
+                    <td class="p-3 text-center space-x-1">
+                        <button onclick="window.editUnitUsaha('${docSnap.id}', '${data.kode}', '${data.nama}', '${klasifikasiTeks}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded text-xs font-bold transition">Edit</button>
+                        <button onclick="window.hapusUnitUsaha('${docSnap.id}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded text-xs font-bold transition">Hapus</button>
                     </td>
                 </tr>
             `;
@@ -38,8 +42,31 @@ async function muatUnitUsaha() {
     }
 }
 
+window.editUnitUsaha = function(id, kode, nama, klasifikasi) {
+    document.getElementById('editIdUnit').value = id;
+    document.getElementById('kodeUnit').value = kode;
+    document.getElementById('namaUnit').value = nama;
+    document.getElementById('klasifikasiUnit').value = klasifikasi === '-' ? '' : klasifikasi;
+    
+    document.getElementById('btnSimpanUnit').innerText = 'Update Data Unit';
+    document.getElementById('btnSimpanUnit').classList.replace('bg-indigo-600', 'bg-amber-500');
+    document.getElementById('btnSimpanUnit').classList.replace('hover:bg-indigo-700', 'hover:bg-amber-600');
+    document.getElementById('btnBatalUnit').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.batalEditUnit = function() {
+    document.getElementById('formUnitUsaha').reset();
+    document.getElementById('editIdUnit').value = '';
+    
+    document.getElementById('btnSimpanUnit').innerText = 'Simpan Unit Usaha';
+    document.getElementById('btnSimpanUnit').classList.replace('bg-amber-500', 'bg-indigo-600');
+    document.getElementById('btnSimpanUnit').classList.replace('hover:bg-amber-600', 'hover:bg-indigo-700');
+    document.getElementById('btnBatalUnit').classList.add('hidden');
+}
+
 window.hapusUnitUsaha = async function(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus Unit Usaha ini? Data jurnal yang sudah menggunakan kode ini akan tetap ada, namun filter mungkin terpengaruh.')) {
+    if (confirm('Yakin hapus Unit Usaha ini? Data jurnal dengan kode ini tidak akan ikut terhapus.')) {
         try {
             await deleteDoc(doc(db, "master_unit_usaha", id));
             muatUnitUsaha();
@@ -66,8 +93,7 @@ async function muatCOA() {
             coaList.push({ id: docSnap.id, ...docSnap.data() });
         });
         
-        // Urutkan berdasarkan kode akun terkecil ke terbesar
-        coaList.sort((a, b) => a.kode.localeCompare(b.kode));
+        coaList.sort((a, b) => String(a.kode).localeCompare(String(b.kode)));
 
         if (coaList.length === 0) {
             tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-400">Belum ada master data COA (Chart of Accounts).</td></tr>';
@@ -79,8 +105,9 @@ async function muatCOA() {
                 <tr class="border-b border-gray-100 hover:bg-gray-50">
                     <td class="p-3"><span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-mono font-bold text-xs">${data.kode}</span></td>
                     <td class="p-3 font-medium text-gray-800 text-sm">${data.nama}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="window.hapusCOA('${data.id}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg text-xs font-bold transition">Hapus</button>
+                    <td class="p-3 text-center space-x-1">
+                        <button onclick="window.editCOA('${data.id}', '${data.kode}', '${data.nama}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded text-xs font-bold transition">Edit</button>
+                        <button onclick="window.hapusCOA('${data.id}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded text-xs font-bold transition">Hapus</button>
                     </td>
                 </tr>
             `;
@@ -91,8 +118,30 @@ async function muatCOA() {
     }
 }
 
+window.editCOA = function(id, kode, nama) {
+    document.getElementById('editIdCOA').value = id;
+    document.getElementById('kodeCOA').value = kode;
+    document.getElementById('namaCOA').value = nama;
+    
+    document.getElementById('btnSimpanCOA').innerText = 'Update COA';
+    document.getElementById('btnSimpanCOA').classList.replace('bg-blue-600', 'bg-amber-500');
+    document.getElementById('btnSimpanCOA').classList.replace('hover:bg-blue-700', 'hover:bg-amber-600');
+    document.getElementById('btnBatalCOA').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.batalEditCOA = function() {
+    document.getElementById('formCOA').reset();
+    document.getElementById('editIdCOA').value = '';
+    
+    document.getElementById('btnSimpanCOA').innerText = 'Simpan COA';
+    document.getElementById('btnSimpanCOA').classList.replace('bg-amber-500', 'bg-blue-600');
+    document.getElementById('btnSimpanCOA').classList.replace('hover:bg-amber-600', 'hover:bg-blue-700');
+    document.getElementById('btnBatalCOA').classList.add('hidden');
+}
+
 window.hapusCOA = async function(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus Kode Akun (COA) ini?')) {
+    if (confirm('Yakin hapus Kode Akun (COA) ini?')) {
         try {
             await deleteDoc(doc(db, "master_coa", id));
             muatCOA();
@@ -109,54 +158,70 @@ document.addEventListener('DOMContentLoaded', () => {
     muatUnitUsaha();
     muatCOA();
 
-    // Event Listener Tambah Unit Usaha
+    // Submit Unit Usaha (Bisa Tambah atau Update)
     const formUnit = document.getElementById('formUnitUsaha');
     if (formUnit) {
         formUnit.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanUnit');
+            const editId = document.getElementById('editIdUnit').value;
+            
             btn.disabled = true;
             btn.innerText = 'Menyimpan...';
             
+            const payload = {
+                kode: document.getElementById('kodeUnit').value.toUpperCase().trim(),
+                nama: document.getElementById('namaUnit').value.trim(),
+                klasifikasi: document.getElementById('klasifikasiUnit').value.trim()
+            };
+
             try {
-                await addDoc(collection(db, "master_unit_usaha"), {
-                    kode: document.getElementById('kodeUnit').value.toUpperCase().trim(),
-                    nama: document.getElementById('namaUnit').value.trim(),
-                    klasifikasi: document.getElementById('klasifikasiUnit').value.trim()
-                });
-                formUnit.reset();
+                if (editId) {
+                    await updateDoc(doc(db, "master_unit_usaha", editId), payload);
+                    window.batalEditUnit(); // Reset form & tombol
+                } else {
+                    await addDoc(collection(db, "master_unit_usaha"), payload);
+                    formUnit.reset();
+                }
                 muatUnitUsaha();
             } catch (error) {
                 alert('Gagal menyimpan Unit Usaha: ' + error.message);
+                btn.disabled = false;
+                btn.innerText = editId ? 'Update Data Unit' : 'Simpan Unit Usaha';
             }
-            
-            btn.disabled = false;
-            btn.innerText = 'Simpan Unit Usaha';
         });
     }
 
-    // Event Listener Tambah COA
+    // Submit COA (Bisa Tambah atau Update)
     const formCOA = document.getElementById('formCOA');
     if (formCOA) {
         formCOA.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanCOA');
+            const editId = document.getElementById('editIdCOA').value;
+            
             btn.disabled = true;
             btn.innerText = 'Menyimpan...';
             
+            const payload = {
+                kode: document.getElementById('kodeCOA').value.trim(),
+                nama: document.getElementById('namaCOA').value.trim()
+            };
+
             try {
-                await addDoc(collection(db, "master_coa"), {
-                    kode: document.getElementById('kodeCOA').value.trim(),
-                    nama: document.getElementById('namaCOA').value.trim()
-                });
-                formCOA.reset();
+                if (editId) {
+                    await updateDoc(doc(db, "master_coa", editId), payload);
+                    window.batalEditCOA();
+                } else {
+                    await addDoc(collection(db, "master_coa"), payload);
+                    formCOA.reset();
+                }
                 muatCOA();
             } catch (error) {
                 alert('Gagal menyimpan COA: ' + error.message);
+                btn.disabled = false;
+                btn.innerText = editId ? 'Update COA' : 'Simpan COA';
             }
-            
-            btn.disabled = false;
-            btn.innerText = 'Simpan COA';
         });
     }
 });
