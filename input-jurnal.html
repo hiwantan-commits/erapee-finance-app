@@ -43,7 +43,7 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 2: Klasifikasi Usaha & Unit (Sesuai Master Data) -->
+                        <!-- Bagian 2: Klasifikasi Usaha & Unit (Dinamis dari Firestore) -->
                         <div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
@@ -59,13 +59,7 @@
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Unit Usaha / Sektor (Master Data)</label>
                                     <select id="unit_usaha" class="form-input-custom">
-                                        <option value="CORP - Corporate/Head Office">CORP - Corporate / Head Office</option>
-                                        <option value="MARC - Marcframe (Digital Services)">MARC - Marcframe (KBLI 62199)</option>
-                                        <option value="SIP - SiPacul (Software Publishing)">SIP - SiPacul (KBLI 58290)</option>
-                                        <option value="WT-NANAS - Wani Tani (Nanas)">WT-NANAS - Wani Tani (KBLI 01220)</option>
-                                        <option value="WT-TEBU - Wani Tani (Tebu)">WT-TEBU - Wani Tani (KBLI 01140)</option>
-                                        <option value="WT-CABAI - Wani Tani (Cabai)">WT-CABAI - Wani Tani (KBLI 01138)</option>
-                                        <option value="SHARED - Biaya Bersama">SHARED - Biaya Bersama (Shared Cost)</option>
+                                        <option value="">Memuat unit usaha...</option>
                                     </select>
                                 </div>
                                 <div>
@@ -93,7 +87,7 @@
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Kode Akun (COA)</label>
                                     <select id="kode_akun" class="form-input-custom">
-                                        <option value="">Memuat data akun...</option>
+                                        <option value="">Memuat akun...</option>
                                     </select>
                                 </div>
                                 <div>
@@ -154,7 +148,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Keterangan / Uraian Jurnal</label>
-                                    <textarea id="keterangan" rows="3" placeholder="Penjelasan lengkap transaksi dalam format paragraf..." class="form-input-custom resize-y" required></textarea>
+                                    <textarea id="keterangan" rows="3" placeholder="Penjelasan lengkap transaksi..." class="form-input-custom resize-y" required></textarea>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1 text-gray-700">Status Jurnal</label>
@@ -173,7 +167,7 @@
                             </button>
                         </div>
                         <div id="alertSuccess" class="hidden mt-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm text-center font-medium">
-                            ✓ Jurnal akuntansi berhasil disimpan ke Cloud database Google!
+                            ✓ Jurnal akuntansi berhasil disimpan ke Cloud database!
                         </div>
                     </form>
                 </div>
@@ -181,30 +175,52 @@
         </div>
     </div>
 
-    <!-- Skrip Firebase & Submit -->
+    <!-- Skrip Firebase & Load Dinamis Unit Usaha + COA -->
     <script type="module">
         import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Muat Dropdown Unit Usaha dari Firestore (Master Unit Usaha)
+        async function muatDropdownUnitUsaha() {
+            const selectUnit = document.getElementById('unit_usaha');
+            try {
+                const snap = await getDocs(collection(db, "master_unit_usaha"));
+                if (snap.empty) {
+                    selectUnit.innerHTML = '<option value="">(Unit Usaha kosong, harap muat di Master Data)</option>';
+                    return;
+                }
+                let units = [];
+                snap.forEach(d => units.push(d.data()));
+                units.sort((a, b) => a.kode.localeCompare(b.kode));
+
+                selectUnit.innerHTML = '';
+                units.forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = `${u.kode} - ${u.nama}`;
+                    opt.text = `${u.kode} - ${u.nama} (${u.kbli})`;
+                    selectUnit.appendChild(opt);
+                });
+            } catch (err) {
+                console.error("Gagal memuat unit usaha:", err);
+                selectUnit.innerHTML = '<option value="">Gagal memuat unit usaha</option>';
+            }
+        }
+
+        // Muat Dropdown COA dari Firestore
         async function muatDropdownCOA() {
             const selectCOA = document.getElementById('kode_akun');
             try {
                 const querySnapshot = await getDocs(collection(db, "master_coa"));
-                
                 if (querySnapshot.empty) {
-                    selectCOA.innerHTML = '<option value="">(COA Kosong, harap isi di Master Data)</option>';
+                    selectCOA.innerHTML = '<option value="">(COA Kosong)</option>';
                     return;
                 }
-
                 let coaList = [];
-                querySnapshot.forEach(doc => {
-                    coaList.push(doc.data());
-                });
+                querySnapshot.forEach(doc => coaList.push(doc.data()));
                 coaList.sort((a, b) => a.kode.localeCompare(b.kode));
 
                 selectCOA.innerHTML = '';
-                
                 coaList.forEach(coa => {
                     const opt = document.createElement('option');
                     opt.value = coa.kode; 
@@ -213,14 +229,14 @@
                 });
             } catch (error) {
                 console.error("Gagal memuat COA:", error);
-                selectCOA.innerHTML = '<option value="">Gagal memuat data akun</option>';
+                selectCOA.innerHTML = '<option value="">Gagal memuat akun</option>';
             }
         }
 
+        muatDropdownUnitUsaha();
         muatDropdownCOA();
 
         const formJurnal = document.getElementById('formJurnal');
-
         formJurnal.addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
@@ -229,7 +245,7 @@
 
             try {
                 const selectCOA = document.getElementById('kode_akun');
-                const namaAkunLengkap = selectCOA.options[selectCOA.selectedIndex].text;
+                const namaAkunLengkap = selectCOA.options[selectCOA.selectedIndex]?.text || '';
 
                 const dataJurnal = {
                     id_jurnal: document.getElementById('id_jurnal').value,
@@ -255,16 +271,10 @@
                 };
 
                 await addDoc(collection(db, CONFIG.COLLECTION_NAME), dataJurnal);
-                
-                await addDoc(collection(db, "histori_audit"), {
-                    aksi: "TAMBAH JURNAL",
-                    no_bukti: dataJurnal.no_bukti,
-                    detail: `Menambah jurnal ${dataJurnal.jenis_dokumen} [${dataJurnal.kode_akun}] segmen ${dataJurnal.unit_usaha}`,
-                    waktu: new Date()
-                });
-
                 document.getElementById('alertSuccess').classList.remove('hidden');
                 formJurnal.reset();
+                muatDropdownUnitUsaha();
+                muatDropdownCOA();
                 setTimeout(() => document.getElementById('alertSuccess').classList.add('hidden'), 5000);
             } catch (error) {
                 console.error("Gagal menyimpan:", error);
