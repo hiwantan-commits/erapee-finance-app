@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histori Audit & Checks | PT ERAPEE</title>
+    <title>Histori Audit & Jejak Aktivitas | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -17,68 +17,30 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Pemeriksaan Sistem & Audit Checks -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
-                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
-                        <div>
-                            <h2 class="text-lg font-bold text-gray-800">Pemeriksaan Sistem (Audit Checks)</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Validasi otomatis keseimbangan jurnal, neraca saldo, dan kepatuhan</p>
-                        </div>
-                        <span class="text-xs px-3 py-1 bg-green-50 text-green-700 font-semibold rounded-full">Status: PASS</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-4">Pemeriksaan</th>
-                                    <th class="p-4 text-center">Nilai</th>
-                                    <th class="p-4 text-center">Ekspektasi</th>
-                                    <th class="p-4 text-center">Prioritas</th>
-                                    <th class="p-4 text-center">Status</th>
-                                    <th class="p-4">Tindakan</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                <tr>
-                                    <td class="p-4 font-medium">Jurnal POSTED tidak seimbang</td>
-                                    <td class="p-4 text-center">0.0</td>
-                                    <td class="p-4 text-center">0</td>
-                                    <td class="p-4 text-center"><span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded">KRITIS</span></td>
-                                    <td class="p-4 text-center"><span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded">PASS</span></td>
-                                    <td class="p-4 text-xs text-gray-500">Perbaiki debit/kredit untuk setiap ID jurnal</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 font-medium">Neraca saldo seimbang</td>
-                                    <td class="p-4 text-center">0.0</td>
-                                    <td class="p-4 text-center">0</td>
-                                    <td class="p-4 text-center"><span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded">KRITIS</span></td>
-                                    <td class="p-4 text-center"><span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded">PASS</span></td>
-                                    <td class="p-4 text-xs text-gray-500">Telusuri jurnal atau saldo awal</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!-- Header Histori -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Histori Audit & Jejak Aktivitas (Audit Trail)</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Catatan waktu, pengguna, dan perubahan transaksi sistem secara transparan</p>
                     </div>
                 </div>
 
-                <!-- Histori Aktivitas Audit Cloud -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
-                    <div class="mb-6 pb-4 border-b border-gray-100">
-                        <h2 class="text-lg font-bold text-gray-800">Log Histori Aktivitas Pengguna</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Catatan waktu nyata dari Firebase Firestore</p>
-                    </div>
+                <!-- Tabel Log Aktivitas -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
+                    <h3 class="font-bold text-gray-800 text-base mb-4">Log Aktivitas Sistem Terbaru</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-4">Waktu</th>
-                                    <th class="p-4">Aksi</th>
-                                    <th class="p-4">No Bukti</th>
-                                    <th class="p-4">Detail Perubahan</th>
+                                    <th class="p-3">Waktu (Timestamp)</th>
+                                    <th class="p-3">Aksi</th>
+                                    <th class="p-3">ID Jurnal</th>
+                                    <th class="p-3">Detail & Pengguna</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelHistori" class="divide-y divide-gray-100">
+                            <tbody id="tabelHistori" class="divide-y divide-gray-100 text-xs">
                                 <tr>
-                                    <td colspan="4" class="p-8 text-center text-gray-400">Memuat histori dari Cloud Firestore...</td>
+                                    <td colspan="4" class="p-8 text-center text-gray-400">Memuat jejak audit aktivitas...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -88,46 +50,8 @@
         </div>
     </div>
 
-    <!-- Skrip Firestore untuk Histori -->
-    <script type="module">
-        import { CONFIG, db } from "./js/config.js";
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const app = initializeApp(CONFIG.FIREBASE_CONFIG);
-
-        async function muatHistori() {
-            const tbody = document.getElementById('tabelHistori');
-            try {
-                const q = query(collection(db, "histori_audit"), orderBy("waktu", "desc"));
-                const querySnapshot = await getDocs(q);
-                tbody.innerHTML = '';
-
-                if (querySnapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Belum ada catatan histori aktivitas.</td></tr>`;
-                    return;
-                }
-
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    let waktuStr = data.waktu && data.waktu.toDate ? data.waktu.toDate().toLocaleString('id-ID') : 'Baru saja';
-                    let tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="p-4 text-xs text-gray-500 whitespace-nowrap">${waktuStr}</td>
-                        <td class="p-4 font-semibold text-xs"><span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full">${data.aksi || '-'}</span></td>
-                        <td class="p-4 font-mono text-xs font-semibold">${data.no_bukti || '-'}</td>
-                        <td class="p-4 text-xs text-gray-600">${data.detail || '-'}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (error) {
-                console.error("Gagal memuat histori:", error);
-                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500">Gagal memuat histori audit dari database.</td></tr>`;
-            }
-        }
-
-        muatHistori();
-    </script>
+    <!-- Panggil Modular Controller & Komponen Global -->
+    <script type="module" src="js/history-page.js"></script>
     <script type="module" src="js/component.js"></script>
 </body>
 </html>
