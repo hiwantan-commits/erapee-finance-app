@@ -6,6 +6,16 @@
     <title>Laporan Keuangan | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        @media print {
+            body { background: white; color: black; }
+            #sidebar-container, #header-container, .no-print { display: none !important; }
+            .dashboard-card { box-shadow: none !important; border: none !important; padding: 0 !important; }
+            main { margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
+            .print-header { display: block !important; text-align: center; margin-bottom: 20px; }
+        }
+        .print-header { display: none; }
+    </style>
 </head>
 <body class="text-gray-800 bg-gray-50">
     <div class="flex h-screen overflow-hidden">
@@ -17,8 +27,29 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+                <!-- Header Laporan & Tombol Cetak -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Laporan Keuangan Korporat</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Laba Rugi, Posisi Keuangan, Arus Kas, dan Neraca Saldo (Tahun Buku 2026)</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition shadow-sm flex items-center gap-2">
+                            🖨️ Cetak / Simpan PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Judul Khusus Saat Diprint -->
+                <div class="print-header">
+                    <h1 class="text-xl font-bold uppercase">PT ERAPEE Anugrah Sejahtera</h1>
+                    <h2 class="text-lg font-semibold text-gray-700" id="judulCetakLaporan">LAPORAN KEUANGAN</h2>
+                    <p class="text-xs text-gray-500">Per Tahun Buku 2026 | Standar Akuntansi Keuangan</p>
+                    <hr class="my-3">
+                </div>
+
                 <!-- Navigasi Tab Laporan -->
-                <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4">
+                <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4 no-print">
                     <button onclick="gantiTab('LabaRugi')" id="tabLabaRugi" class="px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 text-white shadow-sm transition">
                         📈 Laba Rugi
                     </button>
@@ -34,7 +65,7 @@
                 </div>
 
                 <!-- Konten Tab 1: Laba Rugi -->
-                <div id="kontenLabaRugi" class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
+                <div id="kontenLabaRugi" class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm laporan-section">
                     <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
                             <h2 class="text-lg font-bold text-gray-800">Laporan Laba Rugi (Income Statement)</h2>
@@ -51,37 +82,19 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
-                                <tr class="bg-gray-50 font-bold text-gray-900">
-                                    <td class="p-4">PENDAPATAN USAHA</td>
-                                    <td class="p-4 text-right">0</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 pl-6 text-gray-600">SaaS dan lisensi perangkat lunak</td>
-                                    <td class="p-4 text-right">0</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 pl-6 text-gray-600">Pendapatan budidaya pertanian</td>
-                                    <td class="p-4 text-right">0</td>
-                                </tr>
-                                <tr class="bg-gray-50 font-bold text-gray-900">
-                                    <td class="p-4">BEBAN OPERASIONAL</td>
-                                    <td class="p-4 text-right">0</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 pl-6 text-gray-600">Beban gaji & tunjangan</td>
-                                    <td class="p-4 text-right">0</td>
-                                </tr>
-                                <tr class="bg-indigo-50 font-bold text-indigo-900">
-                                    <td class="p-4">LABA / (RUGI) BERSIH</td>
-                                    <td class="p-4 text-right">Rp 0</td>
-                                </tr>
+                                <tr class="bg-gray-50 font-bold text-gray-900"><td class="p-4">PENDAPATAN USAHA</td><td class="p-4 text-right">0</td></tr>
+                                <tr><td class="p-4 pl-6 text-gray-600">SaaS dan lisensi perangkat lunak</td><td class="p-4 text-right">0</td></tr>
+                                <tr><td class="p-4 pl-6 text-gray-600">Pendapatan budidaya pertanian</td><td class="p-4 text-right">0</td></tr>
+                                <tr class="bg-gray-50 font-bold text-gray-900"><td class="p-4">BEBAN OPERASIONAL</td><td class="p-4 text-right">0</td></tr>
+                                <tr><td class="p-4 pl-6 text-gray-600">Beban gaji & tunjangan</td><td class="p-4 text-right">0</td></tr>
+                                <tr class="bg-indigo-50 font-bold text-indigo-900"><td class="p-4">LABA / (RUGI) BERSIH</td><td class="p-4 text-right">Rp 0</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Konten Tab 2: Neraca / Posisi Keuangan -->
-                <div id="kontenNeraca" class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm hidden">
+                <!-- Konten Tab 2: Neraca -->
+                <div id="kontenNeraca" class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm hidden laporan-section">
                     <div class="mb-6 pb-4 border-b border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800">Laporan Posisi Keuangan (Balance Sheet)</h2>
                         <p class="text-xs text-gray-500 mt-0.5">Per 31 Desember 2026</p>
@@ -101,31 +114,39 @@
                                 <tr class="bg-gray-50 font-bold text-gray-900"><td colspan="2" class="p-4">LIABILITAS & EKUITAS</td></tr>
                                 <tr><td class="p-4 pl-6 text-gray-600">Liabilitas Jangka Pendek</td><td class="p-4 text-right">0</td></tr>
                                 <tr><td class="p-4 pl-6 text-gray-600">Modal Saham Disetor</td><td class="p-4 text-right">125.000.000</td></tr>
-                                <tr class="bg-indigo-50 font-bold text-indigo-900">
-                                    <td class="p-4">TOTAL LIABILITAS & EKUITAS</td>
-                                    <td class="p-4 text-right">Rp 125.000.000</td>
-                                </tr>
+                                <tr class="bg-indigo-50 font-bold text-indigo-900"><td class="p-4">TOTAL LIABILITAS & EKUITAS</td><td class="p-4 text-right">Rp 125.000.000</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 <!-- Konten Tab 3: Arus Kas -->
-                <div id="kontenArusKas" class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm hidden">
+                <div id="kontenArusKas" class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm hidden laporan-section">
                     <div class="mb-6 pb-4 border-b border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800">Laporan Arus Kas (Cash Flow Statement)</h2>
                         <p class="text-xs text-gray-500 mt-0.5">Aktivitas Operasi, Investasi, dan Pendanaan</p>
                     </div>
-                    <p class="text-sm text-gray-500 p-4 bg-gray-50 rounded-xl">Arus kas bersih terhitung otomatis berdasarkan data transaksi jurnal.</p>
+                    <p class="text-sm text-gray-500 p-4 bg-gray-50 rounded-xl">Arus kas bersih dihitung otomatis berdasarkan data transaksi jurnal.</p>
                 </div>
 
                 <!-- Konten Tab 4: Neraca Saldo -->
-                <div id="kontenNeracaSaldo" class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm hidden">
+                <div id="kontenNeracaSaldo" class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm hidden laporan-section">
                     <div class="mb-6 pb-4 border-b border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800">Neraca Saldo (Trial Balance)</h2>
                         <p class="text-xs text-gray-500 mt-0.5">Rekapitulasi saldo debit dan kredit seluruh akun</p>
                     </div>
                     <p class="text-sm text-gray-500 p-4 bg-gray-50 rounded-xl">Neraca saldo disinkronkan langsung dari buku besar transaksi Firestore.</p>
+                </div>
+
+                <!-- Tanda Tangan Cetak (Hanya Muncul Saat Diprint) -->
+                <div class="hidden print:block mt-16">
+                    <table class="w-full text-center text-xs">
+                        <tr>
+                            <td>Dibuat Oleh,<br><br><br><br>( Akunting )</td>
+                            <td>Diperiksa Oleh,<br><br><br><br>( Direktur Keuangan )</td>
+                            <td>Disetujui Oleh,<br><br><br><br>( Direktur Utama )</td>
+                        </tr>
+                    </table>
                 </div>
             </main>
         </div>
@@ -133,18 +154,11 @@
 
     <!-- Skrip Pengaturan Tab -->
     <script type="module">
-        import { CONFIG, db } from "./js/config.js";
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
         window.gantiTab = function(namaTab) {
             const listTab = ['LabaRugi', 'Neraca', 'ArusKas', 'NeracaSaldo'];
-
-            listTab.items = listTab; // standard loop array
             listTab.forEach(t => {
                 const konten = document.getElementById('konten' + t);
                 const tombol = document.getElementById('tab' + t);
-
                 if (konten) konten.classList.add('hidden');
                 if (tombol) {
                     tombol.className = "px-4 py-2 text-sm font-semibold rounded-xl bg-white text-gray-600 hover:bg-gray-100 transition border border-gray-200";
@@ -153,11 +167,19 @@
 
             const targetKonten = document.getElementById('konten' + namaTab);
             const targetTombol = document.getElementById('tab' + namaTab);
-
             if (targetKonten) targetKonten.classList.remove('hidden');
             if (targetTombol) {
                 targetTombol.className = "px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 text-white shadow-sm transition";
             }
+
+            // Ubah judul saat dicetak sesuai tab aktif
+            const titles = {
+                'LabaRugi': 'LAPORAN LABA RUGI',
+                'Neraca': 'LAPORAN POSISI KEUANGAN (NERACA)',
+                'ArusKas': 'LAPORAN ARUS KAS',
+                'NeracaSaldo': 'NERACA SALDO (TRIAL BALANCE)'
+            };
+            document.getElementById('judulCetakLaporan').innerText = titles[namaTab] || 'LAPORAN KEUANGAN';
         };
     </script>
     <script type="module" src="js/component.js"></script>
