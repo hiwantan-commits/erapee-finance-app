@@ -4,7 +4,6 @@
 import { CONFIG, db } from "./config.js";
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Nama koleksi pusat yang digunakan bersama oleh seluruh halaman
 const KOLEKSI_UTAMA = CONFIG.COLLECTION_NAME || "jurnal_transaksi";
 
 /**
@@ -12,7 +11,6 @@ const KOLEKSI_UTAMA = CONFIG.COLLECTION_NAME || "jurnal_transaksi";
  */
 export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = null) {
     try {
-        // Jika sedang dalam mode edit, hapus data lama berdasarkan ID Jurnal terlebih dahulu
         if (editIdJurnal) {
             await hapusJurnalPusat(editIdJurnal);
         }
@@ -45,7 +43,7 @@ export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = nul
 }
 
 /**
- * 2. Ambil Seluruh Data Jurnal (Digunakan di Manajemen, Laporan, Dashboard, Rekap PPN)
+ * 2. Ambil Seluruh Data Jurnal
  */
 export async function ambilSemuaJurnalPusat() {
     try {
@@ -84,7 +82,6 @@ export async function ambilSemuaJurnalPusat() {
             groupedJurnal[id_jurnal].total_kredit += parseFloat(data.kredit) || 0;
         });
 
-        // Kembalikan dalam bentuk array yang diurutkan dari yang terbaru
         return Object.values(groupedJurnal).sort((a, b) => b.id_jurnal.localeCompare(a.id_jurnal));
     } catch (error) {
         console.error("Gagal mengambil data dari pusat:", error);
