@@ -181,9 +181,12 @@
 
     <!-- Skrip Utama -->
     <script type="module">
-        import { CONFIG, db } from "./js/config.js";
+        import { db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Nama koleksi diseragamkan secara eksplisit
+        const NAMA_KOLEKSI = "jurnal_transaksi";
 
         let coaOptionsHTML = '<option value="">Pilih Akun...</option>';
         const urlParams = new URLSearchParams(window.location.search);
@@ -314,7 +317,7 @@
                 document.getElementById('btnSubmit').innerText = "Simpan Perubahan";
                 
                 try {
-                    const q = query(collection(db, CONFIG.COLLECTION_NAME), where("id_jurnal", "==", editIdJurnal));
+                    const q = query(collection(db, NAMA_KOLEKSI), where("id_jurnal", "==", editIdJurnal));
                     const querySnapshot = await getDocs(q);
 
                     if (!querySnapshot.empty) {
@@ -381,10 +384,10 @@
                 const targetIdJurnal = document.getElementById('id_jurnal').value;
 
                 if (editIdJurnal) {
-                    const qOld = query(collection(db, CONFIG.COLLECTION_NAME), where("id_jurnal", "==", editIdJurnal));
+                    const qOld = query(collection(db, NAMA_KOLEKSI), where("id_jurnal", "==", editIdJurnal));
                     const oldSnap = await getDocs(qOld);
                     const deletePromises = [];
-                    oldSnap.forEach(dSnap => deletePromises.push(deleteDoc(doc(db, CONFIG.COLLECTION_NAME, dSnap.id))));
+                    oldSnap.forEach(dSnap => deletePromises.push(deleteDoc(doc(db, NAMA_KOLEKSI, dSnap.id))));
                     await Promise.all(deletePromises);
                 }
 
@@ -419,7 +422,7 @@
                             debit: debitVal,
                             kredit: kreditVal
                         };
-                        batchPromises.push(addDoc(collection(db, CONFIG.COLLECTION_NAME), rowData));
+                        batchPromises.push(addDoc(collection(db, NAMA_KOLEKSI), rowData));
                     }
                 });
 
