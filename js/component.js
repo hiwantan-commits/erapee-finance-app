@@ -8,12 +8,17 @@ const auth = getAuth(app);
 
 document.addEventListener("DOMContentLoaded", function() {
     const path = window.location.pathname;
-    const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+    // Mendukung clean URL (tanpa .html) maupun dengan .html
+    let currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index';
+    if (currentFile.endsWith('.html')) {
+        currentFile = currentFile.replace('.html', '');
+    }
+    if (currentFile === '') currentFile = 'index';
 
-    if (currentFile !== 'login.html') {
+    if (currentFile !== 'login') {
         onAuthStateChanged(auth, (user) => {
             if (!user) {
-                window.location.href = 'login.html';
+                window.location.href = 'login';
             } else {
                 muatSidebar();
                 muatHeader();
@@ -27,19 +32,23 @@ function muatSidebar() {
     if (!sidebarContainer) return;
 
     const path = window.location.pathname;
-    const currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+    let currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index';
+    if (currentFile.endsWith('.html')) {
+        currentFile = currentFile.replace('.html', '');
+    }
+    if (currentFile === '') currentFile = 'index';
 
     const menuItems = [
-        { name: 'Dashboard & Audit', href: 'index.html', icon: '🏠' },
-        { name: 'Profil & Parameter Pajak', href: 'profil-pajak.html', icon: '🏢' },
-        { name: 'COA & Master Data', href: 'master-data.html', icon: '🗂️' },
-        { name: 'Input Jurnal (Double-Entry)', href: 'input-jurnal.html', icon: '📝' },
-        { name: 'Manajemen & Buku Besar', href: 'manajemen.html', icon: '📊' },
-        { name: 'Laporan Keuangan', href: 'laporan.html', icon: '📈' },
-        { name: 'Aset Tetap & Penyusutan', href: 'aset-tetap.html', icon: '🏭' },
-        { name: 'Rekapitulasi PPN & PPh', href: 'pajak.html', icon: '🏛️' },
-        { name: 'Rekonsiliasi Fiskal', href: 'rekonsiliasi.html', icon: '⚖️' },
-        { name: 'Histori Audit & Checks', href: 'histori.html', icon: '📜' }
+        { name: 'Dashboard & Audit', href: 'index', icon: '🏠' },
+        { name: 'Profil & Parameter Pajak', href: 'profil-pajak', icon: '🏢' },
+        { name: 'COA & Master Data', href: 'master-data', icon: '🗂️' },
+        { name: 'Input Jurnal (Double-Entry)', href: 'input-jurnal', icon: '📝' },
+        { name: 'Manajemen & Buku Besar', href: 'manajemen', icon: '📊' },
+        { name: 'Laporan Keuangan', href: 'laporan', icon: '📈' },
+        { name: 'Aset Tetap & Penyusutan', href: 'aset-tetap', icon: '🏭' },
+        { name: 'Rekapitulasi PPN & PPh', href: 'pajak', icon: '🏛️' },
+        { name: 'Rekonsiliasi Fiskal', href: 'rekonsiliasi', icon: '⚖️' },
+        { name: 'Histori Audit & Checks', href: 'histori', icon: '📜' }
     ];
 
     let menuHtml = '';
@@ -115,7 +124,7 @@ window.toggleSidebar = function() {
 window.prosesLogout = function() {
     if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
         signOut(auth).then(() => {
-            window.location.href = 'login.html';
+            window.location.href = 'login';
         }).catch((error) => {
             console.error('Logout error:', error);
         });
