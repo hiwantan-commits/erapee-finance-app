@@ -3,58 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Jurnal | PT ERAPEE</title>
-    <!-- Tailwind CSS -->
+    <title>Manajemen Jurnal | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- File CSS Terpusat -->
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="text-gray-800">
+<body class="text-gray-800 bg-gray-50">
     <div class="flex h-screen overflow-hidden">
-        
-        <!-- SIDEBAR DINAMIS -->
+        <!-- SIDEBAR -->
         <div id="sidebar-container"></div>
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
-            
-            <!-- HEADER DINAMIS -->
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <div class="dashboard-card overflow-hidden">
-                    <!-- Bagian Header & Filter Pencarian -->
-                    <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h2 class="font-semibold text-lg text-gray-800">Daftar Seluruh Jurnal Akuntansi</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Sinkronisasi langsung dari database Firebase Firestore</p>
-                        </div>
-                        
-                        <!-- Kotak Pencarian & Tombol Muat Ulang -->
-                        <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                            <input type="text" id="inputPencarian" placeholder="Cari no bukti, uraian, unit..." class="form-input-custom text-sm py-2 px-3 w-full sm:w-64" onkeyup="filterTabel()">
-                            <button onclick="muatDataManajemen()" class="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition whitespace-nowrap w-full sm:w-auto">Muat Ulang</button>
-                        </div>
+                <!-- Header Manajemen -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Manajemen Jurnal & Buku Besar</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Draf, riwayat, dan verifikasi posting jurnal akuntansi</p>
                     </div>
+                    <div class="flex gap-3">
+                        <a href="input-jurnal.html" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                            + Buat Jurnal Baru
+                        </a>
+                    </div>
+                </div>
 
-                    <!-- Tabel Manajemen -->
+                <!-- Tabel Jurnal Interaktif -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left text-sm border-collapse">
                             <thead>
-                                <tr class="border-b bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                                    <th class="p-4">Tanggal</th>
-                                    <th class="p-4">No Bukti</th>
-                                    <th class="p-4">Unit Usaha</th>
-                                    <th class="p-4">Akun & Keterangan</th>
-                                    <th class="p-4 text-right">Debit (Rp)</th>
-                                    <th class="p-4 text-right">Kredit (Rp)</th>
-                                    <th class="p-4 text-center">Status</th>
-                                    <th class="p-4 text-center">Aksi</th>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-3">Tanggal / Bukti</th>
+                                    <th class="p-3">Unit Usaha</th>
+                                    <th class="p-3">Akun & Keterangan</th>
+                                    <th class="p-3 text-right">Debit (Rp)</th>
+                                    <th class="p-3 text-right">Kredit (Rp)</th>
+                                    <th class="p-3 text-center">Status</th>
+                                    <th class="p-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelManajemen" class="divide-y divide-gray-100 text-sm">
+                            <tbody id="tabelManajemenJurnal" class="divide-y divide-gray-100 text-xs">
                                 <tr>
-                                    <td colspan="8" class="p-8 text-center text-gray-400">Menghubungkan ke Firebase Firestore...</td>
+                                    <td colspan="7" class="p-8 text-center text-gray-400">Memuat data transaksi dari Firebase Firestore...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -64,192 +57,78 @@
         </div>
     </div>
 
-    <!-- Modal Edit Jurnal -->
-    <div id="modalEdit" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
-            <h3 class="text-lg font-semibold mb-4 text-gray-800">Edit Jurnal Akuntansi</h3>
-            <form id="formEdit" class="space-y-4">
-                <input type="hidden" id="editId">
-                <input type="hidden" id="editNoBukti">
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Keterangan / Uraian</label>
-                    <input type="text" id="editKeterangan" class="form-input-custom" required>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Debit (Rp)</label>
-                        <input type="number" id="editDebit" class="form-input-custom" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Kredit (Rp)</label>
-                        <input type="number" id="editKredit" class="form-input-custom" required>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Status Jurnal</label>
-                    <select id="editStatus" class="form-input-custom font-semibold">
-                        <option value="POSTED">POSTED</option>
-                        <option value="DRAFT">DRAFT</option>
-                    </select>
-                </div>
-                <div class="flex justify-end space-x-3 pt-4 border-t">
-                    <button type="button" onclick="tutupModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-lg font-medium">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg font-medium">Simpan Perubahan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Skrip Utama (Menggunakan ES Module untuk Firebase) -->
+    <!-- Skrip Firebase untuk Manajemen Jurnal -->
     <script type="module">
-        import { CONFIG } from "./js/config.js";
+        import { CONFIG, db } from "./js/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const app = initializeApp(CONFIG.FIREBASE_CONFIG);
-        const db = getFirestore(app);
-
-        let semuaDataJurnal = [];
-
-        window.muatDataManajemen = async function() {
-            const tbody = document.getElementById('tabelManajemen');
-            tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-400">Mengambil data dari Firebase...</td></tr>`;
+        async function muatManajemenJurnal() {
+            const tbody = document.getElementById('tabelManajemenJurnal');
+            tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Memuat data transaksi...</td></tr>`;
 
             try {
                 const querySnapshot = await getDocs(collection(db, CONFIG.COLLECTION_NAME));
-                semuaDataJurnal = [];
+                tbody.innerHTML = '';
 
+                if (querySnapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat. Silakan buat melalui menu <b>Input Jurnal</b>.</td></tr>`;
+                    return;
+                }
+
+                let listJurnal = [];
                 querySnapshot.forEach((docSnap) => {
-                    semuaDataJurnal.push({
-                        id: docSnap.id,
-                        ...docSnap.data()
-                    });
+                    listJurnal.push({ id: docSnap.id, ...docSnap.data() });
                 });
 
-                tampilkanTabel(semuaDataJurnal);
+                // Urutkan berdasarkan tanggal terbaru
+                listJurnal.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+                listJurnal.forEach((jurnal) => {
+                    let tr = document.createElement('tr');
+                    let badgeStatus = jurnal.status === 'POSTED' 
+                        ? '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded font-semibold">POSTED</span>' 
+                        : '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold">DRAFT</span>';
+
+                    tr.innerHTML = `
+                        <td class="p-3 font-medium text-gray-800">
+                            <div>${jurnal.tanggal || '-'}</div>
+                            <div class="text-xs text-gray-400 font-mono">${jurnal.no_bukti || '-'}</div>
+                        </td>
+                        <td class="p-3 text-gray-600">${jurnal.unit_usaha || '-'}</td>
+                        <td class="p-3">
+                            <div class="font-semibold text-indigo-600">${jurnal.nama_akun || jurnal.kode_akun || '-'}</div>
+                            <div class="text-gray-500 truncate max-w-xs">${jurnal.keterangan || '-'}</div>
+                        </td>
+                        <td class="p-3 text-right font-semibold text-green-700">${Number(jurnal.debit || 0).toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right font-semibold text-red-700">${Number(jurnal.kredit || 0).toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-center">${badgeStatus}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="hapusJurnal('${jurnal.id}')" class="text-red-600 hover:underline font-semibold text-xs">Hapus</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
             } catch (err) {
-                console.error("Gagal memuat data:", err);
-                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-red-500">Gagal terhubung ke Firebase Firestore. Periksa konfigurasi Anda.</td></tr>`;
+                console.error("Gagal memuat manajemen jurnal:", err);
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500">Gagal memuat data dari database.</td></tr>`;
             }
-        };
-
-        function tampilkanTabel(dataArray) {
-            const tbody = document.getElementById('tabelManajemen');
-            tbody.innerHTML = '';
-
-            if (!dataArray || dataArray.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-400">Tidak ada jurnal yang ditemukan.</td></tr>`;
-                return;
-            }
-
-            dataArray.forEach((data) => {
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-4 whitespace-nowrap">${data.tanggal || '-'}</td>
-                    <td class="p-4 font-mono text-xs font-semibold">${data.no_bukti || '-'}</td>
-                    <td class="p-4 text-xs text-gray-600">${data.unit_usaha || '-'}</td>
-                    <td class="p-4">
-                        <div class="font-medium text-gray-800">${data.kode_akun || ''}</div>
-                        <div class="text-xs text-gray-500">${data.keterangan || ''}</div>
-                    </td>
-                    <td class="p-4 text-right font-medium text-green-700">Rp ${(data.debit || 0).toLocaleString('id-ID')}</td>
-                    <td class="p-4 text-right font-medium text-red-700">Rp ${(data.kredit || 0).toLocaleString('id-ID')}</td>
-                    <td class="p-4 text-center">
-                        <span class="px-2.5 py-1 text-xs rounded-full font-semibold ${data.status === 'POSTED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${data.status || 'DRAFT'}</span>
-                    </td>
-                    <td class="p-4 text-center space-x-2 whitespace-nowrap">
-                        <button onclick='bukaEdit("${data.id}", ${JSON.stringify(data).replace(/'/g, "&#39;")})' class="text-indigo-600 hover:underline font-medium text-xs">Edit</button>
-                        <button onclick='hapusData("${data.id}", "${data.no_bukti}")' class="text-red-600 hover:underline font-medium text-xs">Hapus</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
-        window.filterTabel = function() {
-            const keyword = document.getElementById('inputPencarian').value.toLowerCase();
-            const hasilFilter = semuaDataJurnal.filter(item => {
-                return (
-                    (item.no_bukti && item.no_bukti.toLowerCase().includes(keyword)) ||
-                    (item.keterangan && item.keterangan.toLowerCase().includes(keyword)) ||
-                    (item.unit_usaha && item.unit_usaha.toLowerCase().includes(keyword)) ||
-                    (item.kode_akun && item.kode_akun.toLowerCase().includes(keyword)) ||
-                    (item.lawan_transaksi && item.lawan_transaksi.toLowerCase().includes(keyword))
-                );
-            });
-            tampilkanTabel(hasilFilter);
-        };
-
-        window.hapusData = async function(docId, noBukti) {
-            if (confirm(`Apakah Anda yakin ingin menghapus jurnal dengan bukti: ${noBukti}?`)) {
+        window.hapusJurnal = async function(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus catatan jurnal ini?")) {
                 try {
-                    await deleteDoc(doc(db, CONFIG.COLLECTION_NAME, docId));
-                    
-                    // Catat ke histori audit
-                    await addDoc(collection(db, "histori_audit"), {
-                        aksi: "HAPUS JURNAL",
-                        no_bukti: noBukti,
-                        detail: `Menghapus jurnal dengan nomor bukti ${noBukti}`,
-                        waktu: new Date()
-                    });
-
-                    alert('Jurnal berhasil dihapus!');
-                    muatDataManajemen();
+                    await deleteDoc(doc(db, CONFIG.COLLECTION_NAME, id));
+                    alert("Jurnal berhasil dihapus!");
+                    muatManajemenJurnal();
                 } catch (error) {
                     console.error("Gagal menghapus:", error);
-                    alert("Gagal menghapus data.");
+                    alert("Gagal menghapus jurnal: " + error.message);
                 }
             }
         };
 
-        window.bukaEdit = function(docId, data) {
-            document.getElementById('editId').value = docId;
-            document.getElementById('editNoBukti').value = data.no_bukti || '';
-            document.getElementById('editKeterangan').value = data.keterangan || '';
-            document.getElementById('editDebit').value = data.debit || 0;
-            document.getElementById('editKredit').value = data.kredit || 0;
-            document.getElementById('editStatus').value = data.status || 'POSTED';
-            document.getElementById('modalEdit').classList.remove('hidden');
-        };
-
-        window.tutupModal = function() {
-            document.getElementById('modalEdit').classList.add('hidden');
-        };
-
-        document.getElementById('formEdit').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const docId = document.getElementById('editId').value;
-            const noBukti = document.getElementById('editNoBukti').value;
-            
-            try {
-                const docRef = doc(db, CONFIG.COLLECTION_NAME, docId);
-                const newData = {
-                    keterangan: document.getElementById('editKeterangan').value,
-                    debit: parseFloat(document.getElementById('editDebit').value) || 0,
-                    kredit: parseFloat(document.getElementById('editKredit').value) || 0,
-                    status: document.getElementById('editStatus').value
-                };
-
-                await updateDoc(docRef, newData);
-
-                // Catat ke histori audit
-                await addDoc(collection(db, "histori_audit"), {
-                    aksi: "EDIT JURNAL",
-                    no_bukti: noBukti,
-                    detail: `Memperbarui jurnal ${noBukti} (Debit: Rp ${newData.debit.toLocaleString('id-ID')}, Kredit: Rp ${newData.kredit.toLocaleString('id-ID')})`,
-                    waktu: new Date()
-                });
-
-                tutupModal();
-                alert('Perubahan jurnal berhasil disimpan!');
-                muatDataManajemen();
-            } catch (error) {
-                console.error("Gagal memperbarui:", error);
-                alert("Gagal menyimpan perubahan.");
-            }
-        });
-
-        muatDataManajemen();
+        muatManajemenJurnal();
     </script>
     <script type="module" src="js/component.js"></script>
 </body>
