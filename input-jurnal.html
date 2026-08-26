@@ -9,13 +9,9 @@
 </head>
 <body class="text-gray-800 bg-gray-50">
     <div class="flex h-screen overflow-hidden">
-        <!-- SIDEBAR -->
         <div id="sidebar-container"></div>
-
-        <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
             <div id="header-container"></div>
-
             <main class="p-4 md:p-8 max-w-6xl mx-auto w-full">
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
                     <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
@@ -28,7 +24,6 @@
                         </div>
                     </div>
 
-                    <!-- Template Cepat -->
                     <div class="mb-6 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
                         <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-2">⚡ Pintasan Template Transaksi Cepat (Opsional)</label>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -46,7 +41,6 @@
                     </div>
 
                     <form id="formJurnal" class="space-y-6">
-                        <!-- Bagian 1: Referensi Transaksi -->
                         <div>
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">1. Referensi Transaksi</h3>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -72,7 +66,6 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 2: Klasifikasi & Lawan Transaksi -->
                         <div>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
@@ -96,7 +89,6 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 3: Tabel Akun Multi-Row -->
                         <div class="pt-4 border-t border-gray-100">
                             <div class="flex justify-between items-center mb-3">
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">2. Rincian Jurnal (Multi-Akun)</h3>
@@ -104,7 +96,6 @@
                                     + Tambah Baris Akun
                                 </button>
                             </div>
-                            
                             <div class="overflow-x-auto rounded-xl border border-gray-200">
                                 <table class="w-full text-left text-sm border-collapse bg-white">
                                     <thead>
@@ -116,9 +107,7 @@
                                             <th class="p-3 text-center w-12">Hapus</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="tbodyJurnal" class="divide-y divide-gray-100">
-                                        <!-- Baris dinamis -->
-                                    </tbody>
+                                    <tbody id="tbodyJurnal" class="divide-y divide-gray-100"></tbody>
                                     <tfoot>
                                         <tr class="bg-gray-100 font-bold text-gray-800 text-sm border-t-2 border-gray-300">
                                             <td colspan="2" class="p-3 text-right uppercase text-xs text-gray-500">Total Keseimbangan:</td>
@@ -131,7 +120,6 @@
                             </div>
                         </div>
 
-                        <!-- Bagian 4: Parameter Pajak & Eksekusi -->
                         <div class="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">3. Parameter Pajak Coretax</h3>
@@ -154,7 +142,6 @@
                                     </div>
                                 </div>
                             </div>
-                            
                             <div>
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">4. Keterangan Induk & Eksekusi</h3>
                                 <textarea id="keterangan" rows="2" placeholder="Keterangan umum jurnal..." class="form-input-custom resize-y mb-3" required></textarea>
@@ -183,7 +170,6 @@
     <script type="module">
         import { db } from "./js/config.js";
         import { simpanJurnalPusat, ambilSemuaJurnalPusat } from "./js/db.js";
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         let coaOptionsHTML = '<option value="">Pilih Akun...</option>';
@@ -310,11 +296,10 @@
             } catch (err) {}
 
             if (editIdJurnal) {
-                document.getElementById('judulForm').innerText = `Edit Jurnal Akuntansi (${editIdJurnal})`;
+                document.getElementById('judulForm').innerText = "Edit Jurnal Akuntansi (" + editIdJurnal + ")";
                 document.getElementById('btnSubmit').innerText = "Simpan Perubahan";
                 
                 try {
-                    // Ambil data menggunakan fungsi terpusat
                     const semuaData = await ambilSemuaJurnalPusat();
                     const jurnalTarget = semuaData.find(j => j.id_jurnal === editIdJurnal);
 
@@ -340,7 +325,7 @@
                         });
                     } else {
                         alert("Data jurnal tidak ditemukan.");
-                        window.location.href = 'manajemen';
+                        window.location.href = 'manajemen.html';
                     }
                 } catch (err) {
                     console.error("Gagal memuat data edit:", err);
@@ -404,13 +389,12 @@
                     });
                 });
 
-                // Simpan menggunakan modul pusat tunggal
                 const hasil = await simpanJurnalPusat(headerData, rowsData, editIdJurnal ? targetIdJurnal : null);
 
                 if (hasil.success) {
                     document.getElementById('alertSuccess').classList.remove('hidden');
                     setTimeout(() => {
-                        window.location.href = 'manajemen';
+                        window.location.href = 'manajemen.html';
                     }, 1500);
                 } else {
                     alert("Gagal menyimpan: " + hasil.error);
