@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js untuk Grafik Interaktif -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="text-gray-800 bg-gray-50">
@@ -16,164 +18,333 @@
         <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
             <div id="header-container"></div>
 
-            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full space-y-6">
-                <!-- Header Dashboard -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-800">Ikhtisar Keuangan</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Ringkasan data real-time dari pusat database perusahaan</p>
-                    </div>
-                    <div class="px-4 py-2 bg-indigo-50 text-indigo-700 font-bold rounded-xl text-sm border border-indigo-100 shadow-sm">
-                        Periode: <span id="labelPeriode">Memuat...</span>
-                    </div>
-                </div>
-
-                <!-- Kartu Metrik Utama -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Metrik 1 -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border-l-4 border-blue-500">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Transaksi</p>
-                        <h3 class="text-2xl font-black text-gray-800" id="dashTotalTrx">0</h3>
-                        <p class="text-[11px] text-gray-400 mt-2">Seluruh jurnal tercatat</p>
-                    </div>
-                    
-                    <!-- Metrik 2 -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border-l-4 border-green-500">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Volume Perputaran (Rp)</p>
-                        <h3 class="text-2xl font-black text-gray-800" id="dashVolumeTrx">0</h3>
-                        <p class="text-[11px] text-gray-400 mt-2">Total perputaran uang (Debit/Kredit)</p>
-                    </div>
-
-                    <!-- Metrik 3 -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border-l-4 border-indigo-500">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Pendapatan Terinput</p>
-                        <h3 class="text-2xl font-black text-green-600" id="dashPendapatan">0</h3>
-                        <p class="text-[11px] text-gray-400 mt-2">Akun Kepala 4 (Kredit - Debit)</p>
-                    </div>
-
-                    <!-- Metrik 4 -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border-l-4 border-rose-500">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Beban/Biaya Terinput</p>
-                        <h3 class="text-2xl font-black text-rose-600" id="dashBeban">0</h3>
-                        <p class="text-[11px] text-gray-400 mt-2">Akun Kepala 6 (Debit - Kredit)</p>
+            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+                <!-- Selamat Datang Banner -->
+                <div class="dashboard-card p-6 md:p-8 mb-6 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-2xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-2">Dashboard Eksekutif PT ERAPEE Anugrah Sejahtera</h2>
+                    <p class="text-indigo-100 text-sm max-w-2xl mb-6">Sistem Informasi Keuangan, Akuntansi Terpadu, dan Kepatuhan Pajak Standar Coretax (Tahun Buku 2026).</p>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="input-jurnal.html" class="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
+                            + Input Jurnal Baru
+                        </a>
+                        <a href="manajemen.html" class="bg-indigo-700 hover:bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition border border-indigo-500">
+                            📊 Lihat Manajemen Jurnal
+                        </a>
                     </div>
                 </div>
 
-                <!-- Tabel 5 Transaksi Terakhir -->
-                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">5 Transaksi Jurnal Terakhir</h3>
-                        <a href="manajemen.html" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">Lihat Semua &rarr;</a>
+                <!-- Statistik Ringkas (Total Keseluruhan) -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Pendapatan (YTD)</p>
+                        <h3 class="text-xl font-bold text-gray-800 mt-2" id="valPendapatanTotal">Rp 0</h3>
+                        <p class="text-xs text-indigo-600 mt-1 font-medium">Konsolidasi Segmen</p>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Keuntungan (Laba Bersih)</p>
+                        <h3 class="text-xl font-bold text-green-600 mt-2" id="valLabaBersih">Rp 0</h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium">Setelah Pajak</p>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Utang (Liabilitas)</p>
+                        <h3 class="text-xl font-bold text-red-600 mt-2" id="valTotalUtang">Rp 0</h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium">Usaha & Akrual</p>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Akumulasi Pajak</p>
+                        <h3 class="text-xl font-bold text-amber-600 mt-2" id="valAkumulasiPajak">Rp 0</h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium">PPN & PPh Terutang</p>
+                    </div>
+                </div>
+
+                <!-- Detail Keuangan Berdasarkan Master Data Unit Usaha -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 mb-8">
+                    <div class="mb-4 pb-3 border-b border-gray-100 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-base">Detail Keuangan Per Unit Usaha (Sesuai Master Data)</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Klasifikasi divisi digital, pertanian, korporat, dan biaya bersama</p>
+                        </div>
+                        <span class="text-xs px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">Master Data 03</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-3">ID Jurnal & Tanggal</th>
-                                    <th class="p-3">Keterangan</th>
-                                    <th class="p-3 text-right">Nilai (Rp)</th>
-                                    <th class="p-3 text-center">Status</th>
+                                    <th class="p-3">Kode & Unit Usaha</th>
+                                    <th class="p-3">Klasifikasi / KBLI</th>
+                                    <th class="p-3 text-right">Pendapatan (Rp)</th>
+                                    <th class="p-3 text-right">Beban (Rp)</th>
+                                    <th class="p-3 text-right">Keuntungan / Laba (Rp)</th>
+                                    <th class="p-3 text-right">Utang & Pajak (Rp)</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelJurnalTerbaru" class="divide-y divide-gray-100 text-xs">
-                                <tr>
-                                    <td colspan="4" class="p-8 text-center text-gray-400">Memuat data sinkronisasi...</td>
-                                </tr>
+                            <tbody id="tabelUnitUsaha" class="divide-y divide-gray-100 text-xs">
+                                <!-- Data akan di-generate oleh JS -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
+                <!-- Bagian Grafik & Tren Bulanan -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Grafik Tren Keuangan (2 Kolom) -->
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
+                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800 text-sm">Grafik Kinerja Pendapatan & Keuntungan Bulanan</h3>
+                            <span class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">2026</span>
+                        </div>
+                        <div class="relative h-64 w-full">
+                            <canvas id="grafikKinerja"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Status Pemeriksaan Legal (1 Kolom) -->
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800 text-sm">Status Pemeriksaan & Legal</h3>
+                            <span class="text-xs px-2.5 py-1 bg-amber-50 text-amber-700 font-semibold rounded-lg">Checks</span>
+                        </div>
+                        <div class="space-y-3 text-xs">
+                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
+                                <span class="font-medium text-gray-700">Akta Pendirian</span>
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 font-semibold rounded">WARNING</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
+                                <span class="font-medium text-gray-700">NPWP Perseroan</span>
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 font-semibold rounded">WARNING</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
+                                <span class="font-medium text-gray-700">Status PKP</span>
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 font-semibold rounded">WARNING</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl">
+                                <span class="font-medium text-gray-700">Keseimbangan Jurnal</span>
+                                <span id="statusBalanceGlobal" class="px-2 py-0.5 bg-gray-200 text-gray-700 font-semibold rounded">MEMUAT...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabel Tren Bulanan -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <div class="mb-4 pb-3 border-b border-gray-100 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-800 text-base">Tabel Tren Kinerja Bulanan (Januari s.d. Desember 2026)</h3>
+                        <span class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">Sheet 15</span>
+                    </div>
+                    <div class="overflow-x-auto" style="max-height: 300px; overflow-y: auto;">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead class="sticky top-0 bg-white">
+                                <tr class="text-gray-400 text-xs uppercase border-b">
+                                    <th class="py-3 px-4">Bulan</th>
+                                    <th class="py-3 px-4 text-right">Pendapatan (Rp)</th>
+                                    <th class="py-3 px-4 text-right">Laba Bersih / Keuntungan (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelTrenBulanan" class="divide-y divide-gray-100 text-xs">
+                                <!-- Data bulan di-generate oleh JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
 
-    <!-- Skrip Dashboard Terpusat -->
+    <!-- Skrip Integrasi Terpusat & Grafik -->
     <script type="module">
         import { ambilSemuaJurnalPusat } from "./js/db.js";
 
-        // Tampilkan Bulan dan Tahun Saat Ini
-        const now = new Date();
-        const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-        document.getElementById('labelPeriode').innerText = `${namaBulan[now.getMonth()]} ${now.getFullYear()}`;
+        // Konfigurasi Master Unit Usaha (sesuai template asli)
+        const unitUsahaMaster = [
+            { kode: "CORP", nama: "Corporate / Head Office", klasifikasi: "Kantor Pusat & Administrasi", color: "blue" },
+            { kode: "MARC", nama: "Marcframe", klasifikasi: "Digital Services (KBLI 62199)", color: "indigo" },
+            { kode: "SIP", nama: "SiPacul", klasifikasi: "Software Publishing (KBLI 58290)", color: "indigo" },
+            { kode: "WT-NANAS", nama: "Wani Tani - Nanas", klasifikasi: "Pertanian (KBLI 01220)", color: "green" },
+            { kode: "WT-TEBU", nama: "Wani Tani - Tebu", klasifikasi: "Pertanian (KBLI 01140)", color: "green" },
+            { kode: "WT-CABAI", nama: "Wani Tani - Cabai", klasifikasi: "Pertanian (KBLI 01138)", color: "green" },
+            { kode: "SHARED", nama: "Biaya Bersama", klasifikasi: "Alokasi Bersama (Shared Cost)", color: "gray" }
+        ];
 
-        async function muatDashboard() {
+        async function inisialisasiDashboard() {
             try {
-                // 1. Panggil data dari satu fungsi pusat!
+                // 1. Ambil seluruh data jurnal dari satu sumber tunggal
                 const semuaJurnal = await ambilSemuaJurnalPusat();
-                
-                // Variabel perhitungan metrik
-                let volumeTrx = 0;
-                let pendapatan = 0;
-                let beban = 0;
 
+                // Variabel Utama
+                let totalPendapatanGlobal = 0;
+                let totalBebanGlobal = 0;
+                let totalUtangGlobal = 0;
+                let totalPajakGlobal = 0;
+                let isSemuaBalance = true;
+
+                // Variabel Per Unit Usaha
+                const dataPerUnit = {};
+                unitUsahaMaster.forEach(u => {
+                    dataPerUnit[u.kode] = { pendapatan: 0, beban: 0, utang: 0 };
+                });
+
+                // Variabel Bulanan (Indeks 0-11 untuk Jan-Des)
+                const dataBulanan = Array.from({length: 12}, () => ({ pendapatan: 0, beban: 0 }));
+
+                // 2. Lakukan Kalkulasi
                 semuaJurnal.forEach(jurnal => {
-                    // Tambah Volume
-                    volumeTrx += jurnal.total_debit;
+                    // Cek Keseimbangan Jurnal
+                    if (jurnal.total_debit !== jurnal.total_kredit) isSemuaBalance = false;
 
-                    // Hitung Pendapatan & Beban dari rincian akun
+                    // Ekstrak Bulan (Format YYYY-MM-DD)
+                    const bulanIndex = jurnal.tanggal ? parseInt(jurnal.tanggal.split("-")[1]) - 1 : 0;
+                    
+                    // Ambil Kode Unit Usaha (contoh: "CORP - Corporate")
+                    let kodeUnit = "SHARED"; // Default jika kosong
+                    if (jurnal.unit_usaha) {
+                        kodeUnit = jurnal.unit_usaha.split(" - ")[0].trim();
+                    }
+                    if (!dataPerUnit[kodeUnit]) {
+                        dataPerUnit[kodeUnit] = { pendapatan: 0, beban: 0, utang: 0 }; // Cadangan jika ada unit baru
+                    }
+
+                    // Iterasi setiap baris akun
                     jurnal.rows.forEach(baris => {
-                        const kode = baris.kode_akun || "";
-                        
-                        // Akun Pendapatan (Kepala 4) -> Saldo normal Kredit
-                        if (kode.startsWith("4")) {
-                            pendapatan += (baris.kredit - baris.debit);
+                        const kodeAkun = baris.kode_akun || "";
+                        const debit = parseFloat(baris.debit) || 0;
+                        const kredit = parseFloat(baris.kredit) || 0;
+
+                        // PENDAPATAN (Kepala 4) -> Bertambah di Kredit
+                        if (kodeAkun.startsWith("4")) {
+                            const nilai = kredit - debit;
+                            totalPendapatanGlobal += nilai;
+                            dataPerUnit[kodeUnit].pendapatan += nilai;
+                            if (bulanIndex >= 0 && bulanIndex <= 11) dataBulanan[bulanIndex].pendapatan += nilai;
                         }
-                        // Akun Beban (Kepala 6) -> Saldo normal Debit
-                        if (kode.startsWith("6")) {
-                            beban += (baris.debit - baris.kredit);
+                        // BEBAN / BIAYA (Kepala 6) -> Bertambah di Debit
+                        else if (kodeAkun.startsWith("6")) {
+                            const nilai = debit - kredit;
+                            totalBebanGlobal += nilai;
+                            dataPerUnit[kodeUnit].beban += nilai;
+                            if (bulanIndex >= 0 && bulanIndex <= 11) dataBulanan[bulanIndex].beban += nilai;
+                        }
+                        // LIABILITAS / UTANG (Kepala 2) -> Bertambah di Kredit
+                        else if (kodeAkun.startsWith("2")) {
+                            const nilai = kredit - debit;
+                            totalUtangGlobal += nilai;
+                            dataPerUnit[kodeUnit].utang += nilai;
+                            
+                            // Jika ini adalah utang pajak (contoh kode 2105 utang PPN atau 2106 utang PPh)
+                            if (kodeAkun === "2105" || kodeAkun === "2106" || baris.nama_akun.toLowerCase().includes("pajak")) {
+                                totalPajakGlobal += nilai;
+                            }
                         }
                     });
                 });
 
-                // Update UI Metrik
-                document.getElementById('dashTotalTrx').innerText = semuaJurnal.length.toLocaleString('id-ID');
-                document.getElementById('dashVolumeTrx').innerText = volumeTrx.toLocaleString('id-ID');
-                document.getElementById('dashPendapatan').innerText = pendapatan.toLocaleString('id-ID');
-                document.getElementById('dashBeban').innerText = beban.toLocaleString('id-ID');
+                const labaBersihGlobal = totalPendapatanGlobal - totalBebanGlobal;
 
-                // Render 5 Transaksi Terakhir
-                const tbody = document.getElementById('tabelJurnalTerbaru');
-                tbody.innerHTML = '';
-                
-                if (semuaJurnal.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Belum ada transaksi di database.</td></tr>`;
-                    return;
+                // 3. Update UI Statistik Ringkas
+                document.getElementById('valPendapatanTotal').innerText = "Rp " + totalPendapatanGlobal.toLocaleString('id-ID');
+                document.getElementById('valLabaBersih').innerText = "Rp " + labaBersihGlobal.toLocaleString('id-ID');
+                document.getElementById('valTotalUtang').innerText = "Rp " + totalUtangGlobal.toLocaleString('id-ID');
+                document.getElementById('valAkumulasiPajak').innerText = "Rp " + totalPajakGlobal.toLocaleString('id-ID');
+
+                // Update Status Keseimbangan
+                const elStatusBalance = document.getElementById('statusBalanceGlobal');
+                if (semuaJurnal.length > 0 && isSemuaBalance) {
+                    elStatusBalance.className = "px-2 py-0.5 bg-green-100 text-green-700 font-semibold rounded";
+                    elStatusBalance.innerText = "PASS";
+                } else if (semuaJurnal.length === 0) {
+                    elStatusBalance.className = "px-2 py-0.5 bg-gray-200 text-gray-700 font-semibold rounded";
+                    elStatusBalance.innerText = "KOSONG";
+                } else {
+                    elStatusBalance.className = "px-2 py-0.5 bg-red-100 text-red-700 font-semibold rounded";
+                    elStatusBalance.innerText = "ERROR (SELISIH)";
                 }
 
-                // Ambil 5 teratas (karena data dari fungsi ambilSemuaJurnalPusat sudah di-sortir dari terbaru)
-                const limaTerbaru = semuaJurnal.slice(0, 5);
-                
-                limaTerbaru.forEach(jurnal => {
-                    let tr = document.createElement('tr');
-                    let badgeStatus = jurnal.status === 'POSTED' 
-                        ? '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded font-semibold">POSTED</span>' 
-                        : '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold">DRAFT</span>';
+                // 4. Update UI Tabel Unit Usaha
+                const tbodyUnit = document.getElementById('tabelUnitUsaha');
+                tbodyUnit.innerHTML = "";
+                unitUsahaMaster.forEach(u => {
+                    const dataU = dataPerUnit[u.kode] || { pendapatan: 0, beban: 0, utang: 0 };
+                    const labaU = dataU.pendapatan - dataU.beban;
                     
+                    let tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="p-3">
-                            <div class="font-bold text-indigo-700">${jurnal.id_jurnal}</div>
-                            <div class="text-[11px] text-gray-500 mt-0.5">${jurnal.tanggal}</div>
-                        </td>
-                        <td class="p-3">
-                            <div class="font-medium text-gray-800 truncate max-w-sm">${jurnal.keterangan || '-'}</div>
-                            <div class="text-[11px] text-gray-500 mt-0.5">${jurnal.lawan_transaksi || ''}</div>
-                        </td>
-                        <td class="p-3 text-right font-bold text-gray-800">
-                            ${jurnal.total_debit.toLocaleString('id-ID')}
-                        </td>
-                        <td class="p-3 text-center">${badgeStatus}</td>
+                        <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-${u.color}-100 text-${u.color}-700 rounded mr-1 font-mono">${u.kode}</span> ${u.nama}</td>
+                        <td class="p-3 text-gray-500">${u.klasifikasi}</td>
+                        <td class="p-3 text-right">${dataU.pendapatan === 0 ? '-' : dataU.pendapatan.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right">${dataU.beban === 0 ? '-' : dataU.beban.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right ${labaU > 0 ? 'text-green-600 font-semibold' : (labaU < 0 ? 'text-red-600 font-semibold' : '')}">${labaU === 0 ? '-' : labaU.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right ${dataU.utang > 0 ? 'text-red-600' : ''}">${dataU.utang === 0 ? '-' : dataU.utang.toLocaleString('id-ID')}</td>
                     `;
-                    tbody.appendChild(tr);
+                    tbodyUnit.appendChild(tr);
+                });
+                
+                // Tambahkan Baris Total Konsolidasi
+                tbodyUnit.innerHTML += `
+                    <tr class="bg-indigo-50 font-bold text-indigo-900 border-t-2 border-indigo-200 text-sm">
+                        <td colspan="2" class="p-3">TOTAL KESELURUHAN (KONSOLIDASI)</td>
+                        <td class="p-3 text-right">Rp ${totalPendapatanGlobal.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right">Rp ${totalBebanGlobal.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right ${labaBersihGlobal >= 0 ? 'text-green-700' : 'text-red-700'}">Rp ${labaBersihGlobal.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right text-red-700">Rp ${totalUtangGlobal.toLocaleString('id-ID')}</td>
+                    </tr>
+                `;
+
+                // 5. Update UI Tabel Tren Bulanan & Siapkan Data Chart
+                const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                const tbodyTren = document.getElementById('tabelTrenBulanan');
+                tbodyTren.innerHTML = "";
+                
+                const arrayPendapatanChart = [];
+                const arrayLabaChart = [];
+
+                dataBulanan.forEach((data, index) => {
+                    const labaBulan = data.pendapatan - data.beban;
+                    arrayPendapatanChart.push(data.pendapatan);
+                    arrayLabaChart.push(labaBulan);
+
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 font-medium">${namaBulan[index]}</td>
+                        <td class="py-3 px-4 text-right">${data.pendapatan === 0 ? '-' : data.pendapatan.toLocaleString('id-ID')}</td>
+                        <td class="py-3 px-4 text-right ${labaBulan > 0 ? 'text-green-600 font-semibold' : (labaBulan < 0 ? 'text-red-600 font-semibold' : '')}">${labaBulan === 0 ? '-' : labaBulan.toLocaleString('id-ID')}</td>
+                    `;
+                    tbodyTren.appendChild(tr);
+                });
+
+                // 6. Update Chart.js
+                const ctx = document.getElementById('grafikKinerja').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                        datasets: [
+                            {
+                                label: 'Pendapatan (Rp)',
+                                data: arrayPendapatanChart,
+                                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Keuntungan / Laba (Rp)',
+                                data: arrayLabaChart,
+                                backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+                        scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
+                    }
                 });
 
             } catch (error) {
-                console.error("Gagal memuat dashboard:", error);
+                console.error("Gagal melakukan inisialisasi Dashboard:", error);
             }
         }
 
-        // Eksekusi pemuatan data
-        muatDashboard();
+        inisialisasiDashboard();
     </script>
     <script type="module" src="js/component.js"></script>
 </body>
