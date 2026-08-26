@@ -1,23 +1,18 @@
-// js/db.js - Pusat Pengaturan Database (Single Source of Truth)
+// js/db.js - Lapisan Akses Data (Database Layer)
 import { CONFIG, db } from "./config.js";
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const KOLEKSI_UTAMA = CONFIG.COLLECTION_NAME || "jurnal_transaksi";
 
-/**
- * Menyimpan atau Memperbarui Jurnal (Double-Entry)
- */
 export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = null) {
     try {
         if (editIdJurnal) {
             await hapusJurnalPusat(editIdJurnal);
         }
-
         const batchPromises = [];
         rowsData.forEach(row => {
             const debitVal = parseFloat(row.debit) || 0;
             const kreditVal = parseFloat(row.kredit) || 0;
-
             if (debitVal > 0 || kreditVal > 0) {
                 const rowData = {
                     ...headerData,
@@ -31,18 +26,14 @@ export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = nul
                 batchPromises.push(addDoc(collection(db, KOLEKSI_UTAMA), rowData));
             }
         });
-
         await Promise.all(batchPromises);
-        return { success: true, message: "Transaksi berhasil disimpan ke pusat database!" };
+        return { success: true };
     } catch (error) {
-        console.error("Gagal menyimpan ke pusat database:", error);
+        console.error("Gagal menyimpan ke database:", error);
         return { success: false, error: error.message };
     }
 }
 
-/**
- * Mengambil Seluruh Data Jurnal untuk Semua Halaman
- */
 export async function ambilSemuaJurnalPusat() {
     try {
         const querySnapshot = await getDocs(collection(db, KOLEKSI_UTAMA));
@@ -73,7 +64,6 @@ export async function ambilSemuaJurnalPusat() {
                     docIds: []
                 };
             }
-
             groupedJurnal[id_jurnal].rows.push(data);
             groupedJurnal[id_jurnal].docIds.push(docId);
             groupedJurnal[id_jurnal].total_debit += parseFloat(data.debit) || 0;
@@ -82,28 +72,23 @@ export async function ambilSemuaJurnalPusat() {
 
         return Object.values(groupedJurnal).sort((a, b) => b.id_jurnal.localeCompare(a.id_jurnal));
     } catch (error) {
-        console.error("Gagal mengambil data dari pusat:", error);
+        console.error("Gagal mengambil data:", error);
         return [];
     }
 }
 
-/**
- * Menghapus Jurnal Berdasarkan ID Jurnal
- */
 export async function hapusJurnalPusat(id_jurnal) {
     try {
         const q = query(collection(db, KOLEKSI_UTAMA), where("id_jurnal", "==", id_jurnal));
         const querySnapshot = await getDocs(q);
         const deletePromises = [];
-        
         querySnapshot.forEach(docSnap => {
             deletePromises.push(deleteDoc(doc(db, KOLEKSI_UTAMA, docSnap.id)));
         });
-        
         await Promise.all(deletePromises);
         return { success: true };
     } catch (error) {
-        console.error("Gagal menghapus data pusat:", error);
+        console.error("Gagal menghapus:", error);
         return { success: false, error: error.message };
     }
 }
