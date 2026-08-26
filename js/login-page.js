@@ -7,6 +7,21 @@ const app = initializeApp(CONFIG.FIREBASE_CONFIG);
 const auth = getAuth(app);
 
 document.addEventListener("DOMContentLoaded", function() {
+    // Logika Toggle Tampil/Sembunyikan Password
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener("click", function() {
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+            
+            // Ubah warna ikon saat aktif (opsional agar terlihat interaktif)
+            this.classList.toggle("text-indigo-600");
+        });
+    }
+
+    // Logika Proses Login
     const formLogin = document.getElementById("formLogin");
     if (formLogin) {
         formLogin.addEventListener("submit", async function(e) {
@@ -23,18 +38,15 @@ document.addEventListener("DOMContentLoaded", function() {
             btnSubmit.innerText = "Memproses Masuk...";
 
             try {
-                // Autentikasi menggunakan Firebase Auth
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Simpan sesi lokal untuk auth.js
                 sessionStorage.setItem("erapee_user_session", JSON.stringify({
                     uid: user.uid,
                     email: user.email,
                     loginAt: new Date().toISOString()
                 }));
 
-                // Arahkan ke dashboard utama setelah sukses
                 window.location.href = "index.html";
 
             } catch (error) {
