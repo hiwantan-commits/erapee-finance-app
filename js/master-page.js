@@ -27,8 +27,9 @@ async function muatUnitUsaha() {
             const encNama = encodeURIComponent(data.nama || '');
             const encKlas = encodeURIComponent(klasifikasiTeks);
 
+            // Tambahkan atribut id baris agar mudah diberi efek highlight
             tbody.innerHTML += `
-                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <tr id="row-unit-${docSnap.id}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td class="p-3"><span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-mono font-bold text-xs">${data.kode}</span></td>
                     <td class="p-3 font-medium text-gray-800 text-sm">${data.nama}</td>
                     <td class="p-3 text-gray-500 text-sm">${klasifikasiTeks}</td>
@@ -50,6 +51,11 @@ async function muatUnitUsaha() {
 window.editUnitUsaha = function(id, encKode, encNama, encKlas) {
     const klasifikasi = decodeURIComponent(encKlas);
     
+    // Hapus highlight dari semua baris unit usaha lain, lalu beri highlight ke baris yang dipilih
+    document.querySelectorAll('#tabelUnitUsaha tr').forEach(tr => tr.classList.remove('bg-amber-50', 'border-amber-200'));
+    const activeRow = document.getElementById(`row-unit-${id}`);
+    if (activeRow) activeRow.classList.add('bg-amber-50', 'border-amber-200');
+
     document.getElementById('editIdUnit').value = id;
     document.getElementById('kodeUnit').value = decodeURIComponent(encKode);
     document.getElementById('namaUnit').value = decodeURIComponent(encNama);
@@ -57,7 +63,7 @@ window.editUnitUsaha = function(id, encKode, encNama, encKlas) {
     
     const btn = document.getElementById('btnSimpanUnit');
     btn.innerText = 'Update Data';
-    btn.disabled = false; // Pastikan tombol aktif
+    btn.disabled = false;
     btn.classList.replace('bg-indigo-600', 'bg-amber-500');
     btn.classList.replace('hover:bg-indigo-700', 'hover:bg-amber-600');
     document.getElementById('btnBatalUnit').classList.remove('hidden');
@@ -65,12 +71,15 @@ window.editUnitUsaha = function(id, encKode, encNama, encKlas) {
 }
 
 window.batalEditUnit = function() {
+    // Bersihkan semua highlight baris aktif
+    document.querySelectorAll('#tabelUnitUsaha tr').forEach(tr => tr.classList.remove('bg-amber-50', 'border-amber-200'));
+    
     document.getElementById('formUnitUsaha').reset();
     document.getElementById('editIdUnit').value = '';
     
     const btn = document.getElementById('btnSimpanUnit');
     btn.innerText = 'Simpan Unit Usaha';
-    btn.disabled = false; // Pastikan tombol aktif kembali
+    btn.disabled = false;
     btn.classList.replace('bg-amber-500', 'bg-indigo-600');
     btn.classList.replace('hover:bg-amber-600', 'hover:bg-indigo-700');
     document.getElementById('btnBatalUnit').classList.add('hidden');
@@ -115,8 +124,9 @@ async function muatCOA() {
             const encKode = encodeURIComponent(data.kode || '');
             const encNama = encodeURIComponent(data.nama || '');
 
+            // Tambahkan atribut id baris COA
             tbody.innerHTML += `
-                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <tr id="row-coa-${data.id}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td class="p-3"><span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-mono font-bold text-xs">${data.kode}</span></td>
                     <td class="p-3 font-medium text-gray-800 text-sm">${data.nama}</td>
                     <td class="p-3 text-center">
@@ -135,13 +145,18 @@ async function muatCOA() {
 }
 
 window.editCOA = function(id, encKode, encNama) {
+    // Hapus highlight dari baris COA lain, lalu beri highlight ke baris yang dipilih
+    document.querySelectorAll('#tabelCOA tr').forEach(tr => tr.classList.remove('bg-amber-50', 'border-amber-200'));
+    const activeRow = document.getElementById(`row-coa-${id}`);
+    if (activeRow) activeRow.classList.add('bg-amber-50', 'border-amber-200');
+
     document.getElementById('editIdCOA').value = id;
     document.getElementById('kodeCOA').value = decodeURIComponent(encKode);
     document.getElementById('namaCOA').value = decodeURIComponent(encNama);
     
     const btn = document.getElementById('btnSimpanCOA');
     btn.innerText = 'Update COA';
-    btn.disabled = false; // Pastikan tombol aktif
+    btn.disabled = false;
     btn.classList.replace('bg-blue-600', 'bg-amber-500');
     btn.classList.replace('hover:bg-blue-700', 'hover:bg-amber-600');
     document.getElementById('btnBatalCOA').classList.remove('hidden');
@@ -149,12 +164,15 @@ window.editCOA = function(id, encKode, encNama) {
 }
 
 window.batalEditCOA = function() {
+    // Bersihkan semua highlight baris aktif COA
+    document.querySelectorAll('#tabelCOA tr').forEach(tr => tr.classList.remove('bg-amber-50', 'border-amber-200'));
+    
     document.getElementById('formCOA').reset();
     document.getElementById('editIdCOA').value = '';
     
     const btn = document.getElementById('btnSimpanCOA');
     btn.innerText = 'Simpan COA';
-    btn.disabled = false; // Pastikan tombol aktif kembali
+    btn.disabled = false;
     btn.classList.replace('bg-amber-500', 'bg-blue-600');
     btn.classList.replace('hover:bg-amber-600', 'hover:bg-blue-700');
     document.getElementById('btnBatalCOA').classList.add('hidden');
@@ -178,7 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
     muatUnitUsaha();
     muatCOA();
 
-    // Event Listener Tambah/Edit Unit Usaha
     const formUnit = document.getElementById('formUnitUsaha');
     if (formUnit) {
         formUnit.addEventListener('submit', async (e) => {
@@ -198,11 +215,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (editId) {
                     await updateDoc(doc(db, "master_unit_usaha", editId), payload);
-                    window.batalEditUnit(); // Ini sekarang sudah mengembalikan btn.disabled = false
+                    window.batalEditUnit(); 
                 } else {
                     await addDoc(collection(db, "master_unit_usaha"), payload);
                     formUnit.reset();
-                    btn.disabled = false; // Nyalakan kembali tombol untuk mode tambah
+                    btn.disabled = false; 
                     btn.innerText = 'Simpan Unit Usaha';
                 }
                 muatUnitUsaha();
@@ -214,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Event Listener Tambah/Edit COA
     const formCOA = document.getElementById('formCOA');
     if (formCOA) {
         formCOA.addEventListener('submit', async (e) => {
@@ -233,11 +249,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (editId) {
                     await updateDoc(doc(db, "master_coa", editId), payload);
-                    window.batalEditCOA(); // Ini sekarang sudah mengembalikan btn.disabled = false
+                    window.batalEditCOA(); 
                 } else {
                     await addDoc(collection(db, "master_coa"), payload);
                     formCOA.reset();
-                    btn.disabled = false; // Nyalakan kembali tombol untuk mode tambah
+                    btn.disabled = false; 
                     btn.innerText = 'Simpan COA';
                 }
                 muatCOA();
