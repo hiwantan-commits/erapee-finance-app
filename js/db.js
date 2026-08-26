@@ -1,6 +1,6 @@
-// js/db.js - Lapisan Akses Data (Database Layer)
+// js/db.js - Lapisan Akses Data (Database Layer dengan Optimasi Pagination)
 import { CONFIG, db } from "./config.js";
-import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, addDoc, getDocs, query, where, deleteDoc, doc, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const KOLEKSI_UTAMA = CONFIG.COLLECTION_NAME || "jurnal_transaksi";
 
@@ -34,9 +34,11 @@ export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = nul
     }
 }
 
-export async function ambilSemuaJurnalPusat() {
+export async function ambilSemuaJurnalPusat(batasiJumlah = 500) {
     try {
-        const querySnapshot = await getDocs(collection(db, KOLEKSI_UTAMA));
+        // Optimasi: Batasi kueri awal agar browser tidak berat memuat seluruh dokumen
+        const q = query(collection(db, KOLEKSI_UTAMA), limit(batasiJumlah));
+        const querySnapshot = await getDocs(q);
         let groupedJurnal = {};
 
         querySnapshot.forEach((docSnap) => {
