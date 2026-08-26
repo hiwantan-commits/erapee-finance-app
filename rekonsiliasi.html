@@ -67,61 +67,7 @@
         </div>
     </div>
 
-    <!-- Skrip Integrasi Rekonsiliasi -->
-    <script type="module">
-        import { ambilSemuaJurnalPusat } from "./js/db.js";
-
-        async function muatDataRekonsiliasi() {
-            try {
-                const semuaJurnal = await ambilSemuaJurnalPusat();
-                let totalMasuk = 0;
-                let totalKeluar = 0;
-                let rowsHTML = "";
-
-                semuaJurnal.forEach(jurnal => {
-                    jurnal.rows.forEach(baris => {
-                        const kodeAkun = baris.kode_akun || "";
-                        // Asumsi akun kas/bank berawalan 11 (contoh: 1101 Kas, 1102 Bank)
-                        if (kodeAkun.startsWith("11")) {
-                            const debit = parseFloat(baris.debit) || 0;
-                            const kredit = parseFloat(baris.kredit) || 0;
-
-                            totalMasuk += debit;
-                            totalKeluar += kredit;
-
-                            rowsHTML += `
-                                <tr>
-                                    <td class="p-3 font-bold text-indigo-700">${jurnal.id_jurnal}<div class="text-[11px] text-gray-400 font-normal">${jurnal.tanggal}</div></td>
-                                    <td class="p-3"><div class="font-medium text-gray-800">${jurnal.no_bukti}</div><div class="text-[11px] text-gray-500">${jurnal.lawan_transaksi || '-'}</div></td>
-                                    <td class="p-3 text-gray-600 truncate max-w-xs">${baris.memo_baris || jurnal.keterangan || '-'}</td>
-                                    <td class="p-3 text-right font-bold text-green-600">${debit === 0 ? '-' : debit.toLocaleString('id-ID')}</td>
-                                    <td class="p-3 text-right font-bold text-red-600">${kredit === 0 ? '-' : kredit.toLocaleString('id-ID')}</td>
-                                </tr>
-                            `;
-                        }
-                    });
-                });
-
-                const saldoBersih = totalMasuk - totalKeluar;
-
-                document.getElementById('rekonsiliasiKasMasuk').innerText = "Rp " + totalMasuk.toLocaleString('id-ID');
-                document.getElementById('rekonsiliasiKasKeluar').innerText = "Rp " + totalKeluar.toLocaleString('id-ID');
-                document.getElementById('rekonsiliasiSaldoBersih').innerText = "Rp " + saldoBersih.toLocaleString('id-ID');
-
-                const tbody = document.getElementById('tabelRekonsiliasi');
-                if (rowsHTML === "") {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">Belum ada mutasi kas/bank tercatat pada akun kepala 11.</td></tr>`;
-                } else {
-                    tbody.innerHTML = rowsHTML;
-                }
-
-            } catch (error) {
-                console.error("Gagal memuat data rekonsiliasi:", error);
-            }
-        }
-
-        muatDataRekonsiliasi();
-    </script>
+    <!-- Panggil Modular Controller & Komponen Global -->
     <script type="module" src="js/fiscal-page.js"></script>
     <script type="module" src="js/component.js"></script>
 </body>
