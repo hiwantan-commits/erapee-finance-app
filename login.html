@@ -28,7 +28,16 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1.5">Kata Sandi (Password)</label>
-                    <input type="password" id="password" placeholder="••••••••" class="form-input-custom text-sm" required>
+                    <div class="relative">
+                        <input type="password" id="password" placeholder="••••••••" class="form-input-custom text-sm pr-10" required>
+                        <!-- Tombol Simbol Mata -->
+                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+                            <svg id="iconMata" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-sm">
                     Masuk ke Sistem
