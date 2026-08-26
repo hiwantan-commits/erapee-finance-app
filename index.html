@@ -27,7 +27,7 @@
                         <a href="input-jurnal.html" class="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
                             + Input Jurnal Baru
                         </a>
-                        <a href="manajemen.html" class="bg-indigo-700 hover:bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition border border-indigo-500">
+                        <a href="manajemen.html" class="bg-indigo-700 hover:bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl transition border border-indigo-500">
                             📊 Lihat Manajemen Jurnal
                         </a>
                     </div>
@@ -79,7 +79,7 @@
                                 </tr>
                             </thead>
                             <tbody id="tabelUnitUsaha" class="divide-y divide-gray-100 text-xs">
-                                <!-- Data akan di-generate oleh JS -->
+                                <!-- Data unit usaha dimuat otomatis via JavaScript -->
                             </tbody>
                         </table>
                     </div>
@@ -141,7 +141,7 @@
                                 </tr>
                             </thead>
                             <tbody id="tabelTrenBulanan" class="divide-y divide-gray-100 text-xs">
-                                <!-- Data bulan di-generate oleh JS -->
+                                <!-- Data bulanan dimuat otomatis via JavaScript -->
                             </tbody>
                         </table>
                     </div>
@@ -150,11 +150,10 @@
         </div>
     </div>
 
-    <!-- Skrip Integrasi Terpusat & Grafik -->
+    <!-- Skrip Integrasi Terpusat Dashboard -->
     <script type="module">
         import { ambilSemuaJurnalPusat } from "./js/db.js";
 
-        // Konfigurasi Master Unit Usaha (sesuai template asli)
         const unitUsahaMaster = [
             { kode: "CORP", nama: "Corporate / Head Office", klasifikasi: "Kantor Pusat & Administrasi", color: "blue" },
             { kode: "MARC", nama: "Marcframe", klasifikasi: "Digital Services (KBLI 62199)", color: "indigo" },
@@ -167,70 +166,55 @@
 
         async function inisialisasiDashboard() {
             try {
-                // 1. Ambil seluruh data jurnal dari satu sumber tunggal
                 const semuaJurnal = await ambilSemuaJurnalPusat();
 
-                // Variabel Utama
                 let totalPendapatanGlobal = 0;
                 let totalBebanGlobal = 0;
                 let totalUtangGlobal = 0;
                 let totalPajakGlobal = 0;
                 let isSemuaBalance = true;
 
-                // Variabel Per Unit Usaha
                 const dataPerUnit = {};
                 unitUsahaMaster.forEach(u => {
                     dataPerUnit[u.kode] = { pendapatan: 0, beban: 0, utang: 0 };
                 });
 
-                // Variabel Bulanan (Indeks 0-11 untuk Jan-Des)
                 const dataBulanan = Array.from({length: 12}, () => ({ pendapatan: 0, beban: 0 }));
 
-                // 2. Lakukan Kalkulasi
                 semuaJurnal.forEach(jurnal => {
-                    // Cek Keseimbangan Jurnal
                     if (jurnal.total_debit !== jurnal.total_kredit) isSemuaBalance = false;
 
-                    // Ekstrak Bulan (Format YYYY-MM-DD)
                     const bulanIndex = jurnal.tanggal ? parseInt(jurnal.tanggal.split("-")[1]) - 1 : 0;
                     
-                    // Ambil Kode Unit Usaha (contoh: "CORP - Corporate")
-                    let kodeUnit = "SHARED"; // Default jika kosong
+                    let kodeUnit = "SHARED";
                     if (jurnal.unit_usaha) {
                         kodeUnit = jurnal.unit_usaha.split(" - ")[0].trim();
                     }
                     if (!dataPerUnit[kodeUnit]) {
-                        dataPerUnit[kodeUnit] = { pendapatan: 0, beban: 0, utang: 0 }; // Cadangan jika ada unit baru
+                        dataPerUnit[kodeUnit] = { pendapatan: 0, beban: 0, utang: 0 }; 
                     }
 
-                    // Iterasi setiap baris akun
                     jurnal.rows.forEach(baris => {
                         const kodeAkun = baris.kode_akun || "";
                         const debit = parseFloat(baris.debit) || 0;
                         const kredit = parseFloat(baris.kredit) || 0;
 
-                        // PENDAPATAN (Kepala 4) -> Bertambah di Kredit
                         if (kodeAkun.startsWith("4")) {
                             const nilai = kredit - debit;
                             totalPendapatanGlobal += nilai;
                             dataPerUnit[kodeUnit].pendapatan += nilai;
                             if (bulanIndex >= 0 && bulanIndex <= 11) dataBulanan[bulanIndex].pendapatan += nilai;
-                        }
-                        // BEBAN / BIAYA (Kepala 6) -> Bertambah di Debit
-                        else if (kodeAkun.startsWith("6")) {
+                        } else if (kodeAkun.startsWith("6")) {
                             const nilai = debit - kredit;
                             totalBebanGlobal += nilai;
                             dataPerUnit[kodeUnit].beban += nilai;
                             if (bulanIndex >= 0 && bulanIndex <= 11) dataBulanan[bulanIndex].beban += nilai;
-                        }
-                        // LIABILITAS / UTANG (Kepala 2) -> Bertambah di Kredit
-                        else if (kodeAkun.startsWith("2")) {
+                        } else if (kodeAkun.startsWith("2")) {
                             const nilai = kredit - debit;
                             totalUtangGlobal += nilai;
                             dataPerUnit[kodeUnit].utang += nilai;
                             
-                            // Jika ini adalah utang pajak (contoh kode 2105 utang PPN atau 2106 utang PPh)
-                            if (kodeAkun === "2105" || kodeAkun === "2106" || baris.nama_akun.toLowerCase().includes("pajak")) {
+                            if (kodeAkun === "2105" || kodeAkun === "2106" || (baris.nama_akun && baris.nama_akun.toLowerCase().includes("pajak"))) {
                                 totalPajakGlobal += nilai;
                             }
                         }
@@ -239,13 +223,11 @@
 
                 const labaBersihGlobal = totalPendapatanGlobal - totalBebanGlobal;
 
-                // 3. Update UI Statistik Ringkas
                 document.getElementById('valPendapatanTotal').innerText = "Rp " + totalPendapatanGlobal.toLocaleString('id-ID');
                 document.getElementById('valLabaBersih').innerText = "Rp " + labaBersihGlobal.toLocaleString('id-ID');
                 document.getElementById('valTotalUtang').innerText = "Rp " + totalUtangGlobal.toLocaleString('id-ID');
                 document.getElementById('valAkumulasiPajak').innerText = "Rp " + totalPajakGlobal.toLocaleString('id-ID');
 
-                // Update Status Keseimbangan
                 const elStatusBalance = document.getElementById('statusBalanceGlobal');
                 if (semuaJurnal.length > 0 && isSemuaBalance) {
                     elStatusBalance.className = "px-2 py-0.5 bg-green-100 text-green-700 font-semibold rounded";
@@ -258,86 +240,89 @@
                     elStatusBalance.innerText = "ERROR (SELISIH)";
                 }
 
-                // 4. Update UI Tabel Unit Usaha
                 const tbodyUnit = document.getElementById('tabelUnitUsaha');
-                tbodyUnit.innerHTML = "";
-                unitUsahaMaster.forEach(u => {
-                    const dataU = dataPerUnit[u.kode] || { pendapatan: 0, beban: 0, utang: 0 };
-                    const labaU = dataU.pendapatan - dataU.beban;
+                if (tbodyUnit) {
+                    tbodyUnit.innerHTML = "";
+                    unitUsahaMaster.forEach(u => {
+                        const dataU = dataPerUnit[u.kode] || { pendapatan: 0, beban: 0, utang: 0 };
+                        const labaU = dataU.pendapatan - dataU.beban;
+                        
+                        let tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-${u.color}-100 text-${u.color}-700 rounded mr-1 font-mono">${u.kode}</span> ${u.nama}</td>
+                            <td class="p-3 text-gray-500">${u.klasifikasi}</td>
+                            <td class="p-3 text-right">${dataU.pendapatan === 0 ? '-' : dataU.pendapatan.toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-right">${dataU.beban === 0 ? '-' : dataU.beban.toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-right ${labaU > 0 ? 'text-green-600 font-semibold' : (labaU < 0 ? 'text-red-600 font-semibold' : '')}">${labaU === 0 ? '-' : labaU.toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-right ${dataU.utang > 0 ? 'text-red-600' : ''}">${dataU.utang === 0 ? '-' : dataU.utang.toLocaleString('id-ID')}</td>
+                        `;
+                        tbodyUnit.appendChild(tr);
+                    });
                     
-                    let tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-${u.color}-100 text-${u.color}-700 rounded mr-1 font-mono">${u.kode}</span> ${u.nama}</td>
-                        <td class="p-3 text-gray-500">${u.klasifikasi}</td>
-                        <td class="p-3 text-right">${dataU.pendapatan === 0 ? '-' : dataU.pendapatan.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right">${dataU.beban === 0 ? '-' : dataU.beban.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right ${labaU > 0 ? 'text-green-600 font-semibold' : (labaU < 0 ? 'text-red-600 font-semibold' : '')}">${labaU === 0 ? '-' : labaU.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right ${dataU.utang > 0 ? 'text-red-600' : ''}">${dataU.utang === 0 ? '-' : dataU.utang.toLocaleString('id-ID')}</td>
+                    tbodyUnit.innerHTML += `
+                        <tr class="bg-indigo-50 font-bold text-indigo-900 border-t-2 border-indigo-200 text-sm">
+                            <td colspan="2" class="p-3">TOTAL KESELURUHAN (KONSOLIDASI)</td>
+                            <td class="p-3 text-right">Rp ${totalPendapatanGlobal.toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-right">Rp ${totalBebanGlobal.toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-right ${labaBersihGlobal >= 0 ? 'text-green-700' : 'text-red-700'}">Rp ${labaBersihGlobal.toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-right text-red-700">Rp ${totalUtangGlobal.toLocaleString('id-ID')}</td>
+                        </tr>
                     `;
-                    tbodyUnit.appendChild(tr);
-                });
-                
-                // Tambahkan Baris Total Konsolidasi
-                tbodyUnit.innerHTML += `
-                    <tr class="bg-indigo-50 font-bold text-indigo-900 border-t-2 border-indigo-200 text-sm">
-                        <td colspan="2" class="p-3">TOTAL KESELURUHAN (KONSOLIDASI)</td>
-                        <td class="p-3 text-right">Rp ${totalPendapatanGlobal.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right">Rp ${totalBebanGlobal.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right ${labaBersihGlobal >= 0 ? 'text-green-700' : 'text-red-700'}">Rp ${labaBersihGlobal.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right text-red-700">Rp ${totalUtangGlobal.toLocaleString('id-ID')}</td>
-                    </tr>
-                `;
+                }
 
-                // 5. Update UI Tabel Tren Bulanan & Siapkan Data Chart
                 const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
                 const tbodyTren = document.getElementById('tabelTrenBulanan');
-                tbodyTren.innerHTML = "";
                 
                 const arrayPendapatanChart = [];
                 const arrayLabaChart = [];
 
-                dataBulanan.forEach((data, index) => {
-                    const labaBulan = data.pendapatan - data.beban;
-                    arrayPendapatanChart.push(data.pendapatan);
-                    arrayLabaChart.push(labaBulan);
+                if (tbodyTren) {
+                    tbodyTren.innerHTML = "";
+                    dataBulanan.forEach((data, index) => {
+                        const labaBulan = data.pendapatan - data.beban;
+                        arrayPendapatanChart.push(data.pendapatan);
+                        arrayLabaChart.push(labaBulan);
 
-                    let tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="py-3 px-4 font-medium">${namaBulan[index]}</td>
-                        <td class="py-3 px-4 text-right">${data.pendapatan === 0 ? '-' : data.pendapatan.toLocaleString('id-ID')}</td>
-                        <td class="py-3 px-4 text-right ${labaBulan > 0 ? 'text-green-600 font-semibold' : (labaBulan < 0 ? 'text-red-600 font-semibold' : '')}">${labaBulan === 0 ? '-' : labaBulan.toLocaleString('id-ID')}</td>
-                    `;
-                    tbodyTren.appendChild(tr);
-                });
+                        let tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="py-3 px-4 font-medium">${namaBulan[index]}</td>
+                            <td class="py-3 px-4 text-right">${data.pendapatan === 0 ? '-' : data.pendapatan.toLocaleString('id-ID')}</td>
+                            <td class="py-3 px-4 text-right ${labaBulan > 0 ? 'text-green-600 font-semibold' : (labaBulan < 0 ? 'text-red-600 font-semibold' : '')}">${labaBulan === 0 ? '-' : labaBulan.toLocaleString('id-ID')}</td>
+                        `;
+                        tbodyTren.appendChild(tr);
+                    });
+                }
 
-                // 6. Update Chart.js
-                const ctx = document.getElementById('grafikKinerja').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-                        datasets: [
-                            {
-                                label: 'Pendapatan (Rp)',
-                                data: arrayPendapatanChart,
-                                backgroundColor: 'rgba(99, 102, 241, 0.8)',
-                                borderRadius: 6
-                            },
-                            {
-                                label: 'Keuntungan / Laba (Rp)',
-                                data: arrayLabaChart,
-                                backgroundColor: 'rgba(34, 197, 94, 0.8)',
-                                borderRadius: 6
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
-                        scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
-                    }
-                });
+                const canvasElement = document.getElementById('grafikKinerja');
+                if (canvasElement) {
+                    const ctx = canvasElement.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                            datasets: [
+                                {
+                                    label: 'Pendapatan (Rp)',
+                                    data: arrayPendapatanChart,
+                                    backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                                    borderRadius: 6
+                                },
+                                {
+                                    label: 'Keuntungan / Laba (Rp)',
+                                    data: arrayLabaChart,
+                                    backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                                    borderRadius: 6
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+                            scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
+                        }
+                    });
+                }
 
             } catch (error) {
                 console.error("Gagal melakukan inisialisasi Dashboard:", error);
