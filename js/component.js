@@ -1,4 +1,4 @@
-// js/component.js - Komponen Global dengan Filter Menu Berbasis Role
+// js/component.js - Komponen Global dengan Clean URL (Tanpa .html)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { CONFIG } from "./config.js";
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 sessionStorage.removeItem("erapee_user_session");
-                window.location.href = 'login.html';
+                window.location.href = '/login';
             } else {
                 muatSidebar();
                 muatHeader();
@@ -41,7 +41,6 @@ function muatSidebar() {
     }
     if (currentFile === '') currentFile = 'index';
 
-    // Ambil data user aktif untuk mengetahui rolenya
     const currentUser = ambilUserAktif();
     const userRole = currentUser.role || "Akuntan";
 
@@ -61,7 +60,6 @@ function muatSidebar() {
 
     let menuHtml = '';
     menuItems.forEach(item => {
-        // Filter menu berdasarkan role pengguna
         if (!item.roles.includes(userRole)) return;
 
         const isActive = currentFile === item.href || currentFile === item.href + '.html';
@@ -69,8 +67,9 @@ function muatSidebar() {
             ? 'bg-indigo-600 text-white font-medium shadow-sm' 
             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900';
 
+        // Tautan tanpa ekstensi .html (Clean URL)
         menuHtml += `
-            <a href="${item.href}.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${activeClass}">
+            <a href="/${item.href}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${activeClass}">
                 <span class="text-base">${item.icon}</span>
                 <span>${item.name}</span>
             </a>
@@ -138,10 +137,10 @@ window.prosesLogout = function() {
     if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
         sessionStorage.removeItem("erapee_user_session");
         signOut(auth).then(() => {
-            window.location.href = 'login.html';
+            window.location.href = '/login';
         }).catch((error) => {
             console.error('Logout error:', error);
-            window.location.href = 'login.html';
+            window.location.href = '/login';
         });
     }
 };
