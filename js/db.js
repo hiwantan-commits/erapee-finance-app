@@ -1,14 +1,43 @@
-// js/db.js - Lapisan Akses Data (Database Layer dengan Optimasi Pagination)
+// js/db.js - Lapisan Akses Data dengan Otomatisasi Audit Trail
 import { CONFIG, db } from "./config.js";
-import { collection, addDoc, getDocs, query, where, deleteDoc, doc, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, addDoc, getDocs, query, where, deleteDoc, doc, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const KOLEKSI_UTAMA = CONFIG.COLLECTION_NAME || "jurnal_transaksi";
+const KOLEKSI_LOG = "activity_logs";
+
+// Fungsi internal untuk mencatat jejak audit
+async function catatLogAktivitas(aksi, idJurnal, detailKeterangan) {
+    try {
+        let userEmail = "System User";
+        const sesiUser = sessionStorage.getItem("erapee_user_session");
+        if (sesiUser) {
+            try {
+                const parsed = JSON.parse(sesiUser);
+                userEmail = parsed.email || "System User";
+            } catch (e) {
+                userEmail = sesiUser;
+            }
+        }
+
+        await addDoc(collection(db, KOLEKSI_LOG), {
+            aksi: aksi, // "CREATE / POST", "UPDATE / EDIT", atau "DELETE"
+            id_jurnal: idJurnal,
+            keterangan: detailKeterangan,
+            user: userEmail,
+            timestamp: new Date().toISOString()
+        });
+    } catch (err) {
+        console.error("Gagal mencatat log aktivitas:", err);
+    }
+}
 
 export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = null) {
     try {
-        if (editIdJurnal) {
-            await hapusJurnalPusat(editIdJurnal);
+        const isEdit = Boolean(editIdJurnal);
+        if (isEdit) {
+            await hapusJurnalPusat(editIdJurnal, false); // Hapus data lama tanpa double log
         }
+
         const batchPromises = [];
         rowsData.forEach(row => {
             const debitVal = parseFloat(row.debit) || 0;
@@ -27,6 +56,14 @@ export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = nul
             }
         });
         await Promise.all(batchPromises);
+
+        // Catat jejak audit ke database
+        await catatLogAktivitas(
+            isEdit ? "UPDATE / EDIT JURNAL" : "CREATE / POST JURNAL",
+            headerData.id_jurnal,
+            `No. Bukti: ${headerData.no_bukti} | Unit: ${headerData.unit_usaha} | Ket: ${headerData.keterangan}`
+        );
+
         return { success: true };
     } catch (error) {
         console.error("Gagal menyimpan ke database:", error);
@@ -36,7 +73,6 @@ export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = nul
 
 export async function ambilSemuaJurnalPusat(batasiJumlah = 500) {
     try {
-        // Optimasi: Batasi kueri awal agar browser tidak berat memuat seluruh dokumen
         const q = query(collection(db, KOLEKSI_UTAMA), limit(batasiJumlah));
         const querySnapshot = await getDocs(q);
         let groupedJurnal = {};
@@ -79,7 +115,7 @@ export async function ambilSemuaJurnalPusat(batasiJumlah = 500) {
     }
 }
 
-export async function hapusJurnalPusat(id_jurnal) {
+export async function hapusJurnalPusat(id_jurnal, catatLog = true) {
     try {
         const q = query(collection(db, KOLEKSI_UTAMA), where("id_jurnal", "==", id_jurnal));
         const querySnapshot = await getDocs(q);
@@ -88,6 +124,11 @@ export async function hapusJurnalPusat(id_jurnal) {
             deletePromises.push(deleteDoc(doc(db, KOLEKSI_UTAMA, docSnap.id)));
         });
         await Promise.all(deletePromises);
+
+        if (catatLog) {
+            await catatLogAktivitas("DELETE JURNAL", id_jurnal, `Penghapusan seluruh baris transaksi untuk ID ${id_jurnal}`);
+        }
+
         return { success: true };
     } catch (error) {
         console.error("Gagal menghapus:", error);
