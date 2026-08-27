@@ -1,4 +1,4 @@
-// js/branding-page.js - Controller Pengaturan Branding (Penyimpanan Base64 & Preview Otomatis)
+// js/branding-page.js - Controller Pengaturan Branding Final
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { CONFIG, db } from "./config.js";
@@ -6,7 +6,6 @@ import { ambilUserAktif } from "./auth.js";
 
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
 
-// Variabel lokal untuk menyimpan data Base64 sementara
 let currentLogoBase64 = "";
 let currentFaviconBase64 = "";
 
@@ -28,8 +27,9 @@ document.addEventListener("DOMContentLoaded", async function() {
             if (file) {
                 conversiKeBase64(file, function(base64String) {
                     currentLogoBase64 = base64String;
-                    document.getElementById("previewLogo").src = base64String;
-                    document.getElementById("previewLogo").classList.remove("hidden");
+                    const preview = document.getElementById("previewLogo");
+                    preview.src = base64String;
+                    preview.style.display = "block";
                 });
             }
         });
@@ -43,8 +43,9 @@ document.addEventListener("DOMContentLoaded", async function() {
             if (file) {
                 conversiKeBase64(file, function(base64String) {
                     currentFaviconBase64 = base64String;
-                    document.getElementById("previewFavicon").src = base64String;
-                    document.getElementById("previewFavicon").classList.remove("hidden");
+                    const preview = document.getElementById("previewFavicon");
+                    preview.src = base64String;
+                    preview.style.display = "block";
                 });
             }
         });
@@ -57,9 +58,8 @@ document.addEventListener("DOMContentLoaded", async function() {
             const btn = document.getElementById("btnSimpanBranding");
             const notif = document.getElementById("notifikasiBranding");
 
-            // Validasi apakah ada data yang akan disimpan
             if (!currentLogoBase64 && !currentFaviconBase64) {
-                tampilkanNotif(notif, "⚠️ Harap pilih minimal salah satu file logo atau favicon baru sebelum menyimpan.", "red");
+                tampilkanNotif(notif, "⚠️ Harap pilih file logo atau favicon baru terlebih dahulu.", "red");
                 return;
             }
 
@@ -76,11 +76,11 @@ document.addEventListener("DOMContentLoaded", async function() {
                 const brandingRef = doc(db, "pengaturan_sistem", "branding");
                 await setDoc(brandingRef, payload, { merge: true });
 
-                tampilkanNotif(notif, "✅ Pengaturan branding berhasil disimpan! Memuat ulang halaman...", "green");
+                tampilkanNotif(notif, "✅ Berhasil! Memuat ulang sistem...", "green");
                 
                 setTimeout(() => {
                     window.location.reload();
-                }, 1500);
+                }, 1200);
 
             } catch (err) {
                 console.error("Gagal menyimpan branding:", err);
@@ -97,10 +97,6 @@ function konversiKeBase64(file, callback) {
     reader.onload = function(uploadEvent) {
         callback(uploadEvent.target.result);
     };
-    reader.onerror = function(error) {
-        console.error("Gagal membaca file:", error);
-        alert("Gagal membaca file gambar.");
-    };
     reader.readAsDataURL(file);
 }
 
@@ -111,11 +107,13 @@ async function muatPengaturanBrandingSaatIni() {
             const data = docSnap.data();
             if (data.logoUrl) {
                 currentLogoBase64 = data.logoUrl;
-                document.getElementById("previewLogo").src = data.logoUrl;
+                const pLogo = document.getElementById("previewLogo");
+                if(pLogo) pLogo.src = data.logoUrl;
             }
             if (data.faviconUrl) {
                 currentFaviconBase64 = data.faviconUrl;
-                document.getElementById("previewFavicon").src = data.faviconUrl;
+                const pFav = document.getElementById("previewFavicon");
+                if(pFav) pFav.src = data.faviconUrl;
             }
         }
     } catch (err) {
