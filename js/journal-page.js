@@ -1,4 +1,4 @@
-// js/journal-page.js - Controller Input Jurnal (Desain Asli dengan Fitur Searchable)
+// js/journal-page.js - Controller Input Jurnal (Desain Asli + Native Dropdown Search)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { CONFIG } from "./config.js";
@@ -6,7 +6,6 @@ import { CONFIG } from "./config.js";
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
 const db = getFirestore(app);
 
-let daftarCOA = []; 
 let counterBaris = 0; 
 
 document.addEventListener("DOMContentLoaded", async function() {
@@ -24,18 +23,25 @@ document.addEventListener("DOMContentLoaded", async function() {
 async function muatDaftarCOADariDatabase() {
     try {
         const querySnapshot = await getDocs(collection(db, "master_coa"));
-        daftarCOA = []; 
+        
+        // Buat elemen penampung daftar (datalist) global di HTML
+        let datalist = document.getElementById("list-coa");
+        if (!datalist) {
+            datalist = document.createElement("datalist");
+            datalist.id = "list-coa";
+            document.body.appendChild(datalist);
+        }
+        datalist.innerHTML = ""; // Bersihkan list jika ada sisa
+
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             if(data.kodeAkun && data.namaAkun) {
-                daftarCOA.push({
-                    kode: data.kodeAkun,
-                    nama: data.namaAkun,
-                    labelTampil: `${data.kodeAkun} - ${data.namaAkun}`
-                });
+                const option = document.createElement("option");
+                // Tampilan yang akan muncul di dropdown: "1101 - Kas"
+                option.value = `${data.kodeAkun} - ${data.namaAkun}`;
+                datalist.appendChild(option);
             }
         });
-        daftarCOA.sort((a, b) => a.kode.localeCompare(b.kode));
     } catch (error) {
         console.error("Gagal memuat Master COA: ", error);
     }
@@ -47,20 +53,14 @@ function tambahBarisJurnal() {
     const tbody = document.getElementById("tbodyJurnal");
     if(!tbody) return;
     
-    let opsiHtml = `<option value="">Pilih Akun...</option>`;
-    daftarCOA.forEach(coa => {
-        opsiHtml += `<option value="${coa.kode}">${coa.labelTampil}</option>`;
-    });
-
     const tr = document.createElement("tr");
     tr.id = rowId;
     
-    // Menggunakan gaya asli tabel yang lebih ringkas dan sesuai dengan tema Anda
+    // Perhatikan: Kita mengubah <select> menjadi <input list="list-coa">
+    // Desain CSS tetap menggunakan style bawaan Anda 100%
     tr.innerHTML = `
         <td class="p-2 align-top">
-            <select class="coa-dropdown w-full" required>
-                ${opsiHtml}
-            </select>
+            <input type="text" list="list-coa" class="coa-input w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm bg-white" placeholder="Pilih atau Ketik Akun..." required autocomplete="off">
         </td>
         <td class="p-2 align-top">
             <input type="number" min="0" class="input-debit w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm" placeholder="0">
@@ -77,16 +77,7 @@ function tambahBarisJurnal() {
     
     tbody.appendChild(tr);
 
-    // Inisialisasi fitur ketik pencarian tanpa mengubah gaya berlebihan
-    const elemenSelectBaru = tr.querySelector('.coa-dropdown');
-    new TomSelect(elemenSelectBaru, {
-        create: false,
-        sortField: { field: "text", direction: "asc" },
-        maxOptions: 50,
-        placeholder: "Pilih Akun...",
-        controlInput: '<input>',
-    });
-
+    // Event listener untuk kalkulasi total otomatis
     tr.querySelector('.input-debit').addEventListener("input", hitungTotalJurnal);
     tr.querySelector('.input-kredit').addEventListener("input", hitungTotalJurnal);
 }
@@ -127,12 +118,16 @@ function hitungTotalJurnal() {
 
     if (totalDebit === 0 && totalKredit === 0) {
         statusEl.innerText = "Menunggu Input...";
+        statusEl.className = "text-xs font-bold text-center py-2 rounded bg-gray-200 text-gray-600";
         btnSimpan.disabled = true;
     } else if (totalDebit === totalKredit) {
-        statusEl.innerText = "JURNAL SEIMBANG";
+        statusEl.innerText = "✓ JURNAL SEIMBANG";
+        statusEl.className = "text-xs font-bold text-center py-2 rounded bg-green-100 text-green-700 border border-green-200";
         btnSimpan.disabled = false;
     } else {
-        statusEl.innerText = "TIDAK SEIMBANG";
+        const selisih = Math.abs(totalDebit - totalKredit);
+        statusEl.innerText = `✕ TIDAK SEIMBANG (Selisih: Rp ${selisih.toLocaleString('id-ID')})`;
+        statusEl.className = "text-xs font-bold text-center py-2 rounded bg-red-100 text-red-700 border border-red-200";
         btnSimpan.disabled = true;
     }
 }
@@ -141,6 +136,7 @@ async function simpanDataJurnal(e) {
     e.preventDefault();
     const btnSimpan = document.getElementById("btnSimpanJurnal");
     btnSimpan.disabled = true;
+    btnSimpan.innerText = "Menyimpan...";
 
     try {
         const tgl = document.getElementById("tglJurnal").value;
@@ -151,16 +147,20 @@ async function simpanDataJurnal(e) {
         let total = 0;
 
         document.querySelectorAll("#tbodyJurnal tr").forEach(tr => {
-            const akunEl = tr.querySelector('.coa-dropdown');
+            const akunEl = tr.querySelector('.coa-input');
             const debitEl = tr.querySelector('.input-debit');
             const kreditEl = tr.querySelector('.input-kredit');
 
-            const kodeAkun = akunEl.value; 
-            const namaAkun = akunEl.options[akunEl.selectedIndex].text; 
+            const fullText = akunEl.value; // Contoh: "1101 - Kas Utama"
             const nominalDebit = parseFloat(debitEl.value) || 0;
             const nominalKredit = parseFloat(kreditEl.value) || 0;
 
-            if (kodeAkun && (nominalDebit > 0 || nominalKredit > 0)) {
+            if (fullText && (nominalDebit > 0 || nominalKredit > 0)) {
+                // Ekstrak Kode dan Nama dari format input
+                const parts = fullText.split(" - ");
+                const kodeAkun = parts[0] ? parts[0].trim() : "";
+                const namaAkun = parts[1] ? parts.slice(1).join(" - ").trim() : fullText;
+
                 barisData.push({
                     kodeAkun: kodeAkun,
                     namaAkun: namaAkun,
@@ -170,6 +170,10 @@ async function simpanDataJurnal(e) {
                 total += nominalDebit; 
             }
         });
+
+        if (barisData.length < 2) {
+            throw new Error("Jurnal harus memiliki baris debit dan kredit yang sah.");
+        }
 
         const payload = {
             tanggal: tgl,
@@ -181,12 +185,13 @@ async function simpanDataJurnal(e) {
         };
 
         await addDoc(collection(db, "jurnal_transaksi"), payload);
-        alert("Jurnal berhasil disimpan!");
+        alert("✅ Jurnal berhasil disimpan!");
         window.location.reload(); 
 
     } catch (err) {
         console.error("Error menyimpan jurnal: ", err);
-        alert("Gagal menyimpan jurnal.");
+        alert("Gagal menyimpan jurnal: " + err.message);
         btnSimpan.disabled = false;
+        btnSimpan.innerText = "Simpan Jurnal";
     }
 }
