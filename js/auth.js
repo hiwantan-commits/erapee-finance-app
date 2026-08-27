@@ -37,8 +37,10 @@ export async function ambilDataRoleUser(uid, email) {
         console.error("Gagal mengambil role dari database:", err);
     }
 
-    // Default fallback (Darurat jika belum ada di database)
-    if (email === "admin.utama@gmail.com") return "Super Admin";; // Ganti dengan email Anda
+    // Default fallback (Jalur khusus Super Admin)
+    if (email === "hi.wantan@gmail.com") return "Super Admin"; 
+    
+    // Default fallback lainnya
     if (email && email.includes("admin")) return "Admin";
     if (email && email.includes("auditor")) return "Auditor";
     
