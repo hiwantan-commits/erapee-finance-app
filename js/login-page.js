@@ -1,119 +1,65 @@
-// js/login-page.js - Controller Halaman Login & Pemuat Branding Dinamis
+// js/login-page.js - Controller untuk login.html dengan Pengambilan Role
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { CONFIG } from "./config.js";
+import { ambilDataRoleUser } from "./auth.js";
 
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
 const auth = getAuth(app);
-const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Muat Logo dan Favicon Dinamis ke Halaman Login
-    muatBrandingLogin();
+    // Logika Toggle Tampil/Sembunyikan Password
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
 
-    // 2. Cegah akses form jika pengguna sudah login (Langsung lempar ke Dashboard)
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            window.location.href = '/index';
-        }
-    });
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener("click", function() {
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+            this.classList.toggle("text-indigo-600");
+        });
+    }
 
-    // 3. Tangani Proses Form Login
-    const formLogin = document.querySelector("form"); 
+    // Logika Proses Login & Role Fetching
+    const formLogin = document.getElementById("formLogin");
     if (formLogin) {
         formLogin.addEventListener("submit", async function(e) {
             e.preventDefault();
             
-            // Ambil elemen input berdasarkan tipenya agar lebih kebal error (anti-salah ID)
-            const emailInput = document.querySelector('input[type="email"]');
-            const passwordInput = document.querySelector('input[type="password"]');
-            const btnSubmit = formLogin.querySelector('button[type="submit"]') || formLogin.querySelector('button');
-            
-            if (!emailInput || !passwordInput) return;
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+            const pesanError = document.getElementById("pesanError");
+            const btnSubmit = document.getElementById("btnSubmit");
 
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
-
-            // Ubah tombol menjadi mode Loading
-            const originalBtnText = btnSubmit.innerText;
+            pesanError.classList.add("hidden");
+            pesanError.innerText = "";
             btnSubmit.disabled = true;
-            btnSubmit.innerText = "Memverifikasi Data...";
-            btnSubmit.classList.add("opacity-75", "cursor-not-allowed");
+            btnSubmit.innerText = "Memverifikasi Peran & Masuk...";
 
             try {
-                // Autentikasi dengan Firebase Auth
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Ambil Role pengguna dari Firestore
-                const userDoc = await getDoc(doc(db, "users", email));
-                let role = "Akuntan"; // Role default sistem
-                
-                if (userDoc.exists()) {
-                    role = userDoc.data().role || "Akuntan";
-                } else if (email === "hi.wantan@gmail.com") {
-                    // Fallback keamanan jika akun Super Admin utama belum masuk database
-                    role = "Super Admin";
-                }
+                // Ambil role pengguna dari Firestore / aturan kustom
+                const userRole = await ambilDataRoleUser(user.uid, user.email);
 
-                // Simpan Sesi (SessionStorage) agar bisa dibaca oleh component.js
-                const sessionData = {
+                // Simpan sesi lokal beserta role-nya
+                sessionStorage.setItem("erapee_user_session", JSON.stringify({
                     uid: user.uid,
                     email: user.email,
-                    role: role,
-                    loginTime: new Date().getTime()
-                };
-                sessionStorage.setItem("erapee_user_session", JSON.stringify(sessionData));
+                    role: userRole,
+                    loginAt: new Date().toISOString()
+                }));
 
-                // Berhasil login, arahkan ke halaman utama
-                window.location.href = '/index';
+                window.location.href = "index.html";
 
             } catch (error) {
-                console.error("Error login:", error);
-                alert("Gagal masuk: Email atau Kata Sandi salah. Silakan periksa kembali.");
-                
-                // Kembalikan tombol ke kondisi semula
+                console.error("Login gagal:", error.code, error.message);
+                pesanError.innerText = "Gagal Masuk: " + (error.code === 'auth/invalid-credential' ? 'Email atau kata sandi salah.' : error.message);
+                pesanError.classList.remove("hidden");
                 btnSubmit.disabled = false;
-                btnSubmit.innerText = originalBtnText;
-                btnSubmit.classList.remove("opacity-75", "cursor-not-allowed");
+                btnSubmit.innerText = "Masuk ke Sistem";
             }
         });
     }
 });
-
-// Fungsi untuk menarik dan menerapkan Logo & Favicon dari Firestore secara dinamis
-async function muatBrandingLogin() {
-    try {
-        const docSnap = await getDoc(doc(db, "pengaturan_sistem", "branding"));
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            
-            // Terapkan Favicon ke Tab Browser
-            if (data.faviconUrl && !data.faviconUrl.endsWith('/branding')) {
-                let faviconTag = document.querySelector("link[rel*='icon']") || document.createElement('link');
-                faviconTag.type = 'image/png';
-                faviconTag.rel = 'icon';
-                faviconTag.href = data.faviconUrl;
-                document.getElementsByTagName('head')[0].appendChild(faviconTag);
-            }
-
-            // Terapkan Logo ke Halaman Login
-            const logoImg = document.getElementById("loginLogoImg");
-            const titleText = document.getElementById("loginTitleText");
-            
-            if (logoImg && data.logoUrl && !data.logoUrl.endsWith('/branding')) {
-                // Tampilkan gambar logo
-                logoImg.src = data.logoUrl;
-                logoImg.style.display = "block";
-                
-                // Sembunyikan teks polos "PT ERAPEE" agar tidak ada tulisan ganda
-                if (titleText) {
-                    titleText.style.display = "none";
-                }
-            }
-        }
-    } catch (err) {
-        console.error("Gagal memuat branding halaman login:", err);
-    }
-}
