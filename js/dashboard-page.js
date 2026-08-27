@@ -1,4 +1,4 @@
-// js/dashboard-page.js - Controller untuk index.html
+// js/dashboard-page.js - Controller untuk index.html (Support HPP Akun 5 & Beban Akun 6)
 import { db } from "./config.js";
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -51,7 +51,7 @@ async function muatDashboard() {
 
             const bulanIndex = jurnal.tanggal ? parseInt(jurnal.tanggal.split("-")[1]) - 1 : 0;
             
-            // Ambil kode unit dari string "KODE - NAMA"
+            // Ambil kode unit dari string "KODE - NAMA" atau string bersih
             let kodeUnit = "SHARED";
             if (jurnal.unit_usaha) {
                 kodeUnit = jurnal.unit_usaha.split(" - ")[0].trim();
@@ -70,12 +70,15 @@ async function muatDashboard() {
                     totalPendapatanGlobal += nilai;
                     dataPerUnit[kodeUnit].pendapatan += nilai;
                     if (bulanIndex >= 0 && bulanIndex <= 11) dataBulanan[bulanIndex].pendapatan += nilai;
-                } else if (kodeAkun.startsWith("6")) {
+                } 
+                // PERBAIKAN: Akun HPP (Awalan 5) dan Beban (Awalan 6) dihitung sebagai beban/HPP
+                else if (kodeAkun.startsWith("5") || kodeAkun.startsWith("6")) {
                     const nilai = debit - kredit;
                     totalBebanGlobal += nilai;
                     dataPerUnit[kodeUnit].beban += nilai;
                     if (bulanIndex >= 0 && bulanIndex <= 11) dataBulanan[bulanIndex].beban += nilai;
-                } else if (kodeAkun.startsWith("2")) {
+                } 
+                else if (kodeAkun.startsWith("2")) {
                     const nilai = kredit - debit;
                     totalUtangGlobal += nilai;
                     dataPerUnit[kodeUnit].utang += nilai;
