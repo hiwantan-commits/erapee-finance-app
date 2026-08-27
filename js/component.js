@@ -1,4 +1,4 @@
-// js/component.js - Komponen Global dengan Sidebar Berkelompok, Profil di Bawah, & Branding Dinamis
+// js/component.js - Komponen Global dengan Render Logo Dinamis yang Disempurnakan
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -11,7 +11,6 @@ const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", function() {
     cekSesiLogin();
-    terapkanBrandingGlobal(); // Panggil fungsi pemuat logo & favicon dinamis
 
     const path = window.location.pathname;
     let currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index';
@@ -49,10 +48,11 @@ async function terapkanBrandingGlobal() {
                 document.getElementsByTagName('head')[0].appendChild(faviconTag);
             }
 
-            // Terapkan Logo Dinamis ke Sidebar jika elemen sudah dirender
+            // Terapkan Logo Dinamis ke Sidebar
             const logoImg = document.getElementById("sidebarLogoImg");
             if (logoImg && data.logoUrl) {
                 logoImg.src = data.logoUrl;
+                logoImg.classList.remove("hidden");
             }
         }
     } catch (err) {
@@ -158,15 +158,15 @@ function muatSidebar() {
         ? 'bg-indigo-600 text-white font-medium shadow-sm' 
         : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900';
 
+    // Render HTML Sidebar dengan Tag Gambar Logo yang Jelas
     sidebarContainer.innerHTML = `
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
         <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
             <div class="p-5 border-b border-gray-100 flex items-center justify-between">
-                <div class="flex items-center gap-2.5 overflow-hidden">
-                    <img id="sidebarLogoImg" src="/img/logo-erapee.png" alt="PT ERAPEE" class="h-7 w-auto object-contain">
-                    <div>
-                        <p class="text-[9px] text-gray-400 uppercase tracking-wider">Role: <span class="${roleBadgeClass}">${userRole}</span></p>
-                    </div>
+                <div class="flex flex-col gap-1 overflow-hidden">
+                    <!-- Elemen Gambar Logo Dinamis -->
+                    <img id="sidebarLogoImg" src="" alt="Logo PT ERAPEE" class="h-8 max-w-[140px] object-contain">
+                    <p class="text-[9px] text-gray-400 uppercase tracking-wider mt-0.5">Role: <span class="${roleBadgeClass}">${userRole}</span></p>
                 </div>
                 <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700">✕</button>
             </div>
@@ -189,7 +189,7 @@ function muatSidebar() {
         </aside>
     `;
 
-    // Panggil ulang pemuatan logo dinamis agar elemen img ber-ID 'sidebarLogoImg' langsung terisi URL dari database setelah dirender
+    // Segera panggil fungsi pemuat branding setelah elemen sidebar selesai dimasukkan ke DOM
     terapkanBrandingGlobal();
 }
 
