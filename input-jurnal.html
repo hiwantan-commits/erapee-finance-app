@@ -3,186 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Jurnal Umum | PT ERAPEE Anugrah Sejahtera</title>
+    <title>Input Jurnal - PT ERAPEE</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tom Select CSS & JS untuk Searchable Dropdown -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.complete.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="text-gray-800 bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
-        <!-- SIDEBAR -->
-        <div id="sidebar-container"></div>
+<body class="bg-gray-50 flex h-screen overflow-hidden font-sans">
 
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
-            <div id="header-container"></div>
+    <!-- Komponen Sidebar Kiri -->
+    <div id="sidebar-container"></div>
 
-            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Header Jurnal -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h2 id="judulForm" class="text-xl font-bold text-gray-800">Pencatatan Jurnal Akuntansi Baru</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Sistem pencatatan berpasangan (Double-Entry) tersinkronisasi Coretax</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <select id="pilihTemplate" class="form-input-custom text-xs font-semibold py-2">
-                            <option value="">-- Pilih Template Cepat --</option>
-                            <option value="GAJI">Pembayaran Gaji</option>
-                            <option value="OPERASIONAL">Beban Operasional</option>
-                            <option value="PENDAPATAN">Penerimaan Pendapatan</option>
-                            <option value="PEMBELIAN_ASET">Pembelian Aset Tetap</option>
-                        </select>
-                        <button onclick="terapkanTemplate()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold transition">Pakai</button>
-                    </div>
-                </div>
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <!-- Komponen Header Atas -->
+        <div id="header-container"></div>
 
-                <!-- Form Input -->
-                <form id="formJurnal" class="space-y-6">
-                    <!-- Section Header Transaksi -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <h3 class="font-bold text-gray-800 text-sm mb-4 border-b pb-2">Informasi Header Transaksi</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Konten Utama -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <div class="max-w-5xl mx-auto">
+                
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-4">Input Jurnal Umum</h2>
+                    
+                    <form id="formInputJurnal" class="space-y-6">
+                        <!-- Informasi Jurnal Dasar -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">ID Jurnal (Otomatis)</label>
-                                <input type="text" id="id_jurnal" class="form-input-custom bg-gray-50 text-gray-500 font-mono text-xs" readonly required>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Tanggal Transaksi</label>
+                                <input type="date" id="tglJurnal" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 outline-none transition-all">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Tanggal Transaksi</label>
-                                <input type="date" id="tanggal" class="form-input-custom text-sm font-medium" required>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nomor Referensi (Opsional)</label>
+                                <input type="text" id="refJurnal" placeholder="Contoh: INV-2026/08/01" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 outline-none transition-all">
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">No. Bukti / Referensi (Opsional)</label>
-                                <input type="text" id="no_bukti" placeholder="Contoh: INV-2026/08/01" class="form-input-custom text-sm">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Keterangan Jurnal</label>
+                                <input type="text" id="ketJurnal" required placeholder="Contoh: Pembayaran biaya listrik bulan Agustus" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 outline-none transition-all">
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Sifat Transaksi</label>
-                                <select id="sifat_transaksi" class="form-input-custom text-sm" onchange="toggleDueDate()" required>
-                                    <option value="Tunai">Tunai / Langsung</option>
-                                    <option value="Non-Tunai">Non-Tunai / Kredit</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Unit Usaha (Cost Center)</label>
-                                <select id="unit_usaha" class="form-input-custom text-sm" required>
-                                    <option value="">Memuat unit usaha...</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Tanggal Jatuh Tempo (Kredit)</label>
-                                <input type="date" id="jatuh_tempo" class="form-input-custom text-sm bg-gray-100 cursor-not-allowed" disabled>
-                            </div>
-                            <div class="md:col-span-3">
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Lawan Transaksi / Nama Vendor (Opsional)</label>
-                                <input type="text" id="lawan_transaksi" placeholder="Contoh: PT. Pemasok Eksternal" class="form-input-custom text-sm">
+                        </div>
+
+                        <!-- Area Baris Jurnal Dinamis -->
+                        <div class="mt-8">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-3">Detail Akun (Debit & Kredit)</label>
+                            
+                            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                                <table class="w-full text-sm text-left text-gray-600">
+                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+                                        <tr>
+                                            <th class="px-4 py-3 w-5/12">Kode & Nama Akun (COA)</th>
+                                            <th class="px-4 py-3 w-3/12">Debit (Rp)</th>
+                                            <th class="px-4 py-3 w-3/12">Kredit (Rp)</th>
+                                            <th class="px-4 py-3 w-1/12 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyJurnal" class="divide-y divide-gray-100">
+                                        <!-- Baris akan dimasukkan oleh JS -->
+                                    </tbody>
+                                </table>
                             </div>
                             
-                            <!-- BAGIAN UNGGAH BERKAS -->
-                            <div class="md:col-span-3">
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Unggah Bukti Transaksi (PDF/JPG/PNG)</label>
-                                <input type="file" id="file_bukti" accept=".pdf, .jpg, .jpeg, .png" class="form-input-custom text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
-                                <!-- Hidden input untuk menyimpan URL yang dikembalikan dari Cloud Storage -->
-                                <input type="hidden" id="link_bukti" value="">
-                                <p id="statusUpload" class="text-[11px] text-gray-500 mt-1 hidden"></p>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- Section Perpajakan -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <h3 class="font-bold text-gray-800 text-sm mb-4 border-b pb-2">Informasi Perpajakan (Coretax)</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Kode Pajak Terkait</label>
-                                <select id="kode_pajak" class="form-input-custom text-sm">
-                                    <option value="NON">NON - Tidak Ada Aspek Pajak</option>
-                                    <option value="PPN11">PPN11 - Pajak Pertambahan Nilai (11%)</option>
-                                    <option value="PPH21">PPH21 - Pajak Penghasilan Pasal 21</option>
-                                    <option value="PPH23">PPH23 - Pajak Penghasilan Pasal 23</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">DPP (Dasar Pengenaan Pajak)</label>
-                                <input type="number" id="dpp_penjualan" value="0" min="0" step="any" class="form-input-custom text-sm font-mono text-right">
+                            <!-- Tombol Tambah Baris -->
+                            <div class="mt-3">
+                                <button type="button" id="btnTambahBaris" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                                    <span>+ Tambah Baris Akun</span>
+                                </button>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Section Detail Baris Jurnal -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
-                        <div class="flex justify-between items-center mb-4 border-b pb-2 min-w-[700px]">
-                            <h3 class="font-bold text-gray-800 text-sm">Detail Rincian Jurnal</h3>
-                            <button type="button" onclick="tambahBaris()" class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-100 transition">
-                                + Tambah Baris Akun
-                            </button>
-                        </div>
-                        <table class="w-full text-left min-w-[700px]">
-                            <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-[11px] uppercase tracking-wider">
-                                    <th class="p-3 w-1/3 rounded-tl-lg">Kode & Nama Akun (COA)</th>
-                                    <th class="p-3 w-1/4">Keterangan Baris / Memo</th>
-                                    <th class="p-3 w-1/6 text-right">Debit (Rp)</th>
-                                    <th class="p-3 w-1/6 text-right">Kredit (Rp)</th>
-                                    <th class="p-3 w-16 text-center rounded-tr-lg">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyJurnal" class="divide-y divide-gray-100">
-                                <!-- Baris Jurnal Dinamis -->
-                            </tbody>
-                            <tfoot>
-                                <tr class="bg-gray-50 font-bold border-t border-gray-200">
-                                    <td colspan="2" class="p-3 text-right text-gray-600 text-sm">TOTAL KESELURUHAN:</td>
-                                    <td class="p-3 text-right text-green-700 text-sm font-mono" id="totalDebit">0</td>
-                                    <td class="p-3 text-right text-red-700 text-sm font-mono" id="totalKredit">0</td>
-                                    <td class="p-3"></td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-
-                    <!-- Section Validasi & Submit -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Deskripsi Lengkap Transaksi</label>
-                                <textarea id="keterangan" rows="2" class="form-input-custom text-sm" placeholder="Catatan atau keterangan lengkap jurnal..."></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Status Persetujuan Awal</label>
-                                <select id="status_jurnal" class="form-input-custom text-sm font-medium">
-                                    <option value="DRAFT">SIMPAN SEBAGAI DRAFT</option>
-                                    <option value="POSTED" selected>POSTING KE BUKU BESAR</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="flex flex-col items-end justify-between h-full space-y-4">
-                            <div class="w-full text-right">
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Status Keseimbangan</p>
-                                <div id="statusBalance" class="px-4 py-1.5 bg-gray-100 text-gray-500 text-sm font-bold rounded-xl border border-gray-200 shadow-sm inline-block">
-                                    MENUNGGU INPUT
+                        <!-- Ringkasan Total & Validasi Keseimbangan -->
+                        <div class="flex flex-col items-end justify-end border-t pt-6 mt-6">
+                            <div class="w-full md:w-1/2 lg:w-1/3 bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                <div class="flex justify-between mb-2">
+                                    <span class="font-medium text-gray-600">Total Debit:</span>
+                                    <span id="totalDebitView" class="font-bold text-gray-900">Rp 0</span>
+                                </div>
+                                <div class="flex justify-between mb-3">
+                                    <span class="font-medium text-gray-600">Total Kredit:</span>
+                                    <span id="totalKreditView" class="font-bold text-gray-900">Rp 0</span>
+                                </div>
+                                <div id="statusBalance" class="text-xs font-bold text-center py-2 rounded bg-gray-200 text-gray-600">
+                                    Menunggu Input...
                                 </div>
                             </div>
-                            <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl text-sm transition shadow-sm">
-                                💾 Simpan Jurnal Akuntansi
+                        </div>
+
+                        <div class="flex justify-end pt-4">
+                            <button type="submit" id="btnSimpanJurnal" disabled class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-sm">
+                                Simpan Jurnal
                             </button>
                         </div>
-                    </div>
-                </form>
-
-                <div id="alertSuccess" class="hidden mt-6 p-4 bg-green-50 text-green-700 border border-green-200 rounded-xl flex items-center gap-3">
-                    <span class="text-xl">✅</span>
-                    <div>
-                        <p class="font-bold text-sm">Transaksi Berhasil Disimpan!</p>
-                        <p class="text-xs mt-0.5">Jurnal telah tercatat di database pusat dan jejak audit telah dibuat.</p>
-                    </div>
+                    </form>
                 </div>
 
-            </main>
+            </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Panggil Modular Controller Jurnal & Komponen Global -->
-    <script type="module" src="js/journal-page.js"></script>
+    <!-- Skrip Aplikasi -->
     <script type="module" src="js/component.js"></script>
+    <script type="module" src="js/journal-page.js"></script>
 </body>
 </html>
