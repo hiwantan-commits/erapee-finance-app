@@ -46,23 +46,19 @@ async function generateIdJurnal() {
         const semuaData = await ambilSemuaJurnalPusat();
         const tglHariIni = `${yyyy}-${mm}-${dd}`;
         
-        // Hitung ada berapa transaksi di tanggal hari ini
         let countHariIni = 0;
         if (semuaData && semuaData.length > 0) {
             countHariIni = semuaData.filter(j => j.tanggal === tglHariIni).length;
         }
         
-        // Format No Urut menjadi 3 digit (contoh: 001, 002)
         const noUrut = String(countHariIni + 1).padStart(3, '0');
         
-        // Terapkan ke elemen input form
         const inputNoBukti = document.getElementById('no_bukti');
         if (inputNoBukti) {
             inputNoBukti.value = `INV-${yyyy}/${mm}/${dd}/${noUrut}`;
         }
     } catch (error) {
         console.error("Gagal generate No. Bukti Otomatis:", error);
-        // Fallback jika database gagal diakses: gunakan 3 angka unik dari waktu
         const inputNoBukti = document.getElementById('no_bukti');
         if (inputNoBukti) {
             inputNoBukti.value = `INV-${yyyy}/${mm}/${dd}/${time.slice(-3)}`;
@@ -191,7 +187,19 @@ async function inisialisasiData() {
                 document.getElementById('tanggal').value = jurnalTarget.tanggal || '';
                 document.getElementById('no_bukti').value = jurnalTarget.no_bukti || '';
                 document.getElementById('sifat_transaksi').value = jurnalTarget.sifat_transaksi || 'Tunai';
-                document.getElementById('unit_usaha').value = jurnalTarget.unit_usaha || '';
+                
+                // Pencocokan saat Edit data unit usaha
+                const unitVal = jurnalTarget.unit_usaha || '';
+                const selectUnitEl = document.getElementById('unit_usaha');
+                if(selectUnitEl) {
+                    for(let opt of selectUnitEl.options) {
+                        if(opt.value.startsWith(unitVal)) {
+                            selectUnitEl.value = opt.value;
+                            break;
+                        }
+                    }
+                }
+
                 document.getElementById('lawan_transaksi').value = jurnalTarget.lawan_transaksi || '';
                 document.getElementById('jatuh_tempo').value = jurnalTarget.jatuh_tempo || '';
                 document.getElementById('kode_pajak').value = jurnalTarget.kode_pajak || 'NON';
@@ -221,7 +229,6 @@ async function inisialisasiData() {
             console.error("Gagal memuat data edit:", err);
         }
     } else {
-        // TUNGGU generateIdJurnal selesai sebelum lanjut, agar No. Bukti terisi
         await generateIdJurnal(); 
         tambahBaris();
         tambahBaris();
@@ -287,12 +294,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
+                // ==========================================
+                // MEMBERSIHKAN FORMAT UNIT USAHA (AMBIL KODENYA SAJA)
+                // ==========================================
+                const rawUnitValue = document.getElementById('unit_usaha').value;
+                const cleanUnitCode = rawUnitValue ? rawUnitValue.split(' - ')[0].trim() : '';
+
                 const headerData = {
                     id_jurnal: targetIdJurnal,
                     tanggal: tanggalInput,
                     no_bukti: document.getElementById('no_bukti').value,
                     sifat_transaksi: document.getElementById('sifat_transaksi').value,
-                    unit_usaha: document.getElementById('unit_usaha').value,
+                    unit_usaha: cleanUnitCode, // Tersimpan bersih sebagai "WT-NANAS", "CORP", dll.
                     lawan_transaksi: document.getElementById('lawan_transaksi').value,
                     jatuh_tempo: document.getElementById('jatuh_tempo').value,
                     link_bukti: finalLinkBukti, 
