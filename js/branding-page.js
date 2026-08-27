@@ -1,15 +1,12 @@
-// js/branding-page.js - Controller untuk pengaturan branding perusahaan
+// js/branding-page.js - Controller Pengaturan Branding dengan Konversi Base64 (Bebas CORS)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { CONFIG, db } from "./config.js";
 import { ambilUserAktif } from "./auth.js";
 
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
-const storage = getStorage(app);
 
 document.addEventListener("DOMContentLoaded", async function() {
-    // Validasi Akses: Hanya Super Admin yang boleh akses halaman ini
     const user = ambilUserAktif();
     if (user.role !== "Super Admin") {
         alert("⚠️ Akses Dibatasi: Halaman ini khusus untuk Super Admin.");
@@ -19,6 +16,32 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     await muatPengaturanBrandingSaatIni();
 
+    // Handler Preview Logo Utama
+    const inputLogo = document.getElementById("inputFileLogo");
+    if (inputLogo) {
+        inputLogo.addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                conversiKeBase64(file, function(base64String) {
+                    document.getElementById("previewLogo").src = base64String;
+                });
+            }
+        });
+    }
+
+    // Handler Preview Favicon
+    const inputFavicon = document.getElementById("inputFileFavicon");
+    if (inputFavicon) {
+        inputFavicon.addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                conversiKeBase64(file, function(base64String) {
+                    document.getElementById("previewFavicon").src = base64String;
+                });
+            }
+        });
+    }
+
     const form = document.getElementById("formBranding");
     if (form) {
         form.addEventListener("submit", async function(e) {
@@ -27,40 +50,27 @@ document.addEventListener("DOMContentLoaded", async function() {
             const notif = document.getElementById("notifikasiBranding");
 
             btn.disabled = true;
-            btn.innerText = "Mengunggah & Menyimpan...";
+            btn.innerText = "Menyimpan ke Database...";
 
             try {
-                const fileLogo = document.getElementById("inputFileLogo").files[0];
-                const fileFavicon = document.getElementById("inputFileFavicon").files[0];
+                // Ambil string Base64 dari elemen preview gambar
+                let logoData = document.getElementById("previewLogo").src;
+                let faviconData = document.getElementById("previewFavicon").src;
 
-                let logoUrl = document.getElementById("previewLogo").src;
-                let faviconUrl = document.getElementById("previewFavicon").src;
-
-                // Jika ada file logo baru yang dipilih
-                if (fileLogo) {
-                    const logoRef = ref(storage, `branding/logo_utama_${Date.now()}`);
-                    await uploadBytes(logoRef, fileLogo);
-                    logoUrl = await getDownloadURL(logoRef);
+                // Validasi agar data tidak kosong
+                if (!logoData || logoData.startsWith("http") && logoData.includes("404")) {
+                    throw new Error("Pilih file logo utama yang valid.");
                 }
 
-                // Jika ada file favicon baru yang dipilih
-                if (fileFavicon) {
-                    const faviconRef = ref(storage, `branding/favicon_${Date.now()}`);
-                    await uploadBytes(faviconRef, fileFavicon);
-                    faviconUrl = await getDownloadURL(faviconRef);
-                }
-
-                // Simpan tautan URL ke Firestore
+                // Simpan langsung ke Firestore (koleksi pengaturan_sistem -> dokumen branding)
                 const brandingRef = doc(db, "pengaturan_sistem", "branding");
                 await setDoc(brandingRef, {
-                    logoUrl: logoUrl,
-                    faviconUrl: faviconUrl,
+                    logoUrl: logoData,
+                    faviconUrl: faviconData,
                     updatedAt: new Date().toISOString()
                 }, { merge: true });
 
-                tampilkanNotif(notif, "✅ Pengaturan branding berhasil diperbarui! Perubahan akan diterapkan secara global.", "green");
-                await muatPengaturanBrandingSaatIni(); // DIPERBAIKI dari muatPengaturanBrandingSidang
-
+                tampilkanNotif(notif, "✅ Pengaturan branding berhasil disimpan! Perubahan diterapkan secara global.", "green");
             } catch (err) {
                 console.error("Gagal menyimpan branding:", err);
                 tampilkanNotif(notif, "❌ Gagal menyimpan: " + err.message, "red");
@@ -71,6 +81,19 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     }
 });
+
+// Fungsi pembantu untuk membaca file gambar menjadi string Base64
+function konversiKeBase64(file, callback) {
+    const reader = new FileReader();
+    reader.onload = function(uploadEvent) {
+        callback(uploadEvent.target.result);
+    };
+    reader.onerror = function(error) {
+        console.error("Gagal membaca file:", error);
+        alert("Gagal membaca file gambar.");
+    };
+    reader.readAsDataURL(file);
+}
 
 async function muatPengaturanBrandingSaatIni() {
     try {
