@@ -1,4 +1,4 @@
-// js/component.js - Komponen Global dengan Render Logo Langsung (Anti-Gagal)
+// js/component.js - Komponen Global dengan Render Logo Dinamis & Sidebar Terstruktur (UI Diperbarui)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -153,27 +153,35 @@ async function muatSidebarAndBranding() {
         ? 'bg-indigo-600 text-white font-medium shadow-sm' 
         : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900';
 
-    // Jika logo dari database ada, gunakan itu. Jika belum ada, tampilkan teks fallback "PT ERAPEE"
+    // Perbesar ukuran logo dan pastikan posisinya rata kiri
     let logoHtml = logoSrc 
-        ? `<img src="${logoSrc}" alt="PT ERAPEE" class="h-8 max-w-[150px] object-contain">`
-        : `<h1 class="font-bold text-gray-900 text-sm tracking-tight">PT ERAPEE</h1>`;
+        ? `<img src="${logoSrc}" alt="PT ERAPEE" class="h-11 w-auto max-w-[160px] object-contain object-left transition-transform duration-300 hover:scale-105">`
+        : `<h1 class="font-bold text-gray-900 text-base tracking-tight">PT ERAPEE</h1>`;
 
+    // Render HTML Sidebar dengan Header Baru
     sidebarContainer.innerHTML = `
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
         <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-            <div class="p-5 border-b border-gray-100 flex items-center justify-between">
-                <div class="flex flex-col gap-1 overflow-hidden">
+            
+            <!-- Area Header Sidebar yang Diperbarui -->
+            <div class="p-5 border-b border-gray-100 flex items-start justify-between">
+                <div class="flex flex-col gap-3 overflow-hidden w-full">
                     ${logoHtml}
-                    <p class="text-[9px] text-gray-400 uppercase tracking-wider mt-0.5">Role: <span class="${roleBadgeClass}">${userRole}</span></p>
+                    <div class="inline-flex items-center self-start px-2.5 py-1 rounded-md bg-gray-50 border border-gray-100 shadow-sm">
+                        <span class="text-[9px] text-gray-500 uppercase tracking-widest mr-1.5 font-bold">Role:</span>
+                        <span class="text-[10px] ${roleBadgeClass} tracking-wide">${userRole}</span>
+                    </div>
                 </div>
-                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700">✕</button>
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-gray-600 -mt-1 -mr-1">✕</button>
             </div>
+            
             <nav class="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
                 ${groupsHtml}
             </nav>
+            
             <!-- Area Sesi & Profil di Bagian Bawah -->
             <div class="p-3 border-t border-gray-100 bg-gray-50 space-y-2">
-                <a href="/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${profileActiveClass} border border-gray-200 bg-white">
+                <a href="/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${profileActiveClass} border border-gray-200 bg-white shadow-sm hover:shadow-md">
                     <span class="text-sm">👤</span>
                     <div class="overflow-hidden">
                         <p class="font-bold truncate">Profil Akun Saya</p>
