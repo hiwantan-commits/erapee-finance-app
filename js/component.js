@@ -1,14 +1,17 @@
-// js/component.js - Komponen Global dengan Profil di Area Bawah Sesi Pengguna
+// js/component.js - Komponen Global dengan Sidebar Berkelompok, Profil di Bawah, & Branding Dinamis
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { CONFIG } from "./config.js";
 import { cekSesiLogin, ambilUserAktif } from "./auth.js";
 
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", function() {
     cekSesiLogin();
+    terapkanBrandingGlobal(); // Panggil fungsi pemuat logo & favicon dinamis
 
     const path = window.location.pathname;
     let currentFile = path.substring(path.lastIndexOf('/') + 1) || 'index';
@@ -30,6 +33,33 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
+// Fungsi untuk menarik dan menerapkan Logo & Favicon dari Firestore secara dinamis
+async function terapkanBrandingGlobal() {
+    try {
+        const docSnap = await getDoc(doc(db, "pengaturan_sistem", "branding"));
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            
+            // Terapkan Favicon Dinamis ke Tab Browser
+            if (data.faviconUrl) {
+                let faviconTag = document.querySelector("link[rel*='icon']") || document.createElement('link');
+                faviconTag.type = 'image/png';
+                faviconTag.rel = 'icon';
+                faviconTag.href = data.faviconUrl;
+                document.getElementsByTagName('head')[0].appendChild(faviconTag);
+            }
+
+            // Terapkan Logo Dinamis ke Sidebar jika elemen sudah dirender
+            const logoImg = document.getElementById("sidebarLogoImg");
+            if (logoImg && data.logoUrl) {
+                logoImg.src = data.logoUrl;
+            }
+        }
+    } catch (err) {
+        console.error("Gagal memuat branding global:", err);
+    }
+}
+
 function muatSidebar() {
     const sidebarContainer = document.getElementById('sidebar-container');
     if (!sidebarContainer) return;
@@ -44,7 +74,7 @@ function muatSidebar() {
     const currentUser = ambilUserAktif();
     const userRole = currentUser.role || "Akuntan"; 
 
-    // Struktur Menu Berkelompok (Tanpa Profil di dalam list utama)
+    // Struktur Menu Berkelompok
     const menuGroups = [
         {
             groupName: "Utama",
@@ -79,6 +109,7 @@ function muatSidebar() {
         {
             groupName: "Administrasi Sistem",
             items: [
+                { name: 'Pengaturan Branding', href: 'branding', icon: '🎨', roles: ['Super Admin'] },
                 { name: 'Manajemen Pengguna', href: 'users', icon: '👥', roles: ['Super Admin'] },
                 { name: 'Tutup Buku Bulanan', href: 'closing', icon: '🔒', roles: ['Super Admin', 'Admin'] }
             ]
@@ -122,7 +153,6 @@ function muatSidebar() {
     let roleBadgeClass = "text-indigo-600";
     if (userRole === "Super Admin") roleBadgeClass = "text-amber-500 font-bold";
 
-    // Cek apakah halaman aktif saat ini adalah halaman profil
     const isProfileActive = currentFile === 'profile';
     const profileActiveClass = isProfileActive 
         ? 'bg-indigo-600 text-white font-medium shadow-sm' 
@@ -132,9 +162,11 @@ function muatSidebar() {
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
         <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
             <div class="p-5 border-b border-gray-100 flex items-center justify-between">
-                <div>
-                    <h1 class="font-bold text-gray-900 text-sm tracking-tight">PT ERAPEE</h1>
-                    <p class="text-[10px] text-gray-400 mt-0.5 uppercase tracking-wider">Role: <span class="${roleBadgeClass} ml-1">${userRole}</span></p>
+                <div class="flex items-center gap-2.5 overflow-hidden">
+                    <img id="sidebarLogoImg" src="/img/logo-erapee.png" alt="PT ERAPEE" class="h-7 w-auto object-contain">
+                    <div>
+                        <p class="text-[9px] text-gray-400 uppercase tracking-wider">Role: <span class="${roleBadgeClass}">${userRole}</span></p>
+                    </div>
                 </div>
                 <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700">✕</button>
             </div>
@@ -156,6 +188,9 @@ function muatSidebar() {
             </div>
         </aside>
     `;
+
+    // Panggil ulang pemuatan logo dinamis agar elemen img ber-ID 'sidebarLogoImg' langsung terisi URL dari database setelah dirender
+    terapkanBrandingGlobal();
 }
 
 function muatHeader() {
