@@ -1,4 +1,4 @@
-// js/component.js - Komponen Global dengan Hierarki Role Lengkap (Super Admin)
+// js/component.js - Komponen Global dengan Sidebar Berkelompok (Accordion & Collapsible)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { CONFIG } from "./config.js";
@@ -42,71 +42,103 @@ function muatSidebar() {
     if (currentFile === '') currentFile = 'index';
 
     const currentUser = ambilUserAktif();
-    // Default fallback agar aman
     const userRole = currentUser.role || "Akuntan"; 
 
-    // Daftar Menu & Pemetaan Hierarki Role
-    const menuItems = [
-        { name: 'Dashboard & Audit', href: 'index', icon: '🏠', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Profil Akun Saya', href: 'profile', icon: '👤', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
-        
-        // --- MENU EKSKLUSIF SUPER ADMIN ---
-        { name: 'Manajemen Pengguna', href: 'users', icon: '👥', roles: ['Super Admin'] },
-        
-        // --- MENU OPERASIONAL ---
-        { name: 'Profil & Parameter Pajak', href: 'profil-pajak', icon: '🏢', roles: ['Super Admin', 'Admin', 'Akuntan'] },
-        { name: 'COA & Master Data', href: 'master-data', icon: '🗂️', roles: ['Super Admin', 'Admin', 'Akuntan'] },
-        { name: 'Input Jurnal (Double-Entry)', href: 'input-jurnal', icon: '📝', roles: ['Super Admin', 'Admin', 'Akuntan'] },
-        
-        // --- MENU LAPORAN & VIEWING ---
-        { name: 'Manajemen & Buku Besar', href: 'manajemen', icon: '📊', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Laporan Keuangan', href: 'laporan', icon: '📈', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Aset Tetap & Penyusutan', href: 'aset-tetap', icon: '🏭', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Rekapitulasi PPN & PPh', href: 'pajak', icon: '🏛️', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Rekonsiliasi Fiskal', href: 'rekonsiliasi', icon: '⚖️', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
-        
-        // --- MENU MANAJER/ADMIN ---
-        { name: 'Tutup Buku Bulanan', href: 'closing', icon: '🔒', roles: ['Super Admin', 'Admin'] },
-        { name: 'Histori Audit & Checks', href: 'histori', icon: '📜', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
+    // Struktur Menu Berkelompok (Grouped Menu untuk menghindari sidebar terlalu panjang)
+    const menuGroups = [
+        {
+            groupName: "Utama",
+            items: [
+                { name: 'Dashboard & Audit', href: 'index', icon: '🏠', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+                { name: 'Profil Akun Saya', href: 'profile', icon: '👤', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
+            ]
+        },
+        {
+            groupName: "Akuntansi & Transaksi",
+            items: [
+                { name: 'COA & Master Data', href: 'master-data', icon: '🗂️', roles: ['Super Admin', 'Admin', 'Akuntan'] },
+                { name: 'Input Jurnal', href: 'input-jurnal', icon: '📝', roles: ['Super Admin', 'Admin', 'Akuntan'] },
+                { name: 'Buku Besar & Jurnal', href: 'manajemen', icon: '📊', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
+            ]
+        },
+        {
+            groupName: "Pajak & Aset",
+            items: [
+                { name: 'Profil & Param Pajak', href: 'profil-pajak', icon: '🏢', roles: ['Super Admin', 'Admin', 'Akuntan'] },
+                { name: 'Aset Tetap', href: 'aset-tetap', icon: '🏭', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+                { name: 'Rekapitulasi PPN & PPh', href: 'pajak', icon: '🏛️', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+                { name: 'Rekonsiliasi Fiskal', href: 'rekonsiliasi', icon: '⚖️', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
+            ]
+        },
+        {
+            groupName: "Laporan & Analisis",
+            items: [
+                { name: 'Laporan Keuangan', href: 'laporan', icon: '📈', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+                { name: 'Histori Audit', href: 'histori', icon: '📜', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
+            ]
+        },
+        {
+            groupName: "Administrasi Sistem",
+            items: [
+                { name: 'Manajemen Pengguna', href: 'users', icon: '👥', roles: ['Super Admin'] },
+                { name: 'Tutup Buku Bulanan', href: 'closing', icon: '🔒', roles: ['Super Admin', 'Admin'] }
+            ]
+        }
     ];
 
-    let menuHtml = '';
-    menuItems.forEach(item => {
-        // Filter: Jangan render menu jika role user tidak ada dalam array roles item tersebut
-        if (!item.roles.includes(userRole)) return;
+    let groupsHtml = '';
+    menuGroups.forEach((group, groupIndex) => {
+        let itemsHtml = '';
+        let hasVisibleItem = false;
 
-        const isActive = currentFile === item.href || currentFile === item.href + '.html';
-        const activeClass = isActive 
-            ? 'bg-indigo-600 text-white font-medium shadow-sm' 
-            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900';
+        group.items.forEach(item => {
+            if (!item.roles.includes(userRole)) return;
+            hasVisibleItem = true;
 
-        menuHtml += `
-            <a href="/${item.href}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${activeClass}">
-                <span class="text-base">${item.icon}</span>
-                <span>${item.name}</span>
-            </a>
+            const isActive = currentFile === item.href || currentFile === item.href + '.html';
+            const activeClass = isActive 
+                ? 'bg-indigo-600 text-white font-medium shadow-sm' 
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900';
+
+            itemsHtml += `
+                <a href="/${item.href}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${activeClass} my-0.5">
+                    <span class="text-sm">${item.icon}</span>
+                    <span>${item.name}</span>
+                </a>
+            `;
+        });
+
+        // Jangan render grup jika tidak ada menu di dalamnya yang boleh diakses role ini
+        if (!hasVisibleItem) return;
+
+        groupsHtml += `
+            <div class="mb-3">
+                <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">${group.groupName}</p>
+                <div class="space-y-0.5">
+                    ${itemsHtml}
+                </div>
+            </div>
         `;
     });
 
-    // Label khusus untuk Super Admin (warna emas/kuning agar berbeda)
     let roleBadgeClass = "text-indigo-600";
     if (userRole === "Super Admin") roleBadgeClass = "text-amber-500 font-bold";
 
     sidebarContainer.innerHTML = `
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
         <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+            <div class="p-5 border-b border-gray-100 flex items-center justify-between">
                 <div>
-                    <h1 class="font-bold text-gray-900 text-base tracking-tight">PT ERAPEE</h1>
-                    <p class="text-[11px] text-gray-400 mt-0.5 uppercase tracking-wider">Role: <span class="${roleBadgeClass} ml-1">${userRole}</span></p>
+                    <h1 class="font-bold text-gray-900 text-sm tracking-tight">PT ERAPEE</h1>
+                    <p class="text-[10px] text-gray-400 mt-0.5 uppercase tracking-wider">Role: <span class="${roleBadgeClass} ml-1">${userRole}</span></p>
                 </div>
                 <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700">✕</button>
             </div>
-            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-                ${menuHtml}
+            <nav class="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
+                ${groupsHtml}
             </nav>
-            <div class="p-4 border-t border-gray-100 bg-gray-50">
-                <button onclick="prosesLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold py-2.5 px-3 rounded-lg transition flex items-center justify-center gap-2">
+            <div class="p-3 border-t border-gray-100 bg-gray-50">
+                <button onclick="prosesLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold py-2 px-3 rounded-lg transition flex items-center justify-center gap-2">
                     🚪 Keluar Sistem
                 </button>
             </div>
