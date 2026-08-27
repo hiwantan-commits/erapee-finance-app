@@ -38,7 +38,7 @@ export async function ambilDataRoleUser(uid, email) {
     }
 
     // Default fallback (Darurat jika belum ada di database)
-    if (email === "superadmin@erapee.com" || email === "hiwantan@erapee.com") return "Super Admin"; // Ganti dengan email Anda
+    if (email === "superadmin@erapee.com" || email === "hi.wantan@gmail.com") return "Super Admin"; // Ganti dengan email Anda
     if (email && email.includes("admin")) return "Admin";
     if (email && email.includes("auditor")) return "Auditor";
     
