@@ -1,8 +1,14 @@
-// js/journal-page.js - Controller untuk input-jurnal.html dengan Proteksi Tutup Buku
-import { db } from "./config.js";
+// js/journal-page.js - Controller untuk input-jurnal.html dengan Integrasi Cloud Storage
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { CONFIG, db } from "./config.js";
 import { simpanJurnalPusat, ambilSemuaJurnalPusat } from "./db.js";
 import { cekApakahPeriodeTerkunci } from "./closing-period.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// Inisialisasi Firebase Storage
+const firebaseApp = initializeApp(CONFIG.FIREBASE_CONFIG);
+const storage = getStorage(firebaseApp);
 
 let coaOptionsHTML = '<option value="">Pilih Akun...</option>';
 const urlParams = new URLSearchParams(window.location.search);
@@ -44,10 +50,10 @@ window.hitungTotal = function() {
 
     const statusEl = document.getElementById('statusBalance');
     if (totDebit === totKredit && totDebit > 0) {
-        statusEl.className = "px-4 py-1.5 bg-green-100 text-green-700 text-sm font-bold rounded-xl border border-green-300 shadow-sm";
+        statusEl.className = "px-4 py-1.5 bg-green-100 text-green-700 text-sm font-bold rounded-xl border border-green-300 shadow-sm inline-block";
         statusEl.innerText = "✓ SEIMBANG (BALANCE)";
     } else {
-        statusEl.className = "px-4 py-1.5 bg-amber-50 text-amber-700 text-sm font-bold rounded-xl border border-amber-200 shadow-sm";
+        statusEl.className = "px-4 py-1.5 bg-amber-50 text-amber-700 text-sm font-bold rounded-xl border border-amber-200 shadow-sm inline-block";
         statusEl.innerText = "⚠️ BELUM BALANCE";
     }
 };
@@ -132,7 +138,7 @@ async function inisialisasiData() {
 
     if (editIdJurnal) {
         document.getElementById('judulForm').innerText = "Edit Jurnal Akuntansi (" + editIdJurnal + ")";
-        document.getElementById('btnSubmit').innerText = "Simpan Perubahan";
+        document.getElementById('btnSubmit').innerHTML = "💾 Simpan Perubahan Jurnal";
         
         try {
             const semuaData = await ambilSemuaJurnalPusat();
@@ -146,11 +152,19 @@ async function inisialisasiData() {
                 document.getElementById('unit_usaha').value = jurnalTarget.unit_usaha || '';
                 document.getElementById('lawan_transaksi').value = jurnalTarget.lawan_transaksi || '';
                 document.getElementById('jatuh_tempo').value = jurnalTarget.jatuh_tempo || '';
-                document.getElementById('link_bukti').value = jurnalTarget.link_bukti || '';
                 document.getElementById('kode_pajak').value = jurnalTarget.kode_pajak || 'NON';
                 document.getElementById('dpp_penjualan').value = jurnalTarget.dpp_penjualan || 0;
                 document.getElementById('keterangan').value = jurnalTarget.keterangan || '';
                 document.getElementById('status_jurnal').value = jurnalTarget.status || 'POSTED';
+                
+                // Set link bukti tersembunyi
+                document.getElementById('link_bukti').value = jurnalTarget.link_bukti || '';
+                if (jurnalTarget.link_bukti) {
+                    const statusUpload = document.getElementById('statusUpload');
+                    statusUpload.innerHTML = `✅ <a href="${jurnalTarget.link_bukti}" target="_blank" class="text-indigo-600 underline">Lihat File Tersimpan</a> (Pilih berkas baru untuk mengganti)`;
+                    statusUpload.classList.remove('hidden');
+                }
+
                 toggleDueDate();
 
                 const tbody = document.getElementById('tbodyJurnal');
@@ -160,7 +174,7 @@ async function inisialisasiData() {
                 });
             } else {
                 alert("Data jurnal tidak ditemukan.");
-                window.location.href = 'manajemen.html';
+                window.location.href = '/manajemen';
             }
         } catch (err) {
             console.error("Gagal memuat data edit:", err);
@@ -202,12 +216,38 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const btn = document.getElementById('btnSubmit');
-            btn.innerText = "Memproses... Penyimpanan Terpusat";
+            btn.innerText = "Memproses Penyimpanan...";
             btn.disabled = true;
 
             try {
                 const targetIdJurnal = document.getElementById('id_jurnal').value;
+                let finalLinkBukti = document.getElementById('link_bukti').value;
 
+                // Proses Unggah Berkas ke Cloud Storage
+                const fileInput = document.getElementById('file_bukti');
+                const statusUpload = document.getElementById('statusUpload');
+                
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    btn.innerText = "Mengunggah Bukti Transaksi...";
+                    statusUpload.innerText = "Memproses unggahan: " + file.name;
+                    statusUpload.classList.remove('hidden');
+                    
+                    try {
+                        const fileRef = ref(storage, `bukti_jurnal/${targetIdJurnal}_${file.name}`);
+                        await uploadBytes(fileRef, file);
+                        finalLinkBukti = await getDownloadURL(fileRef);
+                        statusUpload.innerText = "✅ Berkas berhasil diunggah.";
+                    } catch (uploadErr) {
+                        console.error("Gagal mengunggah berkas:", uploadErr);
+                        alert("❌ Gagal mengunggah berkas bukti transaksi. Pastikan aturan keamanan Storage mengizinkan akses. " + uploadErr.message);
+                        btn.innerText = "💾 Simpan Jurnal Akuntansi";
+                        btn.disabled = false;
+                        return; // Hentikan proses simpan data
+                    }
+                }
+
+                // Data Header Jurnal
                 const headerData = {
                     id_jurnal: targetIdJurnal,
                     tanggal: tanggalInput,
@@ -216,13 +256,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     unit_usaha: document.getElementById('unit_usaha').value,
                     lawan_transaksi: document.getElementById('lawan_transaksi').value,
                     jatuh_tempo: document.getElementById('jatuh_tempo').value,
-                    link_bukti: document.getElementById('link_bukti').value,
+                    link_bukti: finalLinkBukti, // Gunakan tautan URL yang telah diperbarui
                     kode_pajak: document.getElementById('kode_pajak').value,
                     dpp_penjualan: parseFloat(document.getElementById('dpp_penjualan').value) || 0,
                     keterangan: document.getElementById('keterangan').value,
                     status: document.getElementById('status_jurnal').value
                 };
 
+                // Data Detail Baris
                 let rowsData = [];
                 rows.forEach(row => {
                     const selectCOA = row.querySelector('.kode_akun');
@@ -235,23 +276,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 });
 
+                // Simpan ke Firestore Database
+                btn.innerText = "Menyimpan Transaksi ke Pusat...";
                 const hasil = await simpanJurnalPusat(headerData, rowsData, editIdJurnal ? targetIdJurnal : null);
 
                 if (hasil.success) {
                     document.getElementById('alertSuccess').classList.remove('hidden');
                     setTimeout(() => {
-                        window.location.href = 'manajemen.html';
+                        window.location.href = '/manajemen';
                     }, 1500);
                 } else {
-                    alert("Gagal menyimpan: " + hasil.error);
-                    btn.innerText = "Simpan Jurnal";
+                    alert("Gagal menyimpan data transaksi: " + hasil.error);
+                    btn.innerText = "💾 Simpan Jurnal Akuntansi";
                     btn.disabled = false;
                 }
 
             } catch (error) {
-                console.error("Gagal menyimpan:", error);
+                console.error("Kesalahan sistem saat menyimpan:", error);
                 alert("Kesalahan sistem saat menyimpan data.");
-                btn.innerText = "Simpan Jurnal";
+                btn.innerText = "💾 Simpan Jurnal Akuntansi";
                 btn.disabled = false;
             }
         });
