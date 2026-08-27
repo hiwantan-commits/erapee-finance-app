@@ -1,4 +1,4 @@
-// js/component.js - Komponen Global dengan Sidebar Berkelompok & Posisi Profil Baru
+// js/component.js - Komponen Global dengan Profil di Area Bawah Sesi Pengguna
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { CONFIG } from "./config.js";
@@ -44,7 +44,7 @@ function muatSidebar() {
     const currentUser = ambilUserAktif();
     const userRole = currentUser.role || "Akuntan"; 
 
-    // Struktur Menu Berkelompok
+    // Struktur Menu Berkelompok (Tanpa Profil di dalam list utama)
     const menuGroups = [
         {
             groupName: "Utama",
@@ -79,7 +79,6 @@ function muatSidebar() {
         {
             groupName: "Administrasi Sistem",
             items: [
-                { name: 'Profil Akun Saya', href: 'profile', icon: '👤', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
                 { name: 'Manajemen Pengguna', href: 'users', icon: '👥', roles: ['Super Admin'] },
                 { name: 'Tutup Buku Bulanan', href: 'closing', icon: '🔒', roles: ['Super Admin', 'Admin'] }
             ]
@@ -123,6 +122,12 @@ function muatSidebar() {
     let roleBadgeClass = "text-indigo-600";
     if (userRole === "Super Admin") roleBadgeClass = "text-amber-500 font-bold";
 
+    // Cek apakah halaman aktif saat ini adalah halaman profil
+    const isProfileActive = currentFile === 'profile';
+    const profileActiveClass = isProfileActive 
+        ? 'bg-indigo-600 text-white font-medium shadow-sm' 
+        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900';
+
     sidebarContainer.innerHTML = `
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
         <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
@@ -136,7 +141,15 @@ function muatSidebar() {
             <nav class="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
                 ${groupsHtml}
             </nav>
-            <div class="p-3 border-t border-gray-100 bg-gray-50">
+            <!-- Area Sesi & Profil di Bagian Bawah -->
+            <div class="p-3 border-t border-gray-100 bg-gray-50 space-y-2">
+                <a href="/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${profileActiveClass} border border-gray-200 bg-white">
+                    <span class="text-sm">👤</span>
+                    <div class="overflow-hidden">
+                        <p class="font-bold truncate">Profil Akun Saya</p>
+                        <p class="text-[10px] text-gray-400 truncate">${currentUser.email || ''}</p>
+                    </div>
+                </a>
                 <button onclick="prosesLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold py-2 px-3 rounded-lg transition flex items-center justify-center gap-2">
                     🚪 Keluar Sistem
                 </button>
