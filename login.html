@@ -3,76 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk - PT ERAPEE Anugrah Sejahtera</title>
-    <!-- Tailwind CSS (Gunakan metode CDN sesuai setup Anda saat ini) -->
+    <title>Masuk Sesi | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Custom CSS (Jika ada) -->
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4 font-sans">
-
-    <!-- Kotak Form Login -->
-    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-gray-100 max-w-md w-full">
-        
-        <!-- Bagian Header (Branding & Logo Dinamis) -->
-        <div class="text-center mb-8 flex flex-col items-center justify-center">
+<body class="bg-gray-50 text-gray-800 flex items-center justify-center h-screen">
+    <div class="max-w-md w-full mx-4">
+        <div class="dashboard-card p-8 bg-white rounded-2xl shadow-sm border border-gray-100">
             
-            <!-- TAG IMG: Wadah Logo Dinamis dari Firestore -->
-            <img id="loginLogoImg" src="" alt="Logo PT ERAPEE" class="h-16 w-auto max-w-[200px] object-contain mb-3 transition-all duration-300" style="display: none;">
-            
-            <!-- Teks Judul Fallback (Akan disembunyikan otomatis oleh JS jika logo berhasil dimuat) -->
-            <h1 id="loginTitleText" class="text-2xl font-black text-gray-900 mb-1 tracking-tight">PT ERAPEE</h1>
-            
-            <p class="text-sm text-gray-500 font-medium">Anugrah Sejahtera — Sistem Keuangan & Coretax</p>
-        </div>
-
-        <!-- Form Autentikasi -->
-        <form id="formLogin" class="space-y-5">
-            
-            <!-- Input Email -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Alamat Email Perusahaan</label>
-                <input type="email" required placeholder="admin@erapee.com" 
-                    class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-all text-gray-800">
+            <!-- Header Kartu Login -->
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-gray-900 tracking-tight">PT ERAPEE</h1>
+                <p class="text-xs text-gray-500 mt-1">Anugrah Sejahtera — Sistem Keuangan & Coretax</p>
             </div>
 
-            <!-- Input Password -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Kata Sandi (Password)</label>
-                <div class="relative">
-                    <input type="password" required placeholder="••••••••" 
-                        class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-all text-gray-800 pr-12">
-                    
-                    <!-- Ikon Mata (Hanya visual/dekoratif sesuai desain awal) -->
-                    <span class="absolute right-4 top-3.5 text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </span>
+            <!-- Pesan Error Dinamis -->
+            <div id="pesanError" class="hidden mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-xl font-medium border border-red-200 text-center"></div>
+
+            <!-- Form Login -->
+            <form id="formLogin" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1.5">Alamat Email Perusahaan</label>
+                    <input type="email" id="email" placeholder="admin@erapee.com" class="form-input-custom text-sm" required>
                 </div>
-            </div>
-
-            <!-- Tombol Masuk -->
-            <div class="pt-2">
-                <button type="submit" 
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-sm hover:shadow-md">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1.5">Kata Sandi (Password)</label>
+                    <div class="relative">
+                        <input type="password" id="password" placeholder="••••••••" class="form-input-custom text-sm pr-10" required>
+                        <!-- Tombol Simbol Mata -->
+                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+                            <svg id="iconMata" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-sm">
                     Masuk ke Sistem
                 </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-[11px] text-gray-400">Dilindungi oleh Protokol Keamanan Firebase Authentication</p>
             </div>
-
-        </form>
-
-        <!-- Footer Keamanan -->
-        <div class="mt-8 text-center">
-            <p class="text-[11px] text-gray-400 font-medium">
-                Dilindungi oleh Protokol Keamanan Firebase Authentication
-            </p>
         </div>
-
     </div>
 
-    <!-- Panggil Skrip Logika Login -->
+    <!-- Panggil Modular Controller Login -->
     <script type="module" src="js/login-page.js"></script>
 </body>
 </html>
