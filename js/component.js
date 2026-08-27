@@ -1,4 +1,4 @@
-// js/component.js - Komponen Global (Penambahan Menu Profil)
+// js/component.js - Komponen Global dengan Hierarki Role Lengkap (Super Admin)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { CONFIG } from "./config.js";
@@ -42,26 +42,37 @@ function muatSidebar() {
     if (currentFile === '') currentFile = 'index';
 
     const currentUser = ambilUserAktif();
-    const userRole = currentUser.role || "Akuntan";
+    // Default fallback agar aman
+    const userRole = currentUser.role || "Akuntan"; 
 
-    // Daftar Menu (Profil Akun Saya ditambahkan di sini)
+    // Daftar Menu & Pemetaan Hierarki Role
     const menuItems = [
-        { name: 'Dashboard & Audit', href: 'index', icon: '🏠', roles: ['Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Profil Akun Saya', href: 'profile', icon: '👤', roles: ['Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Profil & Parameter Pajak', href: 'profil-pajak', icon: '🏢', roles: ['Admin', 'Akuntan'] },
-        { name: 'COA & Master Data', href: 'master-data', icon: '🗂️', roles: ['Admin', 'Akuntan'] },
-        { name: 'Input Jurnal (Double-Entry)', href: 'input-jurnal', icon: '📝', roles: ['Admin', 'Akuntan'] },
-        { name: 'Manajemen & Buku Besar', href: 'manajemen', icon: '📊', roles: ['Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Laporan Keuangan', href: 'laporan', icon: '📈', roles: ['Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Aset Tetap & Penyusutan', href: 'aset-tetap', icon: '🏭', roles: ['Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Rekapitulasi PPN & PPh', href: 'pajak', icon: '🏛️', roles: ['Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Rekonsiliasi Fiskal', href: 'rekonsiliasi', icon: '⚖️', roles: ['Admin', 'Akuntan', 'Auditor'] },
-        { name: 'Tutup Buku Bulanan', href: 'closing', icon: '🔒', roles: ['Admin'] },
-        { name: 'Histori Audit & Checks', href: 'histori', icon: '📜', roles: ['Admin', 'Akuntan', 'Auditor'] }
+        { name: 'Dashboard & Audit', href: 'index', icon: '🏠', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+        { name: 'Profil Akun Saya', href: 'profile', icon: '👤', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+        
+        // --- MENU EKSKLUSIF SUPER ADMIN ---
+        { name: 'Manajemen Pengguna', href: 'users', icon: '👥', roles: ['Super Admin'] },
+        
+        // --- MENU OPERASIONAL ---
+        { name: 'Profil & Parameter Pajak', href: 'profil-pajak', icon: '🏢', roles: ['Super Admin', 'Admin', 'Akuntan'] },
+        { name: 'COA & Master Data', href: 'master-data', icon: '🗂️', roles: ['Super Admin', 'Admin', 'Akuntan'] },
+        { name: 'Input Jurnal (Double-Entry)', href: 'input-jurnal', icon: '📝', roles: ['Super Admin', 'Admin', 'Akuntan'] },
+        
+        // --- MENU LAPORAN & VIEWING ---
+        { name: 'Manajemen & Buku Besar', href: 'manajemen', icon: '📊', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+        { name: 'Laporan Keuangan', href: 'laporan', icon: '📈', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+        { name: 'Aset Tetap & Penyusutan', href: 'aset-tetap', icon: '🏭', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+        { name: 'Rekapitulasi PPN & PPh', href: 'pajak', icon: '🏛️', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+        { name: 'Rekonsiliasi Fiskal', href: 'rekonsiliasi', icon: '⚖️', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+        
+        // --- MENU MANAJER/ADMIN ---
+        { name: 'Tutup Buku Bulanan', href: 'closing', icon: '🔒', roles: ['Super Admin', 'Admin'] },
+        { name: 'Histori Audit & Checks', href: 'histori', icon: '📜', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
     ];
 
     let menuHtml = '';
     menuItems.forEach(item => {
+        // Filter: Jangan render menu jika role user tidak ada dalam array roles item tersebut
         if (!item.roles.includes(userRole)) return;
 
         const isActive = currentFile === item.href || currentFile === item.href + '.html';
@@ -77,13 +88,17 @@ function muatSidebar() {
         `;
     });
 
+    // Label khusus untuk Super Admin (warna emas/kuning agar berbeda)
+    let roleBadgeClass = "text-indigo-600";
+    if (userRole === "Super Admin") roleBadgeClass = "text-amber-500 font-bold";
+
     sidebarContainer.innerHTML = `
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
         <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
             <div class="p-6 border-b border-gray-100 flex items-center justify-between">
                 <div>
                     <h1 class="font-bold text-gray-900 text-base tracking-tight">PT ERAPEE</h1>
-                    <p class="text-xs text-gray-400 mt-0.5">Role: <span class="text-indigo-600 font-semibold">${userRole}</span></p>
+                    <p class="text-[11px] text-gray-400 mt-0.5 uppercase tracking-wider">Role: <span class="${roleBadgeClass} ml-1">${userRole}</span></p>
                 </div>
                 <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700">✕</button>
             </div>
