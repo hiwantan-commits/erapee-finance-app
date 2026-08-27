@@ -1,4 +1,4 @@
-// js/component.js - Komponen Global dengan Clean URL (Tanpa .html)
+// js/component.js - Komponen Global (Penambahan Menu Profil)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { CONFIG } from "./config.js";
@@ -44,8 +44,10 @@ function muatSidebar() {
     const currentUser = ambilUserAktif();
     const userRole = currentUser.role || "Akuntan";
 
+    // Daftar Menu (Profil Akun Saya ditambahkan di sini)
     const menuItems = [
         { name: 'Dashboard & Audit', href: 'index', icon: '🏠', roles: ['Admin', 'Akuntan', 'Auditor'] },
+        { name: 'Profil Akun Saya', href: 'profile', icon: '👤', roles: ['Admin', 'Akuntan', 'Auditor'] },
         { name: 'Profil & Parameter Pajak', href: 'profil-pajak', icon: '🏢', roles: ['Admin', 'Akuntan'] },
         { name: 'COA & Master Data', href: 'master-data', icon: '🗂️', roles: ['Admin', 'Akuntan'] },
         { name: 'Input Jurnal (Double-Entry)', href: 'input-jurnal', icon: '📝', roles: ['Admin', 'Akuntan'] },
@@ -67,7 +69,6 @@ function muatSidebar() {
             ? 'bg-indigo-600 text-white font-medium shadow-sm' 
             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900';
 
-        // Tautan tanpa ekstensi .html (Clean URL)
         menuHtml += `
             <a href="/${item.href}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${activeClass}">
                 <span class="text-base">${item.icon}</span>
@@ -115,7 +116,9 @@ function muatHeader() {
                 <h2 class="text-lg font-bold text-gray-800">${pageTitle}</h2>
             </div>
             <div class="flex items-center gap-3">
-                <span class="hidden sm:inline text-xs text-gray-500 font-medium">${currentUser.email || ''}</span>
+                <a href="/profile" class="hidden sm:inline text-xs text-indigo-600 hover:text-indigo-800 font-bold transition-colors cursor-pointer">
+                    ${currentUser.email || ''}
+                </a>
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
                     ● Terhubung ke Firebase
                 </span>
