@@ -1,4 +1,4 @@
-// js/component.js - Komponen Global dengan Sidebar Berkelompok (Accordion & Collapsible)
+// js/component.js - Komponen Global dengan Sidebar Berkelompok & Posisi Profil Baru
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { CONFIG } from "./config.js";
@@ -44,13 +44,12 @@ function muatSidebar() {
     const currentUser = ambilUserAktif();
     const userRole = currentUser.role || "Akuntan"; 
 
-    // Struktur Menu Berkelompok (Grouped Menu untuk menghindari sidebar terlalu panjang)
+    // Struktur Menu Berkelompok
     const menuGroups = [
         {
             groupName: "Utama",
             items: [
-                { name: 'Dashboard & Audit', href: 'index', icon: '🏠', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
-                { name: 'Profil Akun Saya', href: 'profile', icon: '👤', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
+                { name: 'Dashboard & Audit', href: 'index', icon: '🏠', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
             ]
         },
         {
@@ -80,6 +79,7 @@ function muatSidebar() {
         {
             groupName: "Administrasi Sistem",
             items: [
+                { name: 'Profil Akun Saya', href: 'profile', icon: '👤', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
                 { name: 'Manajemen Pengguna', href: 'users', icon: '👥', roles: ['Super Admin'] },
                 { name: 'Tutup Buku Bulanan', href: 'closing', icon: '🔒', roles: ['Super Admin', 'Admin'] }
             ]
@@ -87,7 +87,7 @@ function muatSidebar() {
     ];
 
     let groupsHtml = '';
-    menuGroups.forEach((group, groupIndex) => {
+    menuGroups.forEach((group) => {
         let itemsHtml = '';
         let hasVisibleItem = false;
 
@@ -108,7 +108,6 @@ function muatSidebar() {
             `;
         });
 
-        // Jangan render grup jika tidak ada menu di dalamnya yang boleh diakses role ini
         if (!hasVisibleItem) return;
 
         groupsHtml += `
