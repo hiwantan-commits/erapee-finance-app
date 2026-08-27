@@ -10,7 +10,7 @@ import { cekApakahPeriodeTerkunci } from "./closing-period.js";
 const firebaseApp = initializeApp(CONFIG.FIREBASE_CONFIG);
 const storage = getStorage(firebaseApp);
 
-let coaOptionsHTML = '<option value="">Pilih Akun...</option>';
+let coaArray = []; // Array global untuk menyimpan data COA (untuk mapping otomatis)
 const urlParams = new URLSearchParams(window.location.search);
 const editIdJurnal = urlParams.get('edit');
 
@@ -63,15 +63,23 @@ window.tambahBaris = function(akunVal = "", memoVal = "", debitVal = 0, kreditVa
     if (!tbody) return;
     const tr = document.createElement('tr');
     tr.className = 'jurnal-row hover:bg-gray-50';
+    
+    // PERUBAHAN HANYA DI SINI: Tag <select> diubah jadi <input list="coaList"> dengan class CSS 100% sama persis!
     tr.innerHTML = `
-        <td class="p-2"><select class="form-input-custom kode_akun text-xs font-medium" required>${coaOptionsHTML}</select></td>
+        <td class="p-2"><input list="coaList" type="text" placeholder="Pilih atau Ketik Akun..." class="form-input-custom kode_akun text-xs font-medium" required autocomplete="off"></td>
         <td class="p-2"><input type="text" class="form-input-custom memo_baris text-xs" value="${memoVal}" placeholder="Memo..."></td>
         <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="${debitVal}" min="0" step="any" oninput="hitungTotal()" required></td>
         <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="${kreditVal}" min="0" step="any" oninput="hitungTotal()" required></td>
         <td class="p-2 text-center"><button type="button" onclick="hapusBaris(this)" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-200 transition">X</button></td>
     `;
     tbody.appendChild(tr);
-    if (akunVal) tr.querySelector('.kode_akun').value = akunVal;
+
+    // Mengisi nilai akun jika ada (seperti saat Edit / Template)
+    if (akunVal) {
+        // Cari nama akun dari array agar tampilannya penuh ("Kode - Nama")
+        const found = coaArray.find(c => c.kode === akunVal);
+        tr.querySelector('.kode_akun').value = found ? `${found.kode} - ${found.nama}` : akunVal;
+    }
     hitungTotal();
 };
 
@@ -129,11 +137,18 @@ async function inisialisasiData() {
         let coaList = [];
         snapCOA.forEach(d => coaList.push(d.data()));
         coaList.sort((a, b) => a.kode.localeCompare(b.kode));
+        coaArray = coaList; // Simpan ke variabel global untuk auto-fill
         
-        coaOptionsHTML = '<option value="">Pilih Akun...</option>';
+        // Buat <datalist> di body agar bisa dibaca oleh input
+        let datalistHtml = '<datalist id="coaList">';
         coaList.forEach(coa => {
-            coaOptionsHTML += `<option value="${coa.kode}">${coa.kode} - ${coa.nama}</option>`;
+            datalistHtml += `<option value="${coa.kode} - ${coa.nama}"></option>`;
         });
+        datalistHtml += '</datalist>';
+        
+        if (!document.getElementById('coaList')) {
+            document.body.insertAdjacentHTML('beforeend', datalistHtml);
+        }
     } catch (err) {}
 
     if (editIdJurnal) {
@@ -266,10 +281,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Data Detail Baris
                 let rowsData = [];
                 rows.forEach(row => {
-                    const selectCOA = row.querySelector('.kode_akun');
+                    const inputCOA = row.querySelector('.kode_akun');
+                    const rawVal = inputCOA.value || '';
+                    
+                    // Memecah "1101 - Kas" kembali menjadi kode dan nama
+                    const parts = rawVal.split(' - ');
+                    const kodeAkunDb = parts[0] ? parts[0].trim() : '';
+                    const namaAkunDb = parts[1] ? parts.slice(1).join(' - ').trim() : rawVal;
+
                     rowsData.push({
-                        kode_akun: selectCOA.value,
-                        nama_akun: selectCOA.options[selectCOA.selectedIndex]?.text || '',
+                        kode_akun: kodeAkunDb,
+                        nama_akun: namaAkunDb,
                         memo_baris: row.querySelector('.memo_baris').value || '',
                         debit: parseFloat(row.querySelector('.debit').value) || 0,
                         kredit: parseFloat(row.querySelector('.kredit').value) || 0
