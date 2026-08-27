@@ -28,8 +28,10 @@ document.addEventListener("DOMContentLoaded", async function() {
                 conversiKeBase64(file, function(base64String) {
                     currentLogoBase64 = base64String;
                     const preview = document.getElementById("previewLogo");
-                    preview.src = base64String;
-                    preview.style.display = "block";
+                    if (preview) {
+                        preview.src = base64String;
+                        preview.style.display = "block";
+                    }
                 });
             }
         });
@@ -44,8 +46,10 @@ document.addEventListener("DOMContentLoaded", async function() {
                 conversiKeBase64(file, function(base64String) {
                     currentFaviconBase64 = base64String;
                     const preview = document.getElementById("previewFavicon");
-                    preview.src = base64String;
-                    preview.style.display = "block";
+                    if (preview) {
+                        preview.src = base64String;
+                        preview.style.display = "block";
+                    }
                 });
             }
         });
@@ -97,6 +101,10 @@ function konversiKeBase64(file, callback) {
     reader.onload = function(uploadEvent) {
         callback(uploadEvent.target.result);
     };
+    reader.onerror = function(error) {
+        console.error("Gagal membaca file:", error);
+        alert("Gagal membaca file gambar.");
+    };
     reader.readAsDataURL(file);
 }
 
@@ -108,12 +116,18 @@ async function muatPengaturanBrandingSaatIni() {
             if (data.logoUrl) {
                 currentLogoBase64 = data.logoUrl;
                 const pLogo = document.getElementById("previewLogo");
-                if(pLogo) pLogo.src = data.logoUrl;
+                if(pLogo) {
+                    pLogo.src = data.logoUrl;
+                    pLogo.style.display = "block";
+                }
             }
             if (data.faviconUrl) {
                 currentFaviconBase64 = data.faviconUrl;
                 const pFav = document.getElementById("previewFavicon");
-                if(pFav) pFav.src = data.faviconUrl;
+                if(pFav) {
+                    pFav.src = data.faviconUrl;
+                    pFav.style.display = "block";
+                }
             }
         }
     } catch (err) {
@@ -122,6 +136,7 @@ async function muatPengaturanBrandingSaatIni() {
 }
 
 function tampilkanNotif(el, text, color) {
+    if (!el) return;
     el.classList.remove("hidden", "bg-red-50", "text-red-700", "border-red-200", "bg-green-50", "text-green-700", "border-green-200");
     el.innerText = text;
     if (color === "red") {
