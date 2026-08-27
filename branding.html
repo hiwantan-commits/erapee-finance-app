@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Branding & Logo | PT ERAPEE Anugrah Sejahtera</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Favicon Dinamis akan dimuat oleh skrip -->
+    <link id="dynamic-favicon" rel="icon" type="image/png" href="/favicon.png">
+</head>
+<body class="text-gray-800 bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-y-auto md:ml-64">
+            <div id="header-container"></div>
+
+            <main class="p-4 md:p-8 max-w-4xl mx-auto w-full">
+                <!-- Header -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 border-l-4 border-amber-500">
+                    <h2 class="text-xl font-bold text-gray-800">Pengaturan Identitas & Branding Perusahaan</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">Sesuaikan Logo Sidebar dan Favicon Tab Browser secara dinamis.</p>
+                </div>
+
+                <!-- Form Pengaturan -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <div id="notifikasiBranding" class="hidden mb-5 p-3 text-xs rounded-xl font-medium border text-center"></div>
+
+                    <form id="formBranding" class="space-y-6">
+                        <!-- Preview & Upload Logo Utama -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center border-b pb-6">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 uppercase">Logo Utama (Sidebar)</label>
+                                <p class="text-[11px] text-gray-400 mt-1">Format rekomendasi: PNG transparan (Landscape).</p>
+                            </div>
+                            <div class="flex justify-center">
+                                <img id="previewLogo" src="" alt="Preview Logo" class="h-12 object-contain bg-gray-50 p-2 rounded-xl border border-dashed border-gray-300 w-full max-w-[200px]">
+                            </div>
+                            <div>
+                                <input type="file" id="inputFileLogo" accept="image/png, image/jpeg, image/svg+xml" class="form-input-custom text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                            </div>
+                        </div>
+
+                        <!-- Preview & Upload Favicon -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center pt-2">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 uppercase">Favicon (Ikon Browser)</label>
+                                <p class="text-[11px] text-gray-400 mt-1">Format rekomendasi: PNG Kotak (1:1), ukuran 64x64px.</p>
+                            </div>
+                            <div class="flex justify-center">
+                                <img id="previewFavicon" src="" alt="Preview Favicon" class="h-10 w-10 object-contain bg-gray-50 p-1.5 rounded-xl border border-dashed border-gray-300">
+                            </div>
+                            <div>
+                                <input type="file" id="inputFileFavicon" accept="image/png, image/x-icon" class="form-input-custom text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t flex justify-end">
+                            <button type="submit" id="btnSimpanBranding" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl text-sm transition shadow-sm">
+                                💾 Simpan & Terapkan Perubahan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="js/branding-page.js"></script>
+    <script type="module" src="js/component.js"></script>
+</body>
+</html>
