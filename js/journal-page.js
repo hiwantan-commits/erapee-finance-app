@@ -1,4 +1,4 @@
-// js/journal-page.js - Controller untuk input-jurnal.html dengan Integrasi Cloud Storage
+// js/journal-page.js - Controller untuk input-jurnal.html dengan Integrasi Cloud Storage & Auto No. Bukti
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -29,14 +29,45 @@ window.toggleDueDate = function() {
     }
 };
 
-function generateIdJurnal() {
+// Fungsi generate ID yang sudah diperbarui menjadi Asynchronous untuk menarik nomor urut
+async function generateIdJurnal() {
     const date = new Date();
     const yyyy = date.getFullYear();
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const dd = String(date.getDate()).padStart(2, '0');
     const time = date.getTime().toString().slice(-5);
+    
+    // ID Internal Firebase
     document.getElementById('id_jurnal').value = `JRN-${yyyy}${mm}${dd}-${time}`;
     document.getElementById('tanggal').value = `${yyyy}-${mm}-${dd}`;
+
+    // GENERATE OTOMATIS NO. BUKTI (INV-YYYY/MM/DD/NoUrut)
+    try {
+        const semuaData = await ambilSemuaJurnalPusat();
+        const tglHariIni = `${yyyy}-${mm}-${dd}`;
+        
+        // Hitung ada berapa transaksi di tanggal hari ini
+        let countHariIni = 0;
+        if (semuaData && semuaData.length > 0) {
+            countHariIni = semuaData.filter(j => j.tanggal === tglHariIni).length;
+        }
+        
+        // Format No Urut menjadi 3 digit (contoh: 001, 002)
+        const noUrut = String(countHariIni + 1).padStart(3, '0');
+        
+        // Terapkan ke elemen input form
+        const inputNoBukti = document.getElementById('no_bukti');
+        if (inputNoBukti) {
+            inputNoBukti.value = `INV-${yyyy}/${mm}/${dd}/${noUrut}`;
+        }
+    } catch (error) {
+        console.error("Gagal generate No. Bukti Otomatis:", error);
+        // Fallback jika database gagal diakses: gunakan 3 angka unik dari waktu
+        const inputNoBukti = document.getElementById('no_bukti');
+        if (inputNoBukti) {
+            inputNoBukti.value = `INV-${yyyy}/${mm}/${dd}/${time.slice(-3)}`;
+        }
+    }
 }
 
 window.hitungTotal = function() {
@@ -64,7 +95,6 @@ window.tambahBaris = function(akunVal = "", memoVal = "", debitVal = 0, kreditVa
     const tr = document.createElement('tr');
     tr.className = 'jurnal-row hover:bg-gray-50';
     
-    // PERUBAHAN HANYA DI SINI: Tag <select> diubah jadi <input list="coaList"> dengan class CSS 100% sama persis!
     tr.innerHTML = `
         <td class="p-2"><input list="coaList" type="text" placeholder="Pilih atau Ketik Akun..." class="form-input-custom kode_akun text-xs font-medium" required autocomplete="off"></td>
         <td class="p-2"><input type="text" class="form-input-custom memo_baris text-xs" value="${memoVal}" placeholder="Memo..."></td>
@@ -74,9 +104,7 @@ window.tambahBaris = function(akunVal = "", memoVal = "", debitVal = 0, kreditVa
     `;
     tbody.appendChild(tr);
 
-    // Mengisi nilai akun jika ada (seperti saat Edit / Template)
     if (akunVal) {
-        // Cari nama akun dari array agar tampilannya penuh ("Kode - Nama")
         const found = coaArray.find(c => c.kode === akunVal);
         tr.querySelector('.kode_akun').value = found ? `${found.kode} - ${found.nama}` : akunVal;
     }
@@ -137,9 +165,8 @@ async function inisialisasiData() {
         let coaList = [];
         snapCOA.forEach(d => coaList.push(d.data()));
         coaList.sort((a, b) => a.kode.localeCompare(b.kode));
-        coaArray = coaList; // Simpan ke variabel global untuk auto-fill
+        coaArray = coaList; 
         
-        // Buat <datalist> di body agar bisa dibaca oleh input
         let datalistHtml = '<datalist id="coaList">';
         coaList.forEach(coa => {
             datalistHtml += `<option value="${coa.kode} - ${coa.nama}"></option>`;
@@ -172,7 +199,6 @@ async function inisialisasiData() {
                 document.getElementById('keterangan').value = jurnalTarget.keterangan || '';
                 document.getElementById('status_jurnal').value = jurnalTarget.status || 'POSTED';
                 
-                // Set link bukti tersembunyi
                 document.getElementById('link_bukti').value = jurnalTarget.link_bukti || '';
                 if (jurnalTarget.link_bukti) {
                     const statusUpload = document.getElementById('statusUpload');
@@ -195,7 +221,8 @@ async function inisialisasiData() {
             console.error("Gagal memuat data edit:", err);
         }
     } else {
-        generateIdJurnal();
+        // TUNGGU generateIdJurnal selesai sebelum lanjut, agar No. Bukti terisi
+        await generateIdJurnal(); 
         tambahBaris();
         tambahBaris();
     }
@@ -211,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const tanggalInput = document.getElementById('tanggal').value;
             
-            // Pengecekan Periode Tutup Buku
             const isTerkunci = await cekApakahPeriodeTerkunci(tanggalInput);
             if (isTerkunci) {
                 alert("❌ Transaksi ditolak! Periode bulan untuk tanggal ini telah ditutup (Closed Period). Anda tidak dapat menambah atau mengubah jurnal pada periode tersebut.");
@@ -238,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const targetIdJurnal = document.getElementById('id_jurnal').value;
                 let finalLinkBukti = document.getElementById('link_bukti').value;
 
-                // Proses Unggah Berkas ke Cloud Storage
                 const fileInput = document.getElementById('file_bukti');
                 const statusUpload = document.getElementById('statusUpload');
                 
@@ -258,11 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         alert("❌ Gagal mengunggah berkas bukti transaksi. Pastikan aturan keamanan Storage mengizinkan akses. " + uploadErr.message);
                         btn.innerText = "💾 Simpan Jurnal Akuntansi";
                         btn.disabled = false;
-                        return; // Hentikan proses simpan data
+                        return; 
                     }
                 }
 
-                // Data Header Jurnal
                 const headerData = {
                     id_jurnal: targetIdJurnal,
                     tanggal: tanggalInput,
@@ -271,20 +295,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     unit_usaha: document.getElementById('unit_usaha').value,
                     lawan_transaksi: document.getElementById('lawan_transaksi').value,
                     jatuh_tempo: document.getElementById('jatuh_tempo').value,
-                    link_bukti: finalLinkBukti, // Gunakan tautan URL yang telah diperbarui
+                    link_bukti: finalLinkBukti, 
                     kode_pajak: document.getElementById('kode_pajak').value,
                     dpp_penjualan: parseFloat(document.getElementById('dpp_penjualan').value) || 0,
                     keterangan: document.getElementById('keterangan').value,
                     status: document.getElementById('status_jurnal').value
                 };
 
-                // Data Detail Baris
                 let rowsData = [];
                 rows.forEach(row => {
                     const inputCOA = row.querySelector('.kode_akun');
                     const rawVal = inputCOA.value || '';
                     
-                    // Memecah "1101 - Kas" kembali menjadi kode dan nama
                     const parts = rawVal.split(' - ');
                     const kodeAkunDb = parts[0] ? parts[0].trim() : '';
                     const namaAkunDb = parts[1] ? parts.slice(1).join(' - ').trim() : rawVal;
@@ -298,7 +320,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 });
 
-                // Simpan ke Firestore Database
                 btn.innerText = "Menyimpan Transaksi ke Pusat...";
                 const hasil = await simpanJurnalPusat(headerData, rowsData, editIdJurnal ? targetIdJurnal : null);
 
