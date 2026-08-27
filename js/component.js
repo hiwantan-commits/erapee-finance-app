@@ -1,4 +1,4 @@
-// js/component.js - Komponen Global dengan Render Logo Dinamis & Sidebar Terstruktur
+// js/component.js - Komponen Global dengan Render Logo Langsung (Anti-Gagal)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -25,42 +25,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 sessionStorage.removeItem("erapee_user_session");
                 window.location.href = '/login';
             } else {
-                muatSidebar();
+                muatSidebarAndBranding();
                 muatHeader();
             }
         });
     }
 });
 
-// Fungsi untuk menarik dan menerapkan Logo & Favicon dari Firestore secara dinamis
-async function terapkanBrandingGlobal() {
-    try {
-        const docSnap = await getDoc(doc(db, "pengaturan_sistem", "branding"));
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            
-            // Terapkan Favicon Dinamis ke Tab Browser (Hanya jika berupa data gambar valid)
-            if (data.faviconUrl && !data.faviconUrl.endsWith('/branding')) {
-                let faviconTag = document.querySelector("link[rel*='icon']") || document.createElement('link');
-                faviconTag.type = 'image/png';
-                faviconTag.rel = 'icon';
-                faviconTag.href = data.faviconUrl;
-                document.getElementsByTagName('head')[0].appendChild(faviconTag);
-            }
-
-            // Terapkan Logo Dinamis ke Sidebar (Hanya jika berupa data Base64 atau URL gambar valid)
-            const logoImg = document.getElementById("sidebarLogoImg");
-            if (logoImg && data.logoUrl && !data.logoUrl.endsWith('/branding')) {
-                logoImg.src = data.logoUrl;
-                logoImg.style.display = "block";
-            }
-        }
-    } catch (err) {
-        console.error("Gagal memuat branding global:", err);
-    }
-}
-
-function muatSidebar() {
+async function muatSidebarAndBranding() {
     const sidebarContainer = document.getElementById('sidebar-container');
     if (!sidebarContainer) return;
 
@@ -73,6 +45,29 @@ function muatSidebar() {
 
     const currentUser = ambilUserAktif();
     const userRole = currentUser.role || "Akuntan"; 
+
+    // 1. Ambil data branding terlebih dahulu dari Firestore sebelum merender sidebar
+    let logoSrc = "";
+    let faviconSrc = "";
+    try {
+        const docSnap = await getDoc(doc(db, "pengaturan_sistem", "branding"));
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.logoUrl && !data.logoUrl.endsWith('/branding')) {
+                logoSrc = data.logoUrl;
+            }
+            if (data.faviconUrl && !data.faviconUrl.endsWith('/branding')) {
+                faviconSrc = data.faviconUrl;
+                let faviconTag = document.querySelector("link[rel*='icon']") || document.createElement('link');
+                faviconTag.type = 'image/png';
+                faviconTag.rel = 'icon';
+                faviconTag.href = faviconSrc;
+                document.getElementsByTagName('head')[0].appendChild(faviconTag);
+            }
+        }
+    } catch (err) {
+        console.error("Gagal memuat branding:", err);
+    }
 
     // Struktur Menu Berkelompok
     const menuGroups = [
@@ -158,13 +153,18 @@ function muatSidebar() {
         ? 'bg-indigo-600 text-white font-medium shadow-sm' 
         : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900';
 
+    // Jika logo dari database ada, gunakan itu. Jika belum ada, tampilkan teks fallback "PT ERAPEE"
+    let logoHtml = logoSrc 
+        ? `<img src="${logoSrc}" alt="PT ERAPEE" class="h-8 max-w-[150px] object-contain">`
+        : `<h1 class="font-bold text-gray-900 text-sm tracking-tight">PT ERAPEE</h1>`;
+
     sidebarContainer.innerHTML = `
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
         <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
             <div class="p-5 border-b border-gray-100 flex items-center justify-between">
-                <div class="flex flex-col gap-1.5 overflow-hidden">
-                    <img id="sidebarLogoImg" src="" alt="PT ERAPEE" class="h-8 max-w-[140px] object-contain" style="display: none;">
-                    <p class="text-[9px] text-gray-400 uppercase tracking-wider">Role: <span class="${roleBadgeClass}">${userRole}</span></p>
+                <div class="flex flex-col gap-1 overflow-hidden">
+                    ${logoHtml}
+                    <p class="text-[9px] text-gray-400 uppercase tracking-wider mt-0.5">Role: <span class="${roleBadgeClass}">${userRole}</span></p>
                 </div>
                 <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700">✕</button>
             </div>
@@ -186,9 +186,6 @@ function muatSidebar() {
             </div>
         </aside>
     `;
-
-    // Panggil fungsi pemuat branding setelah elemen sidebar selesai dirender ke DOM
-    terapkanBrandingGlobal();
 }
 
 function muatHeader() {
