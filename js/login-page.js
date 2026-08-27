@@ -1,6 +1,6 @@
-// js/login-page.js - Controller Halaman Login & Pemuat Branding Dinamis (Bebas Bug Race Condition)
+// js/login-page.js - Controller Halaman Login & Pencegah Infinite Loop
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { CONFIG } from "./config.js";
 
@@ -9,18 +9,48 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Muat Logo dan Favicon Dinamis
+    // 1. Muat Branding Terlebih Dahulu
     muatBrandingLogin();
 
-    // 2. Pengecekan sesi statis (Bukan pendeteksi live, agar tidak memotong proses masuk)
-    // Jika user memang sudah punya sesi, baru arahkan ke Dashboard
-    if (sessionStorage.getItem("erapee_user_session")) {
-        window.location.href = '/index';
-        return;
-    }
+    // 2. SINKRONISASI SESI (PENCEGAH INFINITE LOOP)
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // Jika Firebase mengenali user, TAPI session memori kosong (karena tab baru dibuka)
+            if (!sessionStorage.getItem("erapee_user_session")) {
+                try {
+                    // Tarik ulang role/jabatan dari database
+                    const userDoc = await getDoc(doc(db, "users", user.email));
+                    let role = "Akuntan"; // Fallback default
+                    if (userDoc.exists()) {
+                        role = userDoc.data().role || "Akuntan";
+                    } else if (user.email === "hi.wantan@gmail.com") {
+                        role = "Super Admin"; // Keamanan darurat akun utama
+                    }
 
-    // 3. Tangani Proses Form Login
-    const formLogin = document.getElementById("formLogin");
+                    // Buat dan simpan ulang Session Storage!
+                    const sessionData = {
+                        uid: user.uid,
+                        email: user.email,
+                        role: role,
+                        loginTime: new Date().getTime()
+                    };
+                    sessionStorage.setItem("erapee_user_session", JSON.stringify(sessionData));
+                    
+                    // Selesai sinkronisasi, aman untuk dilempar ke index
+                    window.location.href = '/index';
+                } catch (err) {
+                    console.error("Gagal memulihkan sesi memori:", err);
+                    await signOut(auth); // Reset total jika terjadi error fatal
+                }
+            } else {
+                // Sesi memori sudah ada dan cocok, langsung arahkan ke index
+                window.location.href = '/index';
+            }
+        }
+    });
+
+    // 3. Tangani Proses Form Login Manual
+    const formLogin = document.getElementById("formLogin") || document.querySelector("form");
     if (formLogin) {
         formLogin.addEventListener("submit", async function(e) {
             e.preventDefault();
@@ -34,44 +64,22 @@ document.addEventListener("DOMContentLoaded", function() {
             const email = emailInput.value.trim();
             const password = passwordInput.value;
 
-            // Ubah tampilan tombol saat memproses
+            // Visual feedback loading
             const originalBtnText = btnSubmit.innerText;
             btnSubmit.disabled = true;
-            btnSubmit.innerText = "Memverifikasi Data...";
+            btnSubmit.innerText = "Memverifikasi...";
             btnSubmit.classList.add("opacity-75", "cursor-not-allowed");
 
             try {
-                // Autentikasi utama dengan Firebase Auth
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                // Ambil Role (Hak Akses) pengguna dari Firestore SEBELUM pindah halaman
-                const userDoc = await getDoc(doc(db, "users", email));
-                let role = "Akuntan"; // Fallback ke Akuntan jika data tidak ada
-                
-                if (userDoc.exists()) {
-                    role = userDoc.data().role || "Akuntan";
-                } else if (email === "hi.wantan@gmail.com") {
-                    role = "Super Admin"; // Keamanan darurat akun utama
-                }
-
-                // Susun dan simpan data ke Session Storage secara utuh
-                const sessionData = {
-                    uid: user.uid,
-                    email: user.email,
-                    role: role,
-                    loginTime: new Date().getTime()
-                };
-                sessionStorage.setItem("erapee_user_session", JSON.stringify(sessionData));
-
-                // Setelah data sesi 100% tersimpan aman, baru kita pindahkan halamannya!
-                window.location.href = '/index';
-
+                // Kita hanya menjalankan login Firebase di sini.
+                // Jika berhasil, onAuthStateChanged di blok atas akan langsung bereaksi, 
+                // menyusun sessionStorage, dan mengarahkan halaman dengan aman.
+                await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
                 console.error("Error login:", error);
-                alert("Gagal masuk: Email atau Kata Sandi salah. Silakan periksa kembali.");
+                alert("Gagal masuk: Email atau Kata Sandi salah.");
                 
-                // Kembalikan tombol ke kondisi semula jika gagal
+                // Kembalikan tombol jika gagal
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = originalBtnText;
                 btnSubmit.classList.remove("opacity-75", "cursor-not-allowed");
@@ -80,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-// Fungsi pemuat Branding (Tidak diubah, tetap sama)
+// Fungsi memuat Branding Dinamis
 async function muatBrandingLogin() {
     try {
         const docSnap = await getDoc(doc(db, "pengaturan_sistem", "branding"));
@@ -101,10 +109,7 @@ async function muatBrandingLogin() {
             if (logoImg && data.logoUrl && !data.logoUrl.endsWith('/branding')) {
                 logoImg.src = data.logoUrl;
                 logoImg.style.display = "block";
-                
-                if (titleText) {
-                    titleText.style.display = "none";
-                }
+                if (titleText) titleText.style.display = "none";
             }
         }
     } catch (err) {
