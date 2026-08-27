@@ -33,7 +33,6 @@ document.addEventListener("DOMContentLoaded", async function() {
                 const fileLogo = document.getElementById("inputFileLogo").files[0];
                 const fileFavicon = document.getElementById("inputFileFavicon").files[0];
 
-                // Ambil URL lama dari preview jika tidak ada file baru yang diunggah
                 let logoUrl = document.getElementById("previewLogo").src;
                 let faviconUrl = document.getElementById("previewFavicon").src;
 
@@ -60,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                 }, { merge: true });
 
                 tampilkanNotif(notif, "✅ Pengaturan branding berhasil diperbarui! Perubahan akan diterapkan secara global.", "green");
-                await muatPengaturanBrandingSidang();
+                await muatPengaturanBrandingSaatIni(); // DIPERBAIKI dari muatPengaturanBrandingSidang
 
             } catch (err) {
                 console.error("Gagal menyimpan branding:", err);
