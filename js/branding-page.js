@@ -1,10 +1,14 @@
-// js/branding-page.js - Controller Pengaturan Branding dengan Konversi Base64 (Bebas CORS)
+// js/branding-page.js - Controller Pengaturan Branding (Penyimpanan Base64 & Preview Otomatis)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { CONFIG, db } from "./config.js";
 import { ambilUserAktif } from "./auth.js";
 
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
+
+// Variabel lokal untuk menyimpan data Base64 sementara
+let currentLogoBase64 = "";
+let currentFaviconBase64 = "";
 
 document.addEventListener("DOMContentLoaded", async function() {
     const user = ambilUserAktif();
@@ -23,7 +27,9 @@ document.addEventListener("DOMContentLoaded", async function() {
             const file = e.target.files[0];
             if (file) {
                 conversiKeBase64(file, function(base64String) {
+                    currentLogoBase64 = base64String;
                     document.getElementById("previewLogo").src = base64String;
+                    document.getElementById("previewLogo").classList.remove("hidden");
                 });
             }
         });
@@ -36,7 +42,9 @@ document.addEventListener("DOMContentLoaded", async function() {
             const file = e.target.files[0];
             if (file) {
                 conversiKeBase64(file, function(base64String) {
+                    currentFaviconBase64 = base64String;
                     document.getElementById("previewFavicon").src = base64String;
+                    document.getElementById("previewFavicon").classList.remove("hidden");
                 });
             }
         });
@@ -49,40 +57,41 @@ document.addEventListener("DOMContentLoaded", async function() {
             const btn = document.getElementById("btnSimpanBranding");
             const notif = document.getElementById("notifikasiBranding");
 
+            // Validasi apakah ada data yang akan disimpan
+            if (!currentLogoBase64 && !currentFaviconBase64) {
+                tampilkanNotif(notif, "⚠️ Harap pilih minimal salah satu file logo atau favicon baru sebelum menyimpan.", "red");
+                return;
+            }
+
             btn.disabled = true;
             btn.innerText = "Menyimpan ke Database...";
 
             try {
-                // Ambil string Base64 dari elemen preview gambar
-                let logoData = document.getElementById("previewLogo").src;
-                let faviconData = document.getElementById("previewFavicon").src;
-
-                // Validasi agar data tidak kosong
-                if (!logoData || logoData.startsWith("http") && logoData.includes("404")) {
-                    throw new Error("Pilih file logo utama yang valid.");
-                }
-
-                // Simpan langsung ke Firestore (koleksi pengaturan_sistem -> dokumen branding)
-                const brandingRef = doc(db, "pengaturan_sistem", "branding");
-                await setDoc(brandingRef, {
-                    logoUrl: logoData,
-                    faviconUrl: faviconData,
+                const payload = {
                     updatedAt: new Date().toISOString()
-                }, { merge: true });
+                };
+                if (currentLogoBase64) payload.logoUrl = currentLogoBase64;
+                if (currentFaviconBase64) payload.faviconUrl = currentFaviconBase64;
 
-                tampilkanNotif(notif, "✅ Pengaturan branding berhasil disimpan! Perubahan diterapkan secara global.", "green");
+                const brandingRef = doc(db, "pengaturan_sistem", "branding");
+                await setDoc(brandingRef, payload, { merge: true });
+
+                tampilkanNotif(notif, "✅ Pengaturan branding berhasil disimpan! Memuat ulang halaman...", "green");
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+
             } catch (err) {
                 console.error("Gagal menyimpan branding:", err);
                 tampilkanNotif(notif, "❌ Gagal menyimpan: " + err.message, "red");
+                btn.disabled = false;
+                btn.innerText = "💾 Simpan & Terapkan Perubahan";
             }
-
-            btn.disabled = false;
-            btn.innerText = "💾 Simpan & Terapkan Perubahan";
         });
     }
 });
 
-// Fungsi pembantu untuk membaca file gambar menjadi string Base64
 function konversiKeBase64(file, callback) {
     const reader = new FileReader();
     reader.onload = function(uploadEvent) {
@@ -100,8 +109,14 @@ async function muatPengaturanBrandingSaatIni() {
         const docSnap = await getDoc(doc(db, "pengaturan_sistem", "branding"));
         if (docSnap.exists()) {
             const data = docSnap.data();
-            if (data.logoUrl) document.getElementById("previewLogo").src = data.logoUrl;
-            if (data.faviconUrl) document.getElementById("previewFavicon").src = data.faviconUrl;
+            if (data.logoUrl) {
+                currentLogoBase64 = data.logoUrl;
+                document.getElementById("previewLogo").src = data.logoUrl;
+            }
+            if (data.faviconUrl) {
+                currentFaviconBase64 = data.faviconUrl;
+                document.getElementById("previewFavicon").src = data.faviconUrl;
+            }
         }
     } catch (err) {
         console.error("Gagal memuat branding:", err);
