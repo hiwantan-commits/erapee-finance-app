@@ -1,13 +1,10 @@
-// js/branding-page.js - Controller Pengaturan Branding Final
+// js/branding-page.js - Controller Pengaturan Branding yang Diperbarui & Disederhanakan
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { CONFIG, db } from "./config.js";
 import { ambilUserAktif } from "./auth.js";
 
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
-
-let currentLogoBase64 = "";
-let currentFaviconBase64 = "";
 
 document.addEventListener("DOMContentLoaded", async function() {
     const user = ambilUserAktif();
@@ -19,42 +16,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     await muatPengaturanBrandingSaatIni();
 
-    // Handler Preview Logo Utama
-    const inputLogo = document.getElementById("inputFileLogo");
-    if (inputLogo) {
-        inputLogo.addEventListener("change", function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                conversiKeBase64(file, function(base64String) {
-                    currentLogoBase64 = base64String;
-                    const preview = document.getElementById("previewLogo");
-                    if (preview) {
-                        preview.src = base64String;
-                        preview.style.display = "block";
-                    }
-                });
-            }
-        });
-    }
-
-    // Handler Preview Favicon
-    const inputFavicon = document.getElementById("inputFileFavicon");
-    if (inputFavicon) {
-        inputFavicon.addEventListener("change", function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                conversiKeBase64(file, function(base64String) {
-                    currentFaviconBase64 = base64String;
-                    const preview = document.getElementById("previewFavicon");
-                    if (preview) {
-                        preview.src = base64String;
-                        preview.style.display = "block";
-                    }
-                });
-            }
-        });
-    }
-
     const form = document.getElementById("formBranding");
     if (form) {
         form.addEventListener("submit", async function(e) {
@@ -62,29 +23,40 @@ document.addEventListener("DOMContentLoaded", async function() {
             const btn = document.getElementById("btnSimpanBranding");
             const notif = document.getElementById("notifikasiBranding");
 
-            if (!currentLogoBase64 && !currentFaviconBase64) {
+            const fileLogoInput = document.getElementById("inputFileLogo").files[0];
+            const fileFaviconInput = document.getElementById("inputFileFavicon").files[0];
+
+            if (!fileLogoInput && !fileFaviconInput) {
                 tampilkanNotif(notif, "⚠️ Harap pilih file logo atau favicon baru terlebih dahulu.", "red");
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "Menyimpan ke Database...";
+            btn.innerText = "Memproses & Menyimpan...";
 
             try {
                 const payload = {
                     updatedAt: new Date().toISOString()
                 };
-                if (currentLogoBase64) payload.logoUrl = currentLogoBase64;
-                if (currentFaviconBase64) payload.faviconUrl = currentFaviconBase64;
+
+                // Konversi logo utama ke Base64 jika ada file baru
+                if (fileLogoInput) {
+                    payload.logoUrl = await bacaFileKeBase64(fileLogoInput);
+                }
+
+                // Konversi favicon ke Base64 jika ada file baru
+                if (fileFaviconInput) {
+                    payload.faviconUrl = await bacaFileKeBase64(fileFaviconInput);
+                }
 
                 const brandingRef = doc(db, "pengaturan_sistem", "branding");
                 await setDoc(brandingRef, payload, { merge: true });
 
-                tampilkanNotif(notif, "✅ Berhasil! Memuat ulang sistem...", "green");
+                tampilkanNotif(notif, "✅ Berhasil disimpan! Memuat ulang sistem...", "green");
                 
                 setTimeout(() => {
                     window.location.reload();
-                }, 1200);
+                }, 1500);
 
             } catch (err) {
                 console.error("Gagal menyimpan branding:", err);
@@ -94,18 +66,35 @@ document.addEventListener("DOMContentLoaded", async function() {
             }
         });
     }
+
+    // Live Preview saat file dipilih
+    document.getElementById("inputFileLogo").addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            bacaFileKeBase64(file).then(base64 => {
+                document.getElementById("previewLogo").src = base64;
+            });
+        }
+    });
+
+    document.getElementById("inputFileFavicon").addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            bacaFileKeBase64(file).then(base64 => {
+                document.getElementById("previewFavicon").src = base64;
+            });
+        }
+    });
 });
 
-function konversiKeBase64(file, callback) {
-    const reader = new FileReader();
-    reader.onload = function(uploadEvent) {
-        callback(uploadEvent.target.result);
-    };
-    reader.onerror = function(error) {
-        console.error("Gagal membaca file:", error);
-        alert("Gagal membaca file gambar.");
-    };
-    reader.readAsDataURL(file);
+// Fungsi pembantu Promise untuk FileReader
+function bacaFileKeBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.error = error => reject(error);
+        reader.readAsDataURL(file);
+    });
 }
 
 async function muatPengaturanBrandingSaatIni() {
@@ -113,21 +102,11 @@ async function muatPengaturanBrandingSaatIni() {
         const docSnap = await getDoc(doc(db, "pengaturan_sistem", "branding"));
         if (docSnap.exists()) {
             const data = docSnap.data();
-            if (data.logoUrl) {
-                currentLogoBase64 = data.logoUrl;
-                const pLogo = document.getElementById("previewLogo");
-                if(pLogo) {
-                    pLogo.src = data.logoUrl;
-                    pLogo.style.display = "block";
-                }
+            if (data.logoUrl && data.logoUrl.startsWith("data:image")) {
+                document.getElementById("previewLogo").src = data.logoUrl;
             }
-            if (data.faviconUrl) {
-                currentFaviconBase64 = data.faviconUrl;
-                const pFav = document.getElementById("previewFavicon");
-                if(pFav) {
-                    pFav.src = data.faviconUrl;
-                    pFav.style.display = "block";
-                }
+            if (data.faviconUrl && data.faviconUrl.startsWith("data:image")) {
+                document.getElementById("previewFavicon").src = data.faviconUrl;
             }
         }
     } catch (err) {
