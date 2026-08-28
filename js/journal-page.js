@@ -1,15 +1,74 @@
-// js/journal-page.js - Controller untuk input-jurnal.html dengan Integrasi Cloud Storage & Auto No. Bukti
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+// js/journal-page.js - Controller untuk input-jurnal.html dengan Bukti Transaksi & Auto No. Bukti
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { CONFIG, db } from "./config.js";
-import { simpanJurnalPusat, ambilSemuaJurnalPusat } from "./db.js";
+import { db } from "./config.js";
+import { simpanJurnalPusat, ambilSemuaJurnalPusat, ambilBuktiTransaksi } from "./db.js";
 import { cekApakahPeriodeTerkunci } from "./closing-period.js";
 import { escapeHtml } from "./utils.js";
 
-// Inisialisasi Firebase Storage
-const firebaseApp = initializeApp(CONFIG.FIREBASE_CONFIG);
-const storage = getStorage(firebaseApp);
+// Bukti transaksi disimpan langsung di Firestore (base64), bukan Firebase Storage,
+// karena Storage membutuhkan paket berbayar (Blaze) dan project ini tetap di paket gratis.
+const MAKS_UKURAN_BUKTI_BYTE = 700 * 1024; // ~700KB, aman di bawah batas dokumen Firestore 1 MiB
+let buktiTersimpanSebelumnya = false; // Ditandai true saat mode edit & jurnal sudah punya bukti
+
+function perkiraanUkuranBase64(dataUrl) {
+    const base64 = dataUrl.split(',')[1] || '';
+    return Math.floor(base64.length * 0.75);
+}
+
+function kompresGambarKeBase64(file, maksDimensi = 1400, kualitas = 0.72) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const reader = new FileReader();
+        reader.onload = () => { img.src = reader.result; };
+        reader.onerror = () => reject(new Error("Gagal membaca file gambar."));
+        img.onload = () => {
+            let { width, height } = img;
+            if (width > maksDimensi || height > maksDimensi) {
+                const rasio = Math.min(maksDimensi / width, maksDimensi / height);
+                width = Math.round(width * rasio);
+                height = Math.round(height * rasio);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', kualitas));
+        };
+        img.onerror = () => reject(new Error("Gagal memuat gambar untuk diproses."));
+        reader.readAsDataURL(file);
+    });
+}
+
+function bacaFileKeBase64Mentah(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Gagal membaca file."));
+        reader.readAsDataURL(file);
+    });
+}
+
+async function prosesBuktiTransaksiKeBase64(file) {
+    const isGambar = file.type.startsWith('image/');
+    const dataUrl = isGambar ? await kompresGambarKeBase64(file) : await bacaFileKeBase64Mentah(file);
+
+    if (perkiraanUkuranBase64(dataUrl) > MAKS_UKURAN_BUKTI_BYTE) {
+        throw new Error(
+            isGambar
+                ? "Ukuran gambar masih terlalu besar setelah dikompres. Coba gunakan foto dengan resolusi lebih kecil."
+                : "Ukuran berkas PDF terlalu besar (maks. sekitar 500KB). Coba kompres PDF terlebih dahulu atau scan dengan resolusi lebih rendah."
+        );
+    }
+
+    return { data: dataUrl, mimeType: file.type, namaFile: file.name };
+}
+
+async function bukaBuktiTersimpan(dataUrl) {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    window.open(objectUrl, '_blank', 'noopener,noreferrer');
+}
 
 let coaArray = []; // Array global untuk menyimpan data COA (untuk mapping otomatis)
 const urlParams = new URLSearchParams(window.location.search);
@@ -210,11 +269,18 @@ async function inisialisasiData() {
                 document.getElementById('keterangan').value = jurnalTarget.keterangan || '';
                 document.getElementById('status_jurnal').value = jurnalTarget.status || 'POSTED';
                 
-                document.getElementById('link_bukti').value = jurnalTarget.link_bukti || '';
-                if (jurnalTarget.link_bukti && /^https?:\/\//i.test(jurnalTarget.link_bukti)) {
-                    const statusUpload = document.getElementById('statusUpload');
-                    statusUpload.innerHTML = `✅ <a href="${escapeHtml(jurnalTarget.link_bukti)}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 underline">Lihat File Tersimpan</a> (Pilih berkas baru untuk mengganti)`;
-                    statusUpload.classList.remove('hidden');
+                if (jurnalTarget.punya_bukti) {
+                    const buktiTersimpan = await ambilBuktiTransaksi(jurnalTarget.id_jurnal);
+                    if (buktiTersimpan && buktiTersimpan.data) {
+                        buktiTersimpanSebelumnya = true;
+                        const statusUpload = document.getElementById('statusUpload');
+                        statusUpload.innerHTML = `✅ <a href="#" id="linkLihatBukti" class="text-indigo-600 underline">Lihat File Tersimpan (${escapeHtml(buktiTersimpan.namaFile) || 'berkas'})</a> (Pilih berkas baru untuk mengganti)`;
+                        statusUpload.classList.remove('hidden');
+                        document.getElementById('linkLihatBukti').addEventListener('click', (e) => {
+                            e.preventDefault();
+                            bukaBuktiTersimpan(buktiTersimpan.data);
+                        });
+                    }
                 }
 
                 toggleDueDate();
@@ -272,28 +338,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const targetIdJurnal = document.getElementById('id_jurnal').value;
-                let finalLinkBukti = document.getElementById('link_bukti').value;
 
                 const fileInput = document.getElementById('file_bukti');
                 const statusUpload = document.getElementById('statusUpload');
-                
+
+                let buktiBaru = null;
                 if (fileInput.files.length > 0) {
                     const file = fileInput.files[0];
-                    btn.innerText = "Mengunggah Bukti Transaksi...";
-                    statusUpload.innerText = "Memproses unggahan: " + file.name;
+                    btn.innerText = "Memproses Bukti Transaksi...";
+                    statusUpload.innerText = "Memproses berkas: " + file.name;
                     statusUpload.classList.remove('hidden');
-                    
+
                     try {
-                        const fileRef = ref(storage, `bukti_jurnal/${targetIdJurnal}_${file.name}`);
-                        await uploadBytes(fileRef, file);
-                        finalLinkBukti = await getDownloadURL(fileRef);
-                        statusUpload.innerText = "✅ Berkas berhasil diunggah.";
-                    } catch (uploadErr) {
-                        console.error("Gagal mengunggah berkas:", uploadErr);
-                        alert("❌ Gagal mengunggah berkas bukti transaksi. Pastikan aturan keamanan Storage mengizinkan akses. " + uploadErr.message);
+                        buktiBaru = await prosesBuktiTransaksiKeBase64(file);
+                        statusUpload.innerText = "✅ Berkas siap disimpan bersama jurnal.";
+                    } catch (prosesErr) {
+                        console.error("Gagal memproses berkas bukti:", prosesErr);
+                        alert("❌ " + prosesErr.message);
                         btn.innerText = "💾 Simpan Jurnal Akuntansi";
                         btn.disabled = false;
-                        return; 
+                        return;
                     }
                 }
 
@@ -311,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     unit_usaha: cleanUnitCode, // Tersimpan bersih sebagai "WT-NANAS", "CORP", dll.
                     lawan_transaksi: document.getElementById('lawan_transaksi').value,
                     jatuh_tempo: document.getElementById('jatuh_tempo').value,
-                    link_bukti: finalLinkBukti, 
+                    punya_bukti: Boolean(buktiBaru) || (Boolean(editIdJurnal) && buktiTersimpanSebelumnya),
                     kode_pajak: document.getElementById('kode_pajak').value,
                     dpp_penjualan: parseFloat(document.getElementById('dpp_penjualan').value) || 0,
                     keterangan: document.getElementById('keterangan').value,
@@ -337,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 btn.innerText = "Menyimpan Transaksi ke Pusat...";
-                const hasil = await simpanJurnalPusat(headerData, rowsData, editIdJurnal ? targetIdJurnal : null);
+                const hasil = await simpanJurnalPusat(headerData, rowsData, editIdJurnal ? targetIdJurnal : null, buktiBaru);
 
                 if (hasil.success) {
                     document.getElementById('alertSuccess').classList.remove('hidden');
