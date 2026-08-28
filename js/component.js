@@ -36,6 +36,15 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
+function ambilInisial(teks) {
+    if (!teks) return "?";
+    const bagianDepan = teks.split("@")[0].trim();
+    const kata = bagianDepan.split(/[\s._-]+/).filter(Boolean);
+    if (kata.length === 0) return "?";
+    if (kata.length === 1) return kata[0].substring(0, 2).toUpperCase();
+    return (kata[0][0] + kata[1][0]).toUpperCase();
+}
+
 async function muatSidebarAndBranding() {
     const sidebarContainer = document.getElementById('sidebar-container');
     if (!sidebarContainer) return;
@@ -50,6 +59,7 @@ async function muatSidebarAndBranding() {
     const currentUser = ambilUserAktif();
     const userRole = currentUser.role || "Akuntan";
     const namaTampilan = currentUser.nama || currentUser.email;
+    const inisialUser = ambilInisial(namaTampilan);
 
     // 1. Ambil data branding terlebih dahulu dari Firestore sebelum merender sidebar
     let logoSrc = "";
@@ -187,10 +197,12 @@ async function muatSidebarAndBranding() {
             <!-- Area Sesi & Profil di Bagian Bawah -->
             <div class="p-3 border-t border-gray-100 bg-gray-50 space-y-2">
                 <a href="/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${profileActiveClass} border border-gray-200 bg-white shadow-sm hover:shadow-md">
-                    <span class="text-sm">👤</span>
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">
+                        ${inisialUser}
+                    </div>
                     <div class="overflow-hidden">
-                        <p class="font-bold truncate">Profil Akun Saya</p>
-                        <p class="text-[10px] text-gray-400 truncate">${escapeHtml(namaTampilan)}</p>
+                        <p class="font-bold truncate">${escapeHtml(namaTampilan)}</p>
+                        <p class="text-[10px] text-gray-400 truncate">Lihat Profil & Pengaturan</p>
                     </div>
                 </a>
                 <button onclick="prosesLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold py-2 px-3 rounded-lg transition flex items-center justify-center gap-2">
