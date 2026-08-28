@@ -127,8 +127,9 @@ function renderRekapPajak() {
     if (elKurangLebih) {
         const label = kurangLebihBayar >= 0 ? "Kurang Bayar" : "Lebih Bayar";
         elKurangLebih.innerText = formatRupiah(Math.abs(kurangLebihBayar)) + " (" + label + ")";
-        elKurangLebih.className = elKurangLebih.className.replace(/text-(red|green)-600/g, "").trim()
-            + " " + (kurangLebihBayar >= 0 ? "text-red-600" : "text-green-600");
+        elKurangLebih.className = elKurangLebih.className
+            .replace(/text-(red|green|emerald)-600|dark:text-(red|emerald)-400/g, "").trim()
+            + " " + (kurangLebihBayar >= 0 ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400");
     }
 
     const tbody = document.getElementById('tabelRekapPajak');
@@ -136,7 +137,7 @@ function renderRekapPajak() {
     tbody.innerHTML = "";
 
     if (rekap.baris.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada transaksi berparameter pajak tercatat pada periode ini.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-stone-400 dark:text-stone-500">Belum ada transaksi berparameter pajak tercatat pada periode ini.</td></tr>`;
         return;
     }
 
@@ -150,18 +151,18 @@ function renderRekapPajak() {
 
     Object.keys(kelompok).sort().reverse().forEach(masa => {
         const headerRow = document.createElement('tr');
-        headerRow.innerHTML = `<td colspan="6" class="p-2 bg-gray-100 font-bold text-gray-600 text-[11px] uppercase tracking-wide">Masa Pajak ${escapeHtml(masa)}</td>`;
+        headerRow.innerHTML = `<td colspan="6" class="p-2 bg-stone-100 dark:bg-stone-800 font-bold text-stone-600 dark:text-stone-300 text-[11px] uppercase tracking-wide">Masa Pajak ${escapeHtml(masa)}</td>`;
         tbody.appendChild(headerRow);
 
         kelompok[masa].forEach(({ jurnal, dpp, arah, nilaiPajak }) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="p-3 font-bold text-indigo-700">${escapeHtml(jurnal.id_jurnal)}<div class="text-[11px] text-gray-400 font-normal">${escapeHtml(jurnal.tanggal)}</div></td>
-                <td class="p-3"><div class="font-medium text-gray-800">${escapeHtml(jurnal.no_bukti)}</div><div class="text-[11px] text-gray-500 truncate max-w-xs">${escapeHtml(jurnal.keterangan) || '-'}</div></td>
-                <td class="p-3"><span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 font-semibold rounded">${escapeHtml(jurnal.kode_pajak)}</span></td>
-                <td class="p-3 text-xs text-gray-600">${arah}</td>
-                <td class="p-3 text-right font-medium">${dpp === 0 ? '-' : dpp.toLocaleString('id-ID')}</td>
-                <td class="p-3 text-right font-bold text-gray-800">${nilaiPajak === null ? '-' : Math.round(nilaiPajak).toLocaleString('id-ID')}</td>
+                <td class="p-3 font-bold text-stone-900 dark:text-stone-100">${escapeHtml(jurnal.id_jurnal)}<div class="text-[11px] text-stone-400 dark:text-stone-500 font-normal">${escapeHtml(jurnal.tanggal)}</div></td>
+                <td class="p-3"><div class="font-medium text-stone-800 dark:text-stone-200">${escapeHtml(jurnal.no_bukti)}</div><div class="text-[11px] text-stone-500 dark:text-stone-400 truncate max-w-xs">${escapeHtml(jurnal.keterangan) || '-'}</div></td>
+                <td class="p-3"><span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold rounded">${escapeHtml(jurnal.kode_pajak)}</span></td>
+                <td class="p-3 text-xs text-stone-600 dark:text-stone-300">${arah}</td>
+                <td class="p-3 text-right font-medium text-stone-800 dark:text-stone-200">${dpp === 0 ? '-' : dpp.toLocaleString('id-ID')}</td>
+                <td class="p-3 text-right font-bold text-stone-800 dark:text-stone-200">${nilaiPajak === null ? '-' : Math.round(nilaiPajak).toLocaleString('id-ID')}</td>
             `;
             tbody.appendChild(tr);
         });
