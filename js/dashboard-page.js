@@ -3,11 +3,22 @@ import { db } from "./config.js";
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { escapeHtml } from "./utils.js";
+import { ambilUserAktif } from "./auth.js";
 
 function setBadge(el, className, teks) {
     if (!el) return;
     el.className = "px-2 py-0.5 font-semibold rounded " + className;
     el.innerText = teks;
+}
+
+// Sapaan personal ("Selamat datang, [Nama]") di puncak Dashboard, mengambil
+// nama tampilan yang sama dipakai header & sidebar (fallback ke email).
+function muatSapaanUser() {
+    const elSapaan = document.getElementById('sapaNamaUser');
+    if (!elSapaan) return;
+    const currentUser = ambilUserAktif();
+    const namaTampilan = currentUser.nama || currentUser.email || "Pengguna";
+    elSapaan.innerText = namaTampilan.split(" ")[0] || namaTampilan;
 }
 
 // Sebelumnya badge "Akta Pendirian", "NPWP Perseroan", dan "Status PKP" di
@@ -51,6 +62,7 @@ async function muatStatusLegal() {
 }
 
 async function muatDashboard() {
+    muatSapaanUser();
     muatStatusLegal();
     try {
         // 1. AMBIL MASTER UNIT USAHA DARI DATABASE (DINAMIS)
