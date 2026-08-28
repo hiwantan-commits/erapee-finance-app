@@ -1,5 +1,6 @@
 // js/business-analytics-page.js - Controller untuk analisa-bisnis.html
-// Analisis profitabilitas & margin laba antar unit usaha (Tahap 1 Business Intelligence)
+// Analisis profitabilitas & margin laba antar unit usaha + perbandingan
+// tahun-ke-tahun (Tahap 1 & 2 Business Intelligence)
 import { db } from "./config.js";
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -8,9 +9,15 @@ import { escapeHtml } from "./utils.js";
 let semuaJurnalCache = [];
 let unitUsahaMasterCache = [];
 let chartMarginInstance = null;
+let chartYoYInstance = null;
 
 function formatRupiah(angka) {
     return "Rp " + Math.round(angka).toLocaleString('id-ID');
+}
+
+function setTeksAman(id, teks) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = teks;
 }
 
 // Ambang margin bersifat indikatif umum, bukan standar baku industri tertentu -
@@ -193,6 +200,135 @@ function renderSemuaTampilan(tahunFilter) {
     renderGrafik(daftarUnit);
 }
 
+// ==================== Perbandingan Tahun ke Tahun (YoY) ====================
+
+function hitungDataBulananGlobal(tahun) {
+    const dataBulanan = Array.from({ length: 12 }, () => ({ pendapatan: 0, beban: 0 }));
+
+    semuaJurnalCache.forEach(jurnal => {
+        if (!jurnal.tanggal) return;
+        const [tahunJurnal, bulanStr] = jurnal.tanggal.split("-");
+        if (tahunJurnal !== tahun) return;
+
+        const bulanIndex = parseInt(bulanStr) - 1;
+        if (bulanIndex < 0 || bulanIndex > 11) return;
+
+        (jurnal.rows || []).forEach(baris => {
+            const kodeAkun = baris.kode_akun || "";
+            const debit = parseFloat(baris.debit) || 0;
+            const kredit = parseFloat(baris.kredit) || 0;
+
+            if (kodeAkun.startsWith("4")) {
+                dataBulanan[bulanIndex].pendapatan += (kredit - debit);
+            } else if (kodeAkun.startsWith("5") || kodeAkun.startsWith("6")) {
+                dataBulanan[bulanIndex].beban += (debit - kredit);
+            }
+        });
+    });
+
+    return dataBulanan;
+}
+
+function hitungTotalTahun(tahun) {
+    const bulanan = hitungDataBulananGlobal(tahun);
+    const pendapatan = bulanan.reduce((s, b) => s + b.pendapatan, 0);
+    const beban = bulanan.reduce((s, b) => s + b.beban, 0);
+    return { pendapatan, beban, laba: pendapatan - beban, bulanan };
+}
+
+function hitungPertumbuhan(nilaiIni, nilaiLalu) {
+    if (nilaiLalu === 0) return null;
+    return ((nilaiIni - nilaiLalu) / Math.abs(nilaiLalu)) * 100;
+}
+
+// naikBaik: true jika kenaikan nilai adalah kabar baik (Pendapatan/Laba),
+// false jika kenaikan adalah kabar buruk (Beban)
+function renderIndikatorPertumbuhan(elId, nilaiIni, nilaiLalu, tahunLalu, naikBaik) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+
+    const pertumbuhan = hitungPertumbuhan(nilaiIni, nilaiLalu);
+    if (pertumbuhan === null) {
+        el.innerHTML = `<span class="text-gray-400">Tanpa data pembanding</span>`;
+        return;
+    }
+
+    const naik = pertumbuhan >= 0;
+    const kabarBaik = naik === naikBaik;
+    const warna = kabarBaik ? 'text-green-600' : 'text-red-600';
+    const panah = naik ? '▲' : '▼';
+    el.innerHTML = `<span class="${warna} font-semibold">${panah} ${Math.abs(pertumbuhan).toFixed(1)}%</span> <span class="text-gray-400">vs ${escapeHtml(tahunLalu)}</span>`;
+}
+
+function renderYoY(tahunIni, tahunLalu) {
+    const areaTanpaPembanding = document.getElementById('areaYoYTanpaPembanding');
+    if (!tahunIni) {
+        if (areaTanpaPembanding) areaTanpaPembanding.classList.add('hidden');
+        return;
+    }
+
+    const dataIni = hitungTotalTahun(tahunIni);
+    const dataLalu = tahunLalu ? hitungTotalTahun(tahunLalu) : null;
+
+    if (areaTanpaPembanding) areaTanpaPembanding.classList.toggle('hidden', !!dataLalu);
+
+    setTeksAman('yoyPendapatanIni', formatRupiah(dataIni.pendapatan));
+    setTeksAman('yoyBebanIni', formatRupiah(dataIni.beban));
+    setTeksAman('yoyLabaIni', formatRupiah(dataIni.laba));
+
+    if (dataLalu) {
+        renderIndikatorPertumbuhan('yoyPendapatanGrowth', dataIni.pendapatan, dataLalu.pendapatan, tahunLalu, true);
+        renderIndikatorPertumbuhan('yoyBebanGrowth', dataIni.beban, dataLalu.beban, tahunLalu, false);
+        renderIndikatorPertumbuhan('yoyLabaGrowth', dataIni.laba, dataLalu.laba, tahunLalu, true);
+    } else {
+        ['yoyPendapatanGrowth', 'yoyBebanGrowth', 'yoyLabaGrowth'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = '<span class="text-gray-400">Tanpa data pembanding</span>';
+        });
+    }
+
+    const canvasEl = document.getElementById('grafikYoY');
+    if (canvasEl && window.Chart) {
+        if (chartYoYInstance) {
+            chartYoYInstance.destroy();
+            chartYoYInstance = null;
+        }
+
+        const namaBulanPendek = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const datasets = [{
+            label: `Laba Bersih ${tahunIni}`,
+            data: dataIni.bulanan.map(b => b.pendapatan - b.beban),
+            borderColor: 'rgba(79, 70, 229, 1)',
+            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+            tension: 0.3,
+            fill: true
+        }];
+
+        if (dataLalu) {
+            datasets.push({
+                label: `Laba Bersih ${tahunLalu}`,
+                data: dataLalu.bulanan.map(b => b.pendapatan - b.beban),
+                borderColor: 'rgba(156, 163, 175, 1)',
+                backgroundColor: 'rgba(156, 163, 175, 0.08)',
+                tension: 0.3,
+                fill: true,
+                borderDash: [5, 4]
+            });
+        }
+
+        chartYoYInstance = new Chart(canvasEl.getContext('2d'), {
+            type: 'line',
+            data: { labels: namaBulanPendek, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+                scales: { y: { grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
+            }
+        });
+    }
+}
+
 async function muatAnalisisBisnis() {
     try {
         const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
@@ -207,8 +343,7 @@ async function muatAnalisisBisnis() {
 
         semuaJurnalCache = await ambilSemuaJurnalPusat();
 
-        // Bangun daftar tahun yang tersedia dari data transaksi (dasar untuk fitur
-        // perbandingan tahun-ke-tahun di tahap berikutnya)
+        // Bangun daftar tahun yang tersedia dari data transaksi
         const tahunSet = new Set();
         semuaJurnalCache.forEach(j => {
             if (j.tanggal) tahunSet.add(j.tanggal.split("-")[0]);
@@ -231,6 +366,35 @@ async function muatAnalisisBisnis() {
         }
 
         renderSemuaTampilan(tahunTerpilih);
+
+        // Siapkan dropdown Perbandingan Tahun ke Tahun (YoY)
+        const selectTahunIniYoY = document.getElementById('filterTahunIniYoY');
+        const selectTahunLaluYoY = document.getElementById('filterTahunLaluYoY');
+        if (selectTahunIniYoY && selectTahunLaluYoY) {
+            if (daftarTahun.length === 0) {
+                selectTahunIniYoY.innerHTML = '<option value="">Belum ada data</option>';
+                selectTahunLaluYoY.innerHTML = '<option value="">Belum ada data</option>';
+                selectTahunIniYoY.disabled = true;
+                selectTahunLaluYoY.disabled = true;
+                renderYoY(null, null);
+            } else {
+                selectTahunIniYoY.innerHTML = daftarTahun.map(t => `<option value="${t}">Tahun ${t}</option>`).join('');
+                selectTahunLaluYoY.innerHTML = '<option value="">Tanpa pembanding</option>' +
+                    daftarTahun.map(t => `<option value="${t}">Tahun ${t}</option>`).join('');
+
+                const tahunIniYoY = daftarTahun[0];
+                const tahunLaluYoY = daftarTahun.length > 1 ? daftarTahun[1] : "";
+
+                selectTahunIniYoY.value = tahunIniYoY;
+                selectTahunLaluYoY.value = tahunLaluYoY;
+
+                const perbaruiYoY = () => renderYoY(selectTahunIniYoY.value, selectTahunLaluYoY.value || null);
+                selectTahunIniYoY.addEventListener('change', perbaruiYoY);
+                selectTahunLaluYoY.addEventListener('change', perbaruiYoY);
+
+                renderYoY(tahunIniYoY, tahunLaluYoY || null);
+            }
+        }
     } catch (error) {
         console.error("Gagal memuat analisis bisnis:", error);
         const tbody = document.getElementById('tabelRankingUnit');
