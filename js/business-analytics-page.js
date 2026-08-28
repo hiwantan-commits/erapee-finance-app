@@ -5,6 +5,7 @@ import { db } from "./config.js";
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { escapeHtml } from "./utils.js";
+import { kalkulasiNeraca } from "./accounting.js";
 
 let semuaJurnalCache = [];
 let unitUsahaMasterCache = [];
@@ -459,6 +460,79 @@ function renderYoY(tahunIni, tahunLalu) {
     }
 }
 
+// ==================== Rasio Keuangan Kunci ====================
+// Snapshot kumulatif sejak awal hingga transaksi terbaru (bukan per-tahun),
+// konsisten dengan sifat Neraca sebagai laporan posisi keuangan point-in-time.
+
+function formatRasioPercent(nilai) {
+    return nilai !== null ? nilai.toFixed(1) + "%" : "N/A";
+}
+
+function formatRasioKali(nilai) {
+    return nilai !== null ? nilai.toFixed(2) + "x" : "N/A";
+}
+
+function statusRasioNaikBaik(nilai, ambangSehat, ambangWaspada) {
+    if (nilai === null) return { label: "N/A", kelas: "bg-gray-100 text-gray-500" };
+    if (nilai >= ambangSehat) return { label: "SEHAT", kelas: "bg-green-100 text-green-700" };
+    if (nilai >= ambangWaspada) return { label: "WASPADA", kelas: "bg-amber-100 text-amber-800" };
+    return { label: "PERLU PERHATIAN", kelas: "bg-red-100 text-red-700" };
+}
+
+function statusRasioRendahBaik(nilai, ambangSehat, ambangWaspada) {
+    if (nilai === null) return { label: "N/A", kelas: "bg-gray-100 text-gray-500" };
+    if (nilai <= ambangSehat) return { label: "SEHAT", kelas: "bg-green-100 text-green-700" };
+    if (nilai <= ambangWaspada) return { label: "WASPADA", kelas: "bg-amber-100 text-amber-800" };
+    return { label: "PERLU PERHATIAN", kelas: "bg-red-100 text-red-700" };
+}
+
+function setStatusBadge(elId, status) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.className = "inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold " + status.kelas;
+    el.innerText = status.label;
+}
+
+function hitungLabaRugiSemua() {
+    let pendapatan = 0, beban = 0;
+    semuaJurnalCache.forEach(jurnal => {
+        (jurnal.rows || []).forEach(baris => {
+            const kodeAkun = baris.kode_akun || "";
+            const debit = parseFloat(baris.debit) || 0;
+            const kredit = parseFloat(baris.kredit) || 0;
+            if (kodeAkun.startsWith("4")) pendapatan += (kredit - debit);
+            else if (kodeAkun.startsWith("5") || kodeAkun.startsWith("6")) beban += (debit - kredit);
+        });
+    });
+    return { pendapatan, beban, laba: pendapatan - beban };
+}
+
+function renderRasioKeuangan() {
+    const neraca = kalkulasiNeraca(semuaJurnalCache);
+    const labaRugi = hitungLabaRugiSemua();
+
+    const marginLaba = labaRugi.pendapatan > 0 ? (labaRugi.laba / labaRugi.pendapatan) * 100 : null;
+    const roa = neraca.totalAset > 0 ? (labaRugi.laba / neraca.totalAset) * 100 : null;
+    const roe = neraca.totalEkuitas > 0 ? (labaRugi.laba / neraca.totalEkuitas) * 100 : null;
+    const der = neraca.totalEkuitas > 0 ? (neraca.totalLiabilitas / neraca.totalEkuitas) : null;
+    const dta = neraca.totalAset > 0 ? (neraca.totalLiabilitas / neraca.totalAset) * 100 : null;
+
+    setTeksAman('rasioMarginLaba', formatRasioPercent(marginLaba));
+    setStatusBadge('rasioMarginLabaStatus', statusRasioNaikBaik(marginLaba, 10, 0));
+
+    setTeksAman('rasioRoa', formatRasioPercent(roa));
+    setStatusBadge('rasioRoaStatus', statusRasioNaikBaik(roa, 5, 0));
+
+    setTeksAman('rasioRoe', formatRasioPercent(roe));
+    setStatusBadge('rasioRoeStatus', statusRasioNaikBaik(roe, 15, 0));
+
+    setTeksAman('rasioDer', formatRasioKali(der));
+    setStatusBadge('rasioDerStatus', statusRasioRendahBaik(der, 1.0, 2.0));
+
+    setTeksAman('rasioDta', formatRasioPercent(dta));
+    setStatusBadge('rasioDtaStatus', statusRasioRendahBaik(dta, 50, 70));
+}
+
 async function muatAnalisisBisnis() {
     try {
         const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
@@ -472,6 +546,8 @@ async function muatAnalisisBisnis() {
         }
 
         semuaJurnalCache = await ambilSemuaJurnalPusat();
+
+        renderRasioKeuangan();
 
         // Bangun daftar tahun yang tersedia dari data transaksi
         const tahunSet = new Set();

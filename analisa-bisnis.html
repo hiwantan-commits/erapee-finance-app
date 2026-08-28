@@ -26,6 +26,40 @@
                     <p class="text-xs text-gray-500 mt-0.5">Gambaran kinerja keuangan &amp; profitabilitas usaha, dihitung otomatis dari data jurnal</p>
                 </div>
 
+                <!-- Rasio Keuangan Kunci -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-8">
+                    <h3 class="font-bold text-gray-800 text-base mb-1">Rasio Keuangan Kunci</h3>
+                    <p class="text-[11px] text-gray-400 mb-5">Snapshot kesehatan keuangan kumulatif perusahaan hingga transaksi terbaru. *Ambang status bersifat indikatif umum, bukan standar baku industri - sesuaikan dengan karakteristik bisnis Anda.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Margin Laba Bersih</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="rasioMarginLaba">-</h4>
+                            <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold" id="rasioMarginLabaStatus"></span>
+                        </div>
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Return on Assets (ROA)</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="rasioRoa">-</h4>
+                            <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold" id="rasioRoaStatus"></span>
+                        </div>
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Return on Equity (ROE)</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="rasioRoe">-</h4>
+                            <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold" id="rasioRoeStatus"></span>
+                        </div>
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Utang thd Ekuitas (DER)</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="rasioDer">-</h4>
+                            <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold" id="rasioDerStatus"></span>
+                        </div>
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Utang thd Aset</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="rasioDta">-</h4>
+                            <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold" id="rasioDtaStatus"></span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Perbandingan Tahun ke Tahun (YoY) -->
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-8">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-gray-100">
