@@ -2,14 +2,7 @@
 import { db } from "./config.js";
 import { ambilSemuaJurnalPusat, hapusJurnalPusat } from "./db.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { escapeHtml } from "./utils.js";
-
-// Mencegah CSV/Formula Injection: jika nilai teks diawali =, +, -, atau @,
-// Excel/Sheets bisa menafsirkannya sebagai formula saat file CSV dibuka.
-function amankanSelCsv(nilai) {
-    const teks = String(nilai ?? '');
-    return /^[=+\-@]/.test(teks) ? "'" + teks : teks;
-}
+import { escapeHtml, amankanSelCsv, unduhCsv } from "./utils.js";
 
 window.dataJurnalGlobal = {};
 let listJurnalCache = [];
@@ -251,26 +244,18 @@ window.eksporKeExcel = function() {
     const listJurnal = Object.values(window.dataJurnalGlobal);
     if (listJurnal.length === 0) return alert("Tidak ada data untuk diekspor!");
 
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "ID Jurnal,Tanggal,No Bukti,Unit Usaha,Lawan Transaksi,Keterangan,Status,Total Debit,Total Kredit\r\n";
+    const rows = listJurnal.map(j => [
+        `"${amankanSelCsv(j.id_jurnal)}"`, `"${amankanSelCsv(j.tanggal)}"`, `"${amankanSelCsv(j.no_bukti)}"`,
+        `"${amankanSelCsv(j.unit_usaha || '')}"`, `"${amankanSelCsv(j.lawan_transaksi || '')}"`,
+        `"${amankanSelCsv((j.keterangan || '').replace(/"/g, '""'))}"`, `"${amankanSelCsv(j.status)}"`,
+        j.total_debit, j.total_kredit
+    ]);
 
-    listJurnal.forEach(j => {
-        let row = [
-            `"${amankanSelCsv(j.id_jurnal)}"`, `"${amankanSelCsv(j.tanggal)}"`, `"${amankanSelCsv(j.no_bukti)}"`,
-            `"${amankanSelCsv(j.unit_usaha || '')}"`, `"${amankanSelCsv(j.lawan_transaksi || '')}"`,
-            `"${amankanSelCsv((j.keterangan || '').replace(/"/g, '""'))}"`, `"${amankanSelCsv(j.status)}"`,
-            j.total_debit, j.total_kredit
-        ];
-        csvContent += row.join(",") + "\r\n";
-    });
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Laporan_Jurnal_${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    unduhCsv(
+        `Laporan_Jurnal_${new Date().toISOString().slice(0,10)}.csv`,
+        ["ID Jurnal", "Tanggal", "No Bukti", "Unit Usaha", "Lawan Transaksi", "Keterangan", "Status", "Total Debit", "Total Kredit"],
+        rows
+    );
 };
 
 window.cetakVoucher = function(id_jurnal) {
