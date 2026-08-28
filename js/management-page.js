@@ -103,10 +103,18 @@ function renderTabelDenganPagination(dataList) {
                 ${balanceStatus}
             </td>
             <td class="p-3 text-center">${badgeStatus}</td>
-            <td class="p-3 text-center space-x-1">
-                <button onclick="editJurnal('${jurnal.id_jurnal}')" class="text-amber-600 bg-amber-50 px-2 py-1 rounded hover:bg-amber-100 font-semibold text-xs transition">✏️ Edit</button>
-                <button onclick="cetakVoucher('${jurnal.id_jurnal}')" class="text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100 font-semibold text-xs transition">🖨️ Cetak</button>
-                <button onclick="hapusJurnalGrup('${jurnal.id_jurnal}')" class="text-red-600 bg-red-50 px-2 py-1 rounded hover:bg-red-100 font-semibold text-xs transition">🗑️ Hapus</button>
+            <td class="p-3">
+                <div class="flex items-center justify-center flex-wrap gap-1.5">
+                    <button onclick="editJurnal('${jurnal.id_jurnal}')" title="Edit" class="text-amber-600 bg-amber-50 hover:bg-amber-100 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg font-semibold text-xs transition flex items-center gap-1">
+                        <span>✏️</span><span class="hidden sm:inline">Edit</span>
+                    </button>
+                    <button onclick="cetakVoucher('${jurnal.id_jurnal}')" title="Cetak" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg font-semibold text-xs transition flex items-center gap-1">
+                        <span>🖨️</span><span class="hidden sm:inline">Cetak</span>
+                    </button>
+                    <button onclick="hapusJurnalGrup('${jurnal.id_jurnal}')" title="Hapus" class="text-red-600 bg-red-50 hover:bg-red-100 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg font-semibold text-xs transition flex items-center gap-1">
+                        <span>🗑️</span><span class="hidden sm:inline">Hapus</span>
+                    </button>
+                </div>
             </td>
         `;
         tbody.appendChild(tr);
