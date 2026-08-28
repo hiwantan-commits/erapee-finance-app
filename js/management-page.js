@@ -18,6 +18,7 @@ const dataPerHalaman = 10;
 
 async function muatManajemenJurnal() {
     const tbody = document.getElementById('tabelManajemenJurnal');
+    const kartuContainer = document.getElementById('kartuManajemenJurnal');
     if (!tbody) return;
     tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Memuat data teroptimasi dari pusat...</td></tr>`;
 
@@ -35,9 +36,10 @@ async function muatManajemenJurnal() {
         }
 
         const listJurnal = await ambilSemuaJurnalPusat();
-        
+
         if (listJurnal.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat.</td></tr>`;
+            if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Belum ada transaksi jurnal tercatat.</p>`;
             return;
         }
 
@@ -52,16 +54,34 @@ async function muatManajemenJurnal() {
     } catch (err) {
         console.error("Gagal memuat manajemen jurnal:", err);
         tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal memuat data dari pusat database.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-red-500 text-sm">Gagal memuat data dari pusat database.</p>`;
     }
+}
+
+function tombolAksiHtml(id_jurnal, ukuranIkon) {
+    return `
+        <div class="flex items-center justify-center flex-wrap gap-1.5">
+            <button onclick="editJurnal('${id_jurnal}')" title="Edit" class="text-amber-600 bg-amber-50 hover:bg-amber-100 p-1.5 ${ukuranIkon} rounded-lg font-semibold text-xs transition flex items-center gap-1">
+                <span>✏️</span><span class="hidden sm:inline">Edit</span>
+            </button>
+            <button onclick="cetakVoucher('${id_jurnal}')" title="Cetak" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 p-1.5 ${ukuranIkon} rounded-lg font-semibold text-xs transition flex items-center gap-1">
+                <span>🖨️</span><span class="hidden sm:inline">Cetak</span>
+            </button>
+            <button onclick="hapusJurnalGrup('${id_jurnal}')" title="Hapus" class="text-red-600 bg-red-50 hover:bg-red-100 p-1.5 ${ukuranIkon} rounded-lg font-semibold text-xs transition flex items-center gap-1">
+                <span>🗑️</span><span class="hidden sm:inline">Hapus</span>
+            </button>
+        </div>
+    `;
 }
 
 function renderTabelDenganPagination(dataList) {
     const tbody = document.getElementById('tabelManajemenJurnal');
+    const kartuContainer = document.getElementById('kartuManajemenJurnal');
     if (!tbody) return;
-    tbody.innerHTML = '';
 
     if (dataList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Tidak ada transaksi yang cocok.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Tidak ada transaksi yang cocok.</p>`;
         hapusKontrolPagination();
         return;
     }
@@ -75,50 +95,72 @@ function renderTabelDenganPagination(dataList) {
     const indeksAkhir = indeksAwal + dataPerHalaman;
     const dataHalamanIni = dataList.slice(indeksAwal, indeksAkhir);
 
-    dataHalamanIni.forEach((jurnal) => {
-        let tr = document.createElement('tr');
-        let badgeStatus = jurnal.status === 'POSTED' 
-            ? '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded font-semibold">POSTED</span>' 
-            : '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold">DRAFT</span>';
-        
-        let balanceStatus = (jurnal.total_debit === jurnal.total_kredit && jurnal.total_debit > 0)
-            ? '<span class="text-xs text-green-600 font-semibold mt-0.5 block">✓ Seimbang</span>'
-            : '<span class="text-xs text-red-500 font-semibold mt-0.5 block">⚠️ Selisih</span>';
+    const barisTabel = [];
+    const kartuMobile = [];
 
-        tr.innerHTML = `
-            <td class="p-3">
-                <div class="font-bold text-indigo-700">${escapeHtml(jurnal.id_jurnal)}</div>
-                <div class="text-xs text-gray-500 mt-0.5">${escapeHtml(jurnal.tanggal)}</div>
-            </td>
-            <td class="p-3">
-                <div class="font-semibold text-gray-800">${escapeHtml(jurnal.unit_usaha) || '-'}</div>
-                <div class="text-xs text-gray-500 font-mono mt-0.5">${escapeHtml(jurnal.no_bukti)}</div>
-            </td>
-            <td class="p-3">
-                <div class="font-medium text-gray-800">${escapeHtml(jurnal.lawan_transaksi) || '-'}</div>
-                <div class="text-xs text-gray-500 truncate max-w-xs mt-0.5">${escapeHtml(jurnal.keterangan) || '-'}</div>
-            </td>
-            <td class="p-3 text-right">
-                <div class="font-bold text-gray-800">${jurnal.total_debit.toLocaleString('id-ID')}</div>
-                ${balanceStatus}
-            </td>
-            <td class="p-3 text-center">${badgeStatus}</td>
-            <td class="p-3">
-                <div class="flex items-center justify-center flex-wrap gap-1.5">
-                    <button onclick="editJurnal('${jurnal.id_jurnal}')" title="Edit" class="text-amber-600 bg-amber-50 hover:bg-amber-100 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg font-semibold text-xs transition flex items-center gap-1">
-                        <span>✏️</span><span class="hidden sm:inline">Edit</span>
-                    </button>
-                    <button onclick="cetakVoucher('${jurnal.id_jurnal}')" title="Cetak" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg font-semibold text-xs transition flex items-center gap-1">
-                        <span>🖨️</span><span class="hidden sm:inline">Cetak</span>
-                    </button>
-                    <button onclick="hapusJurnalGrup('${jurnal.id_jurnal}')" title="Hapus" class="text-red-600 bg-red-50 hover:bg-red-100 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg font-semibold text-xs transition flex items-center gap-1">
-                        <span>🗑️</span><span class="hidden sm:inline">Hapus</span>
-                    </button>
+    dataHalamanIni.forEach((jurnal) => {
+        const tidakSeimbang = !(jurnal.total_debit === jurnal.total_kredit && jurnal.total_debit > 0);
+
+        const badgeStatus = jurnal.status === 'POSTED'
+            ? '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded font-semibold">POSTED</span>'
+            : '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold">DRAFT</span>';
+
+        const balanceStatus = tidakSeimbang
+            ? '<span class="text-xs text-red-500 font-semibold mt-0.5 block">⚠️ Selisih</span>'
+            : '<span class="text-xs text-green-600 font-semibold mt-0.5 block">✓ Seimbang</span>';
+
+        // Baris tidak seimbang diberi latar merah muda agar langsung terlihat -
+        // ini seharusnya jarang terjadi dan perlu segera diperiksa.
+        barisTabel.push(`
+            <tr class="${tidakSeimbang ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'}">
+                <td class="p-3">
+                    <div class="font-bold text-indigo-700">${escapeHtml(jurnal.id_jurnal)}</div>
+                    <div class="text-xs text-gray-500 mt-0.5">${escapeHtml(jurnal.tanggal)}</div>
+                </td>
+                <td class="p-3">
+                    <div class="font-semibold text-gray-800">${escapeHtml(jurnal.unit_usaha) || '-'}</div>
+                    <div class="text-xs text-gray-500 font-mono mt-0.5">${escapeHtml(jurnal.no_bukti)}</div>
+                </td>
+                <td class="p-3">
+                    <div class="font-medium text-gray-800">${escapeHtml(jurnal.lawan_transaksi) || '-'}</div>
+                    <div class="text-xs text-gray-500 truncate max-w-xs mt-0.5">${escapeHtml(jurnal.keterangan) || '-'}</div>
+                </td>
+                <td class="p-3 text-right">
+                    <div class="font-bold text-gray-800">${jurnal.total_debit.toLocaleString('id-ID')}</div>
+                    ${balanceStatus}
+                </td>
+                <td class="p-3 text-center">${badgeStatus}</td>
+                <td class="p-3">${tombolAksiHtml(jurnal.id_jurnal, 'sm:px-2.5 sm:py-1.5')}</td>
+            </tr>
+        `);
+
+        // Tampilan kartu untuk layar sempit (pengganti tabel horizontal yang
+        // sulit dibaca di HP karena banyak kolom).
+        kartuMobile.push(`
+            <div class="border ${tidakSeimbang ? 'border-red-200 bg-red-50' : 'border-gray-100'} rounded-xl p-4">
+                <div class="flex justify-between items-start gap-2 mb-2">
+                    <div>
+                        <div class="font-bold text-indigo-700 text-sm">${escapeHtml(jurnal.id_jurnal)}</div>
+                        <div class="text-xs text-gray-500">${escapeHtml(jurnal.tanggal)}</div>
+                    </div>
+                    ${badgeStatus}
                 </div>
-            </td>
-        `;
-        tbody.appendChild(tr);
+                <div class="text-xs text-gray-500 font-mono mb-1">${escapeHtml(jurnal.unit_usaha) || '-'} &middot; ${escapeHtml(jurnal.no_bukti)}</div>
+                <div class="text-sm font-medium text-gray-800">${escapeHtml(jurnal.lawan_transaksi) || '-'}</div>
+                <div class="text-xs text-gray-500">${escapeHtml(jurnal.keterangan) || '-'}</div>
+                <div class="flex justify-between items-end border-t border-gray-100 pt-2 mt-3">
+                    <div>
+                        <div class="font-bold text-gray-800 text-sm">Rp ${jurnal.total_debit.toLocaleString('id-ID')}</div>
+                        ${balanceStatus}
+                    </div>
+                    ${tombolAksiHtml(jurnal.id_jurnal, 'px-2.5 py-1.5')}
+                </div>
+            </div>
+        `);
     });
+
+    tbody.innerHTML = barisTabel.join('');
+    if (kartuContainer) kartuContainer.innerHTML = kartuMobile.join('');
 
     renderKontrolPagination(totalHalaman);
 }
@@ -152,12 +194,16 @@ function hapusKontrolPagination() {
     if (containerPagination) containerPagination.remove();
 }
 
-window.ubahHalaman = function(targetHalaman) {
-    halamanAktif = targetHalaman;
+// Menyatukan logika filter pencarian teks + unit usaha + rentang tanggal,
+// dipakai bersama oleh ubahHalaman() dan filterTabelJurnal() agar tidak ada
+// dua salinan logika yang bisa saling berbeda.
+function dapatkanDataTersaring() {
     const keyword = document.getElementById('inputPencarian').value.toLowerCase();
     const selectedUnit = document.getElementById('filterUnit').value;
+    const dariTanggal = document.getElementById('filterTanggalDari')?.value || '';
+    const sampaiTanggal = document.getElementById('filterTanggalSampai')?.value || '';
 
-    const filtered = listJurnalCache.filter(j => {
+    return listJurnalCache.filter(j => {
         const matchUnit = (selectedUnit === 'ALL' || j.unit_usaha === selectedUnit);
         const matchKeyword = (
             j.id_jurnal.toLowerCase().includes(keyword) ||
@@ -165,33 +211,24 @@ window.ubahHalaman = function(targetHalaman) {
             j.lawan_transaksi.toLowerCase().includes(keyword) ||
             (j.keterangan && j.keterangan.toLowerCase().includes(keyword))
         );
-        return matchUnit && matchKeyword;
+        const matchDari = !dariTanggal || (j.tanggal && j.tanggal >= dariTanggal);
+        const matchSampai = !sampaiTanggal || (j.tanggal && j.tanggal <= sampaiTanggal);
+        return matchUnit && matchKeyword && matchDari && matchSampai;
     });
+}
 
-    renderTabelDenganPagination(filtered);
+window.ubahHalaman = function(targetHalaman) {
+    halamanAktif = targetHalaman;
+    renderTabelDenganPagination(dapatkanDataTersaring());
 };
 
 window.filterTabelJurnal = function() {
     halamanAktif = 1; // Reset ke halaman pertama saat memfilter
-    const keyword = document.getElementById('inputPencarian').value.toLowerCase();
-    const selectedUnit = document.getElementById('filterUnit').value;
-
-    const filtered = listJurnalCache.filter(j => {
-        const matchUnit = (selectedUnit === 'ALL' || j.unit_usaha === selectedUnit);
-        const matchKeyword = (
-            j.id_jurnal.toLowerCase().includes(keyword) ||
-            j.no_bukti.toLowerCase().includes(keyword) ||
-            j.lawan_transaksi.toLowerCase().includes(keyword) ||
-            (j.keterangan && j.keterangan.toLowerCase().includes(keyword))
-        );
-        return matchUnit && matchKeyword;
-    });
-
-    renderTabelDenganPagination(filtered);
+    renderTabelDenganPagination(dapatkanDataTersaring());
 };
 
 window.editJurnal = function(id_jurnal) {
-    window.location.href = `input-jurnal.html?edit=${id_jurnal}`;
+    window.location.href = `/input-jurnal?edit=${id_jurnal}`;
 };
 
 window.hapusJurnalGrup = async function(id_jurnal) {
