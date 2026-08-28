@@ -1,54 +1,158 @@
 // js/tax-page.js - Controller untuk pajak.html
 import { ambilSemuaJurnalPusat } from "./db.js";
+import { klasifikasikanAkun } from "./accounting.js";
+import { CONFIG } from "./config.js";
 
-async function muatRekapPajak() {
-    try {
-        const semuaJurnal = await ambilSemuaJurnalPusat();
-        
-        let akumulasiDPP = 0;
-        let akumulasiPPN = 0;
-        let akumulasiPPh = 0;
+let SEMUA_JURNAL_PAJAK = [];
 
-        // Saring jurnal yang memiliki kode pajak selain 'NON'
-        const jurnalPajak = semuaJurnal.filter(j => j.kode_pajak && j.kode_pajak !== "NON");
+// Menentukan arah PPN (Keluaran/Masukan) dari klasifikasi akun baris jurnal.
+// Heuristik: jika ada baris yang mengkredit akun PENDAPATAN (kode awalan 4),
+// transaksi dianggap Penjualan -> PPN Keluaran. Selain itu dianggap PPN Masukan (Pembelian).
+// Catatan: ini estimasi berbasis kode akun karena belum ada field arah transaksi eksplisit.
+function tentukanArahPPN(jurnal) {
+    const adaPendapatan = jurnal.rows.some(baris =>
+        klasifikasikanAkun(baris.kode_akun) === "PENDAPATAN" && (parseFloat(baris.kredit) || 0) > 0
+    );
+    return adaPendapatan ? "Keluaran" : "Masukan";
+}
 
-        const tbody = document.getElementById('tabelRekapPajak');
-        if (!tbody) return;
-        tbody.innerHTML = "";
+function hitungRekapPajak(daftarJurnal) {
+    let rekap = {
+        totalPPNKeluaran: 0,
+        totalPPNMasukan: 0,
+        totalPPh23: 0,
+        totalDPPPh21: 0,
+        baris: []
+    };
 
-        if (jurnalPajak.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">Belum ada transaksi berparameter pajak tercatat.</td></tr>`;
-            document.getElementById('rekapTotalDPP').innerText = "Rp 0";
-            document.getElementById('rekapTotalPPN').innerText = "Rp 0";
-            document.getElementById('rekapTotalPPh').innerText = "Rp 0";
-            return;
+    daftarJurnal.forEach(jurnal => {
+        const dpp = parseFloat(jurnal.dpp_penjualan) || 0;
+        const kode = jurnal.kode_pajak;
+        let arah = "-";
+        let nilaiPajak = null;
+
+        if (kode.includes("PPN")) {
+            arah = tentukanArahPPN(jurnal);
+            nilaiPajak = dpp * CONFIG.TAX_RATES.PPN_EFEKTIF;
+            if (arah === "Keluaran") {
+                rekap.totalPPNKeluaran += nilaiPajak;
+            } else {
+                rekap.totalPPNMasukan += nilaiPajak;
+            }
+        } else if (kode.includes("PPH23")) {
+            arah = "Pemotongan 2%";
+            nilaiPajak = dpp * CONFIG.TAX_RATES.PPH23_JASA;
+            rekap.totalPPh23 += nilaiPajak;
+        } else if (kode.includes("PPH21")) {
+            arah = "Pemotongan (Lihat Payroll)";
+            rekap.totalDPPPh21 += dpp;
         }
 
-        jurnalPajak.forEach(jurnal => {
-            const dpp = parseFloat(jurnal.dpp_penjualan) || 0;
-            akumulasiDPP += dpp;
+        rekap.baris.push({ jurnal, dpp, arah, nilaiPajak });
+    });
 
-            if (jurnal.kode_pajak.includes("PPN")) {
-                akumulasiPPN += dpp * 0.11; // Estimasi PPN standar
-            } else if (jurnal.kode_pajak.includes("PPH")) {
-                akumulasiPPh += dpp * 0.02; // Estimasi rata-rata PPh pemotongan
-            }
+    return rekap;
+}
 
-            let tr = document.createElement('tr');
+function formatRupiah(angka) {
+    return "Rp " + Math.round(angka).toLocaleString('id-ID');
+}
+
+function isiFilterMasaPajak(daftarJurnal) {
+    const select = document.getElementById('filterMasaPajak');
+    if (!select) return;
+
+    const masaSet = new Set(daftarJurnal.map(j => (j.tanggal || '').slice(0, 7)).filter(Boolean));
+    const daftarMasa = Array.from(masaSet).sort().reverse();
+
+    const nilaiTerpilih = select.value || "SEMUA";
+    select.innerHTML = `<option value="SEMUA">Semua Periode</option>`;
+    daftarMasa.forEach(masa => {
+        const opt = document.createElement('option');
+        opt.value = masa;
+        opt.innerText = masa;
+        select.appendChild(opt);
+    });
+    select.value = daftarMasa.includes(nilaiTerpilih) ? nilaiTerpilih : "SEMUA";
+}
+
+function renderRekapPajak() {
+    const select = document.getElementById('filterMasaPajak');
+    const masaTerpilih = select ? select.value : "SEMUA";
+
+    const jurnalTersaring = masaTerpilih === "SEMUA"
+        ? SEMUA_JURNAL_PAJAK
+        : SEMUA_JURNAL_PAJAK.filter(j => (j.tanggal || '').slice(0, 7) === masaTerpilih);
+
+    const rekap = hitungRekapPajak(jurnalTersaring);
+    const kurangLebihBayar = rekap.totalPPNKeluaran - rekap.totalPPNMasukan;
+
+    const elKeluaran = document.getElementById('rekapPPNKeluaran');
+    const elMasukan = document.getElementById('rekapPPNMasukan');
+    const elKurangLebih = document.getElementById('rekapPPNKurangLebih');
+    const elPPh23 = document.getElementById('rekapPPh23');
+    const elDPPPh21 = document.getElementById('rekapDPPPh21');
+
+    if (elKeluaran) elKeluaran.innerText = formatRupiah(rekap.totalPPNKeluaran);
+    if (elMasukan) elMasukan.innerText = formatRupiah(rekap.totalPPNMasukan);
+    if (elPPh23) elPPh23.innerText = formatRupiah(rekap.totalPPh23);
+    if (elDPPPh21) elDPPPh21.innerText = formatRupiah(rekap.totalDPPPh21);
+
+    if (elKurangLebih) {
+        const label = kurangLebihBayar >= 0 ? "Kurang Bayar" : "Lebih Bayar";
+        elKurangLebih.innerText = formatRupiah(Math.abs(kurangLebihBayar)) + " (" + label + ")";
+        elKurangLebih.className = elKurangLebih.className.replace(/text-(red|green)-600/g, "").trim()
+            + " " + (kurangLebihBayar >= 0 ? "text-red-600" : "text-green-600");
+    }
+
+    const tbody = document.getElementById('tabelRekapPajak');
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    if (rekap.baris.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada transaksi berparameter pajak tercatat pada periode ini.</td></tr>`;
+        return;
+    }
+
+    // Kelompokkan baris per Masa Pajak (bulan) agar sesuai unit pelaporan SPT Masa
+    const kelompok = {};
+    rekap.baris.forEach(item => {
+        const masa = (item.jurnal.tanggal || '').slice(0, 7) || 'TANPA-TANGGAL';
+        if (!kelompok[masa]) kelompok[masa] = [];
+        kelompok[masa].push(item);
+    });
+
+    Object.keys(kelompok).sort().reverse().forEach(masa => {
+        const headerRow = document.createElement('tr');
+        headerRow.innerHTML = `<td colspan="6" class="p-2 bg-gray-100 font-bold text-gray-600 text-[11px] uppercase tracking-wide">Masa Pajak ${masa}</td>`;
+        tbody.appendChild(headerRow);
+
+        kelompok[masa].forEach(({ jurnal, dpp, arah, nilaiPajak }) => {
+            const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="p-3 font-bold text-indigo-700">${jurnal.id_jurnal}<div class="text-[11px] text-gray-400 font-normal">${jurnal.tanggal}</div></td>
                 <td class="p-3"><div class="font-medium text-gray-800">${jurnal.no_bukti}</div><div class="text-[11px] text-gray-500 truncate max-w-xs">${jurnal.keterangan || '-'}</div></td>
                 <td class="p-3"><span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 font-semibold rounded">${jurnal.kode_pajak}</span></td>
+                <td class="p-3 text-xs text-gray-600">${arah}</td>
                 <td class="p-3 text-right font-medium">${dpp === 0 ? '-' : dpp.toLocaleString('id-ID')}</td>
-                <td class="p-3 text-right font-bold text-gray-800">${jurnal.total_debit.toLocaleString('id-ID')}</td>
+                <td class="p-3 text-right font-bold text-gray-800">${nilaiPajak === null ? '-' : Math.round(nilaiPajak).toLocaleString('id-ID')}</td>
             `;
             tbody.appendChild(tr);
         });
+    });
+}
 
-        document.getElementById('rekapTotalDPP').innerText = "Rp " + akumulasiDPP.toLocaleString('id-ID');
-        document.getElementById('rekapTotalPPN').innerText = "Rp " + akumulasiPPN.toLocaleString('id-ID');
-        document.getElementById('rekapTotalPPh').innerText = "Rp " + akumulasiPPh.toLocaleString('id-ID');
+async function muatRekapPajak() {
+    try {
+        const semuaJurnal = await ambilSemuaJurnalPusat();
+        SEMUA_JURNAL_PAJAK = semuaJurnal.filter(j => j.kode_pajak && j.kode_pajak !== "NON");
 
+        isiFilterMasaPajak(SEMUA_JURNAL_PAJAK);
+
+        const select = document.getElementById('filterMasaPajak');
+        if (select) select.addEventListener('change', renderRekapPajak);
+
+        renderRekapPajak();
     } catch (error) {
         console.error("Gagal memuat rekapitulasi pajak:", error);
     }
