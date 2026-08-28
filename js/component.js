@@ -45,6 +45,110 @@ function ambilInisial(teks) {
     return (kata[0][0] + kata[1][0]).toUpperCase();
 }
 
+// ==================== Mode Tema "Elegant" (pilot, per-halaman) ====================
+// Halaman yang ingin memakai tampilan baru (minimalis, netral, mendukung dark
+// mode - terinspirasi Vercel/Claude.ai) cukup menandai <body data-tema="elegant">.
+// Halaman TANPA atribut ini akan tetap memakai tampilan sidebar/header lama
+// persis seperti sebelumnya - supaya rollout bisa bertahap per halaman tanpa
+// risiko mengubah tampilan halaman yang belum disetujui.
+
+function modeTemaElegantAktif() {
+    return document.body.dataset.tema === 'elegant';
+}
+
+window.toggleDarkMode = function() {
+    const html = document.documentElement;
+    if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        try { localStorage.setItem('erapee_tema', 'light'); } catch (e) {}
+    } else {
+        html.classList.add('dark');
+        try { localStorage.setItem('erapee_tema', 'dark'); } catch (e) {}
+    }
+    perbaruiIkonDarkMode();
+    window.dispatchEvent(new CustomEvent('erapee-tema-berubah'));
+};
+
+function perbaruiIkonDarkMode() {
+    const ikon = document.getElementById('ikonDarkMode');
+    if (!ikon) return;
+    ikon.innerText = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+}
+
+function bangunGroupsHtmlKlasik(menuGroups, userRole, currentFile) {
+    let groupsHtml = '';
+    menuGroups.forEach((group) => {
+        let itemsHtml = '';
+        let hasVisibleItem = false;
+
+        group.items.forEach(item => {
+            if (!item.roles.includes(userRole)) return;
+            hasVisibleItem = true;
+
+            const isActive = currentFile === item.href || currentFile === item.href + '.html';
+            const activeClass = isActive
+                ? 'bg-indigo-600 text-white font-medium shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900';
+
+            itemsHtml += `
+                <a href="/${item.href}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${activeClass} my-0.5">
+                    <span class="text-sm">${item.icon}</span>
+                    <span>${item.name}</span>
+                </a>
+            `;
+        });
+
+        if (!hasVisibleItem) return;
+
+        groupsHtml += `
+            <div class="mb-3">
+                <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">${group.groupName}</p>
+                <div class="space-y-0.5">
+                    ${itemsHtml}
+                </div>
+            </div>
+        `;
+    });
+    return groupsHtml;
+}
+
+function bangunGroupsHtmlElegant(menuGroups, userRole, currentFile) {
+    let groupsHtml = '';
+    menuGroups.forEach((group) => {
+        let itemsHtml = '';
+        let hasVisibleItem = false;
+
+        group.items.forEach(item => {
+            if (!item.roles.includes(userRole)) return;
+            hasVisibleItem = true;
+
+            const isActive = currentFile === item.href || currentFile === item.href + '.html';
+            const activeClass = isActive
+                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-medium'
+                : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100';
+
+            itemsHtml += `
+                <a href="/${item.href}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${activeClass} my-0.5">
+                    <span class="text-sm">${item.icon}</span>
+                    <span>${item.name}</span>
+                </a>
+            `;
+        });
+
+        if (!hasVisibleItem) return;
+
+        groupsHtml += `
+            <div class="mb-3">
+                <p class="px-3 text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">${group.groupName}</p>
+                <div class="space-y-0.5">
+                    ${itemsHtml}
+                </div>
+            </div>
+        `;
+    });
+    return groupsHtml;
+}
+
 async function muatSidebarAndBranding() {
     const sidebarContainer = document.getElementById('sidebar-container');
     if (!sidebarContainer) return;
@@ -127,44 +231,66 @@ async function muatSidebarAndBranding() {
         }
     ];
 
-    let groupsHtml = '';
-    menuGroups.forEach((group) => {
-        let itemsHtml = '';
-        let hasVisibleItem = false;
+    const modeElegant = modeTemaElegantAktif();
+    const isProfileActive = currentFile === 'profile';
 
-        group.items.forEach(item => {
-            if (!item.roles.includes(userRole)) return;
-            hasVisibleItem = true;
+    if (modeElegant) {
+        const groupsHtml = bangunGroupsHtmlElegant(menuGroups, userRole, currentFile);
 
-            const isActive = currentFile === item.href || currentFile === item.href + '.html';
-            const activeClass = isActive 
-                ? 'bg-indigo-600 text-white font-medium shadow-sm' 
-                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900';
+        const roleBadgeClass = userRole === "Super Admin" ? "text-amber-600 dark:text-amber-400 font-medium" : "text-zinc-600 dark:text-zinc-300";
+        const profileActiveClass = isProfileActive
+            ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100'
+            : 'bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900';
+        const profileTextClass = isProfileActive ? 'text-white dark:text-zinc-900' : 'text-zinc-900 dark:text-zinc-100';
+        const profileSubTextClass = isProfileActive ? 'text-zinc-300 dark:text-zinc-600' : 'text-zinc-400 dark:text-zinc-500';
+        const avatarActiveClass = isProfileActive ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100' : 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900';
+        const logoHtml = logoSrc
+            ? `<img src="${logoSrc}" alt="PT ERAPEE" class="h-10 w-auto max-w-[150px] object-contain object-left">`
+            : `<h1 class="font-semibold text-zinc-900 dark:text-zinc-100 text-base tracking-tight">PT ERAPEE</h1>`;
 
-            itemsHtml += `
-                <a href="/${item.href}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${activeClass} my-0.5">
-                    <span class="text-sm">${item.icon}</span>
-                    <span>${item.name}</span>
-                </a>
-            `;
-        });
+        sidebarContainer.innerHTML = `
+            <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/40 z-40 hidden md:hidden"></div>
+            <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
 
-        if (!hasVisibleItem) return;
-
-        groupsHtml += `
-            <div class="mb-3">
-                <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">${group.groupName}</p>
-                <div class="space-y-0.5">
-                    ${itemsHtml}
+                <div class="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-start justify-between">
+                    <div class="flex flex-col gap-3 overflow-hidden w-full">
+                        ${logoHtml}
+                        <div class="inline-flex items-center self-start px-2.5 py-1 rounded-md bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                            <span class="text-[9px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mr-1.5 font-medium">Role</span>
+                            <span class="text-[10px] ${roleBadgeClass} tracking-wide">${userRole}</span>
+                        </div>
+                    </div>
+                    <button onclick="toggleSidebar()" class="md:hidden text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 -mt-1 -mr-1">✕</button>
                 </div>
-            </div>
+
+                <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                    ${groupsHtml}
+                </nav>
+
+                <div class="p-3 border-t border-zinc-100 dark:border-zinc-800 space-y-2">
+                    <a href="/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all border ${profileActiveClass}">
+                        <div class="w-8 h-8 rounded-full ${avatarActiveClass} flex items-center justify-center text-[11px] font-medium shrink-0">
+                            ${inisialUser}
+                        </div>
+                        <div class="overflow-hidden">
+                            <p class="font-medium truncate ${profileTextClass}">${escapeHtml(namaTampilan)}</p>
+                            <p class="text-[10px] ${profileSubTextClass} truncate">Lihat Profil</p>
+                        </div>
+                    </a>
+                    <button onclick="prosesLogout()" class="w-full bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-2 border border-zinc-100 dark:border-zinc-800">
+                        Keluar Sistem
+                    </button>
+                </div>
+            </aside>
         `;
-    });
+        return;
+    }
+
+    const groupsHtml = bangunGroupsHtmlKlasik(menuGroups, userRole, currentFile);
 
     let roleBadgeClass = "text-indigo-600";
     if (userRole === "Super Admin") roleBadgeClass = "text-amber-500 font-bold";
 
-    const isProfileActive = currentFile === 'profile';
     const profileActiveClass = isProfileActive
         ? 'bg-indigo-600 border-indigo-600 text-white font-medium shadow-sm'
         : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100 hover:text-gray-900';
@@ -174,7 +300,7 @@ async function muatSidebarAndBranding() {
     const profileSubTextClass = isProfileActive ? 'text-indigo-200' : 'text-gray-400';
 
     // Perbesar ukuran logo dan pastikan posisinya rata kiri
-    let logoHtml = logoSrc 
+    let logoHtml = logoSrc
         ? `<img src="${logoSrc}" alt="PT ERAPEE" class="h-11 w-auto max-w-[160px] object-contain object-left transition-transform duration-300 hover:scale-105">`
         : `<h1 class="font-bold text-gray-900 text-base tracking-tight">PT ERAPEE</h1>`;
 
@@ -182,7 +308,7 @@ async function muatSidebarAndBranding() {
     sidebarContainer.innerHTML = `
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
         <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-            
+
             <!-- Area Header Sidebar yang Diperbarui -->
             <div class="p-5 border-b border-gray-100 flex items-start justify-between">
                 <div class="flex flex-col gap-3 overflow-hidden w-full">
@@ -194,11 +320,11 @@ async function muatSidebarAndBranding() {
                 </div>
                 <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-gray-600 -mt-1 -mr-1">✕</button>
             </div>
-            
+
             <nav class="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
                 ${groupsHtml}
             </nav>
-            
+
             <!-- Area Sesi & Profil di Bagian Bawah -->
             <div class="p-3 border-t border-gray-100 bg-gray-50 space-y-2">
                 <a href="/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all border ${profileActiveClass} hover:shadow-md">
@@ -224,6 +350,34 @@ function muatHeader() {
     let pageTitle = document.title.split('|')[0].trim();
     const currentUser = ambilUserAktif();
     const namaTampilan = currentUser.nama || currentUser.email;
+
+    if (modeTemaElegantAktif()) {
+        headerContainer.innerHTML = `
+            <header class="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="md:hidden text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">${pageTitle}</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="window.toggleDarkMode()" id="btnToggleDarkMode" class="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition" title="Ganti tema gelap/terang">
+                        <span id="ikonDarkMode">🌙</span>
+                    </button>
+                    <a href="/profile" class="hidden sm:inline text-xs text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium transition-colors cursor-pointer">
+                        ${escapeHtml(namaTampilan)}
+                    </a>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>Online
+                    </span>
+                </div>
+            </header>
+        `;
+        perbaruiIkonDarkMode();
+        return;
+    }
 
     headerContainer.innerHTML = `
         <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
