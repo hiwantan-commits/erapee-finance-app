@@ -1,6 +1,7 @@
 // js/master-page.js - Controller untuk master-data.html
 import { db } from "./config.js";
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { escapeHtml } from "./utils.js";
 
 // ==========================================
 // 1. MODUL MASTER DATA UNIT USAHA
@@ -30,9 +31,9 @@ async function muatUnitUsaha() {
             // Tambahkan atribut id baris agar mudah diberi efek highlight
             tbody.innerHTML += `
                 <tr id="row-unit-${docSnap.id}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="p-3"><span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-mono font-bold text-xs">${data.kode}</span></td>
-                    <td class="p-3 font-medium text-gray-800 text-sm">${data.nama}</td>
-                    <td class="p-3 text-gray-500 text-sm">${klasifikasiTeks}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-mono font-bold text-xs">${escapeHtml(data.kode)}</span></td>
+                    <td class="p-3 font-medium text-gray-800 text-sm">${escapeHtml(data.nama)}</td>
+                    <td class="p-3 text-gray-500 text-sm">${escapeHtml(klasifikasiTeks)}</td>
                     <td class="p-3 text-center">
                         <div class="flex justify-center items-center gap-2">
                             <button onclick="window.editUnitUsaha('${docSnap.id}', '${encKode}', '${encNama}', '${encKlas}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Edit</button>
@@ -127,8 +128,8 @@ async function muatCOA() {
             // Tambahkan atribut id baris COA
             tbody.innerHTML += `
                 <tr id="row-coa-${data.id}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="p-3"><span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-mono font-bold text-xs">${data.kode}</span></td>
-                    <td class="p-3 font-medium text-gray-800 text-sm">${data.nama}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-mono font-bold text-xs">${escapeHtml(data.kode)}</span></td>
+                    <td class="p-3 font-medium text-gray-800 text-sm">${escapeHtml(data.nama)}</td>
                     <td class="p-3 text-center">
                         <div class="flex justify-center items-center gap-2">
                             <button onclick="window.editCOA('${data.id}', '${encKode}', '${encNama}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Edit</button>

@@ -4,6 +4,7 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { CONFIG } from "./config.js";
 import { cekSesiLogin, ambilUserAktif } from "./auth.js";
+import { escapeHtml } from "./utils.js";
 
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -185,7 +186,7 @@ async function muatSidebarAndBranding() {
                     <span class="text-sm">👤</span>
                     <div class="overflow-hidden">
                         <p class="font-bold truncate">Profil Akun Saya</p>
-                        <p class="text-[10px] text-gray-400 truncate">${currentUser.email || ''}</p>
+                        <p class="text-[10px] text-gray-400 truncate">${escapeHtml(currentUser.email)}</p>
                     </div>
                 </a>
                 <button onclick="prosesLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold py-2 px-3 rounded-lg transition flex items-center justify-center gap-2">
@@ -214,7 +215,7 @@ function muatHeader() {
             </div>
             <div class="flex items-center gap-3">
                 <a href="/profile" class="hidden sm:inline text-xs text-indigo-600 hover:text-indigo-800 font-bold transition-colors cursor-pointer">
-                    ${currentUser.email || ''}
+                    ${escapeHtml(currentUser.email)}
                 </a>
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
                     ● Terhubung ke Firebase

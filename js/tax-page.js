@@ -2,6 +2,7 @@
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { klasifikasikanAkun } from "./accounting.js";
 import { CONFIG } from "./config.js";
+import { escapeHtml } from "./utils.js";
 
 let SEMUA_JURNAL_PAJAK = [];
 
@@ -124,15 +125,15 @@ function renderRekapPajak() {
 
     Object.keys(kelompok).sort().reverse().forEach(masa => {
         const headerRow = document.createElement('tr');
-        headerRow.innerHTML = `<td colspan="6" class="p-2 bg-gray-100 font-bold text-gray-600 text-[11px] uppercase tracking-wide">Masa Pajak ${masa}</td>`;
+        headerRow.innerHTML = `<td colspan="6" class="p-2 bg-gray-100 font-bold text-gray-600 text-[11px] uppercase tracking-wide">Masa Pajak ${escapeHtml(masa)}</td>`;
         tbody.appendChild(headerRow);
 
         kelompok[masa].forEach(({ jurnal, dpp, arah, nilaiPajak }) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="p-3 font-bold text-indigo-700">${jurnal.id_jurnal}<div class="text-[11px] text-gray-400 font-normal">${jurnal.tanggal}</div></td>
-                <td class="p-3"><div class="font-medium text-gray-800">${jurnal.no_bukti}</div><div class="text-[11px] text-gray-500 truncate max-w-xs">${jurnal.keterangan || '-'}</div></td>
-                <td class="p-3"><span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 font-semibold rounded">${jurnal.kode_pajak}</span></td>
+                <td class="p-3 font-bold text-indigo-700">${escapeHtml(jurnal.id_jurnal)}<div class="text-[11px] text-gray-400 font-normal">${escapeHtml(jurnal.tanggal)}</div></td>
+                <td class="p-3"><div class="font-medium text-gray-800">${escapeHtml(jurnal.no_bukti)}</div><div class="text-[11px] text-gray-500 truncate max-w-xs">${escapeHtml(jurnal.keterangan) || '-'}</div></td>
+                <td class="p-3"><span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 font-semibold rounded">${escapeHtml(jurnal.kode_pajak)}</span></td>
                 <td class="p-3 text-xs text-gray-600">${arah}</td>
                 <td class="p-3 text-right font-medium">${dpp === 0 ? '-' : dpp.toLocaleString('id-ID')}</td>
                 <td class="p-3 text-right font-bold text-gray-800">${nilaiPajak === null ? '-' : Math.round(nilaiPajak).toLocaleString('id-ID')}</td>

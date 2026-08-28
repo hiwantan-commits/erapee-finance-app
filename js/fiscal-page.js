@@ -1,5 +1,6 @@
 // js/fiscal-page.js - Controller untuk rekonsiliasi.html
 import { ambilSemuaJurnalPusat } from "./db.js";
+import { escapeHtml } from "./utils.js";
 
 async function muatDataRekonsiliasi() {
     try {
@@ -20,9 +21,9 @@ async function muatDataRekonsiliasi() {
 
                     rowsHTML += `
                         <tr>
-                            <td class="p-3 font-bold text-indigo-700">${jurnal.id_jurnal}<div class="text-[11px] text-gray-400 font-normal">${jurnal.tanggal}</div></td>
-                            <td class="p-3"><div class="font-medium text-gray-800">${jurnal.no_bukti}</div><div class="text-[11px] text-gray-500">${jurnal.lawan_transaksi || '-'}</div></td>
-                            <td class="p-3 text-gray-600 truncate max-w-xs">${baris.memo_baris || jurnal.keterangan || '-'}</td>
+                            <td class="p-3 font-bold text-indigo-700">${escapeHtml(jurnal.id_jurnal)}<div class="text-[11px] text-gray-400 font-normal">${escapeHtml(jurnal.tanggal)}</div></td>
+                            <td class="p-3"><div class="font-medium text-gray-800">${escapeHtml(jurnal.no_bukti)}</div><div class="text-[11px] text-gray-500">${escapeHtml(jurnal.lawan_transaksi) || '-'}</div></td>
+                            <td class="p-3 text-gray-600 truncate max-w-xs">${escapeHtml(baris.memo_baris) || escapeHtml(jurnal.keterangan) || '-'}</td>
                             <td class="p-3 text-right font-bold text-green-600">${debit === 0 ? '-' : debit.toLocaleString('id-ID')}</td>
                             <td class="p-3 text-right font-bold text-red-600">${kredit === 0 ? '-' : kredit.toLocaleString('id-ID')}</td>
                         </tr>

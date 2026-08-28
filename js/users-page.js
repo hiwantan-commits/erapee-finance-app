@@ -1,6 +1,7 @@
 // js/users-page.js - Controller untuk users.html (Manajemen Pengguna oleh Super Admin)
 import { db } from "./config.js";
 import { collection, getDocs, setDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { escapeHtml } from "./utils.js";
 
 async function muatDaftarPengguna() {
     const tbody = document.getElementById('tabelPengguna');
@@ -30,12 +31,14 @@ async function muatDaftarPengguna() {
 
             let tr = document.createElement('tr');
             tr.className = "hover:bg-gray-50 border-b border-gray-50";
+            const encId = encodeURIComponent(user.id || '');
+            const encEmail = encodeURIComponent(user.email || '');
             tr.innerHTML = `
                 <td class="p-4 text-center font-medium text-gray-500">${index + 1}</td>
-                <td class="p-4 font-bold text-gray-800">${user.email}</td>
-                <td class="p-4"><span class="px-3 py-1 rounded-lg text-xs font-bold ${warnaBadge}">${user.role}</span></td>
+                <td class="p-4 font-bold text-gray-800">${escapeHtml(user.email)}</td>
+                <td class="p-4"><span class="px-3 py-1 rounded-lg text-xs font-bold ${warnaBadge}">${escapeHtml(user.role)}</span></td>
                 <td class="p-4 text-center">
-                    <button onclick="hapusPengguna('${user.id}', '${user.email}')" class="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100 font-bold text-xs transition">🗑️ Cabut Akses</button>
+                    <button onclick="hapusPengguna('${encId}', '${encEmail}')" class="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100 font-bold text-xs transition">🗑️ Cabut Akses</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -93,7 +96,9 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 // Fungsi global untuk tombol hapus
-window.hapusPengguna = async function(docId, email) {
+window.hapusPengguna = async function(encDocId, encEmail) {
+    const docId = decodeURIComponent(encDocId);
+    const email = decodeURIComponent(encEmail);
     if (confirm(`Apakah Anda yakin ingin mencabut seluruh hak akses untuk email: ${email}? \n(Pengguna ini akan menjadi 'Guest' dan tidak bisa mengakses menu internal)`)) {
         try {
             await deleteDoc(doc(db, "users", docId));

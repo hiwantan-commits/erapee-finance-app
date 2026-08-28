@@ -1,6 +1,7 @@
 // js/history-page.js - Controller untuk histori.html
 import { db } from "./config.js";
 import { collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { escapeHtml } from "./utils.js";
 
 async function muatHistoriAktivitas() {
     const tbody = document.getElementById('tabelHistori');
@@ -37,11 +38,11 @@ async function muatHistoriAktivitas() {
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="p-3 font-mono text-xs text-gray-500">${formatWaktu}</td>
-                <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[11px] ${warnaBadge}">${log.aksi || 'AKTIVITAS'}</span></td>
-                <td class="p-3 font-semibold text-indigo-700">${log.id_jurnal || '-'}</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[11px] ${warnaBadge}">${escapeHtml(log.aksi) || 'AKTIVITAS'}</span></td>
+                <td class="p-3 font-semibold text-indigo-700">${escapeHtml(log.id_jurnal) || '-'}</td>
                 <td class="p-3 text-gray-700">
-                    <div>${log.keterangan || '-'}</div>
-                    <div class="text-[11px] text-gray-400 mt-0.5">Oleh: ${log.user || 'System'}</div>
+                    <div>${escapeHtml(log.keterangan) || '-'}</div>
+                    <div class="text-[11px] text-gray-400 mt-0.5">Oleh: ${escapeHtml(log.user) || 'System'}</div>
                 </td>
             `;
             tbody.appendChild(tr);
