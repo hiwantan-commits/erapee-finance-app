@@ -86,7 +86,7 @@ function inisialisasiForm() {
                 console.error("Gagal menyimpan:", err);
                 tampilkanNotif(notif, "❌ Gagal menyimpan: " + err.message, "red");
                 btn.disabled = false;
-                btn.innerText = "💾 Simpan & Terapkan Perubahan";
+                btn.innerText = "Simpan & Terapkan Perubahan";
             }
         });
     }
@@ -126,11 +126,15 @@ async function muatPengaturanBrandingSaatIni() {
 
 function tampilkanNotif(el, text, color) {
     if (!el) return;
-    el.classList.remove("hidden", "bg-red-50", "text-red-700", "border-red-200", "bg-green-50", "text-green-700", "border-green-200");
+    el.classList.remove(
+        "hidden",
+        "bg-red-50", "dark:bg-red-900/20", "text-red-700", "dark:text-red-400", "border-red-200", "dark:border-red-800",
+        "bg-emerald-50", "dark:bg-emerald-900/20", "text-emerald-700", "dark:text-emerald-400", "border-emerald-200", "dark:border-emerald-800"
+    );
     el.innerText = text;
     if (color === "red") {
-        el.classList.add("bg-red-50", "text-red-700", "border-red-200");
+        el.classList.add("bg-red-50", "dark:bg-red-900/20", "text-red-700", "dark:text-red-400", "border-red-200", "dark:border-red-800");
     } else {
-        el.classList.add("bg-green-50", "text-green-700", "border-green-200");
+        el.classList.add("bg-emerald-50", "dark:bg-emerald-900/20", "text-emerald-700", "dark:text-emerald-400", "border-emerald-200", "dark:border-emerald-800");
     }
 }
