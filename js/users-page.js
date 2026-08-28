@@ -71,10 +71,12 @@ document.addEventListener("DOMContentLoaded", function() {
             btnSubmit.innerText = "Menyimpan...";
 
             try {
-                // Menggunakan email sebagai Document ID agar unik dan mudah dicari
-                const docId = emailInput.replace(/[@.]/g, "_");
-                const userRef = doc(db, "users", docId);
-                
+                // Menggunakan email MENTAH (bukan versi sanitasi) sebagai Document ID,
+                // agar cocok dengan pencarian role saat login (lihat login-page.js) dan
+                // agar Firestore Security Rules bisa memverifikasi role lewat
+                // request.auth.token.email tanpa perlu memanipulasi string.
+                const userRef = doc(db, "users", emailInput);
+
                 await setDoc(userRef, {
                     email: emailInput,
                     role: roleInput,
