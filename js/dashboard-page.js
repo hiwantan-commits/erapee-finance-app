@@ -225,30 +225,57 @@ async function muatDashboard() {
         }
 
         // 7. Render Grafik Chart.js
-        const canvasElement = document.getElementById('grafikKinerja');
-        if (canvasElement && window.Chart) {
-            const ctx = canvasElement.getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-                    datasets: [
-                        { label: 'Pendapatan (Rp)', data: arrayPendapatanChart, backgroundColor: 'rgba(99, 102, 241, 0.8)', borderRadius: 6 },
-                        { label: 'Keuntungan / Laba (Rp)', data: arrayLabaChart, backgroundColor: 'rgba(34, 197, 94, 0.8)', borderRadius: 6 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
-                    scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
-                }
-            });
-        }
+        DATA_CHART_TERKINI = { arrayPendapatanChart, arrayLabaChart };
+        renderGrafikKinerja();
 
     } catch (error) {
         console.error("Gagal memuat dashboard:", error);
     }
 }
+
+// Data grafik disimpan agar bisa di-render ulang dengan warna yang sesuai
+// saat pengguna mengganti tema gelap/terang (lihat listener di bawah),
+// tanpa perlu mengambil ulang data dari Firestore.
+let CHART_KINERJA_INSTANCE = null;
+let DATA_CHART_TERKINI = null;
+
+function renderGrafikKinerja() {
+    const canvasElement = document.getElementById('grafikKinerja');
+    if (!canvasElement || !window.Chart || !DATA_CHART_TERKINI) return;
+
+    const modeGelap = document.documentElement.classList.contains('dark');
+    const warnaGrid = modeGelap ? 'rgba(255, 255, 255, 0.08)' : '#f3f4f6';
+    const warnaLabel = modeGelap ? '#a1a1aa' : '#6b7280';
+
+    if (CHART_KINERJA_INSTANCE) {
+        CHART_KINERJA_INSTANCE.destroy();
+        CHART_KINERJA_INSTANCE = null;
+    }
+
+    const ctx = canvasElement.getContext('2d');
+    CHART_KINERJA_INSTANCE = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+            datasets: [
+                { label: 'Pendapatan (Rp)', data: DATA_CHART_TERKINI.arrayPendapatanChart, backgroundColor: 'rgba(99, 102, 241, 0.8)', borderRadius: 6 },
+                { label: 'Keuntungan / Laba (Rp)', data: DATA_CHART_TERKINI.arrayLabaChart, backgroundColor: 'rgba(34, 197, 94, 0.8)', borderRadius: 6 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 }, color: warnaLabel } } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: warnaGrid }, ticks: { color: warnaLabel } },
+                x: { grid: { display: false }, ticks: { color: warnaLabel } }
+            }
+        }
+    });
+}
+
+// Render ulang grafik dengan warna yang sesuai saat tema gelap/terang diganti
+// lewat tombol di header (lihat component.js -> window.toggleDarkMode).
+window.addEventListener('erapee-tema-berubah', renderGrafikKinerja);
 
 muatDashboard();
