@@ -22,6 +22,10 @@
                 color: #1c1917 !important;
                 border-color: #e7e5e4 !important;
             }
+            /* Neraca & Laba Rugi versi cetak berjenjang - masing-masing
+               dimulai di halaman baru, gaya laporan akuntansi konvensional. */
+            .laporan-cetak-berjenjang { break-before: page; }
+            .laporan-cetak-berjenjang tr { break-inside: avoid; }
         }
     </style>
 </head>
@@ -122,7 +126,7 @@
                 </div>
 
                 <!-- Neraca (Laporan Posisi Keuangan) -->
-                <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-6">
+                <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-6 print:hidden">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6">
                         <div>
                             <h2 class="h-elegant-3 text-stone-900 dark:text-stone-50">Neraca (Laporan Posisi Keuangan)</h2>
@@ -166,6 +170,44 @@
                         transaksi pertama, bukan direset per tahun buku. Total Laba Kumulatif saat ini:
                         <span id="neracaLabaKumulatif" class="font-semibold text-stone-600 dark:text-stone-300">Rp 0</span>.
                     </p>
+                </div>
+
+                <!-- Cetakan Neraca berjenjang (hanya tampil saat dicetak) -->
+                <div class="hidden print:block laporan-cetak-berjenjang">
+                    <div class="text-center mb-6">
+                        <h1 class="text-base font-bold text-gray-900">PT ERAPEE Anugrah Sejahtera</h1>
+                        <h2 class="text-base font-bold text-gray-900 mt-1">Laporan Neraca (BS)</h2>
+                        <p class="text-sm text-gray-700 mt-1" id="cetakPeriodeNeracaBerjenjang">Per tanggal cetak</p>
+                        <p class="text-sm text-gray-700">Klasifikasi: Semua</p>
+                    </div>
+                    <table class="w-full text-sm border-collapse">
+                        <thead>
+                            <tr class="border-b-2 border-gray-800">
+                                <th class="text-left py-2 font-bold">Akun</th>
+                                <th class="text-right py-2 font-bold" id="cetakTanggalNeracaBerjenjang">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelCetakNeracaBerjenjang"></tbody>
+                    </table>
+                </div>
+
+                <!-- Cetakan Laba Rugi berjenjang (hanya tampil saat dicetak) -->
+                <div class="hidden print:block laporan-cetak-berjenjang">
+                    <div class="text-center mb-6">
+                        <h1 class="text-base font-bold text-gray-900">PT ERAPEE Anugrah Sejahtera</h1>
+                        <h2 class="text-base font-bold text-gray-900 mt-1">Laporan Laba Rugi (PL)</h2>
+                        <p class="text-sm text-gray-700 mt-1" id="cetakPeriodeLabaRugiBerjenjang">Semua Periode</p>
+                        <p class="text-sm text-gray-700">Klasifikasi: Semua</p>
+                    </div>
+                    <table class="w-full text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 border-b border-gray-800">
+                                <th class="text-left py-2 px-2 font-bold">Akun</th>
+                                <th class="text-right py-2 px-2 font-bold" id="cetakTanggalLabaRugiBerjenjang">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelCetakLabaRugiBerjenjang"></tbody>
+                    </table>
                 </div>
             </main>
         </div>

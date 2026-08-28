@@ -1,6 +1,6 @@
 // js/reports-page.js - Controller untuk laporan.html
 import { ambilSemuaJurnalPusat } from "./db.js";
-import { kalkulasiLaporanKeuangan, kalkulasiNeraca } from "./accounting.js";
+import { kalkulasiLaporanKeuangan, kalkulasiNeraca, susunStrukturNeraca, susunStrukturLabaRugi } from "./accounting.js";
 import { db } from "./config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { escapeHtml, amankanSelCsv, unduhCsv } from "./utils.js";
@@ -22,6 +22,28 @@ function renderBarisNeraca(tbody, daftarAkun, warnaKode) {
             <td class="p-2 text-xs text-right font-medium text-stone-800 dark:text-stone-200">${acc.saldo === 0 ? '-' : acc.saldo.toLocaleString('id-ID')}</td>
         </tr>
     `).join('');
+}
+
+// ==================== Cetakan Berjenjang (Neraca & Laba Rugi) ====================
+// Versi cetak bergaya laporan akuntansi konvensional (Kelas > Sub-Kelas >
+// Akun dengan subtotal per level), terpisah dari kartu ringkasan di layar -
+// lihat susunStrukturNeraca()/susunStrukturLabaRugi() di accounting.js untuk
+// penjelasan keterbatasan kedalaman berjenjangnya.
+function renderKelasBerjenjangHtml(kelas, labelTotal, formatAngka) {
+    let html = `<tr><td colspan="2" class="pt-4 pb-1 font-bold">${kelas.nomor} - ${escapeHtml(kelas.label)}</td></tr>`;
+    kelas.subKelas.forEach(sub => {
+        html += `<tr><td class="pl-4 py-1 font-bold">${sub.nomor} - ${escapeHtml(sub.label)}</td><td class="text-right py-1 font-bold">${formatAngka(sub.subtotal)}</td></tr>`;
+        sub.akun.forEach(akun => {
+            html += `<tr><td class="pl-8 py-0.5">${akun.nomorTampil} - ${escapeHtml(akun.nama)}</td><td class="text-right py-0.5">${formatAngka(akun.saldo)}</td></tr>`;
+        });
+    });
+    html += `
+        <tr class="border-t border-gray-400">
+            <td class="text-right font-bold pt-2 pb-4">${labelTotal}</td>
+            <td class="text-right font-bold pt-2 pb-4">${formatAngka(kelas.total)}</td>
+        </tr>
+    `;
+    return html;
 }
 
 // Neraca SELALU dihitung dari seluruh transaksi (kumulatif), tidak ikut
@@ -84,6 +106,30 @@ function muatNeraca() {
             </tr>
         `;
         tbodyLiabilitasEkuitas.innerHTML = html;
+    }
+
+    // Versi cetak berjenjang (lihat blok "Cetakan Berjenjang" di atas)
+    const tbodyCetak = document.getElementById('tabelCetakNeracaBerjenjang');
+    if (tbodyCetak) {
+        const struktur = susunStrukturNeraca(neraca);
+        const tglCetak = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+
+        const elTglHeader = document.getElementById('cetakTanggalNeracaBerjenjang');
+        if (elTglHeader) elTglHeader.innerText = tglCetak;
+        const elPeriode = document.getElementById('cetakPeriodeNeracaBerjenjang');
+        if (elPeriode) elPeriode.innerText = `Per tanggal ${tglCetak}`;
+
+        let htmlCetak = '';
+        htmlCetak += renderKelasBerjenjangHtml(struktur.aset, 'TOTAL ASET', struktur.formatAngkaLaporan);
+        htmlCetak += renderKelasBerjenjangHtml(struktur.liabilitas, 'TOTAL KEWAJIBAN', struktur.formatAngkaLaporan);
+        htmlCetak += renderKelasBerjenjangHtml(struktur.ekuitas, 'TOTAL EKUITAS', struktur.formatAngkaLaporan);
+        htmlCetak += `
+            <tr class="border-t-2 border-gray-800">
+                <td class="text-right font-bold pt-3">TOTAL KEWAJIBAN DAN MODAL</td>
+                <td class="text-right font-bold pt-3">${struktur.formatAngkaLaporan(neraca.totalLiabilitas + neraca.totalEkuitas)}</td>
+            </tr>
+        `;
+        tbodyCetak.innerHTML = htmlCetak;
     }
 }
 
@@ -194,6 +240,37 @@ function renderLabaRugiDanTrialBalance() {
                 </div>
             `;
         }).join('');
+    }
+
+    // Versi cetak berjenjang (lihat blok "Cetakan Berjenjang" di atas). Ikut
+    // filter periode yang sama dengan tampilan layar, karena Laba Rugi
+    // (berbeda dengan Neraca) memang laporan per periode.
+    const tbodyCetakLR = document.getElementById('tabelCetakLabaRugiBerjenjang');
+    if (tbodyCetakLR) {
+        const strukturLR = susunStrukturLabaRugi(hasil);
+
+        const elPeriodeLR = document.getElementById('cetakPeriodeLabaRugiBerjenjang');
+        if (elPeriodeLR) elPeriodeLR.innerText = labelPeriode;
+        const elTglLR = document.getElementById('cetakTanggalLabaRugiBerjenjang');
+        if (elTglLR) elTglLR.innerText = labelPeriode;
+
+        let htmlCetakLR = '';
+        htmlCetakLR += renderKelasBerjenjangHtml(strukturLR.pendapatan, 'TOTAL PENDAPATAN', strukturLR.formatAngkaLaporan);
+        htmlCetakLR += renderKelasBerjenjangHtml(strukturLR.hpp, 'TOTAL HARGA POKOK PENJUALAN', strukturLR.formatAngkaLaporan);
+        htmlCetakLR += `
+            <tr class="bg-gray-100">
+                <td class="text-right font-bold py-2">LABA KOTOR</td>
+                <td class="text-right font-bold py-2">${strukturLR.formatAngkaLaporan(strukturLR.labaKotor)}</td>
+            </tr>
+        `;
+        htmlCetakLR += renderKelasBerjenjangHtml(strukturLR.beban, 'TOTAL BEBAN', strukturLR.formatAngkaLaporan);
+        htmlCetakLR += `
+            <tr class="bg-gray-200 border-t-2 border-gray-800">
+                <td class="text-right font-bold py-2">LABA/RUGI BERSIH</td>
+                <td class="text-right font-bold py-2">${strukturLR.formatAngkaLaporan(strukturLR.labaBersih)}</td>
+            </tr>
+        `;
+        tbodyCetakLR.innerHTML = htmlCetakLR;
     }
 }
 
