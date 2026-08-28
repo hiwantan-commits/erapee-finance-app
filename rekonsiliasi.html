@@ -4,17 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Arus Kas | PT ERAPEE Anugrah Sejahtera</title>
+    <!-- Inisialisasi tema (terpusat di js/tema-*.js, lihat komentar di file
+         tersebut - supaya perubahan logika tema cukup di satu tempat) -->
+    <script src="js/tema-fouc-init.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tema-tailwind-config.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>body.auth-pending { visibility: hidden; }</style>
     <style>
         @media print {
             thead { display: table-header-group; }
-            tr, .dashboard-card { break-inside: avoid; }
+            tr, .laporan-card { break-inside: avoid; }
+            /* Cetakan harus selalu terang & terbaca di atas kertas, terlepas
+               dari mode gelap yang sedang aktif di layar. */
+            body, .laporan-card, table, thead, tbody, tr, td, th {
+                background-color: #ffffff !important;
+                color: #1c1917 !important;
+                border-color: #e7e5e4 !important;
+            }
         }
     </style>
 </head>
-<body class="text-gray-800 bg-gray-50 auth-pending">
+<body data-tema="elegant" class="text-stone-900 dark:text-stone-100 bg-stone-50 dark:bg-stone-950 auth-pending">
     <div class="flex h-screen overflow-hidden print:h-auto print:overflow-visible">
         <!-- SIDEBAR -->
         <div id="sidebar-container" class="print:hidden"></div>
@@ -37,64 +48,66 @@
                     <p class="text-xs text-gray-600">Periode: <span id="cetakPeriodeArusKas">Semua Periode</span></p>
                 </div>
 
-                <!-- Header Rekonsiliasi -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
+                <!-- Header Rekonsiliasi (polos di atas latar, tanpa bingkai kartu) -->
+                <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-800">Laporan Arus Kas</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Klasifikasi mutasi kas/bank per Aktivitas Operasi, Investasi & Pendanaan (estimasi berbasis kode akun)</p>
+                        <h1 class="h-elegant-2 text-stone-900 dark:text-stone-50">Laporan Arus Kas</h1>
+                        <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Klasifikasi mutasi kas/bank per Aktivitas Operasi, Investasi & Pendanaan (estimasi berbasis kode akun)</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <select id="filterMasaArusKas" class="form-input-custom text-xs font-semibold py-2">
+                        <select id="filterMasaArusKas" class="form-input-elegant text-xs font-semibold py-2">
                             <option value="SEMUA">Semua Periode</option>
                         </select>
-                        <button onclick="window.eksporArusKasKeCsv()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm whitespace-nowrap flex items-center gap-2">
-                            <span>📥</span><span>Ekspor CSV</span>
+                        <button onclick="window.eksporArusKasKeCsv()" class="btn-elegant-secondary">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                            Ekspor CSV
                         </button>
-                        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm whitespace-nowrap flex items-center gap-2">
-                            <span>🖨️</span><span>Cetak Laporan</span>
+                        <button onclick="window.print()" class="btn-elegant-primary">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8"/><path d="M6 17H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2"/></svg>
+                            Cetak Laporan
                         </button>
                     </div>
                 </div>
 
                 <!-- Kartu Ringkasan Arus Kas -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Aktivitas Operasi</p>
-                        <h3 class="text-xl font-bold text-blue-600 mt-2" id="arusKasOperasi">Rp 0</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                        <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Aktivitas Operasi</p>
+                        <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-50 mt-2" id="arusKasOperasi">Rp 0</h3>
                     </div>
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Aktivitas Investasi</p>
-                        <h3 class="text-xl font-bold text-amber-600 mt-2" id="arusKasInvestasi">Rp 0</h3>
+                    <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                        <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Aktivitas Investasi</p>
+                        <h3 class="text-xl font-semibold text-amber-600 dark:text-amber-400 mt-2" id="arusKasInvestasi">Rp 0</h3>
                     </div>
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Aktivitas Pendanaan</p>
-                        <h3 class="text-xl font-bold text-purple-600 mt-2" id="arusKasPendanaan">Rp 0</h3>
+                    <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                        <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Aktivitas Pendanaan</p>
+                        <h3 class="text-xl font-semibold text-[#D97757] mt-2" id="arusKasPendanaan">Rp 0</h3>
                     </div>
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Kenaikan/Penurunan Kas Bersih</p>
-                        <h3 class="text-xl font-bold text-indigo-600 mt-2" id="arusKasBersih">Rp 0</h3>
+                    <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                        <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Kenaikan/Penurunan Kas Bersih</p>
+                        <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-50 mt-2" id="arusKasBersih">Rp 0</h3>
                     </div>
                 </div>
 
                 <!-- Tabel Mutasi Kas -->
-                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-gray-800 text-base mb-4">Mutasi Akun Kas & Bank (Kepala 11)</h3>
+                <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                    <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-4">Mutasi Akun Kas & Bank (Kepala 11)</h3>
 
                     <!-- Tabel (layar md ke atas, dan selalu dipakai saat dicetak) -->
                     <div class="hidden md:block print:block overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-3">ID Jurnal & Tanggal</th>
-                                    <th class="p-3">No. Bukti / Lawan Transaksi</th>
-                                    <th class="p-3">Keterangan</th>
-                                    <th class="p-3">Kategori</th>
-                                    <th class="p-3 text-right">Net Kas (Rp)</th>
+                                <tr class="text-stone-400 dark:text-stone-500 text-xs normal-case tracking-normal border-b border-stone-100 dark:border-stone-800">
+                                    <th class="p-3 font-medium">ID Jurnal & Tanggal</th>
+                                    <th class="p-3 font-medium">No. Bukti / Lawan Transaksi</th>
+                                    <th class="p-3 font-medium">Keterangan</th>
+                                    <th class="p-3 font-medium">Kategori</th>
+                                    <th class="p-3 text-right font-medium">Net Kas (Rp)</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelRekonsiliasi" class="divide-y divide-gray-100 text-xs">
+                            <tbody id="tabelRekonsiliasi" class="divide-y divide-stone-100 dark:divide-stone-800 text-xs">
                                 <tr>
-                                    <td colspan="5" class="p-8 text-center text-gray-400">Memuat data arus kas dari pusat database...</td>
+                                    <td colspan="5" class="p-8 text-center text-stone-400 dark:text-stone-500">Memuat data arus kas dari pusat database...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -102,7 +115,7 @@
 
                     <!-- Tampilan kartu untuk layar sempit (disembunyikan saat dicetak) -->
                     <div id="kartuRekonsiliasi" class="md:hidden print:hidden space-y-3">
-                        <p class="p-8 text-center text-gray-400 text-sm">Memuat data arus kas dari pusat database...</p>
+                        <p class="p-8 text-center text-stone-400 dark:text-stone-500 text-sm">Memuat data arus kas dari pusat database...</p>
                     </div>
                 </div>
             </main>
