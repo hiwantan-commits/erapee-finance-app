@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Baru | PT ERAPEE Anugrah Sejahtera</title>
+    <!-- Inisialisasi tema (terpusat di js/tema-*.js, lihat komentar di file
+         tersebut - supaya perubahan logika tema cukup di satu tempat) -->
+    <script src="js/tema-fouc-init.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tema-tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>body.auth-pending { visibility: hidden; }</style>
+    <style>
+        @media print {
+            thead { display: table-header-group; }
+            tr { break-inside: avoid; }
+            /* Cetakan harus selalu terang & terbaca di atas kertas, terlepas
+               dari mode gelap yang sedang aktif di layar. */
+            body, table, thead, tbody, tr, td, th {
+                background-color: #ffffff !important;
+                color: #1c1917 !important;
+                border-color: #e7e5e4 !important;
+            }
+        }
+    </style>
+</head>
+<body data-tema="elegant" class="text-stone-900 dark:text-stone-100 bg-stone-50 dark:bg-stone-950 auth-pending">
+    <div class="flex h-screen overflow-hidden print:h-auto print:overflow-visible">
+        <!-- SIDEBAR -->
+        <div id="sidebar-container" class="print:hidden"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-h-0 overflow-y-auto md:ml-64 print:ml-0 print:overflow-visible">
+            <div id="header-container" class="print:hidden"></div>
+
+            <main class="p-4 md:p-8 max-w-5xl mx-auto w-full print:p-0 print:max-w-full">
+                <!-- Header Form (polos di atas latar, tanpa bingkai kartu) -->
+                <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
+                    <div>
+                        <h1 id="judulForm" class="h-elegant-2 text-stone-900 dark:text-stone-50">Buat Invoice Baru</h1>
+                        <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Dokumen penjualan berdiri sendiri - tidak tercatat otomatis sebagai jurnal akuntansi</p>
+                    </div>
+                    <button type="button" id="btnCetakInvoice" onclick="window.print()" class="hidden btn-elegant-secondary">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8"/><path d="M6 17H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2"/></svg>
+                        Cetak Invoice & Kwitansi
+                    </button>
+                </div>
+
+                <form id="formInvoice" class="space-y-6 print:hidden">
+                    <input type="hidden" id="editIdInvoice" value="">
+
+                    <!-- Informasi Header Invoice -->
+                    <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-5 border-b border-stone-100 dark:border-stone-800 pb-4">Informasi Header</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">No. Invoice (Otomatis)</label>
+                                <input type="text" id="noInvoice" class="form-input-elegant opacity-70 cursor-not-allowed font-mono text-xs" readonly>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">No. Kwitansi (Otomatis)</label>
+                                <input type="text" id="noKwitansi" class="form-input-elegant opacity-70 cursor-not-allowed font-mono text-xs" readonly>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Tanggal</label>
+                                <input type="date" id="tanggalInvoice" class="form-input-elegant text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Mata Uang</label>
+                                <input type="text" id="mataUang" value="IDR" class="form-input-elegant text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">No. PO (Opsional)</label>
+                                <input type="text" id="noPo" placeholder="PO-0001/01/2026" class="form-input-elegant text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Tgl PO (Opsional)</label>
+                                <input type="date" id="tglPo" class="form-input-elegant text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Tgl Jatuh Tempo</label>
+                                <input type="date" id="tglJatuhTempo" class="form-input-elegant text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Pelanggan -->
+                    <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-5 border-b border-stone-100 dark:border-stone-800 pb-4">Data Pelanggan</h3>
+                        <div class="grid grid-cols-1 gap-5">
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Nama Pelanggan</label>
+                                <input type="text" id="namaPelanggan" placeholder="PT Nama Pelanggan" class="form-input-elegant text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Alamat Pelanggan</label>
+                                <textarea id="alamatPelanggan" rows="2" placeholder="Jl. Contoh No. 1, Kota" class="form-input-elegant text-sm"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">No. Surat Jalan (Opsional, satu baris per nomor)</label>
+                                <textarea id="noSuratJalan" rows="2" placeholder="SJ/001/01/2026  01/01/2026" class="form-input-elegant text-sm font-mono"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rincian Barang / Jasa -->
+                    <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm overflow-x-auto">
+                        <div class="flex justify-between items-center mb-5 border-b border-stone-100 dark:border-stone-800 pb-4 min-w-[700px]">
+                            <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50">Rincian Barang / Jasa</h3>
+                            <button type="button" onclick="tambahBarisInvoice()" class="btn-elegant-secondary text-xs py-1.5 px-3">
+                                + Tambah Barang
+                            </button>
+                        </div>
+                        <table class="w-full text-left text-sm min-w-[700px]">
+                            <thead>
+                                <tr class="text-stone-400 dark:text-stone-500 text-xs normal-case tracking-normal border-b border-stone-100 dark:border-stone-800">
+                                    <th class="p-3 w-1/3 font-medium">Nama Barang</th>
+                                    <th class="p-3 font-medium">Satuan</th>
+                                    <th class="p-3 text-right font-medium">Kuantum</th>
+                                    <th class="p-3 text-right font-medium">Harga Satuan</th>
+                                    <th class="p-3 text-right font-medium">Jumlah</th>
+                                    <th class="p-3 w-16 text-center font-medium">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyInvoice" class="divide-y divide-stone-100 dark:divide-stone-800">
+                                <!-- Baris Barang Dinamis -->
+                            </tbody>
+                        </table>
+
+                        <div class="flex justify-end mt-6">
+                            <div class="w-full max-w-xs space-y-3">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-stone-500 dark:text-stone-400">Sub Total</span>
+                                    <span class="font-semibold text-stone-800 dark:text-stone-200" id="valSubTotal">0</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-3">
+                                    <label class="text-sm text-stone-500 dark:text-stone-400 shrink-0">Discount</label>
+                                    <input type="number" id="inputDiscount" value="0" min="0" step="any" oninput="hitungTotalInvoice()" class="form-input-elegant text-sm text-right py-1.5">
+                                </div>
+                                <div class="flex justify-between items-center text-sm border-t border-stone-100 dark:border-stone-800 pt-3">
+                                    <span class="text-stone-500 dark:text-stone-400">Total</span>
+                                    <span class="font-semibold text-stone-800 dark:text-stone-200" id="valTotal">0</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-3">
+                                    <label class="text-sm text-stone-500 dark:text-stone-400 shrink-0">PPN (%)</label>
+                                    <input type="number" id="inputPersenPpn" value="11" min="0" step="any" oninput="hitungTotalInvoice()" class="form-input-elegant text-sm text-right py-1.5">
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-stone-500 dark:text-stone-400">PPN</span>
+                                    <span class="font-semibold text-stone-800 dark:text-stone-200" id="valPpn">0</span>
+                                </div>
+                                <div class="flex justify-between items-center border-t border-stone-200 dark:border-stone-700 pt-3">
+                                    <span class="font-semibold text-stone-900 dark:text-stone-50">Grand Total</span>
+                                    <span class="text-lg font-semibold text-stone-900 dark:text-stone-50" id="valGrandTotal">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informasi Pembayaran & Penandatangan -->
+                    <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-5 border-b border-stone-100 dark:border-stone-800 pb-4">Informasi Pembayaran & Penandatangan</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Informasi Rekening Pembayaran (Opsional)</label>
+                                <textarea id="infoRekening" rows="3" placeholder="Bank BCA Cab. Sudirman&#10;No. Rekening: 000-0000000&#10;Atas Nama PT ERAPEE Anugrah Sejahtera" class="form-input-elegant text-sm"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Nama Penandatangan</label>
+                                <input type="text" id="namaPenandatangan" placeholder="Nama Lengkap" class="form-input-elegant text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Jabatan Penandatangan</label>
+                                <input type="text" id="jabatanPenandatangan" placeholder="Manager Accounting" class="form-input-elegant text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="submit" id="btnSimpanInvoice" class="btn-elegant-primary">
+                            Simpan Invoice
+                        </button>
+                        <a href="/invoice" class="btn-elegant-secondary">Batal</a>
+                    </div>
+                </form>
+
+                <div id="alertSuccessInvoice" class="hidden mt-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center gap-3 print:hidden">
+                    <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
+                    <div>
+                        <p class="font-bold text-sm">Invoice Berhasil Disimpan!</p>
+                        <p class="text-xs mt-0.5">Klik "Cetak Invoice & Kwitansi" di atas untuk mencetak dokumen.</p>
+                    </div>
+                </div>
+
+                <!-- ==================== CETAKAN INVOICE & KWITANSI ==================== -->
+                <div id="areaCetakInvoice" class="hidden print:block">
+                    <!-- INVOICE -->
+                    <div class="mb-6 pb-4 border-b-2 border-gray-800">
+                        <h1 class="text-base font-bold text-gray-900">PT ERAPEE Anugrah Sejahtera</h1>
+                    </div>
+                    <h2 class="text-center text-lg font-bold tracking-widest text-gray-900 mb-6">I N V O I C E</h2>
+                    <div class="flex justify-between gap-6 mb-6 text-sm">
+                        <div>
+                            <p class="text-gray-600">Kepada Yth.</p>
+                            <p class="font-bold text-gray-900" id="cetakNamaPelanggan">-</p>
+                            <p class="text-gray-700 whitespace-pre-line" id="cetakAlamatPelanggan"></p>
+                        </div>
+                        <table class="text-sm">
+                            <tbody>
+                                <tr><td class="text-gray-600 pr-3">No.</td><td>: <span id="cetakNoInvoice" class="font-semibold"></span></td></tr>
+                                <tr><td class="text-gray-600 pr-3">Tanggal</td><td>: <span id="cetakTanggalInvoice"></span></td></tr>
+                                <tr><td class="text-gray-600 pr-3">Mata Uang</td><td>: <span id="cetakMataUang"></span></td></tr>
+                                <tr><td class="text-gray-600 pr-3">No. PO</td><td>: <span id="cetakNoPo"></span></td></tr>
+                                <tr><td class="text-gray-600 pr-3">Tgl PO</td><td>: <span id="cetakTglPo"></span></td></tr>
+                                <tr><td class="text-gray-600 pr-3">Tgl Jatuh Tempo</td><td>: <span id="cetakTglJatuhTempo"></span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <table class="w-full text-sm border-collapse mb-4">
+                        <thead>
+                            <tr class="bg-gray-100 border border-gray-800">
+                                <th class="p-2 border border-gray-800 w-10">No.</th>
+                                <th class="p-2 border border-gray-800 text-left">Nama Barang</th>
+                                <th class="p-2 border border-gray-800">Satuan</th>
+                                <th class="p-2 border border-gray-800 text-right">Kuantum</th>
+                                <th class="p-2 border border-gray-800 text-right">Harga Satuan</th>
+                                <th class="p-2 border border-gray-800 text-right">Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cetakTabelBarang"></tbody>
+                    </table>
+
+                    <div class="flex justify-between gap-6">
+                        <div class="text-xs text-gray-700">
+                            <p id="cetakNoSuratJalanLabel" class="hidden">No. Surat Jalan :</p>
+                            <p id="cetakNoSuratJalan" class="whitespace-pre-line"></p>
+                            <p class="mt-8">Hormat kami,</p>
+                        </div>
+                        <table class="text-sm w-64">
+                            <tbody>
+                                <tr><td class="py-0.5">Sub Total</td><td class="text-right py-0.5" id="cetakSubTotal"></td></tr>
+                                <tr><td class="py-0.5">Discount</td><td class="text-right py-0.5" id="cetakDiscount"></td></tr>
+                                <tr class="border-t border-gray-400"><td class="py-0.5">Total</td><td class="text-right py-0.5" id="cetakTotal"></td></tr>
+                                <tr><td class="py-0.5">PPN</td><td class="text-right py-0.5" id="cetakPpn"></td></tr>
+                                <tr class="border-t-2 border-gray-800 font-bold"><td class="py-1">Grand Total</td><td class="text-right py-1" id="cetakGrandTotal"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="cetakInfoRekeningWrap" class="mt-6 text-xs text-gray-700 whitespace-pre-line"></div>
+
+                    <div class="flex justify-end mt-10">
+                        <div class="text-center text-sm">
+                            <p>&nbsp;</p>
+                            <p class="mt-12 font-semibold" id="cetakTtdInvoice">( &nbsp; )</p>
+                            <p class="text-xs text-gray-600" id="cetakJabatanInvoice"></p>
+                        </div>
+                    </div>
+
+                    <!-- KWITANSI -->
+                    <div style="break-before: page;">
+                        <h2 class="text-center text-lg font-bold tracking-widest text-gray-900 mt-4 mb-6">K W I T A N S I</h2>
+                        <p class="text-sm mb-4">No. : <span class="font-semibold" id="cetakNoKwitansi"></span></p>
+                        <table class="text-sm mb-8 w-full">
+                            <tbody>
+                                <tr>
+                                    <td class="align-top py-1 w-40 text-gray-700">Sudah Terima Dari</td>
+                                    <td class="py-1 font-semibold border-b border-dotted border-gray-500" id="cetakKwitansiPelanggan"></td>
+                                </tr>
+                                <tr>
+                                    <td class="align-top py-1 text-gray-700">Banyaknya Uang</td>
+                                    <td class="py-1 italic border-b border-dotted border-gray-500" id="cetakKwitansiTerbilang"></td>
+                                </tr>
+                                <tr>
+                                    <td class="align-top py-1 text-gray-700">Untuk Pembayaran</td>
+                                    <td class="py-1 border-b border-dotted border-gray-500" id="cetakKwitansiUntuk"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <p class="text-lg font-bold">Jumlah Rp. <span id="cetakKwitansiJumlahPagar"></span></p>
+                            </div>
+                            <div class="text-center text-sm">
+                                <p id="cetakKwitansiTglKota"></p>
+                                <p class="font-bold">PT ERAPEE Anugrah Sejahtera</p>
+                                <p class="mt-12 font-semibold" id="cetakTtdKwitansi">( &nbsp; )</p>
+                                <p class="text-xs text-gray-600" id="cetakJabatanKwitansi"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Panggil Modular Controller & Komponen Global -->
+    <script type="module" src="js/invoice-form-page.js"></script>
+    <script type="module" src="js/component.js"></script>
+</body>
+</html>

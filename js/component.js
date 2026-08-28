@@ -83,6 +83,7 @@ const PETA_IKON_ELEGANT = {
     'master-data': '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
     'input-jurnal': '<path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/><path d="M12 12v6M9 15h6"/>',
     'manajemen': '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
+    'invoice': '<path d="M6 3h12a1 1 0 0 1 1 1v17l-3-2-2 2-2-2-2 2-2-2-3 2V4a1 1 0 0 1 1-1Z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
     'profil-pajak': '<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M14 9h5a1 1 0 0 1 1 1v11"/><path d="M8 8h1M8 12h1M8 16h1M11 8h1M11 12h1M11 16h1"/>',
     'aset-tetap': '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
     'pajak': '<path d="M3 21h18M4 21V10M20 21V10M2 10l10-6 10 6M6 10v6M10 10v6M14 10v6M18 10v6"/>',
@@ -229,7 +230,8 @@ async function muatSidebarAndBranding() {
             items: [
                 { name: 'COA & Master Data', href: 'master-data', icon: '🗂️', roles: ['Super Admin', 'Admin', 'Akuntan'] },
                 { name: 'Input Jurnal', href: 'input-jurnal', icon: '📝', roles: ['Super Admin', 'Admin', 'Akuntan'] },
-                { name: 'Buku Besar & Jurnal', href: 'manajemen', icon: '📊', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
+                { name: 'Buku Besar & Jurnal', href: 'manajemen', icon: '📊', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+                { name: 'Invoice & Kwitansi', href: 'invoice', icon: '🧾', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
             ]
         },
         {
