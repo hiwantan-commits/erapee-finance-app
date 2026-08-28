@@ -35,9 +35,11 @@ document.addEventListener("DOMContentLoaded", function() {
             if (!sessionStorage.getItem("erapee_user_session")) {
                 try {
                     const userDoc = await getDoc(doc(db, "users", user.email));
-                    let role = "Akuntan"; 
+                    let role = "Akuntan";
+                    let nama = "";
                     if (userDoc.exists()) {
                         role = userDoc.data().role || "Akuntan";
+                        nama = userDoc.data().nama || "";
                     } else if (user.email === "hi.wantan@gmail.com") {
                         role = "Super Admin";
                     }
@@ -45,6 +47,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     const sessionData = {
                         uid: user.uid,
                         email: user.email,
+                        nama: nama,
                         role: role,
                         loginTime: new Date().getTime()
                     };
