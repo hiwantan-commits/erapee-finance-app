@@ -4,17 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Keuangan | PT ERAPEE Anugrah Sejahtera</title>
+    <!-- Inisialisasi tema (terpusat di js/tema-*.js, lihat komentar di file
+         tersebut - supaya perubahan logika tema cukup di satu tempat) -->
+    <script src="js/tema-fouc-init.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tema-tailwind-config.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>body.auth-pending { visibility: hidden; }</style>
     <style>
         @media print {
             thead { display: table-header-group; }
-            tr, .dashboard-card { break-inside: avoid; }
+            tr, .laporan-card { break-inside: avoid; }
+            /* Cetakan harus selalu terang & terbaca di atas kertas, terlepas
+               dari mode gelap yang sedang aktif di layar. */
+            body, .laporan-card, table, thead, tbody, tr, td, th {
+                background-color: #ffffff !important;
+                color: #1c1917 !important;
+                border-color: #e7e5e4 !important;
+            }
         }
     </style>
 </head>
-<body class="text-gray-800 bg-gray-50 auth-pending">
+<body data-tema="elegant" class="text-stone-900 dark:text-stone-100 bg-stone-50 dark:bg-stone-950 auth-pending">
     <div class="flex h-screen overflow-hidden print:h-auto print:overflow-visible">
         <!-- SIDEBAR -->
         <div id="sidebar-container" class="print:hidden"></div>
@@ -37,65 +48,68 @@
                     <p class="text-xs text-gray-600">Periode Laba Rugi: <span id="cetakPeriodeLaporan">Semua Periode</span> &middot; Neraca per tanggal cetak (kumulatif)</p>
                 </div>
 
-                <!-- Header Laporan -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
+                <!-- Header Laporan (polos di atas latar, tanpa bingkai kartu) -->
+                <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-800">Laporan Keuangan Korporat Terpadu</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Konsolidasi otomatis dari seluruh transaksi jurnal tersimpan</p>
+                        <h1 class="h-elegant-2 text-stone-900 dark:text-stone-50">Laporan Keuangan Korporat Terpadu</h1>
+                        <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Konsolidasi otomatis dari seluruh transaksi jurnal tersimpan</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <select id="filterMasaLaporan" class="form-input-custom text-xs font-semibold py-2">
+                        <select id="filterMasaLaporan" class="form-input-elegant text-xs font-semibold py-2">
                             <option value="SEMUA">Semua Periode</option>
                         </select>
-                        <button onclick="window.eksporTrialBalanceKeCsv()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm whitespace-nowrap flex items-center gap-2">
-                            <span>📥</span><span>Trial Balance CSV</span>
+                        <button onclick="window.eksporTrialBalanceKeCsv()" class="btn-elegant-secondary">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                            Trial Balance CSV
                         </button>
-                        <button onclick="window.eksporNeracaKeCsv()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm whitespace-nowrap flex items-center gap-2">
-                            <span>📥</span><span>Neraca CSV</span>
+                        <button onclick="window.eksporNeracaKeCsv()" class="btn-elegant-secondary">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                            Neraca CSV
                         </button>
-                        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm whitespace-nowrap flex items-center gap-2">
-                            <span>🖨️</span><span>Cetak / Unduh PDF</span>
+                        <button onclick="window.print()" class="btn-elegant-primary">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8"/><path d="M6 17H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2"/></svg>
+                            Cetak / Unduh PDF
                         </button>
                     </div>
                 </div>
 
-                <p class="text-xs text-gray-500 mb-2 print:hidden">Menampilkan Laba Rugi & Trial Balance untuk: <b id="labelPeriodeAktif">Semua Periode</b>. Neraca selalu kumulatif (bukan per periode), sesuai sifatnya sebagai laporan posisi keuangan.</p>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mb-2 print:hidden">Menampilkan Laba Rugi & Trial Balance untuk: <b id="labelPeriodeAktif" class="text-stone-700 dark:text-stone-300">Semua Periode</b>. Neraca selalu kumulatif (bukan per periode), sesuai sifatnya sebagai laporan posisi keuangan.</p>
 
                 <!-- Kartu Ringkasan Laba Rugi -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Pendapatan Usaha</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-2" id="laporanTotalPendapatan">Rp 0</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                        <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Total Pendapatan Usaha</p>
+                        <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-50 mt-2" id="laporanTotalPendapatan">Rp 0</h3>
                     </div>
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Beban & Operasional</p>
-                        <h3 class="text-2xl font-bold text-red-600 mt-2" id="laporanTotalBeban">Rp 0</h3>
+                    <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                        <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Total Beban & Operasional</p>
+                        <h3 class="text-xl font-semibold text-red-600 dark:text-red-400 mt-2" id="laporanTotalBeban">Rp 0</h3>
                     </div>
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Laba Bersih Konsolidasian</p>
-                        <h3 class="text-2xl font-bold text-green-600 mt-2" id="laporanLabaBersih">Rp 0</h3>
+                    <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                        <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Laba Bersih Konsolidasian</p>
+                        <h3 class="text-xl font-semibold text-emerald-600 dark:text-emerald-400 mt-2" id="laporanLabaBersih">Rp 0</h3>
                     </div>
                 </div>
 
                 <!-- Tabel Rincian Akun Terkonsolidasi -->
-                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm mb-8">
-                    <h3 class="font-bold text-gray-800 text-base mb-4">Rekapitulasi Saldo Akun (Trial Balance / Buku Besar)</h3>
+                <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-8">
+                    <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-4">Rekapitulasi Saldo Akun (Trial Balance / Buku Besar)</h3>
 
                     <!-- Tabel (layar md ke atas, dan selalu dipakai saat dicetak) -->
                     <div class="hidden md:block print:block overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-3">Kode Akun</th>
-                                    <th class="p-3">Nama Akun (COA)</th>
-                                    <th class="p-3 text-right">Total Debit (Rp)</th>
-                                    <th class="p-3 text-right">Total Kredit (Rp)</th>
-                                    <th class="p-3 text-right">Saldo Akhir (Rp)</th>
+                                <tr class="text-stone-400 dark:text-stone-500 text-xs normal-case tracking-normal border-b border-stone-100 dark:border-stone-800">
+                                    <th class="p-3 font-medium">Kode Akun</th>
+                                    <th class="p-3 font-medium">Nama Akun (COA)</th>
+                                    <th class="p-3 text-right font-medium">Total Debit (Rp)</th>
+                                    <th class="p-3 text-right font-medium">Total Kredit (Rp)</th>
+                                    <th class="p-3 text-right font-medium">Saldo Akhir (Rp)</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelLaporanAkun" class="divide-y divide-gray-100 text-xs">
+                            <tbody id="tabelLaporanAkun" class="divide-y divide-stone-100 dark:divide-stone-800 text-xs">
                                 <tr>
-                                    <td colspan="5" class="p-8 text-center text-gray-400">Memuat laporan keuangan dari pusat...</td>
+                                    <td colspan="5" class="p-8 text-center text-stone-400 dark:text-stone-500">Memuat laporan keuangan dari pusat...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -103,54 +117,54 @@
 
                     <!-- Tampilan kartu untuk layar sempit (disembunyikan saat dicetak) -->
                     <div id="kartuLaporanAkun" class="md:hidden print:hidden space-y-3">
-                        <p class="p-8 text-center text-gray-400 text-sm">Memuat laporan keuangan dari pusat...</p>
+                        <p class="p-8 text-center text-stone-400 dark:text-stone-500 text-sm">Memuat laporan keuangan dari pusat...</p>
                     </div>
                 </div>
 
                 <!-- Neraca (Laporan Posisi Keuangan) -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
+                <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-6">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6">
                         <div>
-                            <h2 class="text-lg font-bold text-gray-800">Neraca (Laporan Posisi Keuangan)</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Aset = Liabilitas + Ekuitas, per seluruh transaksi tercatat</p>
+                            <h2 class="h-elegant-3 text-stone-900 dark:text-stone-50">Neraca (Laporan Posisi Keuangan)</h2>
+                            <p class="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Aset = Liabilitas + Ekuitas, per seluruh transaksi tercatat</p>
                         </div>
-                        <span id="neracaStatusBalance" class="px-2 py-0.5 bg-gray-100 text-gray-500 font-semibold rounded text-xs">Memuat...</span>
+                        <span id="neracaStatusBalance" class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 font-semibold rounded text-xs">Memuat...</span>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div class="dashboard-card p-5 bg-white rounded-xl border border-gray-100">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Aset</p>
-                            <h3 class="text-xl font-bold text-indigo-700 mt-2" id="neracaTotalAset">Rp 0</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-xl p-5">
+                            <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Total Aset</p>
+                            <h3 class="text-lg font-semibold text-stone-900 dark:text-stone-50 mt-2" id="neracaTotalAset">Rp 0</h3>
                         </div>
-                        <div class="dashboard-card p-5 bg-white rounded-xl border border-gray-100">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Liabilitas</p>
-                            <h3 class="text-xl font-bold text-red-700 mt-2" id="neracaTotalLiabilitas">Rp 0</h3>
+                        <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-xl p-5">
+                            <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Total Liabilitas</p>
+                            <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 mt-2" id="neracaTotalLiabilitas">Rp 0</h3>
                         </div>
-                        <div class="dashboard-card p-5 bg-white rounded-xl border border-gray-100">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Ekuitas (termasuk Laba)</p>
-                            <h3 class="text-xl font-bold text-amber-700 mt-2" id="neracaTotalEkuitas">Rp 0</h3>
+                        <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-xl p-5">
+                            <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Total Ekuitas (termasuk Laba)</p>
+                            <h3 class="text-lg font-semibold text-amber-600 dark:text-amber-400 mt-2" id="neracaTotalEkuitas">Rp 0</h3>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Aset</h4>
+                            <h4 class="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase mb-2">Aset</h4>
                             <table class="w-full text-left border-collapse">
-                                <tbody id="tabelNeracaAset" class="divide-y divide-gray-100"></tbody>
+                                <tbody id="tabelNeracaAset" class="divide-y divide-stone-100 dark:divide-stone-800"></tbody>
                             </table>
                         </div>
                         <div>
-                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Liabilitas & Ekuitas</h4>
+                            <h4 class="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase mb-2">Liabilitas & Ekuitas</h4>
                             <table class="w-full text-left border-collapse">
-                                <tbody id="tabelNeracaLiabilitasEkuitas" class="divide-y divide-gray-100"></tbody>
+                                <tbody id="tabelNeracaLiabilitasEkuitas" class="divide-y divide-stone-100 dark:divide-stone-800"></tbody>
                             </table>
                         </div>
                     </div>
-                    <p class="text-[11px] text-gray-400 mt-6">
+                    <p class="text-[11px] text-stone-400 dark:text-stone-500 mt-6">
                         * Karena sistem belum memiliki mekanisme jurnal penutup periode, saldo Pendapatan
                         dikurangi Beban ditampilkan sebagai "Laba (Rugi) Ditahan/Berjalan" kumulatif sejak
                         transaksi pertama, bukan direset per tahun buku. Total Laba Kumulatif saat ini:
-                        <span id="neracaLabaKumulatif" class="font-semibold">Rp 0</span>.
+                        <span id="neracaLabaKumulatif" class="font-semibold text-stone-600 dark:text-stone-300">Rp 0</span>.
                     </p>
                 </div>
             </main>

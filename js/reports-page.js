@@ -13,13 +13,13 @@ function formatRupiah(angka) {
 
 function renderBarisNeraca(tbody, daftarAkun, warnaKode) {
     if (daftarAkun.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="2" class="p-3 text-center text-gray-400 text-xs">Belum ada data.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="2" class="p-3 text-center text-stone-400 dark:text-stone-500 text-xs">Belum ada data.</td></tr>`;
         return;
     }
     tbody.innerHTML = daftarAkun.map(acc => `
         <tr>
-            <td class="p-2 text-xs"><span class="font-mono font-bold ${warnaKode}">${escapeHtml(acc.kode)}</span> ${escapeHtml(acc.nama)}</td>
-            <td class="p-2 text-xs text-right font-medium">${acc.saldo === 0 ? '-' : acc.saldo.toLocaleString('id-ID')}</td>
+            <td class="p-2 text-xs text-stone-800 dark:text-stone-200"><span class="font-mono font-bold ${warnaKode}">${escapeHtml(acc.kode)}</span> ${escapeHtml(acc.nama)}</td>
+            <td class="p-2 text-xs text-right font-medium text-stone-800 dark:text-stone-200">${acc.saldo === 0 ? '-' : acc.saldo.toLocaleString('id-ID')}</td>
         </tr>
     `).join('');
 }
@@ -46,10 +46,10 @@ function muatNeraca() {
 
     if (elStatus) {
         if (neraca.seimbang) {
-            elStatus.className = "px-2 py-0.5 bg-green-100 text-green-700 font-semibold rounded text-xs";
+            elStatus.className = "px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 font-semibold rounded text-xs";
             elStatus.innerText = "✓ SEIMBANG";
         } else {
-            elStatus.className = "px-2 py-0.5 bg-red-100 text-red-700 font-semibold rounded text-xs";
+            elStatus.className = "px-2 py-0.5 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 font-semibold rounded text-xs";
             elStatus.innerText = "⚠️ TIDAK SEIMBANG";
         }
     }
@@ -57,30 +57,30 @@ function muatNeraca() {
     const tbodyAset = document.getElementById('tabelNeracaAset');
     const tbodyLiabilitasEkuitas = document.getElementById('tabelNeracaLiabilitasEkuitas');
 
-    if (tbodyAset) renderBarisNeraca(tbodyAset, neraca.petaAset, 'text-indigo-700');
+    if (tbodyAset) renderBarisNeraca(tbodyAset, neraca.petaAset, 'text-stone-700 dark:text-stone-300');
 
     if (tbodyLiabilitasEkuitas) {
         let html = '';
-        html += `<tr class="bg-gray-50"><td colspan="2" class="p-2 text-[11px] font-bold text-gray-500 uppercase">Liabilitas</td></tr>`;
+        html += `<tr class="bg-stone-50 dark:bg-stone-800/60"><td colspan="2" class="p-2 text-[11px] font-bold text-stone-500 dark:text-stone-400 uppercase">Liabilitas</td></tr>`;
         html += neraca.petaLiabilitas.length === 0
-            ? `<tr><td colspan="2" class="p-3 text-center text-gray-400 text-xs">Belum ada data.</td></tr>`
+            ? `<tr><td colspan="2" class="p-3 text-center text-stone-400 dark:text-stone-500 text-xs">Belum ada data.</td></tr>`
             : neraca.petaLiabilitas.map(acc => `
                 <tr>
-                    <td class="p-2 text-xs"><span class="font-mono font-bold text-red-700">${escapeHtml(acc.kode)}</span> ${escapeHtml(acc.nama)}</td>
-                    <td class="p-2 text-xs text-right font-medium">${acc.saldo === 0 ? '-' : acc.saldo.toLocaleString('id-ID')}</td>
+                    <td class="p-2 text-xs text-stone-800 dark:text-stone-200"><span class="font-mono font-bold text-red-600 dark:text-red-400">${escapeHtml(acc.kode)}</span> ${escapeHtml(acc.nama)}</td>
+                    <td class="p-2 text-xs text-right font-medium text-stone-800 dark:text-stone-200">${acc.saldo === 0 ? '-' : acc.saldo.toLocaleString('id-ID')}</td>
                 </tr>
             `).join('');
-        html += `<tr class="bg-gray-50"><td colspan="2" class="p-2 text-[11px] font-bold text-gray-500 uppercase">Ekuitas</td></tr>`;
+        html += `<tr class="bg-stone-50 dark:bg-stone-800/60"><td colspan="2" class="p-2 text-[11px] font-bold text-stone-500 dark:text-stone-400 uppercase">Ekuitas</td></tr>`;
         html += neraca.petaEkuitas.map(acc => `
             <tr>
-                <td class="p-2 text-xs"><span class="font-mono font-bold text-amber-700">${escapeHtml(acc.kode)}</span> ${escapeHtml(acc.nama)}</td>
-                <td class="p-2 text-xs text-right font-medium">${acc.saldo === 0 ? '-' : acc.saldo.toLocaleString('id-ID')}</td>
+                <td class="p-2 text-xs text-stone-800 dark:text-stone-200"><span class="font-mono font-bold text-amber-600 dark:text-amber-400">${escapeHtml(acc.kode)}</span> ${escapeHtml(acc.nama)}</td>
+                <td class="p-2 text-xs text-right font-medium text-stone-800 dark:text-stone-200">${acc.saldo === 0 ? '-' : acc.saldo.toLocaleString('id-ID')}</td>
             </tr>
         `).join('');
         html += `
-            <tr class="border-t border-gray-200">
-                <td class="p-2 text-xs font-semibold text-gray-600">Laba (Rugi) Ditahan / Berjalan *</td>
-                <td class="p-2 text-xs text-right font-semibold">${neraca.labaKumulatif.toLocaleString('id-ID')}</td>
+            <tr class="border-t border-stone-200 dark:border-stone-700">
+                <td class="p-2 text-xs font-semibold text-stone-600 dark:text-stone-300">Laba (Rugi) Ditahan / Berjalan *</td>
+                <td class="p-2 text-xs text-right font-semibold text-stone-800 dark:text-stone-200">${neraca.labaKumulatif.toLocaleString('id-ID')}</td>
             </tr>
         `;
         tbodyLiabilitasEkuitas.innerHTML = html;
@@ -161,8 +161,8 @@ function renderLabaRugiDanTrialBalance() {
     if (!tbody) return;
 
     if (hasil.petaAkun.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">Belum ada data transaksi untuk dilaporkan pada periode ini.</td></tr>`;
-        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Belum ada data transaksi untuk dilaporkan pada periode ini.</p>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-stone-400 dark:text-stone-500">Belum ada data transaksi untuk dilaporkan pada periode ini.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-stone-400 dark:text-stone-500 text-sm">Belum ada data transaksi untuk dilaporkan pada periode ini.</p>`;
         return;
     }
 
@@ -170,11 +170,11 @@ function renderLabaRugiDanTrialBalance() {
         const selisihSaldo = acc.totalDebit - acc.totalKredit;
         return `
             <tr>
-                <td class="p-3 font-mono font-bold text-indigo-700">${escapeHtml(acc.kode)}</td>
-                <td class="p-3 font-medium text-gray-800">${escapeHtml(acc.nama)}</td>
-                <td class="p-3 text-right">${acc.totalDebit === 0 ? '-' : acc.totalDebit.toLocaleString('id-ID')}</td>
-                <td class="p-3 text-right">${acc.totalKredit === 0 ? '-' : acc.totalKredit.toLocaleString('id-ID')}</td>
-                <td class="p-3 text-right font-bold text-gray-900">${selisihSaldo.toLocaleString('id-ID')}</td>
+                <td class="p-3 font-mono font-bold text-stone-700 dark:text-stone-300">${escapeHtml(acc.kode)}</td>
+                <td class="p-3 font-medium text-stone-800 dark:text-stone-200">${escapeHtml(acc.nama)}</td>
+                <td class="p-3 text-right text-stone-700 dark:text-stone-300">${acc.totalDebit === 0 ? '-' : acc.totalDebit.toLocaleString('id-ID')}</td>
+                <td class="p-3 text-right text-stone-700 dark:text-stone-300">${acc.totalKredit === 0 ? '-' : acc.totalKredit.toLocaleString('id-ID')}</td>
+                <td class="p-3 text-right font-bold text-stone-900 dark:text-stone-100">${selisihSaldo.toLocaleString('id-ID')}</td>
             </tr>
         `;
     }).join('');
@@ -183,13 +183,13 @@ function renderLabaRugiDanTrialBalance() {
         kartuContainer.innerHTML = hasil.petaAkun.map(acc => {
             const selisihSaldo = acc.totalDebit - acc.totalKredit;
             return `
-                <div class="border border-gray-100 rounded-xl p-4">
-                    <div class="font-mono font-bold text-indigo-700 text-sm">${escapeHtml(acc.kode)}</div>
-                    <div class="font-medium text-gray-800 mb-2">${escapeHtml(acc.nama)}</div>
-                    <div class="grid grid-cols-3 gap-2 text-xs border-t border-gray-100 pt-2">
-                        <div><p class="text-gray-400">Debit</p><p class="font-semibold">${acc.totalDebit === 0 ? '-' : acc.totalDebit.toLocaleString('id-ID')}</p></div>
-                        <div><p class="text-gray-400">Kredit</p><p class="font-semibold">${acc.totalKredit === 0 ? '-' : acc.totalKredit.toLocaleString('id-ID')}</p></div>
-                        <div><p class="text-gray-400">Saldo</p><p class="font-bold text-gray-900">${selisihSaldo.toLocaleString('id-ID')}</p></div>
+                <div class="border border-stone-100 dark:border-stone-800 rounded-xl p-4">
+                    <div class="font-mono font-bold text-stone-700 dark:text-stone-300 text-sm">${escapeHtml(acc.kode)}</div>
+                    <div class="font-medium text-stone-800 dark:text-stone-200 mb-2">${escapeHtml(acc.nama)}</div>
+                    <div class="grid grid-cols-3 gap-2 text-xs border-t border-stone-100 dark:border-stone-800 pt-2">
+                        <div><p class="text-stone-400 dark:text-stone-500">Debit</p><p class="font-semibold text-stone-700 dark:text-stone-300">${acc.totalDebit === 0 ? '-' : acc.totalDebit.toLocaleString('id-ID')}</p></div>
+                        <div><p class="text-stone-400 dark:text-stone-500">Kredit</p><p class="font-semibold text-stone-700 dark:text-stone-300">${acc.totalKredit === 0 ? '-' : acc.totalKredit.toLocaleString('id-ID')}</p></div>
+                        <div><p class="text-stone-400 dark:text-stone-500">Saldo</p><p class="font-bold text-stone-900 dark:text-stone-100">${selisihSaldo.toLocaleString('id-ID')}</p></div>
                     </div>
                 </div>
             `;
