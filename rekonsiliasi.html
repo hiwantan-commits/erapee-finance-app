@@ -22,6 +22,7 @@
                 color: #1c1917 !important;
                 border-color: #e7e5e4 !important;
             }
+            .laporan-cetak-berjenjang tr { break-inside: avoid; }
         }
     </style>
 </head>
@@ -35,19 +36,6 @@
             <div id="header-container" class="print:hidden"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full print:p-0 print:max-w-full">
-                <!-- Kop Laporan (hanya tampil saat dicetak) -->
-                <div class="hidden print:block mb-6 pb-4 border-b-2 border-gray-800">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h1 class="text-lg font-bold text-gray-900">PT ERAPEE Anugrah Sejahtera</h1>
-                            <p class="text-xs text-gray-600 mt-0.5" id="cetakNpwpArusKas">NPWP: -</p>
-                        </div>
-                        <p class="text-xs text-gray-600" id="cetakTanggalDibuatArusKas"></p>
-                    </div>
-                    <h2 class="text-base font-semibold text-gray-900 mt-4">Laporan Arus Kas</h2>
-                    <p class="text-xs text-gray-600">Periode: <span id="cetakPeriodeArusKas">Semua Periode</span></p>
-                </div>
-
                 <!-- Header Rekonsiliasi (polos di atas latar, tanpa bingkai kartu) -->
                 <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
                     <div>
@@ -93,8 +81,9 @@
                 <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
                     <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-4">Mutasi Akun Kas & Bank (Kepala 11)</h3>
 
-                    <!-- Tabel (layar md ke atas, dan selalu dipakai saat dicetak) -->
-                    <div class="hidden md:block print:block overflow-x-auto">
+                    <!-- Tabel (layar md ke atas). Versi cetak digantikan oleh
+                         bagian berjenjang di bawah, supaya tidak tercetak dobel. -->
+                    <div class="hidden md:block print:hidden overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="text-stone-400 dark:text-stone-500 text-xs normal-case tracking-normal border-b border-stone-100 dark:border-stone-800">
@@ -117,6 +106,19 @@
                     <div id="kartuRekonsiliasi" class="md:hidden print:hidden space-y-3">
                         <p class="p-8 text-center text-stone-400 dark:text-stone-500 text-sm">Memuat data arus kas dari pusat database...</p>
                     </div>
+                </div>
+
+                <!-- Cetakan Arus Kas berjenjang (hanya tampil saat dicetak) -->
+                <div class="hidden print:block laporan-cetak-berjenjang">
+                    <div class="text-center mb-6">
+                        <h1 class="text-base font-bold text-gray-900">PT ERAPEE Anugrah Sejahtera</h1>
+                        <h2 class="text-base font-bold text-gray-900 mt-1">Laporan Arus Kas</h2>
+                        <p class="text-sm text-gray-700 mt-1">Periode: <span id="cetakPeriodeArusKas">Semua Periode</span></p>
+                        <p class="text-sm text-gray-700">Klasifikasi: Semua</p>
+                    </div>
+                    <table class="w-full text-sm border-collapse">
+                        <tbody id="tabelCetakArusKasBerjenjang"></tbody>
+                    </table>
                 </div>
             </main>
         </div>
