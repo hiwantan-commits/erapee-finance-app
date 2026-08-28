@@ -20,7 +20,7 @@ async function muatManajemenJurnal() {
     const tbody = document.getElementById('tabelManajemenJurnal');
     const kartuContainer = document.getElementById('kartuManajemenJurnal');
     if (!tbody) return;
-    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Memuat data teroptimasi dari pusat...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Memuat data teroptimasi dari pusat...</td></tr>`;
 
     try {
         const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
@@ -38,7 +38,7 @@ async function muatManajemenJurnal() {
         const listJurnal = await ambilSemuaJurnalPusat();
 
         if (listJurnal.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat.</td></tr>`;
             if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Belum ada transaksi jurnal tercatat.</p>`;
             return;
         }
@@ -53,7 +53,7 @@ async function muatManajemenJurnal() {
         renderTabelDenganPagination(listJurnalCache);
     } catch (err) {
         console.error("Gagal memuat manajemen jurnal:", err);
-        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal memuat data dari pusat database.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500">Gagal memuat data dari pusat database.</td></tr>`;
         if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-red-500 text-sm">Gagal memuat data dari pusat database.</p>`;
     }
 }
@@ -80,7 +80,7 @@ function renderTabelDenganPagination(dataList) {
     if (!tbody) return;
 
     if (dataList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Tidak ada transaksi yang cocok.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Tidak ada transaksi yang cocok.</td></tr>`;
         if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Tidak ada transaksi yang cocok.</p>`;
         hapusKontrolPagination();
         return;
@@ -115,8 +115,8 @@ function renderTabelDenganPagination(dataList) {
             <tr class="${tidakSeimbang ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'}">
                 <td class="p-3">
                     <div class="font-bold text-indigo-700">${escapeHtml(jurnal.id_jurnal)}</div>
-                    <div class="text-xs text-gray-500 mt-0.5">${escapeHtml(jurnal.tanggal)}</div>
                 </td>
+                <td class="p-3 text-gray-600">${escapeHtml(jurnal.tanggal)}</td>
                 <td class="p-3">
                     <div class="font-semibold text-gray-800">${escapeHtml(jurnal.unit_usaha) || '-'}</div>
                     <div class="text-xs text-gray-500 font-mono mt-0.5">${escapeHtml(jurnal.no_bukti)}</div>
