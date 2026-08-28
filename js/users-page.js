@@ -1,7 +1,38 @@
 // js/users-page.js - Controller untuk users.html (Manajemen Pengguna oleh Super Admin)
-import { db } from "./config.js";
+import { CONFIG, db } from "./config.js";
 import { collection, getDocs, setDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { escapeHtml } from "./utils.js";
+
+// Membuat akun login Firebase Authentication untuk user baru TANPA mengganggu
+// sesi Super Admin yang sedang login. Trik: pakai instance Firebase App kedua
+// yang terpisah (createUserWithEmailAndPassword otomatis login sebagai user
+// baru pada instance Auth yang dipakai - kalau pakai instance utama, sesi
+// Super Admin akan tergantikan oleh sesi user baru tersebut).
+async function buatAkunLoginBaru(email) {
+    const namaAppSementara = "AppSementaraBuatUser_" + Date.now();
+    const appSementara = initializeApp(CONFIG.FIREBASE_CONFIG, namaAppSementara);
+    const authSementara = getAuth(appSementara);
+
+    try {
+        const passwordAcak = crypto.randomUUID() + "Aa1!";
+        await createUserWithEmailAndPassword(authSementara, email, passwordAcak);
+        await sendPasswordResetEmail(authSementara, email);
+        await signOut(authSementara);
+        return { statusAkun: "dibuat" };
+    } catch (error) {
+        if (error.code === "auth/email-already-in-use") {
+            // Akun sudah ada sebelumnya - cukup kirim link atur ulang kata sandi
+            // agar pengguna tetap bisa mengakses/mengatur kata sandinya.
+            await sendPasswordResetEmail(authSementara, email);
+            return { statusAkun: "sudah-ada" };
+        }
+        throw error;
+    } finally {
+        await deleteApp(appSementara);
+    }
+}
 
 async function muatDaftarPengguna() {
     const tbody = document.getElementById('tabelPengguna');
@@ -68,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             btnSubmit.disabled = true;
-            btnSubmit.innerText = "Menyimpan...";
+            btnSubmit.innerText = "Membuat akun & menyimpan...";
 
             try {
                 // Menggunakan email MENTAH (bukan versi sanitasi) sebagai Document ID,
@@ -83,12 +114,23 @@ document.addEventListener("DOMContentLoaded", function() {
                     updatedAt: new Date().toISOString()
                 });
 
-                alert(`✅ Akses ${roleInput} untuk ${emailInput} berhasil ditetapkan!`);
+                const hasilAkun = await buatAkunLoginBaru(emailInput);
+
+                if (hasilAkun.statusAkun === "dibuat") {
+                    alert(`✅ Akses ${roleInput} untuk ${emailInput} berhasil ditetapkan!\n\nAkun login baru telah dibuat. Email berisi tautan untuk mengatur kata sandi telah dikirim ke ${emailInput}.`);
+                } else {
+                    alert(`✅ Akses ${roleInput} untuk ${emailInput} berhasil ditetapkan!\n\nAkun ini sudah pernah terdaftar sebelumnya - email untuk mengatur ulang kata sandi telah dikirim ulang ke ${emailInput}.`);
+                }
+
                 formUser.reset();
                 muatDaftarPengguna();
             } catch (error) {
                 console.error("Gagal menyimpan pengguna:", error);
-                alert("❌ Gagal menyimpan data: " + error.message);
+                if (error.code === "auth/invalid-email") {
+                    alert("❌ Gagal membuat akun: format email tidak valid.");
+                } else {
+                    alert("❌ Gagal menyimpan data: " + error.message);
+                }
             }
 
             btnSubmit.disabled = false;
