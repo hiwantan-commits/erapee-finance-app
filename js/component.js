@@ -294,7 +294,7 @@ async function muatSidebarAndBranding() {
                 </nav>
 
                 <div class="p-3 border-t border-stone-100 dark:border-stone-800 relative">
-                    <button onclick="window.toggleDropdownElegant(event, 'menuAkunSidebar')" class="w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-xs transition-all ${profileRowActiveClass}">
+                    <button onclick="window.toggleDropdownElegant(event, 'menuAkunSidebar')" class="w-full flex items-center gap-2.5 pl-2 pr-3 py-2 rounded-lg text-xs transition-all ${profileRowActiveClass}">
                         <div class="w-7 h-7 rounded-full bg-[#D97757] text-white flex items-center justify-center text-[10px] font-medium shrink-0">
                             ${inisialUser}
                         </div>
@@ -387,27 +387,30 @@ function muatHeader() {
 
     if (modeTemaElegantAktif()) {
         headerContainer.innerHTML = `
-            <header class="bg-stone-50/90 dark:bg-stone-950/90 backdrop-blur-sm px-6 py-4 flex items-center justify-between sticky top-0 z-30">
-                <div class="flex items-center gap-4">
-                    <button onclick="toggleSidebar()" class="md:hidden text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 focus:outline-none">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                    <h2 class="text-sm font-medium text-stone-500 dark:text-stone-400">${pageTitle}</h2>
-                </div>
-                <div class="flex items-center gap-4">
-                    <button onclick="window.toggleDarkMode()" id="btnToggleDarkMode" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 dark:text-stone-500 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition" title="Ganti tema gelap/terang">
-                        <span id="ikonDarkMode">🌙</span>
-                    </button>
-                    <div class="hidden sm:flex items-center gap-1.5 text-xs text-stone-400 dark:text-stone-500">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Online
+            <div class="sticky top-0 z-30">
+                <div class="absolute inset-x-0 top-0 -bottom-6 bg-stone-50/85 dark:bg-stone-950/85 header-elegant-blur pointer-events-none"></div>
+                <header class="relative px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button onclick="toggleSidebar()" class="md:hidden text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <h2 class="text-sm font-semibold text-stone-800 dark:text-stone-100">${pageTitle}</h2>
                     </div>
-                    <a href="/profile" class="text-xs text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 font-medium transition-colors cursor-pointer">
-                        ${escapeHtml(namaTampilan)}
-                    </a>
-                </div>
-            </header>
+                    <div class="flex items-center gap-4">
+                        <button onclick="window.toggleDarkMode()" id="btnToggleDarkMode" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition" title="Ganti tema gelap/terang">
+                            <span id="ikonDarkMode">🌙</span>
+                        </button>
+                        <div class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-stone-500 dark:text-stone-400">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Online
+                        </div>
+                        <a href="/profile" class="text-xs text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-stone-100 font-semibold transition-colors cursor-pointer">
+                            ${escapeHtml(namaTampilan)}
+                        </a>
+                    </div>
+                </header>
+            </div>
         `;
         perbaruiIkonDarkMode();
         return;

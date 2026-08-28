@@ -338,3 +338,15 @@ select.form-input-custom {
 .dark .btn-elegant-icon:hover {
     background-color: #292524;
 }
+
+/* ---- Header atas: efek "progressive blur" ----
+   Lapisan terpisah dari konten header (judul/ikon/nama) supaya teksnya
+   sendiri tetap tajam - hanya lapisan latar ini yang buram dan melemah
+   secara bertahap ke bawah lewat mask-image, mirip status bar aplikasi
+   native, alih-alih potongan blur yang tegas di tepi bawah header. */
+.header-elegant-blur {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+}
