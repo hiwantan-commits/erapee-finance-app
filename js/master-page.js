@@ -2,6 +2,7 @@
 import { db } from "./config.js";
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { escapeHtml } from "./utils.js";
+import { isKodeAkunValid } from "./accounting.js";
 
 // ==========================================
 // 1. MODUL MASTER DATA UNIT USAHA
@@ -246,6 +247,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 kode: document.getElementById('kodeCOA').value.trim(),
                 nama: document.getElementById('namaCOA').value.trim()
             };
+
+            if (!isKodeAkunValid(payload.kode)) {
+                alert('❌ Kode akun harus berawalan angka 1-6 (1=Aset, 2=Liabilitas, 3=Ekuitas, 4=Pendapatan, 5=HPP, 6=Beban).\n\nKode di luar aturan ini tidak akan pernah muncul di Neraca maupun Laporan Laba Rugi.');
+                btn.disabled = false;
+                btn.innerText = editId ? 'Update COA' : 'Simpan COA';
+                return;
+            }
 
             try {
                 if (editId) {
