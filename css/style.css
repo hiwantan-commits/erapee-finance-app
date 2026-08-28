@@ -78,6 +78,41 @@ select.form-input-custom {
     font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
 }
 
+/* ---- Skala Heading terpadu H1-H5 (hanya ukuran/bobot/keluarga font -
+   warna tetap diatur lewat class Tailwind text-stone-*/dark: seperti biasa,
+   supaya logika dark mode tidak terduplikasi di dua sistem) ---- */
+.h-elegant-1 {
+    font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    font-weight: 400;
+    font-size: 2.25rem;
+    line-height: 1.2;
+}
+.h-elegant-2 {
+    font-weight: 700;
+    font-size: 1.75rem;
+    line-height: 1.3;
+}
+.h-elegant-3 {
+    font-weight: 600;
+    font-size: 1.0625rem;
+    line-height: 1.4;
+}
+.h-elegant-4 {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+}
+.h-elegant-5 {
+    font-weight: 500;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+}
+@media (min-width: 768px) {
+    .h-elegant-1 { font-size: 2.75rem; }
+    .h-elegant-2 { font-size: 2rem; }
+}
+
 .btn-elegant-primary {
     display: inline-flex;
     align-items: center;

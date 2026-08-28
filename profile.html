@@ -34,16 +34,23 @@
             <main class="p-4 md:p-8 max-w-5xl mx-auto w-full">
                 <!-- Header Profil (polos di atas latar, tanpa bingkai kartu - gaya Claude.ai) -->
                 <div class="mb-6">
-                    <h2 class="text-2xl md:text-3xl font-bold text-stone-900 dark:text-stone-50">Profil & Pengaturan Akun</h2>
+                    <h1 class="h-elegant-2 text-stone-900 dark:text-stone-50">Profil & Pengaturan Akun</h1>
                     <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Kelola informasi identitas akun dan perbarui keamanan (kata sandi) Anda</p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Kartu Informasi Akun -->
+                <!-- Tab Switcher -->
+                <div class="flex items-center gap-1 mb-5">
+                    <button type="button" id="tabInfoAkun" onclick="window.gantiTabProfil('info')" class="tab-elegant is-active">Informasi Akun</button>
+                    <button type="button" id="tabKeamanan" onclick="window.gantiTabProfil('keamanan')" class="tab-elegant">Keamanan</button>
+                </div>
+
+                <div class="max-w-xl">
+                    <!-- Panel: Informasi Akun -->
+                    <div id="panelInfoAkun">
                     <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 shadow-sm h-fit">
                         <div class="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
                             <svg class="w-5 h-5 text-stone-400 dark:text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                            <h3 class="font-semibold text-stone-900 dark:text-stone-50 text-base">Informasi Sesi Saat Ini</h3>
+                            <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50">Informasi Sesi Saat Ini</h3>
                         </div>
 
                         <div class="space-y-5">
@@ -65,12 +72,14 @@
                             </div>
                         </div>
                     </div>
+                    </div>
 
-                    <!-- Kartu Ganti Kata Sandi -->
+                    <!-- Panel: Keamanan -->
+                    <div id="panelKeamanan" class="hidden">
                     <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
                         <div class="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
                             <svg class="w-5 h-5 text-stone-400 dark:text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-                            <h3 class="font-semibold text-stone-900 dark:text-stone-50 text-base">Pembaruan Kata Sandi</h3>
+                            <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50">Pembaruan Kata Sandi</h3>
                         </div>
 
                         <!-- Area Pesan Notifikasi Dinamis -->
@@ -95,6 +104,7 @@
                                 Catatan: Jika sistem mendeteksi sesi Anda sudah berlangsung terlalu lama, Anda mungkin akan diminta untuk melakukan login ulang demi memverifikasi otoritas perubahan sandi ini.
                             </p>
                         </form>
+                    </div>
                     </div>
                 </div>
             </main>

@@ -8,6 +8,22 @@ import { ambilUserAktif } from "./auth.js";
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
 const auth = getAuth(app);
 
+// Tab switcher "Informasi Akun" / "Keamanan" - menggantikan tampilan dua
+// kartu berdampingan dengan pola tab bergaya Claude.ai.
+window.gantiTabProfil = function(tab) {
+    const tabInfo = document.getElementById("tabInfoAkun");
+    const tabKeamanan = document.getElementById("tabKeamanan");
+    const panelInfo = document.getElementById("panelInfoAkun");
+    const panelKeamanan = document.getElementById("panelKeamanan");
+    if (!tabInfo || !tabKeamanan || !panelInfo || !panelKeamanan) return;
+
+    const infoAktif = tab === "info";
+    tabInfo.classList.toggle("is-active", infoAktif);
+    tabKeamanan.classList.toggle("is-active", !infoAktif);
+    panelInfo.classList.toggle("hidden", !infoAktif);
+    panelKeamanan.classList.toggle("hidden", infoAktif);
+};
+
 document.addEventListener("DOMContentLoaded", function() {
     // 1. Tampilkan Data Pengguna Aktif
     const currentUser = ambilUserAktif();
