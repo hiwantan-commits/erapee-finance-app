@@ -157,7 +157,15 @@ function pasangAutocompleteAkun(inputEl) {
             dropdownEl = null;
         }
         indexAktif = -1;
-        window.removeEventListener('scroll', tutupDropdown, true);
+        window.removeEventListener('scroll', saatScrollLuar, true);
+    }
+
+    // Tutup dropdown hanya kalau yang di-scroll itu DI LUAR dropdown
+    // (misalnya tabel/halaman) - scroll di dalam daftar hasil sendiri
+    // (saat mencari akun ke bawah) tidak boleh menutup dropdown-nya.
+    function saatScrollLuar(e) {
+        if (dropdownEl && e.target instanceof Node && dropdownEl.contains(e.target)) return;
+        tutupDropdown();
     }
 
     function pilihOpsi(coa) {
@@ -196,7 +204,7 @@ function pasangAutocompleteAkun(inputEl) {
         });
 
         document.body.appendChild(dropdownEl);
-        window.addEventListener('scroll', tutupDropdown, true);
+        window.addEventListener('scroll', saatScrollLuar, true);
     }
 
     inputEl.addEventListener('focus', tampilkanDropdown);
