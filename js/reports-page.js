@@ -1,8 +1,6 @@
 // js/reports-page.js - Controller untuk laporan.html
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { kalkulasiLaporanKeuangan, kalkulasiNeraca, susunStrukturNeraca, susunStrukturLabaRugi, susunStrukturPerubahanModal } from "./accounting.js";
-import { db } from "./config.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { escapeHtml, amankanSelCsv, unduhCsv } from "./utils.js";
 
 let SEMUA_JURNAL = [];
@@ -186,8 +184,6 @@ function renderLabaRugiDanTrialBalance() {
         jurnalTersaring = SEMUA_JURNAL.filter(j => (j.tanggal || '').slice(0, 7) === masaTerpilih);
     }
 
-    const elCetakPeriode = document.getElementById('cetakPeriodeLaporan');
-    if (elCetakPeriode) elCetakPeriode.innerText = labelPeriode;
     const elLabelAktif = document.getElementById('labelPeriodeAktif');
     if (elLabelAktif) elLabelAktif.innerText = labelPeriode;
 
@@ -322,23 +318,6 @@ function renderLabaRugiDanTrialBalance() {
     }
 }
 
-async function muatDataKopCetak() {
-    const elTanggal = document.getElementById('cetakTanggalDibuatLaporan');
-    if (elTanggal) {
-        elTanggal.innerText = "Dicetak: " + new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' });
-    }
-
-    try {
-        const snap = await getDoc(doc(db, "pengaturan", "profil_perusahaan"));
-        const elNpwp = document.getElementById('cetakNpwpLaporan');
-        if (elNpwp && snap.exists() && snap.data().npwp_perseroan) {
-            elNpwp.innerText = "NPWP: " + snap.data().npwp_perseroan;
-        }
-    } catch (error) {
-        console.error("Gagal memuat profil perusahaan untuk kop cetak:", error);
-    }
-}
-
 window.eksporTrialBalanceKeCsv = function() {
     if (!HASIL_LABA_RUGI_TERKINI || HASIL_LABA_RUGI_TERKINI.petaAkun.length === 0) {
         return alert("Tidak ada data untuk diekspor!");
@@ -381,7 +360,6 @@ async function muatHalamanLaporan() {
         if (select) select.addEventListener('change', renderLabaRugiDanTrialBalance);
 
         renderLabaRugiDanTrialBalance();
-        muatDataKopCetak();
     } catch (error) {
         console.error("Gagal memuat laporan keuangan:", error);
     }

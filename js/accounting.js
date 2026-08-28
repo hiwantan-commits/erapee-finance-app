@@ -249,7 +249,7 @@ export function hitungPenyusutanAset(aset, tanggalReferensi = new Date()) {
 // bukan 4 tingkat seperti software yang kode akunnya sendiri sudah berjenjang
 // (mis. 1.1.01.01).
 
-function formatAngkaLaporan(angka) {
+export function formatAngkaLaporan(angka) {
     const absFormatted = Math.abs(angka).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return angka < 0 ? `(${absFormatted})` : absFormatted;
 }
