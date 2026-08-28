@@ -183,6 +183,104 @@ export function hitungPenyusutanAset(aset, tanggalReferensi = new Date()) {
     return { nilaiPerolehan, akumulasiPenyusutan, nilaiBuku, tahunBerjalan };
 }
 
+// ==================== Struktur Laporan Berjenjang (khusus cetak) ====================
+// Mengelompokkan akun Neraca & Laba Rugi ke struktur berjenjang ala software
+// akuntansi konvensional (Kelas > Sub-Kelas > Akun), murni diturunkan dari
+// awalan kode akun yang SUDAH ADA - tidak menambah/mengubah field apa pun di
+// Master Data COA. Fungsi ini murni aditif dan tidak mengubah kalkulasiNeraca()
+// / kalkulasiLaporanKeuangan() yang sudah dipakai di tempat lain.
+//
+// Catatan keterbatasan: satu baris COA di aplikasi ini adalah akun rincian
+// (leaf) tanpa sub-akun di bawahnya, sehingga kedalaman berjenjang yang bisa
+// direkonstruksi otomatis maksimal 3 tingkat (Kelas > Sub-Kelas > Akun),
+// bukan 4 tingkat seperti software yang kode akunnya sendiri sudah berjenjang
+// (mis. 1.1.01.01).
+
+function formatAngkaLaporan(angka) {
+    const absFormatted = Math.abs(angka).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return angka < 0 ? `(${absFormatted})` : absFormatted;
+}
+
+function subKelasAset(kode) {
+    const duaDigit = String(kode).slice(0, 2);
+    const PREFIX_TIDAK_LANCAR = ['15', '16', '17', '18', '19'];
+    return PREFIX_TIDAK_LANCAR.includes(duaDigit) ? 'ASET TIDAK-LANCAR' : 'ASET LANCAR';
+}
+
+function subKelasLiabilitas(kode) {
+    const duaDigit = String(kode).slice(0, 2);
+    const PREFIX_JANGKA_PANJANG = ['25', '26', '27', '28', '29'];
+    return PREFIX_JANGKA_PANJANG.includes(duaDigit) ? 'KEWAJIBAN JANGKA PANJANG' : 'KEWAJIBAN LANCAR';
+}
+
+// Mengelompokkan daftar {kode, nama, saldo} menjadi Sub-Kelas > Akun, dengan
+// subtotal per Sub-Kelas dan per Kelas. `nomorKelas` dipakai untuk membuat
+// penomoran tampilan bergaya "1.1.00" - penomoran ini sintetis untuk cetak
+// saja, tidak diklaim sama dengan kode akun aslinya.
+function kelompokkanBerjenjang(daftarAkun, nomorKelas, labelKelas, fnSubKelas) {
+    const petaSub = {};
+    daftarAkun.forEach(akun => {
+        const sub = fnSubKelas(akun.kode);
+        if (!petaSub[sub]) petaSub[sub] = { label: sub, akun: [], subtotal: 0 };
+        petaSub[sub].akun.push(akun);
+        petaSub[sub].subtotal += akun.saldo;
+    });
+
+    // Lancar/Usaha tampil lebih dulu daripada Tidak-Lancar/Jangka Panjang.
+    const daftarSub = Object.values(petaSub).sort((a, b) => {
+        const prioritas = s => (s.includes('TIDAK-LANCAR') || s.includes('JANGKA PANJANG')) ? 1 : 0;
+        return prioritas(a.label) - prioritas(b.label);
+    });
+
+    daftarSub.forEach((sub, iSub) => {
+        sub.nomor = `${nomorKelas}.${iSub + 1}.00`;
+        sub.akun.forEach((akun, iAkun) => {
+            akun.nomorTampil = `${nomorKelas}.${iSub + 1}.${String(iAkun + 1).padStart(2, '0')}`;
+        });
+    });
+
+    const total = daftarAkun.reduce((s, a) => s + a.saldo, 0);
+    return { nomor: `${nomorKelas}.0.00`, label: labelKelas, subKelas: daftarSub, total };
+}
+
+export function susunStrukturNeraca(neraca) {
+    // Sertakan "Laba (Rugi) Ditahan/Berjalan" sebagai baris akun tersendiri
+    // di kelompok Ekuitas (sama seperti yang sudah ditampilkan terpisah di
+    // kartu Neraca on-screen) - tanpa ini total Ekuitas berjenjang tidak akan
+    // sama dengan neraca.totalEkuitas, dan Neraca tidak akan balance saat cetak.
+    const petaEkuitasDenganLaba = [
+        ...neraca.petaEkuitas,
+        { kode: 'LABA', nama: 'Laba (Rugi) Ditahan / Berjalan', saldo: neraca.labaKumulatif }
+    ];
+
+    return {
+        aset: kelompokkanBerjenjang(neraca.petaAset, 1, 'ASET', subKelasAset),
+        liabilitas: kelompokkanBerjenjang(neraca.petaLiabilitas, 2, 'KEWAJIBAN', subKelasLiabilitas),
+        ekuitas: kelompokkanBerjenjang(petaEkuitasDenganLaba, 3, 'EKUITAS', () => 'EKUITAS'),
+        formatAngkaLaporan
+    };
+}
+
+export function susunStrukturLabaRugi(hasilLabaRugi) {
+    const kelompok = { PENDAPATAN: [], HPP: [], BEBAN: [] };
+    hasilLabaRugi.petaAkun.forEach(akun => {
+        const kategori = klasifikasikanAkun(akun.kode);
+        if (!kelompok[kategori]) return; // abaikan kode di luar 4/5/6 (kategori "LAINNYA")
+        const saldo = kategori === 'PENDAPATAN'
+            ? (akun.totalKredit - akun.totalDebit)
+            : (akun.totalDebit - akun.totalKredit);
+        kelompok[kategori].push({ kode: akun.kode, nama: akun.nama, saldo });
+    });
+
+    const pendapatan = kelompokkanBerjenjang(kelompok.PENDAPATAN, 4, 'PENDAPATAN', () => 'PENDAPATAN USAHA');
+    const hpp = kelompokkanBerjenjang(kelompok.HPP, 5, 'HARGA POKOK PENJUALAN', () => 'HARGA POKOK PENJUALAN');
+    const beban = kelompokkanBerjenjang(kelompok.BEBAN, 6, 'BEBAN', () => 'BEBAN USAHA');
+    const labaKotor = pendapatan.total - hpp.total;
+    const labaBersih = labaKotor - beban.total;
+
+    return { pendapatan, hpp, beban, labaKotor, labaBersih, formatAngkaLaporan };
+}
+
 export function kalkulasiLaporanKeuangan(semuaJurnal) {
     let totalPendapatan = 0;
     let totalBeban = 0;
