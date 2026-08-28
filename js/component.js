@@ -113,6 +113,7 @@ async function muatSidebarAndBranding() {
             groupName: "Laporan & Analisis",
             items: [
                 { name: 'Laporan Keuangan', href: 'laporan', icon: '📈', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+                { name: 'Analisis Bisnis', href: 'analisa-bisnis', icon: '💡', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
                 { name: 'Histori Audit', href: 'histori', icon: '📜', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
             ]
         },

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Bisnis | PT ERAPEE Anugrah Sejahtera</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js untuk grafik perbandingan margin antar unit usaha -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>body.auth-pending { visibility: hidden; }</style>
+</head>
+<body class="text-gray-800 bg-gray-50 auth-pending">
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-h-0 overflow-y-auto md:ml-64">
+            <div id="header-container"></div>
+
+            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+                <!-- Header Analisis Bisnis -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Analisis Profitabilitas per Unit Usaha</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Perbandingan kinerja dan margin laba antar unit usaha, dihitung otomatis dari data jurnal</p>
+                    </div>
+                    <div>
+                        <select id="filterTahunBisnis" class="form-input-custom text-xs font-semibold py-2">
+                            <option value="SEMUA">Semua Tahun</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Kartu KPI -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Margin Laba Konsolidasi</p>
+                        <h3 class="text-2xl font-bold text-indigo-600 mt-2" id="kpiMarginKonsolidasi">0%</h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium">Laba Bersih / Total Pendapatan</p>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Unit Usaha Terbaik</p>
+                        <h3 class="text-lg font-bold text-green-600 mt-2" id="kpiUnitTerbaik">-</h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium" id="kpiUnitTerbaikMargin">Margin -</p>
+                    </div>
+                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Unit Usaha Perlu Perhatian</p>
+                        <h3 class="text-lg font-bold text-red-600 mt-2" id="kpiUnitPerhatian">-</h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium" id="kpiUnitPerhatianMargin">Margin -</p>
+                    </div>
+                </div>
+
+                <!-- Grafik Margin per Unit -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 mb-8">
+                    <h3 class="font-bold text-gray-800 text-sm mb-4 border-b border-gray-100 pb-2">Perbandingan Margin Laba (%) Antar Unit Usaha</h3>
+                    <div class="relative h-72 w-full">
+                        <canvas id="grafikMarginUnit"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tabel Ranking Profitabilitas -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm mb-8">
+                    <h3 class="font-bold text-gray-800 text-base mb-1">Ranking Profitabilitas Unit Usaha</h3>
+                    <p class="text-[11px] text-gray-400 mb-4">*Ambang status (Sehat/Waspada/Perlu Perhatian) bersifat indikatif umum - sesuaikan dengan standar margin di industri Anda.</p>
+
+                    <!-- Tabel (layar md ke atas) -->
+                    <div class="hidden md:block overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-3">Unit Usaha</th>
+                                    <th class="p-3 text-right">Pendapatan (Rp)</th>
+                                    <th class="p-3 text-right">Beban (Rp)</th>
+                                    <th class="p-3 text-right">Laba (Rp)</th>
+                                    <th class="p-3 text-right">Margin (%)</th>
+                                    <th class="p-3 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelRankingUnit" class="divide-y divide-gray-100 text-xs">
+                                <tr>
+                                    <td colspan="6" class="p-8 text-center text-gray-400">Memuat data analisis bisnis...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tampilan kartu untuk layar sempit -->
+                    <div id="kartuRankingUnit" class="md:hidden space-y-3">
+                        <p class="p-8 text-center text-gray-400 text-sm">Memuat data analisis bisnis...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Panggil Modular Controller & Komponen Global -->
+    <script type="module" src="js/business-analytics-page.js"></script>
+    <script type="module" src="js/component.js"></script>
+</body>
+</html>
