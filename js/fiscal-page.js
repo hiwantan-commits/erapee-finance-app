@@ -12,9 +12,9 @@ function formatRupiah(angka) {
 }
 
 const WARNA_KATEGORI = {
-    "Operasi": "bg-blue-50 text-blue-700",
-    "Investasi": "bg-amber-50 text-amber-700",
-    "Pendanaan": "bg-purple-50 text-purple-700"
+    "Operasi": "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300",
+    "Investasi": "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400",
+    "Pendanaan": "bg-[#D97757]/10 text-[#D97757]"
 };
 
 function isiFilterMasaArusKas() {
@@ -36,17 +36,17 @@ function isiFilterMasaArusKas() {
 function renderKartu(item) {
     const { jurnal, kategori, netKas } = item;
     return `
-        <div class="border border-gray-100 rounded-xl p-4">
+        <div class="border border-stone-100 dark:border-stone-800 rounded-xl p-4">
             <div class="flex justify-between items-start gap-2 mb-2">
                 <div>
-                    <div class="font-bold text-indigo-700 text-sm">${escapeHtml(jurnal.id_jurnal)}</div>
-                    <div class="text-xs text-gray-500">${escapeHtml(jurnal.tanggal)}</div>
+                    <div class="font-bold text-stone-900 dark:text-stone-100 text-sm">${escapeHtml(jurnal.id_jurnal)}</div>
+                    <div class="text-xs text-stone-400 dark:text-stone-500">${escapeHtml(jurnal.tanggal)}</div>
                 </div>
-                <span class="px-2 py-0.5 rounded font-semibold text-[11px] ${WARNA_KATEGORI[kategori] || 'bg-gray-100 text-gray-600'}">${kategori}</span>
+                <span class="px-2 py-0.5 rounded font-semibold text-[11px] ${WARNA_KATEGORI[kategori] || 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'}">${kategori}</span>
             </div>
-            <div class="text-xs text-gray-500 mb-1">${escapeHtml(jurnal.no_bukti)} &middot; ${escapeHtml(jurnal.lawan_transaksi) || '-'}</div>
-            <div class="text-sm text-gray-700 mb-2">${escapeHtml(jurnal.keterangan) || '-'}</div>
-            <div class="text-right font-bold ${netKas >= 0 ? 'text-green-600' : 'text-red-600'} border-t border-gray-100 pt-2">
+            <div class="text-xs text-stone-500 dark:text-stone-400 mb-1">${escapeHtml(jurnal.no_bukti)} &middot; ${escapeHtml(jurnal.lawan_transaksi) || '-'}</div>
+            <div class="text-sm text-stone-700 dark:text-stone-300 mb-2">${escapeHtml(jurnal.keterangan) || '-'}</div>
+            <div class="text-right font-bold ${netKas >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'} border-t border-stone-100 dark:border-stone-800 pt-2">
                 ${netKas.toLocaleString('id-ID')}
             </div>
         </div>
@@ -80,19 +80,19 @@ function renderLaporanArusKas() {
     const kartuContainer = document.getElementById('kartuRekonsiliasi');
 
     if (arusKas.rincian.length === 0) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">Belum ada mutasi kas/bank tercatat pada periode ini.</td></tr>`;
-        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Belum ada mutasi kas/bank tercatat pada periode ini.</p>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-stone-400 dark:text-stone-500">Belum ada mutasi kas/bank tercatat pada periode ini.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-stone-400 dark:text-stone-500 text-sm">Belum ada mutasi kas/bank tercatat pada periode ini.</p>`;
         return;
     }
 
     if (tbody) {
         tbody.innerHTML = arusKas.rincian.map(({ jurnal, kategori, netKas }) => `
             <tr>
-                <td class="p-3 font-bold text-indigo-700">${escapeHtml(jurnal.id_jurnal)}<div class="text-[11px] text-gray-400 font-normal">${escapeHtml(jurnal.tanggal)}</div></td>
-                <td class="p-3"><div class="font-medium text-gray-800">${escapeHtml(jurnal.no_bukti)}</div><div class="text-[11px] text-gray-500">${escapeHtml(jurnal.lawan_transaksi) || '-'}</div></td>
-                <td class="p-3 text-gray-600 truncate max-w-xs">${escapeHtml(jurnal.keterangan) || '-'}</td>
-                <td class="p-3"><span class="px-2 py-0.5 rounded font-semibold text-[11px] ${WARNA_KATEGORI[kategori] || 'bg-gray-100 text-gray-600'}">${kategori}</span></td>
-                <td class="p-3 text-right font-bold ${netKas >= 0 ? 'text-green-600' : 'text-red-600'}">${netKas.toLocaleString('id-ID')}</td>
+                <td class="p-3 font-bold text-stone-900 dark:text-stone-100">${escapeHtml(jurnal.id_jurnal)}<div class="text-[11px] text-stone-400 dark:text-stone-500 font-normal">${escapeHtml(jurnal.tanggal)}</div></td>
+                <td class="p-3"><div class="font-medium text-stone-800 dark:text-stone-200">${escapeHtml(jurnal.no_bukti)}</div><div class="text-[11px] text-stone-500 dark:text-stone-400">${escapeHtml(jurnal.lawan_transaksi) || '-'}</div></td>
+                <td class="p-3 text-stone-600 dark:text-stone-300 truncate max-w-xs">${escapeHtml(jurnal.keterangan) || '-'}</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded font-semibold text-[11px] ${WARNA_KATEGORI[kategori] || 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'}">${kategori}</span></td>
+                <td class="p-3 text-right font-bold ${netKas >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}">${netKas.toLocaleString('id-ID')}</td>
             </tr>
         `).join('');
     }
