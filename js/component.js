@@ -165,8 +165,8 @@ async function muatSidebarAndBranding() {
 
     const isProfileActive = currentFile === 'profile';
     const profileActiveClass = isProfileActive
-        ? 'bg-indigo-600 text-white font-medium shadow-sm'
-        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900';
+        ? 'bg-indigo-600 border-indigo-600 text-white font-medium shadow-sm'
+        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100 hover:text-gray-900';
     // Saat halaman Profil aktif, latar kartu ini berubah jadi indigo-600 -
     // avatar & sub-teks butuh warna kontras yang berbeda agar tidak "hilang".
     const avatarActiveClass = isProfileActive ? 'bg-white text-indigo-600' : 'bg-indigo-600 text-white';
@@ -200,7 +200,7 @@ async function muatSidebarAndBranding() {
             
             <!-- Area Sesi & Profil di Bagian Bawah -->
             <div class="p-3 border-t border-gray-100 bg-gray-50 space-y-2">
-                <a href="/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${profileActiveClass} border border-gray-200 bg-white shadow-sm hover:shadow-md">
+                <a href="/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all border ${profileActiveClass} hover:shadow-md">
                     <div class="w-8 h-8 rounded-full ${avatarActiveClass} flex items-center justify-center text-[11px] font-bold shrink-0">
                         ${inisialUser}
                     </div>
