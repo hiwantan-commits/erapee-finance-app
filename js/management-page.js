@@ -51,18 +51,12 @@ async function muatManajemenJurnal() {
     }
 }
 
-function tombolAksiHtml(id_jurnal, ukuranIkon) {
+function tombolAksiHtml(id_jurnal) {
     return `
-        <div class="flex items-center justify-center flex-wrap gap-1.5">
-            <button onclick="editJurnal('${id_jurnal}')" title="Edit" class="text-amber-600 bg-amber-50 hover:bg-amber-100 p-1.5 ${ukuranIkon} rounded-lg font-semibold text-xs transition flex items-center gap-1">
-                <span>✏️</span><span class="hidden sm:inline">Edit</span>
-            </button>
-            <button onclick="cetakVoucher('${id_jurnal}')" title="Cetak" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 p-1.5 ${ukuranIkon} rounded-lg font-semibold text-xs transition flex items-center gap-1">
-                <span>🖨️</span><span class="hidden sm:inline">Cetak</span>
-            </button>
-            <button onclick="hapusJurnalGrup('${id_jurnal}')" title="Hapus" class="text-red-600 bg-red-50 hover:bg-red-100 p-1.5 ${ukuranIkon} rounded-lg font-semibold text-xs transition flex items-center gap-1">
-                <span>🗑️</span><span class="hidden sm:inline">Hapus</span>
-            </button>
+        <div class="flex items-center justify-center flex-nowrap gap-1.5">
+            <button onclick="editJurnal('${id_jurnal}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg font-semibold text-xs transition whitespace-nowrap">Edit</button>
+            <button onclick="cetakVoucher('${id_jurnal}')" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded-lg font-semibold text-xs transition whitespace-nowrap">Cetak</button>
+            <button onclick="hapusJurnalGrup('${id_jurnal}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg font-semibold text-xs transition whitespace-nowrap">Hapus</button>
         </div>
     `;
 }
@@ -123,7 +117,7 @@ function renderTabelDenganPagination(dataList) {
                     ${balanceStatus}
                 </td>
                 <td class="p-3 text-center">${badgeStatus}</td>
-                <td class="p-3">${tombolAksiHtml(jurnal.id_jurnal, 'sm:px-2.5 sm:py-1.5')}</td>
+                <td class="p-3">${tombolAksiHtml(jurnal.id_jurnal)}</td>
             </tr>
         `);
 
@@ -146,7 +140,7 @@ function renderTabelDenganPagination(dataList) {
                         <div class="font-bold text-gray-800 text-sm">Rp ${jurnal.total_debit.toLocaleString('id-ID')}</div>
                         ${balanceStatus}
                     </div>
-                    ${tombolAksiHtml(jurnal.id_jurnal, 'px-2.5 py-1.5')}
+                    ${tombolAksiHtml(jurnal.id_jurnal)}
                 </div>
             </div>
         `);
