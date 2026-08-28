@@ -27,7 +27,10 @@ function base64Url(input) {
     return Buffer.from(input).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-async function ambilTokenAkses(serviceAccount, scopes) {
+// Token untuk baca Firestore, memakai Service Account (role read-only
+// "Cloud Datastore Viewer") - dibatasi kewenangannya lewat IAM, bukan
+// lewat kode.
+async function ambilTokenViaServiceAccount(serviceAccount, scopes) {
     const header = { alg: 'RS256', typ: 'JWT' };
     const now = Math.floor(Date.now() / 1000);
     const claim = {
@@ -51,7 +54,30 @@ async function ambilTokenAkses(serviceAccount, scopes) {
             assertion: jwt
         })
     });
-    if (!res.ok) throw new Error(`Gagal mendapatkan token akses: ${res.status} ${await res.text()}`);
+    if (!res.ok) throw new Error(`Gagal mendapatkan token Service Account: ${res.status} ${await res.text()}`);
+    const data = await res.json();
+    return data.access_token;
+}
+
+// Token untuk upload ke Google Drive, memakai identitas akun Google pengguna
+// sendiri (lewat refresh token OAuth) - BUKAN Service Account. Google tidak
+// memberi Service Account jatah penyimpanan Drive sendiri sejak pertengahan
+// 2023 ("Service Accounts do not have storage quota"), kecuali lewat Shared
+// Drive (fitur Google Workspace berbayar) yang tidak tersedia di akun Gmail
+// biasa. Dengan token akun pengguna, file yang diunggah terhitung ke kuota
+// Drive pribadi pengguna, sama seperti kalau mereka upload manual.
+async function ambilTokenViaOAuthUser(clientId, clientSecret, refreshToken) {
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            grant_type: 'refresh_token',
+            client_id: clientId,
+            client_secret: clientSecret,
+            refresh_token: refreshToken
+        })
+    });
+    if (!res.ok) throw new Error(`Gagal refresh token OAuth pengguna: ${res.status} ${await res.text()}`);
     const data = await res.json();
     return data.access_token;
 }
@@ -151,22 +177,29 @@ async function rotasiBackupLama(token, folderId) {
 async function main() {
     const rawKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
     const folderId = process.env.GDRIVE_BACKUP_FOLDER_ID;
+    const oauthClientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
+    const oauthClientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+    const oauthRefreshToken = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
 
-    if (!rawKey || !folderId) {
-        throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY atau GDRIVE_BACKUP_FOLDER_ID belum diatur sebagai GitHub Secret.');
+    const daftarWajib = { GOOGLE_SERVICE_ACCOUNT_KEY: rawKey, GDRIVE_BACKUP_FOLDER_ID: folderId, GOOGLE_OAUTH_CLIENT_ID: oauthClientId, GOOGLE_OAUTH_CLIENT_SECRET: oauthClientSecret, GOOGLE_OAUTH_REFRESH_TOKEN: oauthRefreshToken };
+    const belumDiatur = Object.entries(daftarWajib).filter(([, v]) => !v).map(([k]) => k);
+    if (belumDiatur.length > 0) {
+        throw new Error(`GitHub Secret berikut belum diatur: ${belumDiatur.join(', ')}`);
     }
 
     const serviceAccount = JSON.parse(rawKey);
-    const token = await ambilTokenAkses(serviceAccount, [
-        'https://www.googleapis.com/auth/datastore',
-        'https://www.googleapis.com/auth/drive.file'
-    ]);
+
+    console.log('Mengautentikasi ke Firestore (Service Account, read-only)...');
+    const tokenFirestore = await ambilTokenViaServiceAccount(serviceAccount, ['https://www.googleapis.com/auth/datastore']);
+
+    console.log('Mengautentikasi ke Google Drive (akun pengguna sendiri)...');
+    const tokenDrive = await ambilTokenViaOAuthUser(oauthClientId, oauthClientSecret, oauthRefreshToken);
 
     console.log('Mengambil data dari Firestore...');
     const hasilBackup = { tanggalBackup: new Date().toISOString(), koleksi: {} };
 
     for (const namaKoleksi of KOLEKSI_DIBACKUP) {
-        hasilBackup.koleksi[namaKoleksi] = await ambilSemuaDokumen(token, namaKoleksi);
+        hasilBackup.koleksi[namaKoleksi] = await ambilSemuaDokumen(tokenFirestore, namaKoleksi);
         console.log(`  - ${namaKoleksi}: ${hasilBackup.koleksi[namaKoleksi].length} dokumen`);
     }
 
@@ -174,10 +207,10 @@ async function main() {
     const isiJson = JSON.stringify(hasilBackup, null, 2);
 
     console.log(`Mengunggah ${namaFile} ke Google Drive (${(isiJson.length / 1024).toFixed(0)} KB)...`);
-    await uploadKeGoogleDrive(token, folderId, namaFile, isiJson);
+    await uploadKeGoogleDrive(tokenDrive, folderId, namaFile, isiJson);
 
     console.log('Memeriksa rotasi backup lama...');
-    await rotasiBackupLama(token, folderId);
+    await rotasiBackupLama(tokenDrive, folderId);
 
     console.log('Backup selesai.');
 }
