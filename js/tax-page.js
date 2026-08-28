@@ -1,7 +1,8 @@
 // js/tax-page.js - Controller untuk pajak.html
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { klasifikasikanAkun } from "./accounting.js";
-import { CONFIG } from "./config.js";
+import { CONFIG, db } from "./config.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { escapeHtml } from "./utils.js";
 
 let SEMUA_JURNAL_PAJAK = [];
@@ -77,9 +78,33 @@ function isiFilterMasaPajak(daftarJurnal) {
     select.value = daftarMasa.includes(nilaiTerpilih) ? nilaiTerpilih : "SEMUA";
 }
 
+async function muatDataKopCetak() {
+    const elTanggal = document.getElementById('cetakTanggalDibuat');
+    if (elTanggal) {
+        elTanggal.innerText = "Dicetak: " + new Date().toLocaleString('id-ID', {
+            dateStyle: 'long', timeStyle: 'short'
+        });
+    }
+
+    try {
+        const snap = await getDoc(doc(db, "pengaturan", "profil_perusahaan"));
+        const elNpwp = document.getElementById('cetakNpwp');
+        if (elNpwp && snap.exists() && snap.data().npwp_perseroan) {
+            elNpwp.innerText = "NPWP: " + snap.data().npwp_perseroan;
+        }
+    } catch (error) {
+        console.error("Gagal memuat profil perusahaan untuk kop cetak:", error);
+    }
+}
+
 function renderRekapPajak() {
     const select = document.getElementById('filterMasaPajak');
     const masaTerpilih = select ? select.value : "SEMUA";
+
+    const elCetakPeriode = document.getElementById('cetakPeriode');
+    if (elCetakPeriode) {
+        elCetakPeriode.innerText = masaTerpilih === "SEMUA" ? "Semua Periode" : masaTerpilih;
+    }
 
     const jurnalTersaring = masaTerpilih === "SEMUA"
         ? SEMUA_JURNAL_PAJAK
@@ -154,6 +179,7 @@ async function muatRekapPajak() {
         if (select) select.addEventListener('change', renderRekapPajak);
 
         renderRekapPajak();
+        muatDataKopCetak();
     } catch (error) {
         console.error("Gagal memuat rekapitulasi pajak:", error);
     }
