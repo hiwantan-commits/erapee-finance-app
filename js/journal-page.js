@@ -145,20 +145,100 @@ window.hitungTotal = function() {
     }
 };
 
+// Dropdown pencarian akun buatan sendiri (menggantikan <datalist> bawaan
+// browser yang tampilannya tidak bisa dikustomisasi lewat CSS).
+function pasangAutocompleteAkun(inputEl) {
+    let dropdownEl = null;
+    let indexAktif = -1;
+
+    function tutupDropdown() {
+        if (dropdownEl) {
+            dropdownEl.remove();
+            dropdownEl = null;
+        }
+        indexAktif = -1;
+        window.removeEventListener('scroll', tutupDropdown, true);
+    }
+
+    function pilihOpsi(coa) {
+        inputEl.value = `${coa.kode} - ${coa.nama}`;
+        tutupDropdown();
+        inputEl.dispatchEvent(new Event('change'));
+    }
+
+    function perbaruiSorotan(opsiEl) {
+        opsiEl.forEach((el, i) => el.classList.toggle('bg-indigo-50', i === indexAktif));
+        if (indexAktif >= 0) opsiEl[indexAktif].scrollIntoView({ block: 'nearest' });
+    }
+
+    function tampilkanDropdown() {
+        const kataKunci = inputEl.value.toLowerCase().trim();
+        const hasil = coaArray.filter(c =>
+            !kataKunci || c.kode.toLowerCase().includes(kataKunci) || c.nama.toLowerCase().includes(kataKunci)
+        ).slice(0, 50);
+
+        tutupDropdown();
+        if (hasil.length === 0) return;
+
+        dropdownEl = document.createElement('div');
+        dropdownEl.className = 'fixed z-50 max-h-56 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg text-xs';
+        const rect = inputEl.getBoundingClientRect();
+        dropdownEl.style.left = rect.left + 'px';
+        dropdownEl.style.top = (rect.bottom + 4) + 'px';
+        dropdownEl.style.width = rect.width + 'px';
+
+        hasil.forEach(coa => {
+            const opt = document.createElement('div');
+            opt.className = 'px-3 py-2 cursor-pointer hover:bg-indigo-50 flex justify-between gap-3';
+            opt.innerHTML = `<span class="font-mono font-bold text-indigo-700 shrink-0">${escapeHtml(coa.kode)}</span><span class="text-gray-600 truncate">${escapeHtml(coa.nama)}</span>`;
+            opt.addEventListener('mousedown', (e) => { e.preventDefault(); pilihOpsi(coa); });
+            dropdownEl.appendChild(opt);
+        });
+
+        document.body.appendChild(dropdownEl);
+        window.addEventListener('scroll', tutupDropdown, true);
+    }
+
+    inputEl.addEventListener('focus', tampilkanDropdown);
+    inputEl.addEventListener('input', tampilkanDropdown);
+    inputEl.addEventListener('blur', () => setTimeout(tutupDropdown, 150));
+    inputEl.addEventListener('keydown', (e) => {
+        if (!dropdownEl) return;
+        const opsiEl = Array.from(dropdownEl.children);
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            indexAktif = Math.min(indexAktif + 1, opsiEl.length - 1);
+            perbaruiSorotan(opsiEl);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            indexAktif = Math.max(indexAktif - 1, 0);
+            perbaruiSorotan(opsiEl);
+        } else if (e.key === 'Escape') {
+            tutupDropdown();
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const target = indexAktif >= 0 ? opsiEl[indexAktif] : opsiEl[0];
+            if (target) target.dispatchEvent(new MouseEvent('mousedown'));
+        }
+    });
+}
+
 window.tambahBaris = function(akunVal = "", memoVal = "", debitVal = 0, kreditVal = 0) {
     const tbody = document.getElementById('tbodyJurnal');
     if (!tbody) return;
     const tr = document.createElement('tr');
     tr.className = 'jurnal-row hover:bg-gray-50';
-    
+
     tr.innerHTML = `
-        <td class="p-2"><input list="coaList" type="text" placeholder="Pilih atau Ketik Akun..." class="form-input-custom kode_akun text-xs font-medium" required autocomplete="off"></td>
+        <td class="p-2"><input type="text" placeholder="Pilih atau Ketik Akun..." class="form-input-custom kode_akun text-xs font-medium" required autocomplete="off"></td>
         <td class="p-2"><input type="text" class="form-input-custom memo_baris text-xs" value="${memoVal}" placeholder="Memo..."></td>
         <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="${debitVal}" min="0" step="any" oninput="hitungTotal()" required></td>
         <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="${kreditVal}" min="0" step="any" oninput="hitungTotal()" required></td>
         <td class="p-2 text-center"><button type="button" onclick="hapusBaris(this)" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-200 transition">X</button></td>
     `;
     tbody.appendChild(tr);
+    pasangAutocompleteAkun(tr.querySelector('.kode_akun'));
 
     if (akunVal) {
         const found = coaArray.find(c => c.kode === akunVal);
@@ -199,6 +279,30 @@ window.terapkanTemplate = function() {
         document.getElementById('keterangan').value = "Pembelian aset tetap secara tunai";
         tambahBaris("1501", "Aset Tetap", 0, 0);
         tambahBaris("1101", "Kas / Bank Operasional", 0, 0);
+    } else if (jenis === "JASA_WEBSITE") {
+        document.getElementById('keterangan').value = "Penerimaan pembayaran jasa pembuatan website";
+        tambahBaris("1101", "Kas / Bank Operasional", 0, 0);
+        tambahBaris("4102", "Pendapatan Jasa Pembuatan Website", 0, 0);
+    } else if (jenis === "LANGGANAN_SAAS") {
+        document.getElementById('keterangan').value = "Penerimaan pendapatan langganan aplikasi SaaS";
+        tambahBaris("1101", "Kas / Bank Operasional", 0, 0);
+        tambahBaris("4103", "Pendapatan Langganan Aplikasi SaaS", 0, 0);
+    } else if (jenis === "DP_PROYEK") {
+        document.getElementById('keterangan').value = "Penerimaan uang muka (DP) proyek dari klien";
+        tambahBaris("1101", "Kas / Bank Operasional", 0, 0);
+        tambahBaris("2102", "Pendapatan Diterima Dimuka", 0, 0);
+    } else if (jenis === "HOSTING_CLOUD") {
+        document.getElementById('keterangan').value = "Pembayaran biaya hosting, domain & infrastruktur cloud";
+        tambahBaris("6103", "Beban Hosting & Infrastruktur Cloud", 0, 0);
+        tambahBaris("1101", "Kas / Bank Operasional", 0, 0);
+    } else if (jenis === "PANEN_TUNAI") {
+        document.getElementById('keterangan').value = "Penerimaan penjualan hasil pertanian secara tunai";
+        tambahBaris("1101", "Kas / Bank Operasional", 0, 0);
+        tambahBaris("4104", "Pendapatan Penjualan Hasil Pertanian", 0, 0);
+    } else if (jenis === "SARANA_PERTANIAN") {
+        document.getElementById('keterangan').value = "Pembelian sarana produksi pertanian (bibit/pupuk/pestisida)";
+        tambahBaris("5101", "HPP - Sarana Produksi Pertanian", 0, 0);
+        tambahBaris("1101", "Kas / Bank Operasional", 0, 0);
     }
 };
 
@@ -222,18 +326,7 @@ async function inisialisasiData() {
         let coaList = [];
         snapCOA.forEach(d => coaList.push(d.data()));
         coaList.sort((a, b) => a.kode.localeCompare(b.kode));
-        coaArray = coaList; 
-        
-        let datalistHtml = '<datalist id="coaList">';
-        coaList.forEach(coa => {
-            const label = escapeHtml(coa.kode) + " - " + escapeHtml(coa.nama);
-            datalistHtml += `<option value="${label}"></option>`;
-        });
-        datalistHtml += '</datalist>';
-        
-        if (!document.getElementById('coaList')) {
-            document.body.insertAdjacentHTML('beforeend', datalistHtml);
-        }
+        coaArray = coaList;
     } catch (err) {}
 
     if (editIdJurnal) {
