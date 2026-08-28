@@ -117,6 +117,13 @@ service cloud.firestore {
       allow read, write: if adalahOperator();
     }
 
+    // ---- Invoice & Kwitansi (dokumen penjualan berdiri sendiri, tidak
+    // terhubung ke jurnal_transaksi) ----
+    match /invoice_penjualan/{docId} {
+      allow read: if adalahPenggunaInternal();
+      allow write: if adalahOperator();
+    }
+
     // Tolak akses ke koleksi lain yang tidak terdaftar secara eksplisit di atas.
     match /{document=**} {
       allow read, write: if false;
