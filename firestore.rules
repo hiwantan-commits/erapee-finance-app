@@ -66,6 +66,12 @@ service cloud.firestore {
       allow update, delete: if false; // Audit trail bersifat permanen (append-only)
     }
 
+    // ---- Bukti Transaksi (disimpan base64 di Firestore, bukan Storage) ----
+    match /bukti_transaksi/{docId} {
+      allow read: if adalahPenggunaInternal();
+      allow create, update, delete: if adalahOperator();
+    }
+
     // ---- Manajemen Pengguna & Role (RBAC) ----
     match /users/{emailId} {
       // Setiap pengguna login boleh baca datanya sendiri (untuk cek role saat login).

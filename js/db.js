@@ -1,10 +1,15 @@
 // js/db.js - Lapisan Akses Data dengan Otomatisasi Audit Trail
 import { CONFIG, db } from "./config.js";
-import { collection, addDoc, getDocs, query, where, deleteDoc, doc, limit, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, addDoc, getDoc, getDocs, query, where, deleteDoc, doc, limit, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { cekApakahPeriodeTerkunci } from "./closing-period.js";
 
 const KOLEKSI_UTAMA = CONFIG.COLLECTION_NAME || "jurnal_transaksi";
 const KOLEKSI_LOG = "activity_logs";
+// Berkas bukti transaksi disimpan sebagai satu dokumen tersendiri per id_jurnal
+// (bukan disebar ke setiap baris jurnal) agar tidak terduplikasi N kali dan
+// tidak mudah melebihi batas ukuran dokumen Firestore (1 MiB). Firebase Storage
+// tidak dipakai karena membutuhkan paket berbayar (Blaze).
+const KOLEKSI_BUKTI = "bukti_transaksi";
 
 // Fungsi internal untuk mencatat jejak audit
 async function catatLogAktivitas(aksi, idJurnal, detailKeterangan) {
@@ -32,7 +37,7 @@ async function catatLogAktivitas(aksi, idJurnal, detailKeterangan) {
     }
 }
 
-export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = null) {
+export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = null, buktiBaru = null) {
     try {
         const isEdit = Boolean(editIdJurnal);
 
@@ -86,6 +91,17 @@ export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = nul
             }
         });
 
+        // Simpan berkas bukti transaksi (jika ada unggahan baru) sebagai satu
+        // dokumen tersendiri, atomik bersama baris-baris jurnal di atas.
+        if (buktiBaru) {
+            batch.set(doc(db, KOLEKSI_BUKTI, headerData.id_jurnal), {
+                data: buktiBaru.data,
+                mimeType: buktiBaru.mimeType,
+                namaFile: buktiBaru.namaFile,
+                uploadedAt: new Date().toISOString()
+            });
+        }
+
         await batch.commit();
 
         // Catat jejak audit ke database
@@ -129,7 +145,7 @@ export async function ambilSemuaJurnalPusat(batasiJumlah = null) {
                     lawan_transaksi: data.lawan_transaksi || '',
                     sifat_transaksi: data.sifat_transaksi || 'Tunai',
                     jatuh_tempo: data.jatuh_tempo || '',
-                    link_bukti: data.link_bukti || '',
+                    punya_bukti: Boolean(data.punya_bukti),
                     kode_pajak: data.kode_pajak || 'NON',
                     dpp_penjualan: parseFloat(data.dpp_penjualan) || 0,
                     total_debit: 0,
@@ -151,6 +167,16 @@ export async function ambilSemuaJurnalPusat(batasiJumlah = null) {
     }
 }
 
+export async function ambilBuktiTransaksi(id_jurnal) {
+    try {
+        const snap = await getDoc(doc(db, KOLEKSI_BUKTI, id_jurnal));
+        return snap.exists() ? snap.data() : null;
+    } catch (error) {
+        console.error("Gagal mengambil bukti transaksi:", error);
+        return null;
+    }
+}
+
 export async function hapusJurnalPusat(id_jurnal, catatLog = true) {
     try {
         const q = query(collection(db, KOLEKSI_UTAMA), where("id_jurnal", "==", id_jurnal));
@@ -169,6 +195,8 @@ export async function hapusJurnalPusat(id_jurnal, catatLog = true) {
 
         const batch = writeBatch(db);
         querySnapshot.forEach(docSnap => batch.delete(doc(db, KOLEKSI_UTAMA, docSnap.id)));
+        // Ikut hapus berkas bukti terkait jika ada (aman meski dokumennya tidak ada)
+        batch.delete(doc(db, KOLEKSI_BUKTI, id_jurnal));
         await batch.commit();
 
         if (catatLog) {
