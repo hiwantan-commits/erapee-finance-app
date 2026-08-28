@@ -60,3 +60,86 @@ select.form-input-custom {
     background-size: 1rem;
     padding-right: 2.5rem;
 }
+
+/* ==================== Komponen "Elegant" (gaya Claude.ai) ==================== */
+/* Class-class ini SENGAJA baru dan HANYA dipakai oleh halaman yang menandai
+   <body data-tema="elegant"> (lihat js/component.js). Halaman lain tidak
+   mereferensikan class ini sama sekali, jadi menambahkannya di sini tidak
+   berdampak apa pun ke 14 halaman yang belum ikut rollout desain baru. */
+
+.btn-elegant-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: #D97757;
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.75rem;
+    transition: background-color 0.15s ease;
+}
+.btn-elegant-primary:hover {
+    background-color: #C2653F;
+}
+.btn-elegant-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-elegant-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: transparent;
+    color: #44403c;
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e7e5e4;
+    transition: background-color 0.15s ease;
+}
+.btn-elegant-secondary:hover {
+    background-color: #f5f5f4;
+}
+.dark .btn-elegant-secondary {
+    color: #d6d3d1;
+    border-color: #292524;
+}
+.dark .btn-elegant-secondary:hover {
+    background-color: #1c1917;
+}
+
+.form-input-elegant {
+    width: 100%;
+    background-color: #ffffff;
+    border: 1px solid #e7e5e4;
+    border-radius: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    color: #1c1917;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.form-input-elegant:focus {
+    border-color: #D97757;
+    box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.15);
+}
+.form-input-elegant::placeholder {
+    color: #a8a29e;
+}
+.form-input-elegant:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.dark .form-input-elegant {
+    background-color: #1c1917;
+    border-color: #292524;
+    color: #f5f5f4;
+}
+.dark .form-input-elegant::placeholder {
+    color: #78716c;
+}

@@ -112,11 +112,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // Fungsi pembantu untuk notifikasi UI
 function tampilkanPesan(element, text, color) {
-    element.classList.remove("hidden", "bg-red-50", "text-red-700", "border-red-200", "bg-green-50", "text-green-700", "border-green-200");
+    element.classList.remove(
+        "hidden",
+        "bg-red-50", "text-red-700", "border-red-200",
+        "dark:bg-red-900/20", "dark:text-red-400", "dark:border-red-900/40",
+        "bg-green-50", "text-green-700", "border-green-200",
+        "dark:bg-emerald-900/20", "dark:text-emerald-400", "dark:border-emerald-900/40"
+    );
     element.innerText = text;
     if (color === "red") {
-        element.classList.add("bg-red-50", "text-red-700", "border-red-200");
+        element.classList.add("bg-red-50", "text-red-700", "border-red-200", "dark:bg-red-900/20", "dark:text-red-400", "dark:border-red-900/40");
     } else {
-        element.classList.add("bg-green-50", "text-green-700", "border-green-200");
+        element.classList.add("bg-green-50", "text-green-700", "border-green-200", "dark:bg-emerald-900/20", "dark:text-emerald-400", "dark:border-emerald-900/40");
     }
 }

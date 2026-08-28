@@ -4,11 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil & Pengaturan Akun | PT ERAPEE Anugrah Sejahtera</title>
+    <!-- Terapkan tema gelap/terang SEBELUM body dirender (mencegah flash
+         terang->gelap saat halaman dimuat, membaca preferensi tersimpan) -->
+    <script>
+        (function() {
+            try {
+                if (localStorage.getItem('erapee_tema') === 'dark') {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
     <link rel="stylesheet" href="css/style.css">
     <style>body.auth-pending { visibility: hidden; }</style>
 </head>
-<body class="text-gray-800 bg-gray-50 auth-pending">
+<body data-tema="elegant" class="text-stone-900 dark:text-stone-100 bg-stone-50 dark:bg-stone-950 auth-pending">
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
         <div id="sidebar-container"></div>
@@ -19,67 +33,65 @@
 
             <main class="p-4 md:p-8 max-w-5xl mx-auto w-full">
                 <!-- Header Profil -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-800">Profil & Pengaturan Akun</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Kelola informasi identitas akun dan perbarui keamanan (kata sandi) Anda</p>
-                    </div>
+                <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 md:p-8 shadow-sm mb-6">
+                    <h2 class="text-xl font-semibold text-stone-900 dark:text-stone-50">Profil & Pengaturan Akun</h2>
+                    <p class="text-xs text-stone-400 dark:text-stone-500 mt-0.5">Kelola informasi identitas akun dan perbarui keamanan (kata sandi) Anda</p>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Kartu Informasi Akun -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 h-fit">
-                        <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 shadow-sm h-fit">
+                        <div class="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
                             <span class="text-2xl">👤</span>
-                            <h3 class="font-bold text-gray-800 text-base">Informasi Sesi Saat Ini</h3>
+                            <h3 class="font-semibold text-stone-900 dark:text-stone-50 text-base">Informasi Sesi Saat Ini</h3>
                         </div>
-                        
+
                         <div class="space-y-5">
                             <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Nama Lengkap (Tampil di Header)</p>
+                                <p class="text-[10px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-1.5">Nama Lengkap (Tampil di Header)</p>
                                 <div class="flex gap-2">
-                                    <input type="text" id="inputNamaPengguna" placeholder="Masukkan nama lengkap Anda" maxlength="60" class="form-input-custom text-sm flex-1">
-                                    <button type="button" id="btnSimpanNama" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 rounded-xl transition shrink-0">Simpan</button>
+                                    <input type="text" id="inputNamaPengguna" placeholder="Masukkan nama lengkap Anda" maxlength="60" class="form-input-elegant flex-1">
+                                    <button type="button" id="btnSimpanNama" class="btn-elegant-primary shrink-0">Simpan</button>
                                 </div>
                                 <p id="pesanNama" class="hidden mt-2 p-2.5 text-xs rounded-lg font-medium border text-center"></p>
                             </div>
                             <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Alamat Email Terdaftar</p>
-                                <p id="userEmail" class="font-semibold text-gray-800 bg-gray-50 p-3 rounded-xl border border-gray-100 text-sm">Memuat data...</p>
+                                <p class="text-[10px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-1.5">Alamat Email Terdaftar</p>
+                                <p id="userEmail" class="font-medium text-stone-800 dark:text-stone-100 bg-stone-50 dark:bg-stone-800/60 p-3 rounded-xl border border-stone-100 dark:border-stone-800 text-sm">Memuat data...</p>
                             </div>
                             <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Hak Akses Sistem (Role)</p>
-                                <p id="userRole" class="font-bold text-indigo-700 bg-indigo-50 p-3 rounded-xl border border-indigo-100 text-sm inline-block">Memuat data...</p>
+                                <p class="text-[10px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-1.5">Hak Akses Sistem (Role)</p>
+                                <p id="userRole" class="font-medium text-[#D97757] bg-[#D97757]/10 p-3 rounded-xl border border-[#D97757]/20 text-sm inline-block">Memuat data...</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Kartu Ganti Kata Sandi -->
-                    <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
                             <span class="text-2xl">🔐</span>
-                            <h3 class="font-bold text-gray-800 text-base">Pembaruan Kata Sandi</h3>
+                            <h3 class="font-semibold text-stone-900 dark:text-stone-50 text-base">Pembaruan Kata Sandi</h3>
                         </div>
-                        
+
                         <!-- Area Pesan Notifikasi Dinamis -->
                         <div id="pesanNotifikasi" class="hidden mb-5 p-3 text-xs rounded-xl font-medium border text-center transition-all duration-300"></div>
 
                         <form id="formGantiPassword" class="space-y-5">
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Kata Sandi Baru</label>
-                                <input type="password" id="newPassword" placeholder="Minimal 6 karakter" class="form-input-custom text-sm" required minlength="6">
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Kata Sandi Baru</label>
+                                <input type="password" id="newPassword" placeholder="Minimal 6 karakter" class="form-input-elegant" required minlength="6">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Konfirmasi Kata Sandi Baru</label>
-                                <input type="password" id="confirmPassword" placeholder="Ketik ulang kata sandi baru" class="form-input-custom text-sm" required minlength="6">
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Konfirmasi Kata Sandi Baru</label>
+                                <input type="password" id="confirmPassword" placeholder="Ketik ulang kata sandi baru" class="form-input-elegant" required minlength="6">
                             </div>
-                            
+
                             <div class="pt-2">
-                                <button type="submit" id="btnSimpanPassword" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-sm">
+                                <button type="submit" id="btnSimpanPassword" class="btn-elegant-primary w-full">
                                     Simpan Kata Sandi Baru
                                 </button>
                             </div>
-                            <p class="text-[10px] text-gray-400 text-center mt-3 leading-relaxed">
+                            <p class="text-[10px] text-stone-400 dark:text-stone-500 text-center mt-3 leading-relaxed">
                                 Catatan: Jika sistem mendeteksi sesi Anda sudah berlangsung terlalu lama, Anda mungkin akan diminta untuk melakukan login ulang demi memverifikasi otoritas perubahan sandi ini.
                             </p>
                         </form>
