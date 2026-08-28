@@ -1,6 +1,7 @@
 // js/db.js - Lapisan Akses Data dengan Otomatisasi Audit Trail
 import { CONFIG, db } from "./config.js";
-import { collection, addDoc, getDocs, query, where, deleteDoc, doc, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, addDoc, getDocs, query, where, deleteDoc, doc, limit, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { cekApakahPeriodeTerkunci } from "./closing-period.js";
 
 const KOLEKSI_UTAMA = CONFIG.COLLECTION_NAME || "jurnal_transaksi";
 const KOLEKSI_LOG = "activity_logs";
@@ -34,11 +35,40 @@ async function catatLogAktivitas(aksi, idJurnal, detailKeterangan) {
 export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = null) {
     try {
         const isEdit = Boolean(editIdJurnal);
-        if (isEdit) {
-            await hapusJurnalPusat(editIdJurnal, false); // Hapus data lama tanpa double log
+
+        // Tolak jika tanggal transaksi (baru) berada pada periode yang sudah ditutup buku
+        const periodeBaruTerkunci = await cekApakahPeriodeTerkunci(headerData.tanggal);
+        if (periodeBaruTerkunci) {
+            return { success: false, error: "Periode akuntansi untuk tanggal transaksi ini telah ditutup buku (Closed Period)." };
         }
 
-        const batchPromises = [];
+        // Cegah duplikasi No. Bukti antar transaksi berbeda
+        if (headerData.no_bukti) {
+            const qDup = query(collection(db, KOLEKSI_UTAMA), where("no_bukti", "==", headerData.no_bukti));
+            const dupSnap = await getDocs(qDup);
+            const adaDuplikat = dupSnap.docs.some(d => d.data().id_jurnal !== headerData.id_jurnal);
+            if (adaDuplikat) {
+                return { success: false, error: `No. Bukti "${headerData.no_bukti}" sudah digunakan oleh transaksi lain. Gunakan nomor lain.` };
+            }
+        }
+
+        // Gunakan satu batch atomik untuk hapus baris lama (jika edit) & simpan baris baru,
+        // agar tidak ada kondisi "setengah tersimpan" jika koneksi terputus di tengah proses.
+        const batch = writeBatch(db);
+
+        if (isEdit) {
+            const qOld = query(collection(db, KOLEKSI_UTAMA), where("id_jurnal", "==", editIdJurnal));
+            const oldSnap = await getDocs(qOld);
+            if (!oldSnap.empty) {
+                const tanggalLama = oldSnap.docs[0].data().tanggal;
+                const periodeLamaTerkunci = await cekApakahPeriodeTerkunci(tanggalLama);
+                if (periodeLamaTerkunci) {
+                    return { success: false, error: "Transaksi asli berada pada periode yang telah ditutup buku, tidak dapat diubah." };
+                }
+                oldSnap.forEach(docSnap => batch.delete(doc(db, KOLEKSI_UTAMA, docSnap.id)));
+            }
+        }
+
         rowsData.forEach(row => {
             const debitVal = parseFloat(row.debit) || 0;
             const kreditVal = parseFloat(row.kredit) || 0;
@@ -52,10 +82,11 @@ export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = nul
                     kredit: kreditVal,
                     timestamp: new Date()
                 };
-                batchPromises.push(addDoc(collection(db, KOLEKSI_UTAMA), rowData));
+                batch.set(doc(collection(db, KOLEKSI_UTAMA)), rowData);
             }
         });
-        await Promise.all(batchPromises);
+
+        await batch.commit();
 
         // Catat jejak audit ke database
         await catatLogAktivitas(
@@ -71,9 +102,14 @@ export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = nul
     }
 }
 
-export async function ambilSemuaJurnalPusat(batasiJumlah = 500) {
+export async function ambilSemuaJurnalPusat(batasiJumlah = null) {
     try {
-        const q = query(collection(db, KOLEKSI_UTAMA), limit(batasiJumlah));
+        // Catatan: sebelumnya ada limit(500) default yang membuat data terpotong
+        // secara arbitrer (tanpa orderBy) begitu transaksi melebihi 500 dokumen,
+        // sehingga laporan bisa diam-diam menampilkan data tidak lengkap.
+        // Sekarang seluruh data diambil kecuali caller memang meminta batas eksplisit.
+        const baseQuery = collection(db, KOLEKSI_UTAMA);
+        const q = batasiJumlah ? query(baseQuery, limit(batasiJumlah)) : query(baseQuery);
         const querySnapshot = await getDocs(q);
         let groupedJurnal = {};
 
@@ -119,11 +155,21 @@ export async function hapusJurnalPusat(id_jurnal, catatLog = true) {
     try {
         const q = query(collection(db, KOLEKSI_UTAMA), where("id_jurnal", "==", id_jurnal));
         const querySnapshot = await getDocs(q);
-        const deletePromises = [];
-        querySnapshot.forEach(docSnap => {
-            deletePromises.push(deleteDoc(doc(db, KOLEKSI_UTAMA, docSnap.id)));
-        });
-        await Promise.all(deletePromises);
+
+        if (querySnapshot.empty) {
+            return { success: false, error: "Data jurnal tidak ditemukan." };
+        }
+
+        // Tolak penghapusan jika transaksi berada pada periode yang sudah ditutup buku
+        const tanggalTransaksi = querySnapshot.docs[0].data().tanggal;
+        const periodeTerkunci = await cekApakahPeriodeTerkunci(tanggalTransaksi);
+        if (periodeTerkunci) {
+            return { success: false, error: "Transaksi berada pada periode yang telah ditutup buku (Closed Period), tidak dapat dihapus." };
+        }
+
+        const batch = writeBatch(db);
+        querySnapshot.forEach(docSnap => batch.delete(doc(db, KOLEKSI_UTAMA, docSnap.id)));
+        await batch.commit();
 
         if (catatLog) {
             await catatLogAktivitas("DELETE JURNAL", id_jurnal, `Penghapusan seluruh baris transaksi untuk ID ${id_jurnal}`);

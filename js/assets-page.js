@@ -1,5 +1,6 @@
 // js/assets-page.js - Controller untuk aset-tetap.html
 import { ambilSemuaJurnalPusat } from "./db.js";
+import { escapeHtml } from "./utils.js";
 
 async function muatDataAset() {
     try {
@@ -16,9 +17,9 @@ async function muatDataAset() {
                         totalPerolehan += nilaiDebit;
                         rowsAsetHTML += `
                             <tr>
-                                <td class="p-3 font-bold text-indigo-700">${jurnal.id_jurnal}<div class="text-[11px] text-gray-400 font-normal">${jurnal.tanggal}</div></td>
-                                <td class="p-3"><div class="font-medium text-gray-800">${jurnal.no_bukti}</div><div class="text-[11px] text-gray-500">${jurnal.keterangan || '-'}</div></td>
-                                <td class="p-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 font-semibold rounded">${baris.kode_akun} - ${baris.nama_akun}</span></td>
+                                <td class="p-3 font-bold text-indigo-700">${escapeHtml(jurnal.id_jurnal)}<div class="text-[11px] text-gray-400 font-normal">${escapeHtml(jurnal.tanggal)}</div></td>
+                                <td class="p-3"><div class="font-medium text-gray-800">${escapeHtml(jurnal.no_bukti)}</div><div class="text-[11px] text-gray-500">${escapeHtml(jurnal.keterangan) || '-'}</div></td>
+                                <td class="p-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 font-semibold rounded">${escapeHtml(baris.kode_akun)} - ${escapeHtml(baris.nama_akun)}</span></td>
                                 <td class="p-3 text-right font-bold text-gray-800">${nilaiDebit.toLocaleString('id-ID')}</td>
                             </tr>
                         `;

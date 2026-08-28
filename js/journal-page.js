@@ -5,6 +5,7 @@ import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/f
 import { CONFIG, db } from "./config.js";
 import { simpanJurnalPusat, ambilSemuaJurnalPusat } from "./db.js";
 import { cekApakahPeriodeTerkunci } from "./closing-period.js";
+import { escapeHtml } from "./utils.js";
 
 // Inisialisasi Firebase Storage
 const firebaseApp = initializeApp(CONFIG.FIREBASE_CONFIG);
@@ -151,7 +152,8 @@ async function inisialisasiData() {
             snapUnit.forEach(d => units.push(d.data()));
             selectUnit.innerHTML = '<option value="">Pilih Unit...</option>';
             units.forEach(u => {
-                selectUnit.innerHTML += `<option value="${u.kode} - ${u.nama}">${u.kode} - ${u.nama}</option>`;
+                const label = escapeHtml(u.kode) + " - " + escapeHtml(u.nama);
+                selectUnit.innerHTML += `<option value="${label}">${label}</option>`;
             });
         }
     } catch (err) {}
@@ -165,7 +167,8 @@ async function inisialisasiData() {
         
         let datalistHtml = '<datalist id="coaList">';
         coaList.forEach(coa => {
-            datalistHtml += `<option value="${coa.kode} - ${coa.nama}"></option>`;
+            const label = escapeHtml(coa.kode) + " - " + escapeHtml(coa.nama);
+            datalistHtml += `<option value="${label}"></option>`;
         });
         datalistHtml += '</datalist>';
         
@@ -208,9 +211,9 @@ async function inisialisasiData() {
                 document.getElementById('status_jurnal').value = jurnalTarget.status || 'POSTED';
                 
                 document.getElementById('link_bukti').value = jurnalTarget.link_bukti || '';
-                if (jurnalTarget.link_bukti) {
+                if (jurnalTarget.link_bukti && /^https?:\/\//i.test(jurnalTarget.link_bukti)) {
                     const statusUpload = document.getElementById('statusUpload');
-                    statusUpload.innerHTML = `✅ <a href="${jurnalTarget.link_bukti}" target="_blank" class="text-indigo-600 underline">Lihat File Tersimpan</a> (Pilih berkas baru untuk mengganti)`;
+                    statusUpload.innerHTML = `✅ <a href="${escapeHtml(jurnalTarget.link_bukti)}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 underline">Lihat File Tersimpan</a> (Pilih berkas baru untuk mengganti)`;
                     statusUpload.classList.remove('hidden');
                 }
 

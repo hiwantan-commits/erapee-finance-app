@@ -2,6 +2,7 @@
 import { db } from "./config.js";
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { escapeHtml } from "./utils.js";
 
 async function muatDashboard() {
     try {
@@ -130,8 +131,8 @@ async function muatDashboard() {
                     const labaU = dataU.pendapatan - dataU.beban;
                     let tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-${u.color}-100 text-${u.color}-700 rounded mr-1 font-mono">${u.kode}</span> ${u.nama}</td>
-                        <td class="p-3 text-gray-500">${u.klasifikasi}</td>
+                        <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-${u.color}-100 text-${u.color}-700 rounded mr-1 font-mono">${escapeHtml(u.kode)}</span> ${escapeHtml(u.nama)}</td>
+                        <td class="p-3 text-gray-500">${escapeHtml(u.klasifikasi)}</td>
                         <td class="p-3 text-right">${dataU.pendapatan === 0 ? '-' : dataU.pendapatan.toLocaleString('id-ID')}</td>
                         <td class="p-3 text-right">${dataU.beban === 0 ? '-' : dataU.beban.toLocaleString('id-ID')}</td>
                         <td class="p-3 text-right ${labaU > 0 ? 'text-green-600 font-semibold' : (labaU < 0 ? 'text-red-600 font-semibold' : '')}">${labaU === 0 ? '-' : labaU.toLocaleString('id-ID')}</td>

@@ -1,0 +1,108 @@
+rules_version = '2';
+
+// =====================================================================
+// PENTING: File ini HARUS di-paste manual ke Firebase Console
+// (Firestore Database -> Rules -> Publish), atau di-deploy lewat
+// Firebase CLI ("firebase deploy --only firestore:rules").
+// Push ke GitHub/Vercel TIDAK mengubah rules yang aktif di Firestore,
+// karena Vercel hanya meng-host file statis, bukan konfigurasi Firebase.
+// =====================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Helper RBAC ----
+    // Skema ID dokumen koleksi 'users' adalah EMAIL MENTAH pengguna
+    // (contoh: "nama@contoh.com"), sesuai cara login-page.js mencari role.
+    function emailSaatIni() {
+      return request.auth != null ? request.auth.token.email : null;
+    }
+
+    function sudahLogin() {
+      return request.auth != null;
+    }
+
+    function rolePenggunaSaatIni() {
+      // Bootstrap: founder/Super Admin pertama bisa saja belum punya dokumen
+      // di koleksi 'users'. Disarankan tetap membuat dokumen
+      // users/hi.wantan@gmail.com dengan role "Super Admin" di Firebase
+      // Console agar tidak bergantung pada pengecualian ini.
+      return sudahLogin() && emailSaatIni() == "hi.wantan@gmail.com"
+        ? "Super Admin"
+        : (sudahLogin() && exists(/databases/$(database)/documents/users/$(emailSaatIni()))
+            ? get(/databases/$(database)/documents/users/$(emailSaatIni())).data.role
+            : null);
+    }
+
+    function adalahSuperAdmin() {
+      return rolePenggunaSaatIni() == "Super Admin";
+    }
+
+    function adalahAdminKeAtas() {
+      return rolePenggunaSaatIni() in ["Super Admin", "Admin"];
+    }
+
+    // Boleh input/ubah transaksi & master data: Super Admin, Admin, Akuntan
+    function adalahOperator() {
+      return rolePenggunaSaatIni() in ["Super Admin", "Admin", "Akuntan"];
+    }
+
+    // Semua role internal yang sah (termasuk Auditor, read-only)
+    function adalahPenggunaInternal() {
+      return rolePenggunaSaatIni() in ["Super Admin", "Admin", "Akuntan", "Auditor"];
+    }
+
+    // ---- Jurnal Transaksi (baris-baris jurnal akuntansi) ----
+    match /jurnal_transaksi/{docId} {
+      allow read: if adalahPenggunaInternal();
+      allow create, delete: if adalahOperator();
+      allow update: if false; // Aplikasi selalu hapus lalu buat baru saat edit, tidak pernah update baris
+    }
+
+    // ---- Log Aktivitas (Audit Trail) - harus tidak bisa diubah/dihapus ----
+    match /activity_logs/{docId} {
+      allow read: if adalahPenggunaInternal();
+      allow create: if adalahOperator();
+      allow update, delete: if false; // Audit trail bersifat permanen (append-only)
+    }
+
+    // ---- Manajemen Pengguna & Role (RBAC) ----
+    match /users/{emailId} {
+      // Setiap pengguna login boleh baca datanya sendiri (untuk cek role saat login).
+      // Super Admin boleh baca dokumen siapa saja.
+      allow get: if sudahLogin() && (emailId == emailSaatIni() || adalahSuperAdmin());
+      // Melihat SELURUH daftar pengguna hanya untuk Super Admin (halaman Manajemen Pengguna).
+      allow list: if adalahSuperAdmin();
+      // Hanya Super Admin yang boleh menetapkan/mencabut role pengguna lain.
+      allow write: if adalahSuperAdmin();
+    }
+
+    // ---- Master Data: Unit Usaha & Chart of Accounts ----
+    match /master_unit_usaha/{docId} {
+      allow read: if adalahPenggunaInternal();
+      allow write: if adalahOperator();
+    }
+
+    match /master_coa/{docId} {
+      allow read: if adalahPenggunaInternal();
+      allow write: if adalahOperator();
+    }
+
+    // ---- Pengaturan Sistem: Branding & Tutup Buku ----
+    match /pengaturan_sistem/{docId} {
+      allow read: if adalahPenggunaInternal();
+      // Branding hanya boleh diubah Super Admin; sisanya (tutup buku) Admin ke atas.
+      allow write: if docId == "branding" ? adalahSuperAdmin() : adalahAdminKeAtas();
+    }
+
+    // ---- Profil Perusahaan & Parameter Pajak ----
+    match /pengaturan/{docId} {
+      allow read, write: if adalahOperator();
+    }
+
+    // Tolak akses ke koleksi lain yang tidak terdaftar secara eksplisit di atas.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

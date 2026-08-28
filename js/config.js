@@ -17,7 +17,18 @@ export const CONFIG = {
     },
     
     // Nama koleksi database di Firestore untuk mencatat jurnal akuntansi
-    COLLECTION_NAME: "jurnal_transaksi"
+    COLLECTION_NAME: "jurnal_transaksi",
+
+    // Parameter tarif pajak terpusat, sesuai profil tarif di halaman Profil Pajak
+    TAX_RATES: {
+        // Tarif efektif PPN Non-Mewah: DPP Nilai Lain (11/12) x Tarif UU PPN (12%)
+        PPN_EFEKTIF: 0.11,
+        // Tarif PPh Pasal 23 atas jasa/sewa/dividen dll (tarif tetap, bukan progresif)
+        PPH23_JASA: 0.02
+        // Catatan: PPh Pasal 21 sengaja tidak diberi tarif tetap di sini karena
+        // menggunakan skema TER/progresif per lapisan penghasilan pegawai,
+        // sehingga tidak bisa diestimasi dengan satu persentase flat.
+    }
 };
 
 // Inisialisasi Firebase & Firestore agar bisa diakses global di seluruh halaman

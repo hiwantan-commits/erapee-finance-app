@@ -1,6 +1,7 @@
 // js/reports-page.js - Controller untuk laporan.html
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { kalkulasiLaporanKeuangan } from "./accounting.js";
+import { escapeHtml } from "./utils.js";
 
 async function muatHalamanLaporan() {
     try {
@@ -29,8 +30,8 @@ async function muatHalamanLaporan() {
                 const selisihSaldo = acc.totalDebit - acc.totalKredit;
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-3 font-mono font-bold text-indigo-700">${acc.kode}</td>
-                    <td class="p-3 font-medium text-gray-800">${acc.nama}</td>
+                    <td class="p-3 font-mono font-bold text-indigo-700">${escapeHtml(acc.kode)}</td>
+                    <td class="p-3 font-medium text-gray-800">${escapeHtml(acc.nama)}</td>
                     <td class="p-3 text-right">${acc.totalDebit === 0 ? '-' : acc.totalDebit.toLocaleString('id-ID')}</td>
                     <td class="p-3 text-right">${acc.totalKredit === 0 ? '-' : acc.totalKredit.toLocaleString('id-ID')}</td>
                     <td class="p-3 text-right font-bold text-gray-900">${selisihSaldo.toLocaleString('id-ID')}</td>

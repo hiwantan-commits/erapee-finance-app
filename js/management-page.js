@@ -2,6 +2,14 @@
 import { db } from "./config.js";
 import { ambilSemuaJurnalPusat, hapusJurnalPusat } from "./db.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { escapeHtml } from "./utils.js";
+
+// Mencegah CSV/Formula Injection: jika nilai teks diawali =, +, -, atau @,
+// Excel/Sheets bisa menafsirkannya sebagai formula saat file CSV dibuka.
+function amankanSelCsv(nilai) {
+    const teks = String(nilai ?? '');
+    return /^[=+\-@]/.test(teks) ? "'" + teks : teks;
+}
 
 window.dataJurnalGlobal = {};
 let listJurnalCache = [];
@@ -20,7 +28,8 @@ async function muatManajemenJurnal() {
             let unitOptions = '<option value="ALL">Semua Unit Usaha</option>';
             snapUnit.forEach(d => {
                 const u = d.data();
-                unitOptions += `<option value="${u.kode} - ${u.nama}">${u.kode} - ${u.nama}</option>`;
+                const label = escapeHtml(u.kode) + " - " + escapeHtml(u.nama);
+                unitOptions += `<option value="${label}">${label}</option>`;
             });
             selectFilter.innerHTML = unitOptions;
         }
@@ -78,16 +87,16 @@ function renderTabelDenganPagination(dataList) {
 
         tr.innerHTML = `
             <td class="p-3">
-                <div class="font-bold text-indigo-700">${jurnal.id_jurnal}</div>
-                <div class="text-xs text-gray-500 mt-0.5">${jurnal.tanggal}</div>
+                <div class="font-bold text-indigo-700">${escapeHtml(jurnal.id_jurnal)}</div>
+                <div class="text-xs text-gray-500 mt-0.5">${escapeHtml(jurnal.tanggal)}</div>
             </td>
             <td class="p-3">
-                <div class="font-semibold text-gray-800">${jurnal.unit_usaha || '-'}</div>
-                <div class="text-xs text-gray-500 font-mono mt-0.5">${jurnal.no_bukti}</div>
+                <div class="font-semibold text-gray-800">${escapeHtml(jurnal.unit_usaha) || '-'}</div>
+                <div class="text-xs text-gray-500 font-mono mt-0.5">${escapeHtml(jurnal.no_bukti)}</div>
             </td>
             <td class="p-3">
-                <div class="font-medium text-gray-800">${jurnal.lawan_transaksi || '-'}</div>
-                <div class="text-xs text-gray-500 truncate max-w-xs mt-0.5">${jurnal.keterangan || '-'}</div>
+                <div class="font-medium text-gray-800">${escapeHtml(jurnal.lawan_transaksi) || '-'}</div>
+                <div class="text-xs text-gray-500 truncate max-w-xs mt-0.5">${escapeHtml(jurnal.keterangan) || '-'}</div>
             </td>
             <td class="p-3 text-right">
                 <div class="font-bold text-gray-800">${jurnal.total_debit.toLocaleString('id-ID')}</div>
@@ -202,9 +211,9 @@ window.eksporKeExcel = function() {
 
     listJurnal.forEach(j => {
         let row = [
-            `"${j.id_jurnal}"`, `"${j.tanggal}"`, `"${j.no_bukti}"`, 
-            `"${j.unit_usaha || ''}"`, `"${j.lawan_transaksi || ''}"`, 
-            `"${(j.keterangan || '').replace(/"/g, '""')}"`, `"${j.status}"`, 
+            `"${amankanSelCsv(j.id_jurnal)}"`, `"${amankanSelCsv(j.tanggal)}"`, `"${amankanSelCsv(j.no_bukti)}"`,
+            `"${amankanSelCsv(j.unit_usaha || '')}"`, `"${amankanSelCsv(j.lawan_transaksi || '')}"`,
+            `"${amankanSelCsv((j.keterangan || '').replace(/"/g, '""'))}"`, `"${amankanSelCsv(j.status)}"`,
             j.total_debit, j.total_kredit
         ];
         csvContent += row.join(",") + "\r\n";
@@ -227,8 +236,8 @@ window.cetakVoucher = function(id_jurnal) {
     jurnal.rows.forEach((row, index) => {
         rowsHTML += "<tr>";
         rowsHTML += "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>" + (index + 1) + "</td>";
-        rowsHTML += "<td style='padding: 8px; border: 1px solid #ddd;'>" + row.kode_akun + " - " + row.nama_akun + "</td>";
-        rowsHTML += "<td style='padding: 8px; border: 1px solid #ddd;'>" + (row.memo_baris || '-') + "</td>";
+        rowsHTML += "<td style='padding: 8px; border: 1px solid #ddd;'>" + escapeHtml(row.kode_akun) + " - " + escapeHtml(row.nama_akun) + "</td>";
+        rowsHTML += "<td style='padding: 8px; border: 1px solid #ddd;'>" + (escapeHtml(row.memo_baris) || '-') + "</td>";
         rowsHTML += "<td style='padding: 8px; border: 1px solid #ddd; text-align: right;'>" + (parseFloat(row.debit)||0).toLocaleString('id-ID') + "</td>";
         rowsHTML += "<td style='padding: 8px; border: 1px solid #ddd; text-align: right;'>" + (parseFloat(row.kredit)||0).toLocaleString('id-ID') + "</td>";
         rowsHTML += "</tr>";
@@ -240,9 +249,9 @@ window.cetakVoucher = function(id_jurnal) {
     templateCetak += "<h2>PT ERAPEE Anugrah Sejahtera</h2>";
     templateCetak += "<div style='text-align:center;font-weight:bold;margin-bottom:30px;'>BUKTI JURNAL (VOUCHER)</div>";
     templateCetak += "<table style='width:100%;margin-bottom:20px;'>";
-    templateCetak += "<tr><td style='width:15%;font-weight:bold;'>ID Jurnal</td><td style='width:35%;'>: " + jurnal.id_jurnal + "</td><td style='width:15%;font-weight:bold;'>Tanggal</td><td style='width:35%;'>: " + jurnal.tanggal + "</td></tr>";
-    templateCetak += "<tr><td style='font-weight:bold;'>No. Bukti</td><td>: " + jurnal.no_bukti + "</td><td style='font-weight:bold;'>Status</td><td>: " + jurnal.status + "</td></tr>";
-    templateCetak += "<tr><td style='font-weight:bold;'>Unit Usaha</td><td colspan='3'>: " + (jurnal.unit_usaha || '-') + "</td></tr>";
+    templateCetak += "<tr><td style='width:15%;font-weight:bold;'>ID Jurnal</td><td style='width:35%;'>: " + escapeHtml(jurnal.id_jurnal) + "</td><td style='width:15%;font-weight:bold;'>Tanggal</td><td style='width:35%;'>: " + escapeHtml(jurnal.tanggal) + "</td></tr>";
+    templateCetak += "<tr><td style='font-weight:bold;'>No. Bukti</td><td>: " + escapeHtml(jurnal.no_bukti) + "</td><td style='font-weight:bold;'>Status</td><td>: " + escapeHtml(jurnal.status) + "</td></tr>";
+    templateCetak += "<tr><td style='font-weight:bold;'>Unit Usaha</td><td colspan='3'>: " + (escapeHtml(jurnal.unit_usaha) || '-') + "</td></tr>";
     templateCetak += "</table>";
     templateCetak += "<table class='data-table'><thead><tr><th>No</th><th>Kode & Nama Akun</th><th>Memo</th><th>Debit (Rp)</th><th>Kredit (Rp)</th></tr></thead><tbody>";
     templateCetak += rowsHTML;
