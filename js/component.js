@@ -221,7 +221,7 @@ function muatHeader() {
                     ${escapeHtml(currentUser.email)}
                 </a>
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
-                    ● Terhubung ke Firebase
+                    ● Sistem Online
                 </span>
             </div>
         </header>
