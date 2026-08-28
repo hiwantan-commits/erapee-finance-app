@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil & Parameter Pajak | PT ERAPEE</title>
+    <!-- Inisialisasi tema (terpusat di js/tema-*.js, lihat komentar di file
+         tersebut - supaya perubahan logika tema cukup di satu tempat) -->
+    <script src="js/tema-fouc-init.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tema-tailwind-config.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>body.auth-pending { visibility: hidden; }</style>
 </head>
-<body class="text-gray-800 bg-gray-50 auth-pending">
+<body data-tema="elegant" class="text-stone-900 dark:text-stone-100 bg-stone-50 dark:bg-stone-950 auth-pending">
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
         <div id="sidebar-container"></div>
@@ -19,82 +23,86 @@
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
                 <!-- Form Edit Legalitas Perusahaan -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
-                    <div class="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
+                <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-6">
+                    <div class="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
+                        <svg class="w-5 h-5 text-stone-400 dark:text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="M9 13h6M9 17h6"/></svg>
                         <div>
-                            <h2 class="text-lg font-bold text-gray-800">Edit Identitas Perseroan & Legalitas Akta</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Perbarui nomor akta, NPWP, dan status PKP untuk kepatuhan sistem Coretax</p>
+                            <h2 class="h-elegant-3 text-stone-900 dark:text-stone-50">Edit Identitas Perseroan & Legalitas Akta</h2>
+                            <p class="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Perbarui nomor akta, NPWP, dan status PKP untuk kepatuhan sistem Coretax</p>
                         </div>
                     </div>
 
                     <form id="formProfil" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Nomor Akta Pendirian</label>
-                                <input type="text" id="nomor_akta" placeholder="Contoh: Akta No. 01 Tahun 2026" class="form-input-custom" required>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Nomor Akta Pendirian</label>
+                                <input type="text" id="nomor_akta" placeholder="Contoh: Akta No. 01 Tahun 2026" class="form-input-elegant" required>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Tanggal Akta / Pendirian</label>
-                                <input type="date" id="tanggal_akta" class="form-input-custom" required>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Tanggal Akta / Pendirian</label>
+                                <input type="date" id="tanggal_akta" class="form-input-elegant" required>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">NPWP Perseroan</label>
-                                <input type="text" id="npwp_perseroan" placeholder="Contoh: 00.000.000.0-000.000" class="form-input-custom font-mono" required>
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">NPWP Perseroan</label>
+                                <input type="text" id="npwp_perseroan" placeholder="Contoh: 00.000.000.0-000.000" class="form-input-elegant font-mono" required>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Status PKP</label>
-                                <select id="status_pkp" class="form-input-custom font-bold">
+                                <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Status PKP</label>
+                                <select id="status_pkp" class="form-input-elegant font-semibold">
                                     <option value="Belum PKP">Belum PKP (Non-PKP)</option>
                                     <option value="PKP Terdaftar">PKP Terdaftar (Pengusaha Kena Pajak)</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="pt-4 flex justify-end">
-                            <button type="submit" id="btnSimpanProfil" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2.5 rounded-xl transition shadow-sm text-sm">
+                        <div class="pt-2 flex justify-end">
+                            <button type="submit" id="btnSimpanProfil" class="btn-elegant-primary">
                                 Simpan Perubahan Profil
                             </button>
                         </div>
-                        <div id="alertProfilSuccess" class="hidden p-3 bg-green-50 text-green-700 rounded-lg text-sm text-center font-medium">
+                        <div id="alertProfilSuccess" class="hidden p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-sm text-center font-medium">
                             ✓ Profil legalitas berhasil diperbarui ke Cloud Firestore!
                         </div>
                     </form>
                 </div>
 
                 <!-- Parameter Pajak & Coretax -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm">
-                    <div class="mb-6 pb-4 border-b border-gray-100">
-                        <h2 class="text-lg font-bold text-gray-800">Parameter Perpajakan & Tarif Coretax 2026</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Ketentuan tarif pajak sesuai UU PPh/HPP & PMK terbaru</p>
+                <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
+                        <svg class="w-5 h-5 text-stone-400 dark:text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 20 4"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+                        <div>
+                            <h2 class="h-elegant-3 text-stone-900 dark:text-stone-50">Parameter Perpajakan & Tarif Coretax 2026</h2>
+                            <p class="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Ketentuan tarif pajak sesuai UU PPh/HPP & PMK terbaru</p>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-4">Parameter Pajak</th>
-                                    <th class="p-4">Nilai / Ketentuan</th>
-                                    <th class="p-4">Referensi Hukum / Catatan</th>
+                                <tr class="text-stone-400 dark:text-stone-500 text-xs normal-case tracking-normal border-b border-stone-100 dark:border-stone-800">
+                                    <th class="p-4 font-medium">Parameter Pajak</th>
+                                    <th class="p-4 font-medium">Nilai / Ketentuan</th>
+                                    <th class="p-4 font-medium">Referensi Hukum / Catatan</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
+                            <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
                                 <tr>
-                                    <td class="p-4 font-medium">Tarif Umum PPh Badan</td>
-                                    <td class="p-4 font-semibold text-indigo-600">22,0%</td>
-                                    <td class="p-4 text-xs text-gray-500">UU PPh / HPP - Berlaku sejak 2022</td>
+                                    <td class="p-4 font-medium text-stone-800 dark:text-stone-200">Tarif Umum PPh Badan</td>
+                                    <td class="p-4 font-semibold text-stone-700 dark:text-stone-300">22,0%</td>
+                                    <td class="p-4 text-xs text-stone-500 dark:text-stone-400">UU PPh / HPP - Berlaku sejak 2022</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-4 font-medium">Fasilitas Pasal 31E</td>
-                                    <td class="p-4 font-semibold text-indigo-600">Omzet s.d. Rp 50 Miliar</td>
-                                    <td class="p-4 text-xs text-gray-500">Fasilitas pengurangan tarif untuk peredaran bruto s.d. Rp 4,8 Miliar</td>
+                                    <td class="p-4 font-medium text-stone-800 dark:text-stone-200">Fasilitas Pasal 31E</td>
+                                    <td class="p-4 font-semibold text-stone-700 dark:text-stone-300">Omzet s.d. Rp 50 Miliar</td>
+                                    <td class="p-4 text-xs text-stone-500 dark:text-stone-400">Fasilitas pengurangan tarif untuk peredaran bruto s.d. Rp 4,8 Miliar</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-4 font-medium">Tarif PPN Undang-Undang</td>
-                                    <td class="p-4 font-semibold text-indigo-600">12,0%</td>
-                                    <td class="p-4 text-xs text-gray-500">Undang-Undang Harmonisasi Peraturan Perpajakan (HPP)</td>
+                                    <td class="p-4 font-medium text-stone-800 dark:text-stone-200">Tarif PPN Undang-Undang</td>
+                                    <td class="p-4 font-semibold text-stone-700 dark:text-stone-300">12,0%</td>
+                                    <td class="p-4 text-xs text-stone-500 dark:text-stone-400">Undang-Undang Harmonisasi Peraturan Perpajakan (HPP)</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-4 font-medium">Tarif Efektif PPN Non-Mewah</td>
-                                    <td class="p-4 font-semibold text-green-700">11,0% (DPP Nilai Lain 91,7%)</td>
-                                    <td class="p-4 text-xs text-gray-500">PMK Terbaru</td>
+                                    <td class="p-4 font-medium text-stone-800 dark:text-stone-200">Tarif Efektif PPN Non-Mewah</td>
+                                    <td class="p-4 font-semibold text-emerald-600 dark:text-emerald-400">11,0% (DPP Nilai Lain 91,7%)</td>
+                                    <td class="p-4 text-xs text-stone-500 dark:text-stone-400">PMK Terbaru</td>
                                 </tr>
                             </tbody>
                         </table>
