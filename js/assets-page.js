@@ -11,10 +11,31 @@ function formatRupiah(angka) {
     return "Rp " + Math.round(angka).toLocaleString('id-ID');
 }
 
+// Menu aksi per-baris memakai pola dropdown/3-titik, konsisten dengan
+// Manajemen Jurnal & Master Data. `encId` sudah di-encodeURIComponent oleh
+// pemanggil, tapi tetap disaring lagi untuk id panel HTML yang valid.
 function tombolAksiAsetHtml(encId) {
+    const idAman = String(encId).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const panelId = `menuAksiAset-${idAman}`;
     return `
-        <button onclick="window.editAset('${encId}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded text-[11px] font-bold transition">Edit</button>
-        <button onclick="window.hapusAset('${encId}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded text-[11px] font-bold transition">Hapus</button>
+        <div class="relative inline-block">
+            <button type="button" onclick="window.toggleDropdownElegant(event, '${panelId}')" class="btn-elegant-icon" title="Aksi">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="12" cy="19" r="1.75"/></svg>
+            </button>
+            <div id="${panelId}" class="hidden absolute right-0 mt-1 z-50" data-dropdown-elegant>
+                <div class="dropdown-elegant-panel">
+                    <button type="button" onclick="window.editAset('${encId}')" class="dropdown-elegant-item">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                        Edit
+                    </button>
+                    <div class="dropdown-elegant-divider"></div>
+                    <button type="button" onclick="window.hapusAset('${encId}')" class="dropdown-elegant-item dropdown-elegant-item-danger">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+                        Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
     `;
 }
 
@@ -22,7 +43,7 @@ async function muatDaftarAset() {
     const tbody = document.getElementById('tabelDaftarAset');
     const kartuContainer = document.getElementById('kartuDaftarAset');
     if (!tbody) return;
-    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Memuat daftar aset tetap...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-stone-400 dark:text-stone-500">Memuat daftar aset tetap...</td></tr>`;
 
     try {
         const snap = await getDocs(collection(db, KOLEKSI_ASET));
@@ -33,8 +54,8 @@ async function muatDaftarAset() {
         let totalPerolehan = 0, totalAkumulasi = 0, totalNilaiBuku = 0;
 
         if (daftarAset.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Belum ada aset tetap terdaftar. Tambahkan lewat form di atas.</td></tr>`;
-            if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Belum ada aset tetap terdaftar. Tambahkan lewat form di atas.</p>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-stone-400 dark:text-stone-500">Belum ada aset tetap terdaftar. Tambahkan lewat form di atas.</td></tr>`;
+            if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-stone-400 dark:text-stone-500 text-sm">Belum ada aset tetap terdaftar. Tambahkan lewat form di atas.</p>`;
         } else {
             const barisTabel = [];
             const kartuMobile = [];
@@ -48,39 +69,35 @@ async function muatDaftarAset() {
                 const encId = encodeURIComponent(aset.id);
 
                 barisTabel.push(`
-                    <tr id="row-aset-${aset.id}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                        <td class="p-3 text-xs font-medium text-gray-800">${escapeHtml(aset.nama_aset)}</td>
-                        <td class="p-3 text-xs text-gray-500">${escapeHtml(aset.tanggal_perolehan)}</td>
-                        <td class="p-3 text-xs"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-semibold">${escapeHtml(aset.kelompok)}</span><div class="text-[10px] text-gray-400 mt-0.5">${escapeHtml(aset.metode)}</div></td>
-                        <td class="p-3 text-xs text-right font-medium">${hasil.nilaiPerolehan.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-xs text-right text-amber-700">${Math.round(hasil.akumulasiPenyusutan).toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-xs text-right font-bold text-green-700">${Math.round(hasil.nilaiBuku).toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-center">
-                            <div class="flex justify-center items-center gap-1">
-                                ${tombolAksiAsetHtml(encId)}
-                            </div>
-                        </td>
+                    <tr id="row-aset-${aset.id}" class="hover:bg-stone-50 dark:hover:bg-stone-800/40 transition-colors">
+                        <td class="p-3 text-xs font-medium text-stone-800 dark:text-stone-200">${escapeHtml(aset.nama_aset)}</td>
+                        <td class="p-3 text-xs text-stone-500 dark:text-stone-400">${escapeHtml(aset.tanggal_perolehan)}</td>
+                        <td class="p-3 text-xs"><span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded font-semibold">${escapeHtml(aset.kelompok)}</span><div class="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">${escapeHtml(aset.metode)}</div></td>
+                        <td class="p-3 text-xs text-right font-medium text-stone-800 dark:text-stone-200">${hasil.nilaiPerolehan.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-xs text-right text-amber-600 dark:text-amber-400">${Math.round(hasil.akumulasiPenyusutan).toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-xs text-right font-bold text-emerald-600 dark:text-emerald-400">${Math.round(hasil.nilaiBuku).toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-center">${tombolAksiAsetHtml(encId)}</td>
                     </tr>
                 `);
 
                 kartuMobile.push(`
-                    <div id="kartu-aset-${aset.id}" class="border border-gray-100 rounded-xl p-4">
+                    <div id="kartu-aset-${aset.id}" class="border border-stone-100 dark:border-stone-800 rounded-xl p-4">
                         <div class="flex justify-between items-start gap-2 mb-2">
                             <div>
-                                <div class="font-bold text-gray-800 text-sm">${escapeHtml(aset.nama_aset)}</div>
-                                <div class="text-xs text-gray-500">${escapeHtml(aset.tanggal_perolehan)}</div>
+                                <div class="font-bold text-stone-900 dark:text-stone-100 text-sm">${escapeHtml(aset.nama_aset)}</div>
+                                <div class="text-xs text-stone-400 dark:text-stone-500">${escapeHtml(aset.tanggal_perolehan)}</div>
                             </div>
                             <div class="text-right">
-                                <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-semibold text-[11px]">${escapeHtml(aset.kelompok)}</span>
-                                <div class="text-[10px] text-gray-400 mt-0.5">${escapeHtml(aset.metode)}</div>
+                                <span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded font-semibold text-[11px]">${escapeHtml(aset.kelompok)}</span>
+                                <div class="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">${escapeHtml(aset.metode)}</div>
                             </div>
                         </div>
-                        <div class="grid grid-cols-3 gap-2 text-xs border-t border-gray-100 pt-2 mb-3">
-                            <div><p class="text-gray-400">Perolehan</p><p class="font-semibold">${hasil.nilaiPerolehan.toLocaleString('id-ID')}</p></div>
-                            <div><p class="text-gray-400">Penyusutan</p><p class="font-semibold text-amber-700">${Math.round(hasil.akumulasiPenyusutan).toLocaleString('id-ID')}</p></div>
-                            <div><p class="text-gray-400">Nilai Buku</p><p class="font-bold text-green-700">${Math.round(hasil.nilaiBuku).toLocaleString('id-ID')}</p></div>
+                        <div class="grid grid-cols-3 gap-2 text-xs border-t border-stone-100 dark:border-stone-800 pt-2 mb-3">
+                            <div><p class="text-stone-400 dark:text-stone-500">Perolehan</p><p class="font-semibold text-stone-700 dark:text-stone-300">${hasil.nilaiPerolehan.toLocaleString('id-ID')}</p></div>
+                            <div><p class="text-stone-400 dark:text-stone-500">Penyusutan</p><p class="font-semibold text-amber-600 dark:text-amber-400">${Math.round(hasil.akumulasiPenyusutan).toLocaleString('id-ID')}</p></div>
+                            <div><p class="text-stone-400 dark:text-stone-500">Nilai Buku</p><p class="font-bold text-emerald-600 dark:text-emerald-400">${Math.round(hasil.nilaiBuku).toLocaleString('id-ID')}</p></div>
                         </div>
-                        <div class="flex justify-end gap-1">
+                        <div class="flex justify-end">
                             ${tombolAksiAsetHtml(encId)}
                         </div>
                     </div>
@@ -103,8 +120,8 @@ async function muatDaftarAset() {
 
     } catch (error) {
         console.error("Gagal memuat daftar aset:", error);
-        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500">Gagal memuat data aset tetap.</td></tr>`;
-        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-red-500 text-sm">Gagal memuat data aset tetap.</p>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500 dark:text-red-400">Gagal memuat data aset tetap.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-red-500 dark:text-red-400 text-sm">Gagal memuat data aset tetap.</p>`;
     }
 }
 
@@ -113,11 +130,11 @@ window.editAset = function(encId) {
     const aset = window.dataAsetGlobal[id];
     if (!aset) return;
 
-    document.querySelectorAll('#tabelDaftarAset tr, #kartuDaftarAset > div').forEach(el => el.classList.remove('bg-amber-50'));
+    document.querySelectorAll('#tabelDaftarAset tr, #kartuDaftarAset > div').forEach(el => el.classList.remove('bg-amber-50', 'dark:bg-amber-900/20'));
     const activeRow = document.getElementById(`row-aset-${id}`);
-    if (activeRow) activeRow.classList.add('bg-amber-50');
+    if (activeRow) activeRow.classList.add('bg-amber-50', 'dark:bg-amber-900/20');
     const activeCard = document.getElementById(`kartu-aset-${id}`);
-    if (activeCard) activeCard.classList.add('bg-amber-50');
+    if (activeCard) activeCard.classList.add('bg-amber-50', 'dark:bg-amber-900/20');
 
     document.getElementById('editIdAset').value = id;
     document.getElementById('namaAset').value = aset.nama_aset || '';
@@ -128,21 +145,17 @@ window.editAset = function(encId) {
 
     const btn = document.getElementById('btnSimpanAset');
     btn.innerText = 'Update Aset';
-    btn.classList.replace('bg-indigo-600', 'bg-amber-500');
-    btn.classList.replace('hover:bg-indigo-700', 'hover:bg-amber-600');
     document.getElementById('btnBatalAset').classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 window.batalEditAset = function() {
-    document.querySelectorAll('#tabelDaftarAset tr, #kartuDaftarAset > div').forEach(el => el.classList.remove('bg-amber-50'));
+    document.querySelectorAll('#tabelDaftarAset tr, #kartuDaftarAset > div').forEach(el => el.classList.remove('bg-amber-50', 'dark:bg-amber-900/20'));
     document.getElementById('formAset').reset();
     document.getElementById('editIdAset').value = '';
 
     const btn = document.getElementById('btnSimpanAset');
     btn.innerText = 'Simpan Aset Tetap';
-    btn.classList.replace('bg-amber-500', 'bg-indigo-600');
-    btn.classList.replace('hover:bg-amber-600', 'hover:bg-indigo-700');
     document.getElementById('btnBatalAset').classList.add('hidden');
 };
 
@@ -174,10 +187,10 @@ async function muatRiwayatJurnalAset() {
                     if (nilaiDebit > 0) {
                         rowsHTML += `
                             <tr>
-                                <td class="p-3 font-bold text-indigo-700">${escapeHtml(jurnal.id_jurnal)}<div class="text-[11px] text-gray-400 font-normal">${escapeHtml(jurnal.tanggal)}</div></td>
-                                <td class="p-3"><div class="font-medium text-gray-800">${escapeHtml(jurnal.no_bukti)}</div><div class="text-[11px] text-gray-500">${escapeHtml(jurnal.keterangan) || '-'}</div></td>
-                                <td class="p-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 font-semibold rounded">${escapeHtml(baris.kode_akun)} - ${escapeHtml(baris.nama_akun)}</span></td>
-                                <td class="p-3 text-right font-bold text-gray-800">${nilaiDebit.toLocaleString('id-ID')}</td>
+                                <td class="p-3 font-bold text-stone-900 dark:text-stone-100">${escapeHtml(jurnal.id_jurnal)}<div class="text-[11px] text-stone-400 dark:text-stone-500 font-normal">${escapeHtml(jurnal.tanggal)}</div></td>
+                                <td class="p-3"><div class="font-medium text-stone-800 dark:text-stone-200">${escapeHtml(jurnal.no_bukti)}</div><div class="text-[11px] text-stone-500 dark:text-stone-400">${escapeHtml(jurnal.keterangan) || '-'}</div></td>
+                                <td class="p-3"><span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold rounded">${escapeHtml(baris.kode_akun)} - ${escapeHtml(baris.nama_akun)}</span></td>
+                                <td class="p-3 text-right font-bold text-stone-800 dark:text-stone-200">${nilaiDebit.toLocaleString('id-ID')}</td>
                             </tr>
                         `;
                     }
@@ -185,7 +198,7 @@ async function muatRiwayatJurnalAset() {
             });
         });
 
-        tbody.innerHTML = rowsHTML === "" ? `<tr><td colspan="4" class="p-8 text-center text-gray-400">Belum ada transaksi pembelian aset tetap tercatat di jurnal.</td></tr>` : rowsHTML;
+        tbody.innerHTML = rowsHTML === "" ? `<tr><td colspan="4" class="p-8 text-center text-stone-400 dark:text-stone-500">Belum ada transaksi pembelian aset tetap tercatat di jurnal.</td></tr>` : rowsHTML;
     } catch (error) {
         console.error("Gagal memuat riwayat jurnal aset:", error);
     }
