@@ -189,3 +189,117 @@ select.form-input-custom {
 .dark .form-input-elegant::placeholder {
     color: #78716c;
 }
+
+/* ---- Tab bergaya segmented control (referensi: tab "Semua/Milik Anda/..."
+   di Claude.ai) ---- */
+.tab-elegant {
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #78716c;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+}
+.tab-elegant:hover {
+    color: #292524;
+}
+.tab-elegant.is-active {
+    background-color: #e7e5e4;
+    color: #1c1917;
+}
+.dark .tab-elegant {
+    color: #a8a29e;
+}
+.dark .tab-elegant:hover {
+    color: #f5f5f4;
+}
+.dark .tab-elegant.is-active {
+    background-color: #292524;
+    color: #f5f5f4;
+}
+
+/* ---- Panel dropdown / mega menu (referensi: menu "Tambahkan", filter
+   Terjadwal di Claude.ai) ---- */
+.dropdown-elegant-panel {
+    background-color: #ffffff;
+    border: 1px solid #e7e5e4;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px -10px rgba(28, 25, 23, 0.15), 0 2px 6px -2px rgba(28, 25, 23, 0.08);
+    padding: 0.375rem;
+    min-width: 12rem;
+}
+.dropdown-elegant-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.625rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    color: #292524;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+}
+.dropdown-elegant-item:hover {
+    background-color: #f5f5f4;
+}
+.dropdown-elegant-item-danger {
+    color: #b91c1c;
+}
+.dropdown-elegant-item-danger:hover {
+    background-color: #fef2f2;
+}
+.dropdown-elegant-divider {
+    height: 1px;
+    background-color: #e7e5e4;
+    margin: 0.25rem 0;
+}
+.dark .dropdown-elegant-panel {
+    background-color: #1c1917;
+    border-color: #292524;
+}
+.dark .dropdown-elegant-item {
+    color: #e7e5e4;
+}
+.dark .dropdown-elegant-item:hover {
+    background-color: #292524;
+}
+.dark .dropdown-elegant-item-danger {
+    color: #f87171;
+}
+.dark .dropdown-elegant-item-danger:hover {
+    background-color: rgba(153, 27, 27, 0.2);
+}
+.dark .dropdown-elegant-divider {
+    background-color: #292524;
+}
+
+/* ---- Tombol ikon bulat (pemicu menu 3-titik, dst.) ---- */
+.btn-elegant-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    color: #78716c;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+.btn-elegant-icon:hover {
+    background-color: #f5f5f4;
+}
+.dark .btn-elegant-icon {
+    color: #a8a29e;
+}
+.dark .btn-elegant-icon:hover {
+    background-color: #292524;
+}

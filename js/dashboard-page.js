@@ -182,20 +182,30 @@ async function muatDashboard() {
         if (tbodyUnit) {
             tbodyUnit.innerHTML = ""; 
             
+            // Catatan: file ini eksklusif dipakai index.html, yang selalu
+            // memakai tema elegant - jadi warna di bawah langsung memakai
+            // palet stone/dark tanpa perlu percabangan mode.
+            const kelasBadgeUnit = 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300';
+            const kelasNamaUnit = 'text-stone-900 dark:text-stone-100';
+            const kelasKlasifikasi = 'text-stone-500 dark:text-stone-400';
+            const kelasLabaPositif = 'text-emerald-600 dark:text-emerald-400';
+            const kelasLabaNegatif = 'text-red-600 dark:text-red-400';
+            const kelasUtang = 'text-red-600 dark:text-red-400';
+
             if (unitUsahaMaster.length === 1 && unitUsahaMaster[0].kode === "SHARED") {
-                 tbodyUnit.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">Belum ada master data unit usaha.</td></tr>`;
+                 tbodyUnit.innerHTML = `<tr><td colspan="6" class="p-4 text-center ${kelasKlasifikasi}">Belum ada master data unit usaha.</td></tr>`;
             } else {
                 unitUsahaMaster.forEach(u => {
                     const dataU = dataPerUnit[u.kode] || { pendapatan: 0, beban: 0, utang: 0 };
                     const labaU = dataU.pendapatan - dataU.beban;
                     let tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="p-3 font-semibold text-gray-800"><span class="px-2 py-0.5 bg-${u.color}-100 text-${u.color}-700 rounded mr-1 font-mono">${escapeHtml(u.kode)}</span> ${escapeHtml(u.nama)}</td>
-                        <td class="p-3 text-gray-500">${escapeHtml(u.klasifikasi)}</td>
-                        <td class="p-3 text-right">${dataU.pendapatan === 0 ? '-' : dataU.pendapatan.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right">${dataU.beban === 0 ? '-' : dataU.beban.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right ${labaU > 0 ? 'text-green-600 font-semibold' : (labaU < 0 ? 'text-red-600 font-semibold' : '')}">${labaU === 0 ? '-' : labaU.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right ${dataU.utang > 0 ? 'text-red-600' : ''}">${dataU.utang === 0 ? '-' : dataU.utang.toLocaleString('id-ID')}</td>
+                        <td class="p-3 font-semibold ${kelasNamaUnit}"><span class="px-2 py-0.5 ${kelasBadgeUnit} rounded mr-1 font-mono">${escapeHtml(u.kode)}</span> ${escapeHtml(u.nama)}</td>
+                        <td class="p-3 ${kelasKlasifikasi}">${escapeHtml(u.klasifikasi)}</td>
+                        <td class="p-3 text-right ${kelasNamaUnit}">${dataU.pendapatan === 0 ? '-' : dataU.pendapatan.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right ${kelasNamaUnit}">${dataU.beban === 0 ? '-' : dataU.beban.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right ${labaU > 0 ? kelasLabaPositif + ' font-semibold' : (labaU < 0 ? kelasLabaNegatif + ' font-semibold' : kelasKlasifikasi)}">${labaU === 0 ? '-' : labaU.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right ${dataU.utang > 0 ? kelasUtang : kelasKlasifikasi}">${dataU.utang === 0 ? '-' : dataU.utang.toLocaleString('id-ID')}</td>
                     `;
                     tbodyUnit.appendChild(tr);
                 });
@@ -203,12 +213,12 @@ async function muatDashboard() {
 
             // Baris Total Bawah
             tbodyUnit.innerHTML += `
-                <tr class="bg-indigo-50 font-bold text-indigo-900 border-t-2 border-indigo-200 text-sm">
+                <tr class="bg-stone-100 dark:bg-stone-800 font-bold text-stone-900 dark:text-stone-100 border-t-2 border-stone-200 dark:border-stone-700 text-sm">
                     <td colspan="2" class="p-3">TOTAL KESELURUHAN (KONSOLIDASI)</td>
                     <td class="p-3 text-right">Rp ${totalPendapatanGlobal.toLocaleString('id-ID')}</td>
                     <td class="p-3 text-right">Rp ${totalBebanGlobal.toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-right ${labaBersihGlobal >= 0 ? 'text-green-700' : 'text-red-700'}">Rp ${labaBersihGlobal.toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-right text-red-700">Rp ${totalUtangGlobal.toLocaleString('id-ID')}</td>
+                    <td class="p-3 text-right ${labaBersihGlobal >= 0 ? kelasLabaPositif : kelasLabaNegatif}">Rp ${labaBersihGlobal.toLocaleString('id-ID')}</td>
+                    <td class="p-3 text-right ${kelasUtang}">Rp ${totalUtangGlobal.toLocaleString('id-ID')}</td>
                 </tr>
             `;
         }
@@ -230,7 +240,7 @@ async function muatDashboard() {
                 tr.innerHTML = `
                     <td class="py-3 px-4 font-medium">${namaBulan[index]}</td>
                     <td class="py-3 px-4 text-right">${data.pendapatan === 0 ? '-' : data.pendapatan.toLocaleString('id-ID')}</td>
-                    <td class="py-3 px-4 text-right ${labaBulan > 0 ? 'text-green-600 font-semibold' : (labaBulan < 0 ? 'text-red-600 font-semibold' : '')}">${labaBulan === 0 ? '-' : labaBulan.toLocaleString('id-ID')}</td>
+                    <td class="py-3 px-4 text-right ${labaBulan > 0 ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : (labaBulan < 0 ? 'text-red-600 dark:text-red-400 font-semibold' : '')}">${labaBulan === 0 ? '-' : labaBulan.toLocaleString('id-ID')}</td>
                 `;
                 tbodyTren.appendChild(tr);
             });
