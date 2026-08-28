@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Master Data | PT ERAPEE Anugrah Sejahtera</title>
+    <!-- Inisialisasi tema (terpusat di js/tema-*.js, lihat komentar di file
+         tersebut - supaya perubahan logika tema cukup di satu tempat) -->
+    <script src="js/tema-fouc-init.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tema-tailwind-config.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>body.auth-pending { visibility: hidden; }</style>
 </head>
-<body class="text-gray-800 bg-gray-50 auth-pending">
+<body data-tema="elegant" class="text-stone-900 dark:text-stone-100 bg-stone-50 dark:bg-stone-950 auth-pending">
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
         <div id="sidebar-container"></div>
@@ -18,43 +22,44 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Header Master Data -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-800">Manajemen Master Data Terpusat</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Kelola daftar Unit Usaha dan Chart of Accounts (COA) perusahaan</p>
-                    </div>
+                <!-- Header Master Data (polos di atas latar, tanpa bingkai kartu) -->
+                <div class="mb-6">
+                    <h1 class="h-elegant-2 text-stone-900 dark:text-stone-50">Manajemen Master Data Terpusat</h1>
+                    <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Kelola daftar Unit Usaha dan Chart of Accounts (COA) perusahaan</p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
                     <!-- ============================== -->
                     <!-- KOLOM 1: MASTER UNIT USAHA -->
                     <!-- ============================== -->
                     <div class="space-y-6">
                         <!-- Form Tambah/Edit Unit Usaha -->
-                        <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                            <h3 class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">1. Form Unit Usaha (Divisi)</h3>
+                        <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                            <div class="flex items-center gap-3 mb-5 border-b border-stone-100 dark:border-stone-800 pb-4">
+                                <svg class="w-5 h-5 text-stone-400 dark:text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v15"/><path d="M14 21v-9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v9"/><path d="M9 9h.01M9 12h.01M9 15h.01"/><path d="M4 21h16"/></svg>
+                                <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50">Form Unit Usaha (Divisi)</h3>
+                            </div>
                             <form id="formUnitUsaha" class="space-y-4">
                                 <input type="hidden" id="editIdUnit" value="">
-                                
+
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Kode Unit (Cth: CORP, WT-NANAS)</label>
-                                    <input type="text" id="kodeUnit" placeholder="KODE" class="form-input-custom text-sm font-mono" required>
+                                    <label class="block text-xs font-medium mb-1.5 text-stone-600 dark:text-stone-300">Kode Unit (Cth: CORP, WT-NANAS)</label>
+                                    <input type="text" id="kodeUnit" placeholder="KODE" class="form-input-elegant text-sm font-mono" required>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Nama Lengkap Unit Usaha</label>
-                                    <input type="text" id="namaUnit" placeholder="Corporate / Head Office" class="form-input-custom text-sm" required>
+                                    <label class="block text-xs font-medium mb-1.5 text-stone-600 dark:text-stone-300">Nama Lengkap Unit Usaha</label>
+                                    <input type="text" id="namaUnit" placeholder="Corporate / Head Office" class="form-input-elegant text-sm">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 text-gray-700">Keterangan / Klasifikasi KBLI</label>
-                                    <input type="text" id="klasifikasiUnit" placeholder="Kantor Pusat & Administrasi" class="form-input-custom text-sm">
+                                    <label class="block text-xs font-medium mb-1.5 text-stone-600 dark:text-stone-300">Keterangan / Klasifikasi KBLI</label>
+                                    <input type="text" id="klasifikasiUnit" placeholder="Kantor Pusat & Administrasi" class="form-input-elegant text-sm">
                                 </div>
-                                <div class="flex gap-3">
-                                    <button type="submit" id="btnSimpanUnit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition">
+                                <div class="flex gap-3 pt-1">
+                                    <button type="submit" id="btnSimpanUnit" class="btn-elegant-primary flex-1">
                                         Simpan Unit Usaha
                                     </button>
-                                    <button type="button" id="btnBatalUnit" onclick="window.batalEditUnit()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2.5 px-6 rounded-xl text-sm transition">
+                                    <button type="button" id="btnBatalUnit" onclick="window.batalEditUnit()" class="hidden btn-elegant-secondary">
                                         Batal
                                     </button>
                                 </div>
@@ -62,19 +67,19 @@
                         </div>
 
                         <!-- Tabel Daftar Unit Usaha -->
-                        <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                            <h3 class="text-sm font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Daftar Unit Usaha Aktif</h3>
+                        <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                            <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-4 border-b border-stone-100 dark:border-stone-800 pb-4">Daftar Unit Usaha Aktif</h3>
                             <div class="overflow-x-auto">
-                                <table class="w-full text-left border-collapse">
+                                <table class="w-full text-left text-sm border-collapse">
                                     <thead>
-                                        <tr class="bg-gray-50 text-gray-400 text-[10px] uppercase border-b border-gray-200">
-                                            <th class="p-3 w-24">Kode</th>
-                                            <th class="p-3">Nama Unit</th>
-                                            <th class="p-3">Klasifikasi</th>
-                                            <th class="p-3 w-32 text-center">Aksi</th>
+                                        <tr class="text-stone-400 dark:text-stone-500 text-xs normal-case tracking-normal border-b border-stone-100 dark:border-stone-800">
+                                            <th class="p-3 w-24 font-medium">Kode</th>
+                                            <th class="p-3 font-medium">Nama Unit</th>
+                                            <th class="p-3 font-medium">Klasifikasi</th>
+                                            <th class="p-3 w-16 text-center font-medium">Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="tabelUnitUsaha" class="divide-y divide-gray-100">
+                                    <tbody id="tabelUnitUsaha" class="divide-y divide-stone-100 dark:divide-stone-800 text-xs">
                                         <!-- Data dimuat oleh master-page.js -->
                                     </tbody>
                                 </table>
@@ -87,29 +92,32 @@
                     <!-- ============================== -->
                     <div class="space-y-6">
                         <!-- Form Tambah/Edit COA -->
-                        <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                            <h3 class="text-sm font-bold text-blue-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">2. Form Kode Akun (COA)</h3>
+                        <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                            <div class="flex items-center gap-3 mb-5 border-b border-stone-100 dark:border-stone-800 pb-4">
+                                <svg class="w-5 h-5 text-stone-400 dark:text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                                <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50">Form Kode Akun (COA)</h3>
+                            </div>
                             <form id="formCOA" class="space-y-4">
                                 <input type="hidden" id="editIdCOA" value="">
 
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="col-span-1">
-                                        <label class="block text-xs font-medium mb-1 text-gray-700">Kode Akun (Cth: 1101)</label>
-                                        <input type="text" id="kodeCOA" placeholder="1000" class="form-input-custom text-sm font-mono" required>
+                                        <label class="block text-xs font-medium mb-1.5 text-stone-600 dark:text-stone-300">Kode Akun (Cth: 1101)</label>
+                                        <input type="text" id="kodeCOA" placeholder="1000" class="form-input-elegant text-sm font-mono" required>
                                     </div>
                                     <div class="col-span-2">
-                                        <label class="block text-xs font-medium mb-1 text-gray-700">Nama Akun Lengkap</label>
-                                        <input type="text" id="namaCOA" placeholder="Kas / Bank Operasional" class="form-input-custom text-sm" required>
+                                        <label class="block text-xs font-medium mb-1.5 text-stone-600 dark:text-stone-300">Nama Akun Lengkap</label>
+                                        <input type="text" id="namaCOA" placeholder="Kas / Bank Operasional" class="form-input-elegant text-sm">
                                     </div>
                                 </div>
-                                <div class="text-[11px] text-gray-500 mb-2">
-                                    <b>Aturan:</b> Awalan 1 (Aset), 2 (Liabilitas), 3 (Ekuitas), 4 (Pendapatan), 5 (HPP), 6 (Beban).
-                                </div>
-                                <div class="flex gap-3">
-                                    <button type="submit" id="btnSimpanCOA" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition">
+                                <p class="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">
+                                    <b class="text-stone-600 dark:text-stone-300">Aturan:</b> Awalan 1 (Aset), 2 (Liabilitas), 3 (Ekuitas), 4 (Pendapatan), 5 (HPP), 6 (Beban).
+                                </p>
+                                <div class="flex gap-3 pt-1">
+                                    <button type="submit" id="btnSimpanCOA" class="btn-elegant-primary flex-1">
                                         Simpan COA
                                     </button>
-                                    <button type="button" id="btnBatalCOA" onclick="window.batalEditCOA()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2.5 px-6 rounded-xl text-sm transition">
+                                    <button type="button" id="btnBatalCOA" onclick="window.batalEditCOA()" class="hidden btn-elegant-secondary">
                                         Batal
                                     </button>
                                 </div>
@@ -117,18 +125,18 @@
                         </div>
 
                         <!-- Tabel Daftar COA -->
-                        <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                            <h3 class="text-sm font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Daftar Chart of Accounts (COA)</h3>
+                        <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                            <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-4 border-b border-stone-100 dark:border-stone-800 pb-4">Daftar Chart of Accounts (COA)</h3>
                             <div class="overflow-x-auto h-96 overflow-y-auto">
-                                <table class="w-full text-left border-collapse">
-                                    <thead class="sticky top-0 bg-white shadow-sm">
-                                        <tr class="bg-gray-50 text-gray-400 text-[10px] uppercase border-b border-gray-200">
-                                            <th class="p-3 w-24">Kode Akun</th>
-                                            <th class="p-3">Nama Akun (COA)</th>
-                                            <th class="p-3 w-32 text-center">Aksi</th>
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead class="sticky top-0 bg-white dark:bg-stone-900">
+                                        <tr class="text-stone-400 dark:text-stone-500 text-xs normal-case tracking-normal border-b border-stone-100 dark:border-stone-800">
+                                            <th class="p-3 w-24 font-medium">Kode Akun</th>
+                                            <th class="p-3 font-medium">Nama Akun (COA)</th>
+                                            <th class="p-3 w-16 text-center font-medium">Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="tabelCOA" class="divide-y divide-gray-100">
+                                    <tbody id="tabelCOA" class="divide-y divide-stone-100 dark:divide-stone-800 text-xs">
                                         <!-- Data dimuat oleh master-page.js -->
                                     </tbody>
                                 </table>
