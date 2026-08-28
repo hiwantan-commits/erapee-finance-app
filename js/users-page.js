@@ -37,39 +37,42 @@ async function buatAkunLoginBaru(email) {
 async function muatDaftarPengguna() {
     const tbody = document.getElementById('tabelPengguna');
     if (!tbody) return;
-    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Memuat data pengguna dari server...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-stone-400 dark:text-stone-500">Memuat data pengguna dari server...</td></tr>`;
 
     try {
         const querySnapshot = await getDocs(collection(db, "users"));
         let usersList = [];
-        
+
         querySnapshot.forEach(docSnap => {
             usersList.push({ id: docSnap.id, ...docSnap.data() });
         });
 
         tbody.innerHTML = '';
         if (usersList.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Belum ada pemetaan hak akses pengguna yang ditambahkan.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-stone-400 dark:text-stone-500">Belum ada pemetaan hak akses pengguna yang ditambahkan.</td></tr>`;
             return;
         }
 
         usersList.forEach((user, index) => {
-            let warnaBadge = "bg-gray-100 text-gray-700";
-            if (user.role === "Super Admin") warnaBadge = "bg-amber-100 text-amber-700 border border-amber-200";
-            if (user.role === "Admin") warnaBadge = "bg-indigo-100 text-indigo-700 border border-indigo-200";
-            if (user.role === "Akuntan") warnaBadge = "bg-blue-100 text-blue-700 border border-blue-200";
-            if (user.role === "Auditor") warnaBadge = "bg-green-100 text-green-700 border border-green-200";
+            let warnaBadge = "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border border-stone-200 dark:border-stone-700";
+            if (user.role === "Super Admin") warnaBadge = "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800";
+            if (user.role === "Admin") warnaBadge = "bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-100 border border-stone-300 dark:border-stone-600";
+            if (user.role === "Akuntan") warnaBadge = "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700";
+            if (user.role === "Auditor") warnaBadge = "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800";
 
             let tr = document.createElement('tr');
-            tr.className = "hover:bg-gray-50 border-b border-gray-50";
+            tr.className = "hover:bg-stone-50 dark:hover:bg-stone-800/40 border-b border-stone-100 dark:border-stone-800";
             const encId = encodeURIComponent(user.id || '');
             const encEmail = encodeURIComponent(user.email || '');
             tr.innerHTML = `
-                <td class="p-4 text-center font-medium text-gray-500">${index + 1}</td>
-                <td class="p-4 font-bold text-gray-800">${escapeHtml(user.email)}</td>
+                <td class="p-4 text-center font-medium text-stone-500 dark:text-stone-400">${index + 1}</td>
+                <td class="p-4 font-bold text-stone-900 dark:text-stone-100">${escapeHtml(user.email)}</td>
                 <td class="p-4"><span class="px-3 py-1 rounded-lg text-xs font-bold ${warnaBadge}">${escapeHtml(user.role)}</span></td>
                 <td class="p-4 text-center">
-                    <button onclick="hapusPengguna('${encId}', '${encEmail}')" class="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100 font-bold text-xs transition">🗑️ Cabut Akses</button>
+                    <button onclick="hapusPengguna('${encId}', '${encEmail}')" class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 font-bold text-xs transition">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+                        Cabut Akses
+                    </button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -77,7 +80,7 @@ async function muatDaftarPengguna() {
 
     } catch (err) {
         console.error("Gagal memuat daftar pengguna:", err);
-        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500">Gagal memuat data. Pastikan Anda memiliki hak Super Admin.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 dark:text-red-400">Gagal memuat data. Pastikan Anda memiliki hak Super Admin.</td></tr>`;
     }
 }
 
