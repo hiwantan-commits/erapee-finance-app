@@ -39,19 +39,6 @@
             <div id="header-container" class="print:hidden"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full print:p-0 print:max-w-full">
-                <!-- Kop Laporan (hanya tampil saat dicetak) -->
-                <div class="hidden print:block mb-6 pb-4 border-b-2 border-gray-800">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h1 class="text-lg font-bold text-gray-900">PT ERAPEE Anugrah Sejahtera</h1>
-                            <p class="text-xs text-gray-600 mt-0.5" id="cetakNpwpLaporan">NPWP: -</p>
-                        </div>
-                        <p class="text-xs text-gray-600" id="cetakTanggalDibuatLaporan"></p>
-                    </div>
-                    <h2 class="text-base font-semibold text-gray-900 mt-4">Laporan Keuangan Korporat Terpadu</h2>
-                    <p class="text-xs text-gray-600">Periode Laba Rugi: <span id="cetakPeriodeLaporan">Semua Periode</span> &middot; Neraca per tanggal cetak (kumulatif)</p>
-                </div>
-
                 <!-- Header Laporan (polos di atas latar, tanpa bingkai kartu) -->
                 <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
                     <div>
@@ -80,7 +67,7 @@
                 <p class="text-xs text-stone-500 dark:text-stone-400 mb-2 print:hidden">Menampilkan Laba Rugi & Trial Balance untuk: <b id="labelPeriodeAktif" class="text-stone-700 dark:text-stone-300">Semua Periode</b>. Neraca selalu kumulatif (bukan per periode), sesuai sifatnya sebagai laporan posisi keuangan.</p>
 
                 <!-- Kartu Ringkasan Laba Rugi -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 print:hidden">
                     <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
                         <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Total Pendapatan Usaha</p>
                         <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-50 mt-2" id="laporanTotalPendapatan">Rp 0</h3>
@@ -96,11 +83,13 @@
                 </div>
 
                 <!-- Tabel Rincian Akun Terkonsolidasi -->
-                <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-8">
+                <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-8 print:hidden">
                     <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-4">Rekapitulasi Saldo Akun (Trial Balance / Buku Besar)</h3>
 
-                    <!-- Tabel (layar md ke atas, dan selalu dipakai saat dicetak) -->
-                    <div class="hidden md:block print:block overflow-x-auto">
+                    <!-- Tabel (layar md ke atas). Versi cetak digantikan oleh
+                         bagian berjenjang Neraca/Laba Rugi di bawah, supaya
+                         tidak ada dua gaya laporan tercampur dalam satu cetakan. -->
+                    <div class="hidden md:block overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="text-stone-400 dark:text-stone-500 text-xs normal-case tracking-normal border-b border-stone-100 dark:border-stone-800">

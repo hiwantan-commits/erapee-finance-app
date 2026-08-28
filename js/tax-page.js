@@ -1,8 +1,7 @@
 // js/tax-page.js - Controller untuk pajak.html
 import { ambilSemuaJurnalPusat } from "./db.js";
-import { klasifikasikanAkun } from "./accounting.js";
-import { CONFIG, db } from "./config.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { klasifikasikanAkun, formatAngkaLaporan } from "./accounting.js";
+import { CONFIG } from "./config.js";
 import { escapeHtml } from "./utils.js";
 
 let SEMUA_JURNAL_PAJAK = [];
@@ -78,33 +77,66 @@ function isiFilterMasaPajak(daftarJurnal) {
     select.value = daftarMasa.includes(nilaiTerpilih) ? nilaiTerpilih : "SEMUA";
 }
 
-async function muatDataKopCetak() {
-    const elTanggal = document.getElementById('cetakTanggalDibuat');
-    if (elTanggal) {
-        elTanggal.innerText = "Dicetak: " + new Date().toLocaleString('id-ID', {
-            dateStyle: 'long', timeStyle: 'short'
-        });
+// Versi cetak (gaya laporan akuntansi konvensional, selalu terang di atas
+// kertas) - dipisah dari kartu ringkasan & tabel di layar yang tetap
+// memakai gaya elegant/stone seperti sebelumnya.
+function renderCetakPajakBerjenjang(rekap, kurangLebihBayar) {
+    const elKeluaran = document.getElementById('cetakPpnKeluaranBerjenjang');
+    const elMasukan = document.getElementById('cetakPpnMasukanBerjenjang');
+    const elKurangLebih = document.getElementById('cetakPpnKurangLebihBerjenjang');
+    const elKurangLebihLabel = document.getElementById('cetakPpnKurangLebihLabel');
+    const elPPh23 = document.getElementById('cetakPph23Berjenjang');
+    const elDPPPh21 = document.getElementById('cetakDppPph21Berjenjang');
+    const tbody = document.getElementById('tabelCetakPajakBerjenjang');
+    if (!tbody) return; // Elemen cetak tidak ada di halaman ini
+
+    if (elKeluaran) elKeluaran.innerText = formatAngkaLaporan(rekap.totalPPNKeluaran);
+    if (elMasukan) elMasukan.innerText = formatAngkaLaporan(rekap.totalPPNMasukan);
+    if (elPPh23) elPPh23.innerText = formatAngkaLaporan(rekap.totalPPh23);
+    if (elDPPPh21) elDPPPh21.innerText = formatAngkaLaporan(rekap.totalDPPPh21);
+    if (elKurangLebih) elKurangLebih.innerText = formatAngkaLaporan(Math.abs(kurangLebihBayar));
+    if (elKurangLebihLabel) {
+        elKurangLebihLabel.innerText = kurangLebihBayar >= 0 ? "PPN Kurang Bayar" : "PPN Lebih Bayar";
     }
 
-    try {
-        const snap = await getDoc(doc(db, "pengaturan", "profil_perusahaan"));
-        const elNpwp = document.getElementById('cetakNpwp');
-        if (elNpwp && snap.exists() && snap.data().npwp_perseroan) {
-            elNpwp.innerText = "NPWP: " + snap.data().npwp_perseroan;
-        }
-    } catch (error) {
-        console.error("Gagal memuat profil perusahaan untuk kop cetak:", error);
+    if (rekap.baris.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-gray-500">Belum ada transaksi berparameter pajak tercatat pada periode ini.</td></tr>`;
+        return;
     }
+
+    const kelompok = {};
+    rekap.baris.forEach(item => {
+        const masa = (item.jurnal.tanggal || '').slice(0, 7) || 'TANPA-TANGGAL';
+        if (!kelompok[masa]) kelompok[masa] = [];
+        kelompok[masa].push(item);
+    });
+
+    let html = '';
+    Object.keys(kelompok).sort().reverse().forEach(masa => {
+        html += `<tr><td colspan="6" class="pt-3 pb-1 font-bold">Masa Pajak ${escapeHtml(masa)}</td></tr>`;
+        kelompok[masa].forEach(({ jurnal, dpp, arah, nilaiPajak }) => {
+            html += `
+                <tr class="border-b border-gray-200">
+                    <td class="py-1 pr-2">${escapeHtml(jurnal.id_jurnal)}<div class="text-xs text-gray-500">${escapeHtml(jurnal.tanggal)}</div></td>
+                    <td class="py-1 pr-2">${escapeHtml(jurnal.no_bukti)}<div class="text-xs text-gray-500">${escapeHtml(jurnal.keterangan) || '-'}</div></td>
+                    <td class="py-1 pr-2">${escapeHtml(jurnal.kode_pajak)}</td>
+                    <td class="py-1 pr-2">${arah}</td>
+                    <td class="py-1 pr-2 text-right">${dpp === 0 ? '-' : formatAngkaLaporan(dpp)}</td>
+                    <td class="py-1 text-right">${nilaiPajak === null ? '-' : formatAngkaLaporan(nilaiPajak)}</td>
+                </tr>
+            `;
+        });
+    });
+    tbody.innerHTML = html;
 }
 
 function renderRekapPajak() {
     const select = document.getElementById('filterMasaPajak');
     const masaTerpilih = select ? select.value : "SEMUA";
+    const labelPeriode = masaTerpilih === "SEMUA" ? "Semua Periode" : masaTerpilih;
 
-    const elCetakPeriode = document.getElementById('cetakPeriode');
-    if (elCetakPeriode) {
-        elCetakPeriode.innerText = masaTerpilih === "SEMUA" ? "Semua Periode" : masaTerpilih;
-    }
+    const elCetakPeriodeBerjenjang = document.getElementById('cetakPeriodePajakBerjenjang');
+    if (elCetakPeriodeBerjenjang) elCetakPeriodeBerjenjang.innerText = labelPeriode;
 
     const jurnalTersaring = masaTerpilih === "SEMUA"
         ? SEMUA_JURNAL_PAJAK
@@ -131,6 +163,8 @@ function renderRekapPajak() {
             .replace(/text-(red|green|emerald)-600|dark:text-(red|emerald)-400/g, "").trim()
             + " " + (kurangLebihBayar >= 0 ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400");
     }
+
+    renderCetakPajakBerjenjang(rekap, kurangLebihBayar);
 
     const tbody = document.getElementById('tabelRekapPajak');
     if (!tbody) return;
@@ -180,7 +214,6 @@ async function muatRekapPajak() {
         if (select) select.addEventListener('change', renderRekapPajak);
 
         renderRekapPajak();
-        muatDataKopCetak();
     } catch (error) {
         console.error("Gagal memuat rekapitulasi pajak:", error);
     }
