@@ -25,12 +25,12 @@ function setTeksAman(id, teks) {
 // pengguna disarankan menyesuaikan sendiri sesuai karakteristik bisnisnya.
 function hitungStatusMargin(margin, laba) {
     if (margin === null) {
-        if (laba < 0) return { label: "RUGI", kelas: "bg-red-100 text-red-700" };
-        return { label: "TIDAK ADA AKTIVITAS", kelas: "bg-gray-100 text-gray-500" };
+        if (laba < 0) return { label: "RUGI", kelas: "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400" };
+        return { label: "TIDAK ADA AKTIVITAS", kelas: "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400" };
     }
-    if (margin >= 15) return { label: "SEHAT", kelas: "bg-green-100 text-green-700" };
-    if (margin >= 5) return { label: "WASPADA", kelas: "bg-amber-100 text-amber-800" };
-    return { label: "PERLU PERHATIAN", kelas: "bg-red-100 text-red-700" };
+    if (margin >= 15) return { label: "SEHAT", kelas: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400" };
+    if (margin >= 5) return { label: "WASPADA", kelas: "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400" };
+    return { label: "PERLU PERHATIAN", kelas: "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400" };
 }
 
 function hitungDataPerUnit(tahunFilter) {
@@ -111,8 +111,8 @@ function renderTabelDanKartu(daftarUnit) {
     const kartuContainer = document.getElementById('kartuRankingUnit');
 
     if (daftarUnit.length === 0) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada transaksi pada periode ini.</td></tr>`;
-        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Belum ada transaksi pada periode ini.</p>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-stone-400 dark:text-stone-500">Belum ada transaksi pada periode ini.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-stone-400 dark:text-stone-500 text-sm">Belum ada transaksi pada periode ini.</p>`;
         return;
     }
 
@@ -120,12 +120,12 @@ function renderTabelDanKartu(daftarUnit) {
         tbody.innerHTML = daftarUnit.map(u => {
             const status = hitungStatusMargin(u.margin, u.laba);
             return `
-                <tr class="hover:bg-gray-50">
-                    <td class="p-3 font-semibold text-gray-800">${escapeHtml(u.nama)}</td>
-                    <td class="p-3 text-right">${formatRupiah(u.pendapatan)}</td>
-                    <td class="p-3 text-right">${formatRupiah(u.beban)}</td>
-                    <td class="p-3 text-right font-bold ${u.laba >= 0 ? 'text-green-700' : 'text-red-700'}">${formatRupiah(u.laba)}</td>
-                    <td class="p-3 text-right">${u.margin !== null ? u.margin.toFixed(1) + '%' : '-'}</td>
+                <tr class="hover:bg-stone-50 dark:hover:bg-stone-800/40">
+                    <td class="p-3 font-semibold text-stone-800 dark:text-stone-200">${escapeHtml(u.nama)}</td>
+                    <td class="p-3 text-right text-stone-700 dark:text-stone-300">${formatRupiah(u.pendapatan)}</td>
+                    <td class="p-3 text-right text-stone-700 dark:text-stone-300">${formatRupiah(u.beban)}</td>
+                    <td class="p-3 text-right font-bold ${u.laba >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}">${formatRupiah(u.laba)}</td>
+                    <td class="p-3 text-right text-stone-700 dark:text-stone-300">${u.margin !== null ? u.margin.toFixed(1) + '%' : '-'}</td>
                     <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-semibold ${status.kelas}">${status.label}</span></td>
                 </tr>
             `;
@@ -136,16 +136,16 @@ function renderTabelDanKartu(daftarUnit) {
         kartuContainer.innerHTML = daftarUnit.map(u => {
             const status = hitungStatusMargin(u.margin, u.laba);
             return `
-                <div class="border border-gray-100 rounded-xl p-4">
+                <div class="border border-stone-100 dark:border-stone-800 rounded-xl p-4">
                     <div class="flex justify-between items-start gap-2 mb-2">
-                        <div class="font-bold text-gray-800 text-sm">${escapeHtml(u.nama)}</div>
+                        <div class="font-bold text-stone-900 dark:text-stone-100 text-sm">${escapeHtml(u.nama)}</div>
                         <span class="px-2 py-0.5 rounded font-semibold text-[11px] ${status.kelas} shrink-0">${status.label}</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs border-t border-gray-100 pt-2">
-                        <div><p class="text-gray-400">Pendapatan</p><p class="font-semibold">${formatRupiah(u.pendapatan)}</p></div>
-                        <div><p class="text-gray-400">Beban</p><p class="font-semibold">${formatRupiah(u.beban)}</p></div>
-                        <div><p class="text-gray-400">Laba</p><p class="font-bold ${u.laba >= 0 ? 'text-green-700' : 'text-red-700'}">${formatRupiah(u.laba)}</p></div>
-                        <div><p class="text-gray-400">Margin</p><p class="font-bold">${u.margin !== null ? u.margin.toFixed(1) + '%' : '-'}</p></div>
+                    <div class="grid grid-cols-2 gap-2 text-xs border-t border-stone-100 dark:border-stone-800 pt-2">
+                        <div><p class="text-stone-400 dark:text-stone-500">Pendapatan</p><p class="font-semibold text-stone-700 dark:text-stone-300">${formatRupiah(u.pendapatan)}</p></div>
+                        <div><p class="text-stone-400 dark:text-stone-500">Beban</p><p class="font-semibold text-stone-700 dark:text-stone-300">${formatRupiah(u.beban)}</p></div>
+                        <div><p class="text-stone-400 dark:text-stone-500">Laba</p><p class="font-bold ${u.laba >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}">${formatRupiah(u.laba)}</p></div>
+                        <div><p class="text-stone-400 dark:text-stone-500">Margin</p><p class="font-bold text-stone-800 dark:text-stone-200">${u.margin !== null ? u.margin.toFixed(1) + '%' : '-'}</p></div>
                     </div>
                 </div>
             `;
@@ -153,7 +153,10 @@ function renderTabelDanKartu(daftarUnit) {
     }
 }
 
+let dataUnitTerkini = [];
+
 function renderGrafik(daftarUnit) {
+    dataUnitTerkini = daftarUnit;
     const canvasEl = document.getElementById('grafikMarginUnit');
     if (!canvasEl || !window.Chart) return;
 
@@ -165,6 +168,10 @@ function renderGrafik(daftarUnit) {
     }
 
     if (unitUntukGrafik.length === 0) return;
+
+    const modeGelap = document.documentElement.classList.contains('dark');
+    const warnaGrid = modeGelap ? 'rgba(255, 255, 255, 0.08)' : '#f3f4f6';
+    const warnaLabel = modeGelap ? '#a1a1aa' : '#6b7280';
 
     chartMarginInstance = new Chart(canvasEl.getContext('2d'), {
         type: 'bar',
@@ -187,8 +194,8 @@ function renderGrafik(daftarUnit) {
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                x: { grid: { color: '#f3f4f6' } },
-                y: { grid: { display: false } }
+                x: { grid: { color: warnaGrid }, ticks: { color: warnaLabel } },
+                y: { grid: { display: false }, ticks: { color: warnaLabel } }
             }
         }
     });
@@ -278,7 +285,7 @@ function renderDaftarPeringkat(containerId, daftar, warnaBar, warnaTeks) {
     if (!container) return;
 
     if (daftar.length === 0) {
-        container.innerHTML = `<p class="p-6 text-center text-gray-400 text-sm">Belum ada data pada periode ini.</p>`;
+        container.innerHTML = `<p class="p-6 text-center text-stone-400 dark:text-stone-500 text-sm">Belum ada data pada periode ini.</p>`;
         return;
     }
 
@@ -291,15 +298,15 @@ function renderDaftarPeringkat(containerId, daftar, warnaBar, warnaTeks) {
         const persenDariTotal = total > 0 ? (d.total / total) * 100 : 0;
         const lebarBar = nilaiMaks > 0 ? Math.max((d.total / nilaiMaks) * 100, 3) : 0;
         return `
-            <div class="p-3 rounded-xl border border-gray-100">
+            <div class="p-3 rounded-xl border border-stone-100 dark:border-stone-800">
                 <div class="flex justify-between items-center gap-2 mb-1.5">
-                    <span class="font-semibold text-gray-800 text-sm truncate">${idx + 1}. ${escapeHtml(d.nama)}</span>
+                    <span class="font-semibold text-stone-800 dark:text-stone-200 text-sm truncate">${idx + 1}. ${escapeHtml(d.nama)}</span>
                     <span class="font-bold ${warnaTeks} text-sm shrink-0">${formatRupiah(d.total)}</span>
                 </div>
-                <div class="w-full bg-gray-100 rounded-full h-1.5 mb-1">
+                <div class="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 mb-1">
                     <div class="${warnaBar} h-1.5 rounded-full" style="width: ${lebarBar.toFixed(0)}%"></div>
                 </div>
-                <p class="text-[10px] text-gray-400">${d.jumlahTransaksi} transaksi &middot; ${persenDariTotal.toFixed(1)}% dari total</p>
+                <p class="text-[10px] text-stone-400 dark:text-stone-500">${d.jumlahTransaksi} transaksi &middot; ${persenDariTotal.toFixed(1)}% dari total</p>
             </div>
         `;
     }).join('');
@@ -308,8 +315,8 @@ function renderDaftarPeringkat(containerId, daftar, warnaBar, warnaTeks) {
 function renderVendorPelanggan(tahunFilter) {
     const { daftarVendor, daftarPelanggan } = hitungVendorPelanggan(tahunFilter);
 
-    renderDaftarPeringkat('daftarPelangganTeratas', daftarPelanggan, 'bg-green-500', 'text-green-700');
-    renderDaftarPeringkat('daftarVendorTeratas', daftarVendor, 'bg-red-500', 'text-red-700');
+    renderDaftarPeringkat('daftarPelangganTeratas', daftarPelanggan, 'bg-emerald-500', 'text-emerald-600 dark:text-emerald-400');
+    renderDaftarPeringkat('daftarVendorTeratas', daftarVendor, 'bg-red-500', 'text-red-600 dark:text-red-400');
 
     const elInsightPelanggan = document.getElementById('insightKonsentrasiPelanggan');
     if (elInsightPelanggan) {
@@ -393,17 +400,17 @@ function renderStrukturBeban(tahunFilter) {
     const kartuContainer = document.getElementById('kartuStrukturBeban');
 
     if (baris.length === 0) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">Belum ada data beban pada periode ini.</td></tr>`;
-        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Belum ada data beban pada periode ini.</p>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-stone-400 dark:text-stone-500">Belum ada data beban pada periode ini.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-stone-400 dark:text-stone-500 text-sm">Belum ada data beban pada periode ini.</p>`;
     } else {
         if (tbody) {
             tbody.innerHTML = baris.map(a => {
                 const persen = totalBeban > 0 ? (a.total / totalBeban) * 100 : 0;
                 return `
-                    <tr class="hover:bg-gray-50">
-                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(a.nama)}</td>
-                        <td class="p-3 text-right">${formatRupiah(a.total)}</td>
-                        <td class="p-3 text-right">${persen.toFixed(1)}%</td>
+                    <tr class="hover:bg-stone-50 dark:hover:bg-stone-800/40">
+                        <td class="p-3 font-semibold text-stone-800 dark:text-stone-200">${escapeHtml(a.nama)}</td>
+                        <td class="p-3 text-right text-stone-700 dark:text-stone-300">${formatRupiah(a.total)}</td>
+                        <td class="p-3 text-right text-stone-700 dark:text-stone-300">${persen.toFixed(1)}%</td>
                     </tr>
                 `;
             }).join('');
@@ -412,12 +419,12 @@ function renderStrukturBeban(tahunFilter) {
             kartuContainer.innerHTML = baris.map(a => {
                 const persen = totalBeban > 0 ? (a.total / totalBeban) * 100 : 0;
                 return `
-                    <div class="border border-gray-100 rounded-xl p-4 flex justify-between items-center gap-2">
+                    <div class="border border-stone-100 dark:border-stone-800 rounded-xl p-4 flex justify-between items-center gap-2">
                         <div class="overflow-hidden">
-                            <div class="font-semibold text-gray-800 text-sm truncate">${escapeHtml(a.nama)}</div>
-                            <div class="text-xs text-gray-400 mt-0.5">${persen.toFixed(1)}% dari total beban</div>
+                            <div class="font-semibold text-stone-800 dark:text-stone-200 text-sm truncate">${escapeHtml(a.nama)}</div>
+                            <div class="text-xs text-stone-400 dark:text-stone-500 mt-0.5">${persen.toFixed(1)}% dari total beban</div>
                         </div>
-                        <div class="font-bold text-red-700 text-sm shrink-0">${formatRupiah(a.total)}</div>
+                        <div class="font-bold text-red-600 dark:text-red-400 text-sm shrink-0">${formatRupiah(a.total)}</div>
                     </div>
                 `;
             }).join('');
@@ -431,6 +438,10 @@ function renderStrukturBeban(tahunFilter) {
             chartBebanInstance = null;
         }
         if (tampil.length > 0) {
+            const modeGelap = document.documentElement.classList.contains('dark');
+            const warnaGrid = modeGelap ? 'rgba(255, 255, 255, 0.08)' : '#f3f4f6';
+            const warnaLabel = modeGelap ? '#a1a1aa' : '#6b7280';
+
             chartBebanInstance = new Chart(canvasEl.getContext('2d'), {
                 type: 'bar',
                 data: {
@@ -448,8 +459,8 @@ function renderStrukturBeban(tahunFilter) {
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { color: '#f3f4f6' } },
-                        y: { grid: { display: false } }
+                        x: { grid: { color: warnaGrid }, ticks: { color: warnaLabel } },
+                        y: { grid: { display: false }, ticks: { color: warnaLabel } }
                     }
                 }
             });
@@ -506,18 +517,21 @@ function renderIndikatorPertumbuhan(elId, nilaiIni, nilaiLalu, tahunLalu, naikBa
 
     const pertumbuhan = hitungPertumbuhan(nilaiIni, nilaiLalu);
     if (pertumbuhan === null) {
-        el.innerHTML = `<span class="text-gray-400">Tanpa data pembanding</span>`;
+        el.innerHTML = `<span class="text-stone-400 dark:text-stone-500">Tanpa data pembanding</span>`;
         return;
     }
 
     const naik = pertumbuhan >= 0;
     const kabarBaik = naik === naikBaik;
-    const warna = kabarBaik ? 'text-green-600' : 'text-red-600';
+    const warna = kabarBaik ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400';
     const panah = naik ? '▲' : '▼';
-    el.innerHTML = `<span class="${warna} font-semibold">${panah} ${Math.abs(pertumbuhan).toFixed(1)}%</span> <span class="text-gray-400">vs ${escapeHtml(tahunLalu)}</span>`;
+    el.innerHTML = `<span class="${warna} font-semibold">${panah} ${Math.abs(pertumbuhan).toFixed(1)}%</span> <span class="text-stone-400 dark:text-stone-500">vs ${escapeHtml(tahunLalu)}</span>`;
 }
 
+let yoyTerkini = { tahunIni: null, tahunLalu: null };
+
 function renderYoY(tahunIni, tahunLalu) {
+    yoyTerkini = { tahunIni, tahunLalu };
     const areaTanpaPembanding = document.getElementById('areaYoYTanpaPembanding');
     if (!tahunIni) {
         if (areaTanpaPembanding) areaTanpaPembanding.classList.add('hidden');
@@ -540,7 +554,7 @@ function renderYoY(tahunIni, tahunLalu) {
     } else {
         ['yoyPendapatanGrowth', 'yoyBebanGrowth', 'yoyLabaGrowth'].forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.innerHTML = '<span class="text-gray-400">Tanpa data pembanding</span>';
+            if (el) el.innerHTML = '<span class="text-stone-400 dark:text-stone-500">Tanpa data pembanding</span>';
         });
     }
 
@@ -551,12 +565,16 @@ function renderYoY(tahunIni, tahunLalu) {
             chartYoYInstance = null;
         }
 
+        const modeGelap = document.documentElement.classList.contains('dark');
+        const warnaGrid = modeGelap ? 'rgba(255, 255, 255, 0.08)' : '#f3f4f6';
+        const warnaLabel = modeGelap ? '#a1a1aa' : '#6b7280';
+
         const namaBulanPendek = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const datasets = [{
             label: `Laba Bersih ${tahunIni}`,
             data: dataIni.bulanan.map(b => b.pendapatan - b.beban),
-            borderColor: 'rgba(79, 70, 229, 1)',
-            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+            borderColor: 'rgba(217, 119, 87, 1)',
+            backgroundColor: 'rgba(217, 119, 87, 0.12)',
             tension: 0.3,
             fill: true
         }];
@@ -565,8 +583,8 @@ function renderYoY(tahunIni, tahunLalu) {
             datasets.push({
                 label: `Laba Bersih ${tahunLalu}`,
                 data: dataLalu.bulanan.map(b => b.pendapatan - b.beban),
-                borderColor: 'rgba(156, 163, 175, 1)',
-                backgroundColor: 'rgba(156, 163, 175, 0.08)',
+                borderColor: 'rgba(168, 162, 158, 1)',
+                backgroundColor: 'rgba(168, 162, 158, 0.08)',
                 tension: 0.3,
                 fill: true,
                 borderDash: [5, 4]
@@ -579,8 +597,11 @@ function renderYoY(tahunIni, tahunLalu) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
-                scales: { y: { grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 }, color: warnaLabel } } },
+                scales: {
+                    y: { grid: { color: warnaGrid }, ticks: { color: warnaLabel } },
+                    x: { grid: { display: false }, ticks: { color: warnaLabel } }
+                }
             }
         });
     }
@@ -599,17 +620,17 @@ function formatRasioKali(nilai) {
 }
 
 function statusRasioNaikBaik(nilai, ambangSehat, ambangWaspada) {
-    if (nilai === null) return { label: "N/A", kelas: "bg-gray-100 text-gray-500" };
-    if (nilai >= ambangSehat) return { label: "SEHAT", kelas: "bg-green-100 text-green-700" };
-    if (nilai >= ambangWaspada) return { label: "WASPADA", kelas: "bg-amber-100 text-amber-800" };
-    return { label: "PERLU PERHATIAN", kelas: "bg-red-100 text-red-700" };
+    if (nilai === null) return { label: "N/A", kelas: "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400" };
+    if (nilai >= ambangSehat) return { label: "SEHAT", kelas: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400" };
+    if (nilai >= ambangWaspada) return { label: "WASPADA", kelas: "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400" };
+    return { label: "PERLU PERHATIAN", kelas: "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400" };
 }
 
 function statusRasioRendahBaik(nilai, ambangSehat, ambangWaspada) {
-    if (nilai === null) return { label: "N/A", kelas: "bg-gray-100 text-gray-500" };
-    if (nilai <= ambangSehat) return { label: "SEHAT", kelas: "bg-green-100 text-green-700" };
-    if (nilai <= ambangWaspada) return { label: "WASPADA", kelas: "bg-amber-100 text-amber-800" };
-    return { label: "PERLU PERHATIAN", kelas: "bg-red-100 text-red-700" };
+    if (nilai === null) return { label: "N/A", kelas: "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400" };
+    if (nilai <= ambangSehat) return { label: "SEHAT", kelas: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400" };
+    if (nilai <= ambangWaspada) return { label: "WASPADA", kelas: "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400" };
+    return { label: "PERLU PERHATIAN", kelas: "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400" };
 }
 
 function setStatusBadge(elId, status) {
@@ -753,7 +774,7 @@ function renderProyeksiArusKas() {
     const elBurnRate = document.getElementById('proyeksiBurnRate');
     if (elBurnRate) {
         const positif = rataRataNetKasOperasi >= 0;
-        elBurnRate.innerHTML = `<span class="${positif ? 'text-green-600' : 'text-red-600'}">${positif ? '+' : ''}${formatRupiah(rataRataNetKasOperasi)}</span>`;
+        elBurnRate.innerHTML = `<span class="${positif ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}">${positif ? '+' : ''}${formatRupiah(rataRataNetKasOperasi)}</span>`;
     }
 
     const elRunway = document.getElementById('proyeksiRunway');
@@ -762,19 +783,19 @@ function renderProyeksiArusKas() {
         const bulanRunway = totalKas / Math.abs(rataRataNetKasOperasi);
         if (elRunway) {
             elRunway.innerText = bulanRunway.toFixed(1) + " bulan";
-            elRunway.className = "text-2xl font-bold mt-2 " + (bulanRunway < 3 ? "text-red-600" : (bulanRunway < 6 ? "text-amber-600" : "text-gray-800"));
+            elRunway.className = "text-2xl font-semibold mt-2 " + (bulanRunway < 3 ? "text-red-600 dark:text-red-400" : (bulanRunway < 6 ? "text-amber-600 dark:text-amber-400" : "text-stone-900 dark:text-stone-50"));
         }
         if (elRunwayKeterangan) elRunwayKeterangan.innerText = `Estimasi jika tren pengeluaran ${JUMLAH_BULAN_TREN} bulan terakhir berlanjut tanpa pemasukan baru`;
     } else if (totalKas <= 0) {
         if (elRunway) {
             elRunway.innerText = "0 bulan";
-            elRunway.className = "text-2xl font-bold mt-2 text-red-600";
+            elRunway.className = "text-2xl font-semibold mt-2 text-red-600 dark:text-red-400";
         }
         if (elRunwayKeterangan) elRunwayKeterangan.innerText = "Saldo kas tercatat sudah habis/negatif";
     } else {
         if (elRunway) {
             elRunway.innerText = "Aman";
-            elRunway.className = "text-2xl font-bold mt-2 text-green-600";
+            elRunway.className = "text-2xl font-semibold mt-2 text-emerald-600 dark:text-emerald-400";
         }
         if (elRunwayKeterangan) elRunwayKeterangan.innerText = `Arus kas operasional rata-rata ${JUMLAH_BULAN_TREN} bulan terakhir positif - tidak ada risiko kehabisan kas dalam waktu dekat`;
     }
@@ -790,6 +811,11 @@ function renderProyeksiArusKas() {
             chartProyeksiInstance.destroy();
             chartProyeksiInstance = null;
         }
+
+        const modeGelap = document.documentElement.classList.contains('dark');
+        const warnaGrid = modeGelap ? 'rgba(255, 255, 255, 0.08)' : '#f3f4f6';
+        const warnaLabel = modeGelap ? '#a1a1aa' : '#6b7280';
+
         chartProyeksiInstance = new Chart(canvasEl.getContext('2d'), {
             type: 'bar',
             data: {
@@ -806,8 +832,8 @@ function renderProyeksiArusKas() {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { grid: { color: '#f3f4f6' } },
-                    x: { grid: { display: false } }
+                    y: { grid: { color: warnaGrid }, ticks: { color: warnaLabel } },
+                    x: { grid: { display: false }, ticks: { color: warnaLabel } }
                 }
             }
         });
@@ -887,9 +913,20 @@ async function muatAnalisisBisnis() {
         console.error("Gagal memuat analisis bisnis:", error);
         const tbody = document.getElementById('tabelRankingUnit');
         const kartuContainer = document.getElementById('kartuRankingUnit');
-        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Gagal memuat data dari pusat database.</td></tr>`;
-        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-red-500 text-sm">Gagal memuat data dari pusat database.</p>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500 dark:text-red-400">Gagal memuat data dari pusat database.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-red-500 dark:text-red-400 text-sm">Gagal memuat data dari pusat database.</p>`;
     }
 }
 
 document.addEventListener("DOMContentLoaded", muatAnalisisBisnis);
+
+// Render ulang keempat grafik Chart.js dengan warna grid/label yang sesuai
+// saat tema gelap/terang diganti lewat tombol di header (lihat component.js
+// -> window.toggleDarkMode). Data tidak diambil ulang dari Firestore, cukup
+// dipakai lagi dari cache terakhir masing-masing grafik.
+window.addEventListener('erapee-tema-berubah', () => {
+    renderGrafik(dataUnitTerkini);
+    renderStrukturBeban(document.getElementById('filterTahunBisnis')?.value || 'SEMUA');
+    if (yoyTerkini.tahunIni) renderYoY(yoyTerkini.tahunIni, yoyTerkini.tahunLalu);
+    renderProyeksiArusKas();
+});
