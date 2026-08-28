@@ -79,11 +79,9 @@ window.toggleDueDate = function() {
     const tglJatuhTempo = document.getElementById('jatuh_tempo');
     if (sifat === 'Non-Tunai') {
         tglJatuhTempo.disabled = false;
-        tglJatuhTempo.classList.remove('bg-gray-100', 'cursor-not-allowed');
         tglJatuhTempo.required = true;
     } else {
         tglJatuhTempo.disabled = true;
-        tglJatuhTempo.classList.add('bg-gray-100', 'cursor-not-allowed');
         tglJatuhTempo.value = "";
         tglJatuhTempo.required = false;
     }
@@ -137,10 +135,10 @@ window.hitungTotal = function() {
 
     const statusEl = document.getElementById('statusBalance');
     if (totDebit === totKredit && totDebit > 0) {
-        statusEl.className = "px-4 py-1.5 bg-green-100 text-green-700 text-sm font-bold rounded-xl border border-green-300 shadow-sm inline-block";
+        statusEl.className = "px-4 py-1.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-sm font-bold rounded-xl border border-emerald-300 dark:border-emerald-800 shadow-sm inline-block";
         statusEl.innerText = "✓ SEIMBANG (BALANCE)";
     } else {
-        statusEl.className = "px-4 py-1.5 bg-amber-50 text-amber-700 text-sm font-bold rounded-xl border border-amber-200 shadow-sm inline-block";
+        statusEl.className = "px-4 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-sm font-bold rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm inline-block";
         statusEl.innerText = "⚠️ BELUM BALANCE";
     }
 };
@@ -175,7 +173,10 @@ function pasangAutocompleteAkun(inputEl) {
     }
 
     function perbaruiSorotan(opsiEl) {
-        opsiEl.forEach((el, i) => el.classList.toggle('bg-indigo-50', i === indexAktif));
+        opsiEl.forEach((el, i) => {
+            el.classList.toggle('bg-stone-100', i === indexAktif);
+            el.classList.toggle('dark:bg-stone-800', i === indexAktif);
+        });
         if (indexAktif >= 0) opsiEl[indexAktif].scrollIntoView({ block: 'nearest' });
     }
 
@@ -189,7 +190,7 @@ function pasangAutocompleteAkun(inputEl) {
         if (hasil.length === 0) return;
 
         dropdownEl = document.createElement('div');
-        dropdownEl.className = 'fixed z-50 max-h-56 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg text-xs';
+        dropdownEl.className = 'fixed z-50 max-h-56 overflow-y-auto bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg shadow-lg text-xs';
         const rect = inputEl.getBoundingClientRect();
         dropdownEl.style.left = rect.left + 'px';
         dropdownEl.style.top = (rect.bottom + 4) + 'px';
@@ -197,8 +198,8 @@ function pasangAutocompleteAkun(inputEl) {
 
         hasil.forEach(coa => {
             const opt = document.createElement('div');
-            opt.className = 'px-3 py-2 cursor-pointer hover:bg-indigo-50 flex justify-between gap-3';
-            opt.innerHTML = `<span class="font-mono font-bold text-indigo-700 shrink-0">${escapeHtml(coa.kode)}</span><span class="text-gray-600 truncate">${escapeHtml(coa.nama)}</span>`;
+            opt.className = 'px-3 py-2 cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-800 flex justify-between gap-3';
+            opt.innerHTML = `<span class="font-mono font-bold text-stone-700 dark:text-stone-300 shrink-0">${escapeHtml(coa.kode)}</span><span class="text-stone-500 dark:text-stone-400 truncate">${escapeHtml(coa.nama)}</span>`;
             opt.addEventListener('mousedown', (e) => { e.preventDefault(); pilihOpsi(coa); });
             dropdownEl.appendChild(opt);
         });
@@ -236,14 +237,18 @@ window.tambahBaris = function(akunVal = "", memoVal = "", debitVal = 0, kreditVa
     const tbody = document.getElementById('tbodyJurnal');
     if (!tbody) return;
     const tr = document.createElement('tr');
-    tr.className = 'jurnal-row hover:bg-gray-50';
+    tr.className = 'jurnal-row hover:bg-stone-50 dark:hover:bg-stone-800/40';
 
     tr.innerHTML = `
-        <td class="p-2"><input type="text" placeholder="Pilih atau Ketik Akun..." class="form-input-custom kode_akun text-xs font-medium" required autocomplete="off"></td>
-        <td class="p-2"><input type="text" class="form-input-custom memo_baris text-xs" value="${memoVal}" placeholder="Memo..."></td>
-        <td class="p-2"><input type="number" class="form-input-custom debit font-bold text-green-700 text-right" value="${debitVal}" min="0" step="any" oninput="hitungTotal()" required></td>
-        <td class="p-2"><input type="number" class="form-input-custom kredit font-bold text-red-700 text-right" value="${kreditVal}" min="0" step="any" oninput="hitungTotal()" required></td>
-        <td class="p-2 text-center"><button type="button" onclick="hapusBaris(this)" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-200 transition">X</button></td>
+        <td class="p-2"><input type="text" placeholder="Pilih atau Ketik Akun..." class="form-input-elegant kode_akun text-xs font-medium" required autocomplete="off"></td>
+        <td class="p-2"><input type="text" class="form-input-elegant memo_baris text-xs" value="${memoVal}" placeholder="Memo..."></td>
+        <td class="p-2"><input type="number" class="form-input-elegant debit font-bold text-emerald-600 dark:text-emerald-400 text-right" value="${debitVal}" min="0" step="any" oninput="hitungTotal()" required></td>
+        <td class="p-2"><input type="number" class="form-input-elegant kredit font-bold text-red-600 dark:text-red-400 text-right" value="${kreditVal}" min="0" step="any" oninput="hitungTotal()" required></td>
+        <td class="p-2 text-center">
+            <button type="button" onclick="hapusBaris(this)" class="btn-elegant-icon" title="Hapus Baris">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+            </button>
+        </td>
     `;
     tbody.appendChild(tr);
     pasangAutocompleteAkun(tr.querySelector('.kode_akun'));
@@ -339,7 +344,7 @@ async function inisialisasiData() {
 
     if (editIdJurnal) {
         document.getElementById('judulForm').innerText = "Edit Jurnal Akuntansi (" + editIdJurnal + ")";
-        document.getElementById('btnSubmit').innerHTML = "💾 Simpan Perubahan Jurnal";
+        document.getElementById('btnSubmit').innerHTML = "Simpan Perubahan Jurnal";
         
         try {
             const semuaData = await ambilSemuaJurnalPusat();
@@ -375,7 +380,7 @@ async function inisialisasiData() {
                     if (buktiTersimpan && buktiTersimpan.data) {
                         buktiTersimpanSebelumnya = true;
                         const statusUpload = document.getElementById('statusUpload');
-                        statusUpload.innerHTML = `✅ <a href="#" id="linkLihatBukti" class="text-indigo-600 underline">Lihat File Tersimpan (${escapeHtml(buktiTersimpan.namaFile) || 'berkas'})</a> (Pilih berkas baru untuk mengganti)`;
+                        statusUpload.innerHTML = `✅ <a href="#" id="linkLihatBukti" class="text-[#D97757] underline">Lihat File Tersimpan (${escapeHtml(buktiTersimpan.namaFile) || 'berkas'})</a> (Pilih berkas baru untuk mengganti)`;
                         statusUpload.classList.remove('hidden');
                         document.getElementById('linkLihatBukti').addEventListener('click', (e) => {
                             e.preventDefault();
@@ -456,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } catch (prosesErr) {
                         console.error("Gagal memproses berkas bukti:", prosesErr);
                         alert("❌ " + prosesErr.message);
-                        btn.innerText = "💾 Simpan Jurnal Akuntansi";
+                        btn.innerText = "Simpan Jurnal Akuntansi";
                         btn.disabled = false;
                         return;
                     }
@@ -511,14 +516,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 1500);
                 } else {
                     alert("Gagal menyimpan data transaksi: " + hasil.error);
-                    btn.innerText = "💾 Simpan Jurnal Akuntansi";
+                    btn.innerText = "Simpan Jurnal Akuntansi";
                     btn.disabled = false;
                 }
 
             } catch (error) {
                 console.error("Kesalahan sistem saat menyimpan:", error);
                 alert("Kesalahan sistem saat menyimpan data.");
-                btn.innerText = "💾 Simpan Jurnal Akuntansi";
+                btn.innerText = "Simpan Jurnal Akuntansi";
                 btn.disabled = false;
             }
         });
