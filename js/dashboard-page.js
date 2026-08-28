@@ -1,10 +1,57 @@
 // js/dashboard-page.js - Controller untuk index.html (Support HPP Akun 5 & Beban Akun 6)
 import { db } from "./config.js";
 import { ambilSemuaJurnalPusat } from "./db.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { escapeHtml } from "./utils.js";
 
+function setBadge(el, className, teks) {
+    if (!el) return;
+    el.className = "px-2 py-0.5 font-semibold rounded " + className;
+    el.innerText = teks;
+}
+
+// Sebelumnya badge "Akta Pendirian", "NPWP Perseroan", dan "Status PKP" di
+// dashboard selalu menampilkan WARNING secara statis (hardcode), tidak
+// pernah benar-benar mengecek data asli - jadi tetap WARNING meski data
+// sudah lengkap. Sekarang dicek langsung ke profil perusahaan tersimpan.
+async function muatStatusLegal() {
+    const elAkta = document.getElementById('statusAktaLegal');
+    const elNpwp = document.getElementById('statusNpwpLegal');
+    const elPkp = document.getElementById('statusPkpLegal');
+
+    try {
+        const snap = await getDoc(doc(db, "pengaturan", "profil_perusahaan"));
+        const data = snap.exists() ? snap.data() : {};
+
+        if (data.nomor_akta) {
+            setBadge(elAkta, "bg-green-100 text-green-700", "LENGKAP");
+        } else {
+            setBadge(elAkta, "bg-amber-100 text-amber-800", "WARNING");
+        }
+
+        if (data.npwp_perseroan) {
+            setBadge(elNpwp, "bg-green-100 text-green-700", "LENGKAP");
+        } else {
+            setBadge(elNpwp, "bg-amber-100 text-amber-800", "WARNING");
+        }
+
+        if (data.status_pkp === "PKP Terdaftar") {
+            setBadge(elPkp, "bg-blue-100 text-blue-700", "PKP TERDAFTAR");
+        } else if (data.status_pkp === "Belum PKP") {
+            setBadge(elPkp, "bg-gray-200 text-gray-600", "BELUM PKP");
+        } else {
+            setBadge(elPkp, "bg-amber-100 text-amber-800", "WARNING");
+        }
+    } catch (error) {
+        console.error("Gagal memuat status legal perusahaan:", error);
+        setBadge(elAkta, "bg-gray-200 text-gray-500", "TIDAK DIKETAHUI");
+        setBadge(elNpwp, "bg-gray-200 text-gray-500", "TIDAK DIKETAHUI");
+        setBadge(elPkp, "bg-gray-200 text-gray-500", "TIDAK DIKETAHUI");
+    }
+}
+
 async function muatDashboard() {
+    muatStatusLegal();
     try {
         // 1. AMBIL MASTER UNIT USAHA DARI DATABASE (DINAMIS)
         const snapUnit = await getDocs(collection(db, "master_unit_usaha"));

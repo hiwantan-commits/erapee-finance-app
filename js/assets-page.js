@@ -11,8 +11,16 @@ function formatRupiah(angka) {
     return "Rp " + Math.round(angka).toLocaleString('id-ID');
 }
 
+function tombolAksiAsetHtml(encId) {
+    return `
+        <button onclick="window.editAset('${encId}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded text-[11px] font-bold transition">Edit</button>
+        <button onclick="window.hapusAset('${encId}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded text-[11px] font-bold transition">Hapus</button>
+    `;
+}
+
 async function muatDaftarAset() {
     const tbody = document.getElementById('tabelDaftarAset');
+    const kartuContainer = document.getElementById('kartuDaftarAset');
     if (!tbody) return;
     tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Memuat daftar aset tetap...</td></tr>`;
 
@@ -24,10 +32,13 @@ async function muatDaftarAset() {
 
         let totalPerolehan = 0, totalAkumulasi = 0, totalNilaiBuku = 0;
 
-        tbody.innerHTML = '';
         if (daftarAset.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Belum ada aset tetap terdaftar. Tambahkan lewat form di atas.</td></tr>`;
+            if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Belum ada aset tetap terdaftar. Tambahkan lewat form di atas.</p>`;
         } else {
+            const barisTabel = [];
+            const kartuMobile = [];
+
             daftarAset.forEach(aset => {
                 const hasil = hitungPenyusutanAset(aset);
                 totalPerolehan += hasil.nilaiPerolehan;
@@ -35,25 +46,49 @@ async function muatDaftarAset() {
                 totalNilaiBuku += hasil.nilaiBuku;
 
                 const encId = encodeURIComponent(aset.id);
-                let tr = document.createElement('tr');
-                tr.id = `row-aset-${aset.id}`;
-                tr.className = "border-b border-gray-100 hover:bg-gray-50 transition-colors";
-                tr.innerHTML = `
-                    <td class="p-3 text-xs font-medium text-gray-800">${escapeHtml(aset.nama_aset)}</td>
-                    <td class="p-3 text-xs text-gray-500">${escapeHtml(aset.tanggal_perolehan)}</td>
-                    <td class="p-3 text-xs"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-semibold">${escapeHtml(aset.kelompok)}</span><div class="text-[10px] text-gray-400 mt-0.5">${escapeHtml(aset.metode)}</div></td>
-                    <td class="p-3 text-xs text-right font-medium">${hasil.nilaiPerolehan.toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-xs text-right text-amber-700">${Math.round(hasil.akumulasiPenyusutan).toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-xs text-right font-bold text-green-700">${Math.round(hasil.nilaiBuku).toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-center">
-                        <div class="flex justify-center items-center gap-1">
-                            <button onclick="window.editAset('${encId}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded text-[11px] font-bold transition">Edit</button>
-                            <button onclick="window.hapusAset('${encId}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded text-[11px] font-bold transition">Hapus</button>
+
+                barisTabel.push(`
+                    <tr id="row-aset-${aset.id}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td class="p-3 text-xs font-medium text-gray-800">${escapeHtml(aset.nama_aset)}</td>
+                        <td class="p-3 text-xs text-gray-500">${escapeHtml(aset.tanggal_perolehan)}</td>
+                        <td class="p-3 text-xs"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-semibold">${escapeHtml(aset.kelompok)}</span><div class="text-[10px] text-gray-400 mt-0.5">${escapeHtml(aset.metode)}</div></td>
+                        <td class="p-3 text-xs text-right font-medium">${hasil.nilaiPerolehan.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-xs text-right text-amber-700">${Math.round(hasil.akumulasiPenyusutan).toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-xs text-right font-bold text-green-700">${Math.round(hasil.nilaiBuku).toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-center">
+                            <div class="flex justify-center items-center gap-1">
+                                ${tombolAksiAsetHtml(encId)}
+                            </div>
+                        </td>
+                    </tr>
+                `);
+
+                kartuMobile.push(`
+                    <div id="kartu-aset-${aset.id}" class="border border-gray-100 rounded-xl p-4">
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <div>
+                                <div class="font-bold text-gray-800 text-sm">${escapeHtml(aset.nama_aset)}</div>
+                                <div class="text-xs text-gray-500">${escapeHtml(aset.tanggal_perolehan)}</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-semibold text-[11px]">${escapeHtml(aset.kelompok)}</span>
+                                <div class="text-[10px] text-gray-400 mt-0.5">${escapeHtml(aset.metode)}</div>
+                            </div>
                         </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
+                        <div class="grid grid-cols-3 gap-2 text-xs border-t border-gray-100 pt-2 mb-3">
+                            <div><p class="text-gray-400">Perolehan</p><p class="font-semibold">${hasil.nilaiPerolehan.toLocaleString('id-ID')}</p></div>
+                            <div><p class="text-gray-400">Penyusutan</p><p class="font-semibold text-amber-700">${Math.round(hasil.akumulasiPenyusutan).toLocaleString('id-ID')}</p></div>
+                            <div><p class="text-gray-400">Nilai Buku</p><p class="font-bold text-green-700">${Math.round(hasil.nilaiBuku).toLocaleString('id-ID')}</p></div>
+                        </div>
+                        <div class="flex justify-end gap-1">
+                            ${tombolAksiAsetHtml(encId)}
+                        </div>
+                    </div>
+                `);
             });
+
+            tbody.innerHTML = barisTabel.join('');
+            if (kartuContainer) kartuContainer.innerHTML = kartuMobile.join('');
         }
 
         const elPerolehan = document.getElementById('totalPerolehanAset');
@@ -69,6 +104,7 @@ async function muatDaftarAset() {
     } catch (error) {
         console.error("Gagal memuat daftar aset:", error);
         tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500">Gagal memuat data aset tetap.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-red-500 text-sm">Gagal memuat data aset tetap.</p>`;
     }
 }
 
@@ -77,9 +113,11 @@ window.editAset = function(encId) {
     const aset = window.dataAsetGlobal[id];
     if (!aset) return;
 
-    document.querySelectorAll('#tabelDaftarAset tr').forEach(tr => tr.classList.remove('bg-amber-50'));
+    document.querySelectorAll('#tabelDaftarAset tr, #kartuDaftarAset > div').forEach(el => el.classList.remove('bg-amber-50'));
     const activeRow = document.getElementById(`row-aset-${id}`);
     if (activeRow) activeRow.classList.add('bg-amber-50');
+    const activeCard = document.getElementById(`kartu-aset-${id}`);
+    if (activeCard) activeCard.classList.add('bg-amber-50');
 
     document.getElementById('editIdAset').value = id;
     document.getElementById('namaAset').value = aset.nama_aset || '';
@@ -97,7 +135,7 @@ window.editAset = function(encId) {
 };
 
 window.batalEditAset = function() {
-    document.querySelectorAll('#tabelDaftarAset tr').forEach(tr => tr.classList.remove('bg-amber-50'));
+    document.querySelectorAll('#tabelDaftarAset tr, #kartuDaftarAset > div').forEach(el => el.classList.remove('bg-amber-50'));
     document.getElementById('formAset').reset();
     document.getElementById('editIdAset').value = '';
 

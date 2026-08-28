@@ -24,8 +24,8 @@
                         <p class="text-xs text-gray-500 mt-0.5">Skedul penyusutan per aset sesuai kelompok tarif fiskal (UU PPh)</p>
                     </div>
                     <div>
-                        <a href="input-jurnal.html" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
-                            + Catat Pembelian Aset
+                        <a href="/input-jurnal" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
+                            ➕ Catat Pembelian Aset
                         </a>
                     </div>
                 </div>
@@ -90,7 +90,9 @@
                 <!-- Tabel Daftar Aset & Skedul Penyusutan -->
                 <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm mb-8">
                     <h3 class="font-bold text-gray-800 text-base mb-4">Daftar Aset Tetap & Skedul Penyusutan</h3>
-                    <div class="overflow-x-auto">
+
+                    <!-- Tabel (layar md ke atas) -->
+                    <div class="hidden md:block overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
@@ -109,6 +111,11 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Tampilan kartu untuk layar sempit -->
+                    <div id="kartuDaftarAset" class="md:hidden space-y-3">
+                        <p class="p-8 text-center text-gray-400 text-sm">Memuat daftar aset tetap...</p>
                     </div>
                 </div>
 
