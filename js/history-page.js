@@ -31,7 +31,7 @@ function renderTabelHistori(daftarLog) {
     if (!tbody) return;
 
     if (daftarLog.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Tidak ada aktivitas yang cocok.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-stone-400 dark:text-stone-500">Tidak ada aktivitas yang cocok.</td></tr>`;
         hapusKontrolPagination();
         return;
     }
@@ -44,21 +44,21 @@ function renderTabelHistori(daftarLog) {
     const dataHalamanIni = daftarLog.slice(indeksAwal, indeksAwal + dataPerHalaman);
 
     tbody.innerHTML = dataHalamanIni.map(log => {
-        let warnaBadge = "bg-blue-100 text-blue-700";
-        if (log.aksi && log.aksi.includes("DELETE")) warnaBadge = "bg-red-100 text-red-700";
-        if (log.aksi && log.aksi.includes("UPDATE")) warnaBadge = "bg-amber-100 text-amber-800";
-        if (log.aksi && log.aksi.includes("CREATE")) warnaBadge = "bg-green-100 text-green-700";
+        let warnaBadge = "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300";
+        if (log.aksi && log.aksi.includes("DELETE")) warnaBadge = "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400";
+        if (log.aksi && log.aksi.includes("UPDATE")) warnaBadge = "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400";
+        if (log.aksi && log.aksi.includes("CREATE")) warnaBadge = "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400";
 
         const formatWaktu = log.timestamp ? new Date(log.timestamp).toLocaleString('id-ID') : '-';
 
         return `
             <tr>
-                <td class="p-3 font-mono text-xs text-gray-500">${formatWaktu}</td>
+                <td class="p-3 font-mono text-xs text-stone-500 dark:text-stone-400">${formatWaktu}</td>
                 <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[11px] ${warnaBadge}">${escapeHtml(log.aksi) || 'AKTIVITAS'}</span></td>
-                <td class="p-3 font-semibold text-indigo-700">${escapeHtml(log.id_jurnal) || '-'}</td>
-                <td class="p-3 text-gray-700">
+                <td class="p-3 font-semibold text-stone-900 dark:text-stone-100">${escapeHtml(log.id_jurnal) || '-'}</td>
+                <td class="p-3 text-stone-700 dark:text-stone-300">
                     <div>${escapeHtml(log.keterangan) || '-'}</div>
-                    <div class="text-[11px] text-gray-400 mt-0.5">Oleh: ${escapeHtml(log.user) || 'System'}</div>
+                    <div class="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5">Oleh: ${escapeHtml(log.user) || 'System'}</div>
                 </td>
             </tr>
         `;
@@ -72,8 +72,11 @@ function renderKontrolPagination(totalHalaman) {
     if (!containerPagination) {
         containerPagination = document.createElement('div');
         containerPagination.id = 'pagination-container-histori';
-        containerPagination.className = 'flex justify-between items-center mt-4 px-2 py-3 border-t border-gray-100 text-xs text-gray-600';
-        const cardTabel = document.querySelector('#tabelHistori').closest('.dashboard-card');
+        containerPagination.className = 'flex justify-between items-center mt-4 px-2 py-3 border-t border-stone-100 dark:border-stone-800 text-xs text-stone-500 dark:text-stone-400';
+        // Dulu pakai .closest('.dashboard-card'), tapi kelas itu sudah tidak
+        // dipakai di desain elegant sehingga akan diam-diam gagal (null) dan
+        // kontrol paginasi hilang - sekarang diarahkan lewat id eksplisit.
+        const cardTabel = document.getElementById('kartuTabelHistori');
         if (cardTabel) cardTabel.appendChild(containerPagination);
     }
 
@@ -85,8 +88,8 @@ function renderKontrolPagination(totalHalaman) {
     containerPagination.innerHTML = `
         <span>Halaman <b>${halamanAktif}</b> dari <b>${totalHalaman}</b></span>
         <div class="space-x-1">
-            <button onclick="window.ubahHalamanHistori(${halamanAktif - 1})" ${halamanAktif === 1 ? 'disabled class="px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded hover:bg-indigo-100 transition"'}>Sebelumnya</button>
-            <button onclick="window.ubahHalamanHistori(${halamanAktif + 1})" ${halamanAktif === totalHalaman ? 'disabled class="px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded hover:bg-indigo-100 transition"'}>Berikutnya</button>
+            <button onclick="window.ubahHalamanHistori(${halamanAktif - 1})" ${halamanAktif === 1 ? 'disabled class="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-600 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-semibold rounded hover:bg-stone-200 dark:hover:bg-stone-700 transition"'}>Sebelumnya</button>
+            <button onclick="window.ubahHalamanHistori(${halamanAktif + 1})" ${halamanAktif === totalHalaman ? 'disabled class="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-600 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-semibold rounded hover:bg-stone-200 dark:hover:bg-stone-700 transition"'}>Berikutnya</button>
         </div>
     `;
 }
@@ -109,7 +112,7 @@ window.filterHistori = function() {
 async function muatHistoriAktivitas() {
     const tbody = document.getElementById('tabelHistori');
     if (!tbody) return;
-    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Memuat jejak audit aktivitas...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-stone-400 dark:text-stone-500">Memuat jejak audit aktivitas...</td></tr>`;
 
     try {
         const querySnapshot = await getDocs(collection(db, "activity_logs"));
@@ -120,14 +123,14 @@ async function muatHistoriAktivitas() {
         SEMUA_LOG.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
         if (SEMUA_LOG.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">Belum ada riwayat aktivitas tercatat.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-stone-400 dark:text-stone-500">Belum ada riwayat aktivitas tercatat.</td></tr>`;
             return;
         }
 
         renderTabelHistori(SEMUA_LOG);
     } catch (err) {
         console.error("Gagal memuat histori:", err);
-        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500">Gagal memuat data histori audit dari database.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 dark:text-red-400">Gagal memuat data histori audit dari database.</td></tr>`;
     }
 }
 

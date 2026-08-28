@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Histori Audit & Jejak Aktivitas | PT ERAPEE Anugrah Sejahtera</title>
+    <!-- Inisialisasi tema (terpusat di js/tema-*.js, lihat komentar di file
+         tersebut - supaya perubahan logika tema cukup di satu tempat) -->
+    <script src="js/tema-fouc-init.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tema-tailwind-config.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>body.auth-pending { visibility: hidden; }</style>
 </head>
-<body class="text-gray-800 bg-gray-50 auth-pending">
+<body data-tema="elegant" class="text-stone-900 dark:text-stone-100 bg-stone-50 dark:bg-stone-950 auth-pending">
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
         <div id="sidebar-container"></div>
@@ -18,24 +22,22 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Header Histori -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-800">Histori Audit & Jejak Aktivitas (Audit Trail)</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Catatan waktu, pengguna, dan perubahan transaksi sistem secara transparan</p>
-                    </div>
+                <!-- Header Histori (polos di atas latar, tanpa bingkai kartu) -->
+                <div class="mb-6">
+                    <h1 class="h-elegant-2 text-stone-900 dark:text-stone-50">Histori Audit & Jejak Aktivitas (Audit Trail)</h1>
+                    <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Catatan waktu, pengguna, dan perubahan transaksi sistem secara transparan</p>
                 </div>
 
                 <!-- Kotak Pencarian & Filter -->
-                <div class="dashboard-card p-4 md:p-6 bg-white rounded-2xl shadow-sm mb-6 space-y-4">
+                <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-4 md:p-6 shadow-sm mb-6 space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Cari (ID Jurnal / Keterangan / Pengguna)</label>
-                            <input type="text" id="inputPencarianHistori" onkeyup="window.filterHistori()" placeholder="Ketik kata kunci pencarian..." class="form-input-custom text-xs">
+                            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Cari (ID Jurnal / Keterangan / Pengguna)</label>
+                            <input type="text" id="inputPencarianHistori" onkeyup="window.filterHistori()" placeholder="Ketik kata kunci pencarian..." class="form-input-elegant text-xs">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Jenis Aksi</label>
-                            <select id="filterAksiHistori" onchange="window.filterHistori()" class="form-input-custom text-xs">
+                            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Jenis Aksi</label>
+                            <select id="filterAksiHistori" onchange="window.filterHistori()" class="form-input-elegant text-xs">
                                 <option value="SEMUA">Semua Aksi</option>
                                 <option value="CREATE">Dibuat (Create)</option>
                                 <option value="UPDATE">Diubah (Update)</option>
@@ -45,32 +47,32 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Dari Tanggal</label>
-                            <input type="date" id="filterTanggalDariHistori" onchange="window.filterHistori()" class="form-input-custom text-xs">
+                            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Dari Tanggal</label>
+                            <input type="date" id="filterTanggalDariHistori" onchange="window.filterHistori()" class="form-input-elegant text-xs">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Sampai Tanggal</label>
-                            <input type="date" id="filterTanggalSampaiHistori" onchange="window.filterHistori()" class="form-input-custom text-xs">
+                            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Sampai Tanggal</label>
+                            <input type="date" id="filterTanggalSampaiHistori" onchange="window.filterHistori()" class="form-input-elegant text-xs">
                         </div>
                     </div>
                 </div>
 
                 <!-- Tabel Log Aktivitas -->
-                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-gray-800 text-base mb-4">Log Aktivitas Sistem</h3>
+                <div id="kartuTabelHistori" class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
+                    <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-4">Log Aktivitas Sistem</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-3">Waktu (Timestamp)</th>
-                                    <th class="p-3">Aksi</th>
-                                    <th class="p-3">ID Jurnal</th>
-                                    <th class="p-3">Detail & Pengguna</th>
+                                <tr class="text-stone-400 dark:text-stone-500 text-xs normal-case tracking-normal border-b border-stone-100 dark:border-stone-800">
+                                    <th class="p-3 font-medium">Waktu (Timestamp)</th>
+                                    <th class="p-3 font-medium">Aksi</th>
+                                    <th class="p-3 font-medium">ID Jurnal</th>
+                                    <th class="p-3 font-medium">Detail & Pengguna</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelHistori" class="divide-y divide-gray-100 text-xs">
+                            <tbody id="tabelHistori" class="divide-y divide-stone-100 dark:divide-stone-800 text-xs">
                                 <tr>
-                                    <td colspan="4" class="p-8 text-center text-gray-400">Memuat jejak audit aktivitas...</td>
+                                    <td colspan="4" class="p-8 text-center text-stone-400 dark:text-stone-500">Memuat jejak audit aktivitas...</td>
                                 </tr>
                             </tbody>
                         </table>
