@@ -241,6 +241,43 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Proyeksi Arus Kas & Cash Runway -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm mb-8">
+                    <h3 class="font-bold text-gray-800 text-base mb-1">Proyeksi Arus Kas &amp; Cash Runway</h3>
+                    <p class="text-xs text-gray-500 mb-5">Estimasi sederhana berbasis tren transaksi beberapa bulan terakhir - bukan prediksi presisi, gunakan sebagai sinyal awal saja.</p>
+
+                    <div id="proyeksiCatatanKurang" class="hidden p-4 bg-gray-50 text-gray-500 rounded-xl text-sm text-center">
+                        Riwayat transaksi masih kurang dari 2 bulan berjalan - proyeksi memerlukan minimal 2 bulan data untuk mulai dihitung.
+                    </div>
+
+                    <div id="proyeksiKontenUtama" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Kas Saat Ini</p>
+                                <h4 class="text-xl font-bold text-gray-800 mt-2" id="proyeksiTotalKas">Rp 0</h4>
+                            </div>
+                            <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Rata-rata Arus Kas Operasi/Bulan</p>
+                                <h4 class="text-xl font-bold mt-2" id="proyeksiBurnRate">-</h4>
+                            </div>
+                            <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Estimasi Cash Runway</p>
+                                <h4 class="text-2xl font-bold text-gray-800 mt-2" id="proyeksiRunway">-</h4>
+                                <p class="text-[11px] text-gray-400 mt-1" id="proyeksiRunwayKeterangan"></p>
+                            </div>
+                            <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Proyeksi Pendapatan Bulan Depan</p>
+                                <h4 class="text-xl font-bold text-indigo-600 mt-2" id="proyeksiPendapatan">Rp 0</h4>
+                                <p class="text-[11px] text-gray-400 mt-1" id="proyeksiPendapatanLabel"></p>
+                            </div>
+                        </div>
+
+                        <div class="relative h-64 w-full">
+                            <canvas id="grafikProyeksiKas"></canvas>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>

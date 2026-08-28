@@ -5,7 +5,7 @@ import { db } from "./config.js";
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { escapeHtml } from "./utils.js";
-import { kalkulasiNeraca } from "./accounting.js";
+import { kalkulasiNeraca, kalkulasiArusKas } from "./accounting.js";
 
 let semuaJurnalCache = [];
 let unitUsahaMasterCache = [];
@@ -659,6 +659,161 @@ function renderRasioKeuangan() {
     setStatusBadge('rasioDtaStatus', statusRasioRendahBaik(dta, 50, 70));
 }
 
+// ==================== Proyeksi Arus Kas & Cash Runway ====================
+// Estimasi sederhana berbasis rata-rata bergerak dari beberapa bulan
+// transaksi terakhir yang benar-benar ada (bukan model prediksi kompleks).
+// Tidak mengikuti filter Tahun - selalu memakai bulan-bulan paling baru.
+
+const NAMA_BULAN_LENGKAP = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+let chartProyeksiInstance = null;
+
+function hitungTotalKasSaatIni() {
+    let total = 0;
+    semuaJurnalCache.forEach(jurnal => {
+        (jurnal.rows || []).forEach(baris => {
+            const kode = String(baris.kode_akun || "");
+            if (!kode.startsWith("11")) return;
+            total += (parseFloat(baris.debit) || 0) - (parseFloat(baris.kredit) || 0);
+        });
+    });
+    return total;
+}
+
+function formatBulanTahun(kunciYYYYMM) {
+    const [tahun, bulan] = kunciYYYYMM.split("-");
+    const idx = parseInt(bulan) - 1;
+    return `${NAMA_BULAN_LENGKAP[idx] || bulan} ${tahun}`;
+}
+
+function namaBulanBerikutnya(kunciYYYYMMTerakhir) {
+    const [tahun, bulan] = kunciYYYYMMTerakhir.split("-").map(Number);
+    let bulanBerikut = bulan + 1;
+    let tahunBerikut = tahun;
+    if (bulanBerikut > 12) {
+        bulanBerikut = 1;
+        tahunBerikut += 1;
+    }
+    return `${NAMA_BULAN_LENGKAP[bulanBerikut - 1]} ${tahunBerikut}`;
+}
+
+function hitungTrenBulananTerakhir(jumlahBulan) {
+    const kunciSet = new Set();
+    semuaJurnalCache.forEach(j => {
+        if (j.tanggal) kunciSet.add(j.tanggal.substring(0, 7));
+    });
+    const daftarKunci = Array.from(kunciSet).sort();
+    const kunciTerakhir = daftarKunci.slice(-jumlahBulan);
+    if (kunciTerakhir.length === 0) return [];
+
+    const arusKas = kalkulasiArusKas(semuaJurnalCache);
+
+    return kunciTerakhir.map(kunci => {
+        let pendapatan = 0, beban = 0, netKasOperasi = 0;
+
+        semuaJurnalCache.forEach(jurnal => {
+            if (!jurnal.tanggal || jurnal.tanggal.substring(0, 7) !== kunci) return;
+            (jurnal.rows || []).forEach(baris => {
+                const kode = String(baris.kode_akun || "");
+                const debit = parseFloat(baris.debit) || 0;
+                const kredit = parseFloat(baris.kredit) || 0;
+                if (kode.startsWith("4")) pendapatan += (kredit - debit);
+                else if (kode.startsWith("5") || kode.startsWith("6")) beban += (debit - kredit);
+            });
+        });
+
+        arusKas.rincian.forEach(r => {
+            if (r.kategori === "Operasi" && r.jurnal.tanggal && r.jurnal.tanggal.substring(0, 7) === kunci) {
+                netKasOperasi += r.netKas;
+            }
+        });
+
+        return { kunci, pendapatan, beban, netKasOperasi };
+    });
+}
+
+function renderProyeksiArusKas() {
+    const JUMLAH_BULAN_TREN = 6;
+    const tren = hitungTrenBulananTerakhir(JUMLAH_BULAN_TREN);
+
+    const elCatatan = document.getElementById('proyeksiCatatanKurang');
+    const elKonten = document.getElementById('proyeksiKontenUtama');
+
+    if (tren.length < 2) {
+        if (elCatatan) elCatatan.classList.remove('hidden');
+        if (elKonten) elKonten.classList.add('hidden');
+        return;
+    }
+    if (elCatatan) elCatatan.classList.add('hidden');
+    if (elKonten) elKonten.classList.remove('hidden');
+
+    const totalKas = hitungTotalKasSaatIni();
+    setTeksAman('proyeksiTotalKas', formatRupiah(totalKas));
+
+    const rataRataNetKasOperasi = tren.reduce((s, t) => s + t.netKasOperasi, 0) / tren.length;
+    const elBurnRate = document.getElementById('proyeksiBurnRate');
+    if (elBurnRate) {
+        const positif = rataRataNetKasOperasi >= 0;
+        elBurnRate.innerHTML = `<span class="${positif ? 'text-green-600' : 'text-red-600'}">${positif ? '+' : ''}${formatRupiah(rataRataNetKasOperasi)}</span>`;
+    }
+
+    const elRunway = document.getElementById('proyeksiRunway');
+    const elRunwayKeterangan = document.getElementById('proyeksiRunwayKeterangan');
+    if (rataRataNetKasOperasi < 0 && totalKas > 0) {
+        const bulanRunway = totalKas / Math.abs(rataRataNetKasOperasi);
+        if (elRunway) {
+            elRunway.innerText = bulanRunway.toFixed(1) + " bulan";
+            elRunway.className = "text-2xl font-bold mt-2 " + (bulanRunway < 3 ? "text-red-600" : (bulanRunway < 6 ? "text-amber-600" : "text-gray-800"));
+        }
+        if (elRunwayKeterangan) elRunwayKeterangan.innerText = `Estimasi jika tren pengeluaran ${JUMLAH_BULAN_TREN} bulan terakhir berlanjut tanpa pemasukan baru`;
+    } else if (totalKas <= 0) {
+        if (elRunway) {
+            elRunway.innerText = "0 bulan";
+            elRunway.className = "text-2xl font-bold mt-2 text-red-600";
+        }
+        if (elRunwayKeterangan) elRunwayKeterangan.innerText = "Saldo kas tercatat sudah habis/negatif";
+    } else {
+        if (elRunway) {
+            elRunway.innerText = "Aman";
+            elRunway.className = "text-2xl font-bold mt-2 text-green-600";
+        }
+        if (elRunwayKeterangan) elRunwayKeterangan.innerText = `Arus kas operasional rata-rata ${JUMLAH_BULAN_TREN} bulan terakhir positif - tidak ada risiko kehabisan kas dalam waktu dekat`;
+    }
+
+    const rataRataPendapatan = tren.reduce((s, t) => s + t.pendapatan, 0) / tren.length;
+    const kunciTerakhir = tren[tren.length - 1].kunci;
+    setTeksAman('proyeksiPendapatan', formatRupiah(rataRataPendapatan));
+    setTeksAman('proyeksiPendapatanLabel', `Estimasi untuk ${namaBulanBerikutnya(kunciTerakhir)} (rata-rata ${tren.length} bulan terakhir)`);
+
+    const canvasEl = document.getElementById('grafikProyeksiKas');
+    if (canvasEl && window.Chart) {
+        if (chartProyeksiInstance) {
+            chartProyeksiInstance.destroy();
+            chartProyeksiInstance = null;
+        }
+        chartProyeksiInstance = new Chart(canvasEl.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: tren.map(t => formatBulanTahun(t.kunci)),
+                datasets: [{
+                    label: 'Arus Kas Operasional Bersih (Rp)',
+                    data: tren.map(t => Math.round(t.netKasOperasi)),
+                    backgroundColor: tren.map(t => t.netKasOperasi >= 0 ? 'rgba(34, 197, 94, 0.75)' : 'rgba(239, 68, 68, 0.75)'),
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { color: '#f3f4f6' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+}
+
 async function muatAnalisisBisnis() {
     try {
         const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
@@ -674,6 +829,7 @@ async function muatAnalisisBisnis() {
         semuaJurnalCache = await ambilSemuaJurnalPusat();
 
         renderRasioKeuangan();
+        renderProyeksiArusKas();
 
         // Bangun daftar tahun yang tersedia dari data transaksi
         const tahunSet = new Set();
