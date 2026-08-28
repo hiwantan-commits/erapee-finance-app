@@ -21,10 +21,57 @@
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
                 <!-- Header Analisis Bisnis -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">Analisis Bisnis</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">Gambaran kinerja keuangan &amp; profitabilitas usaha, dihitung otomatis dari data jurnal</p>
+                </div>
+
+                <!-- Perbandingan Tahun ke Tahun (YoY) -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-8">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-gray-100">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-base">Perbandingan Tahun ke Tahun (YoY)</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Bandingkan kinerja keuangan konsolidasi perusahaan antar dua periode tahun</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="filterTahunIniYoY" class="form-input-custom text-xs font-semibold py-2"></select>
+                            <span class="text-xs text-gray-400 font-medium">vs</span>
+                            <select id="filterTahunLaluYoY" class="form-input-custom text-xs font-semibold py-2"></select>
+                        </div>
+                    </div>
+
+                    <div id="areaYoYTanpaPembanding" class="hidden p-3 mb-5 bg-amber-50 text-amber-700 rounded-xl text-xs">
+                        Belum ada data tahun pembanding untuk dianalisis - angka di bawah hanya menampilkan tahun yang sedang berjalan.
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Pendapatan</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="yoyPendapatanIni">Rp 0</h4>
+                            <div class="text-xs mt-1.5" id="yoyPendapatanGrowth"></div>
+                        </div>
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Beban</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="yoyBebanIni">Rp 0</h4>
+                            <div class="text-xs mt-1.5" id="yoyBebanGrowth"></div>
+                        </div>
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Laba Bersih</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="yoyLabaIni">Rp 0</h4>
+                            <div class="text-xs mt-1.5" id="yoyLabaGrowth"></div>
+                        </div>
+                    </div>
+
+                    <div class="relative h-72 w-full">
+                        <canvas id="grafikYoY"></canvas>
+                    </div>
+                </div>
+
+                <!-- Profitabilitas per Unit Usaha -->
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-800">Analisis Profitabilitas per Unit Usaha</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Perbandingan kinerja dan margin laba antar unit usaha, dihitung otomatis dari data jurnal</p>
+                        <h3 class="font-bold text-gray-800 text-base">Profitabilitas per Unit Usaha</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Perbandingan kinerja dan margin laba antar unit usaha pada satu periode tahun</p>
                     </div>
                     <div>
                         <select id="filterTahunBisnis" class="form-input-custom text-xs font-semibold py-2">
