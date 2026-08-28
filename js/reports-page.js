@@ -91,16 +91,31 @@ function isiFilterMasaLaporan() {
     const select = document.getElementById('filterMasaLaporan');
     if (!select) return;
 
-    const masaSet = new Set(SEMUA_JURNAL.map(j => (j.tanggal || '').slice(0, 7)).filter(Boolean));
-    const daftarMasa = Array.from(masaSet).sort().reverse();
+    const masaTahunSet = new Set(SEMUA_JURNAL.map(j => (j.tanggal || '').slice(0, 4)).filter(Boolean));
+    const masaBulanSet = new Set(SEMUA_JURNAL.map(j => (j.tanggal || '').slice(0, 7)).filter(Boolean));
 
-    select.innerHTML = `<option value="SEMUA">Semua Periode</option>`;
-    daftarMasa.forEach(masa => {
-        const opt = document.createElement('option');
-        opt.value = masa;
-        opt.innerText = masa;
-        select.appendChild(opt);
-    });
+    const daftarTahun = Array.from(masaTahunSet).sort().reverse();
+    const daftarBulan = Array.from(masaBulanSet).sort().reverse();
+
+    let optionsHtml = `<option value="SEMUA">Semua Periode</option>`;
+
+    if (daftarTahun.length > 0) {
+        optionsHtml += `<optgroup label="Per Tahun (Laba Rugi Tahunan)">`;
+        daftarTahun.forEach(tahun => {
+            optionsHtml += `<option value="${tahun}">Tahun ${tahun}</option>`;
+        });
+        optionsHtml += `</optgroup>`;
+    }
+
+    if (daftarBulan.length > 0) {
+        optionsHtml += `<optgroup label="Per Bulan">`;
+        daftarBulan.forEach(masa => {
+            optionsHtml += `<option value="${masa}">${masa}</option>`;
+        });
+        optionsHtml += `</optgroup>`;
+    }
+
+    select.innerHTML = optionsHtml;
 }
 
 let HASIL_LABA_RUGI_TERKINI = null;
@@ -109,15 +124,26 @@ function renderLabaRugiDanTrialBalance() {
     const select = document.getElementById('filterMasaLaporan');
     const masaTerpilih = select ? select.value : "SEMUA";
 
-    const labelPeriode = masaTerpilih === "SEMUA" ? "Semua Periode" : masaTerpilih;
+    let labelPeriode;
+    let jurnalTersaring;
+
+    if (masaTerpilih === "SEMUA") {
+        labelPeriode = "Semua Periode";
+        jurnalTersaring = SEMUA_JURNAL;
+    } else if (masaTerpilih.length === 4) {
+        // Filter per Tahun (YYYY) - untuk Laba Rugi tahunan (mis. dasar bonus karyawan)
+        labelPeriode = "Tahun " + masaTerpilih;
+        jurnalTersaring = SEMUA_JURNAL.filter(j => (j.tanggal || '').slice(0, 4) === masaTerpilih);
+    } else {
+        // Filter per Bulan (YYYY-MM)
+        labelPeriode = masaTerpilih;
+        jurnalTersaring = SEMUA_JURNAL.filter(j => (j.tanggal || '').slice(0, 7) === masaTerpilih);
+    }
+
     const elCetakPeriode = document.getElementById('cetakPeriodeLaporan');
     if (elCetakPeriode) elCetakPeriode.innerText = labelPeriode;
     const elLabelAktif = document.getElementById('labelPeriodeAktif');
     if (elLabelAktif) elLabelAktif.innerText = labelPeriode;
-
-    const jurnalTersaring = masaTerpilih === "SEMUA"
-        ? SEMUA_JURNAL
-        : SEMUA_JURNAL.filter(j => (j.tanggal || '').slice(0, 7) === masaTerpilih);
 
     const hasil = kalkulasiLaporanKeuangan(jurnalTersaring);
     HASIL_LABA_RUGI_TERKINI = hasil;
