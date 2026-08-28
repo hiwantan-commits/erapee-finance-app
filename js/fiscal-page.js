@@ -1,8 +1,6 @@
 // js/fiscal-page.js - Controller untuk rekonsiliasi.html (Laporan Arus Kas)
 import { ambilSemuaJurnalPusat } from "./db.js";
-import { kalkulasiArusKas } from "./accounting.js";
-import { db } from "./config.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { kalkulasiArusKas, susunStrukturArusKas } from "./accounting.js";
 import { escapeHtml, amankanSelCsv, unduhCsv } from "./utils.js";
 
 let SEMUA_JURNAL = [];
@@ -100,23 +98,62 @@ function renderLaporanArusKas() {
     if (kartuContainer) {
         kartuContainer.innerHTML = arusKas.rincian.map(renderKartu).join('');
     }
+
+    renderCetakArusKasBerjenjang(arusKas, masaTerpilih);
 }
 
-async function muatDataKopCetak() {
-    const elTanggal = document.getElementById('cetakTanggalDibuatArusKas');
-    if (elTanggal) {
-        elTanggal.innerText = "Dicetak: " + new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' });
-    }
+// Versi cetak berjenjang (lihat susunStrukturArusKas() di accounting.js untuk
+// penjelasan keterbatasan dibanding software akuntansi yang punya sub-kelompok
+// rinci per akun lawan transaksi).
+function renderCetakArusKasBerjenjang(arusKas, masaTerpilih) {
+    const tbody = document.getElementById('tabelCetakArusKasBerjenjang');
+    if (!tbody) return;
 
-    try {
-        const snap = await getDoc(doc(db, "pengaturan", "profil_perusahaan"));
-        const elNpwp = document.getElementById('cetakNpwpArusKas');
-        if (elNpwp && snap.exists() && snap.data().npwp_perseroan) {
-            elNpwp.innerText = "NPWP: " + snap.data().npwp_perseroan;
+    const struktur = susunStrukturArusKas(SEMUA_JURNAL, arusKas, masaTerpilih);
+    const formatAngka = struktur.formatAngkaLaporan;
+
+    const renderBarisRincian = (r) => `
+        <tr>
+            <td class="pl-4 py-0.5">${escapeHtml(r.jurnal.id_jurnal)} - ${escapeHtml(r.jurnal.keterangan) || escapeHtml(r.jurnal.lawan_transaksi) || '-'}</td>
+            <td class="text-right py-0.5">${formatAngka(r.netKas)}</td>
+        </tr>
+    `;
+
+    const renderKelompokAktivitas = (kelompok, labelJudul, labelTotal) => {
+        let html = `<tr><td colspan="2" class="pt-4 pb-1 font-bold">${kelompok.nomor}. ${labelJudul}</td></tr>`;
+        if (kelompok.rincian.length === 0) {
+            html += `<tr><td class="pl-4 py-0.5 text-gray-500">Tidak ada mutasi pada kategori ini.</td><td></td></tr>`;
+        } else {
+            html += kelompok.rincian.map(renderBarisRincian).join('');
         }
-    } catch (error) {
-        console.error("Gagal memuat profil perusahaan untuk kop cetak:", error);
-    }
+        html += `
+            <tr class="border-t border-gray-400">
+                <td class="text-right font-bold pt-2 pb-4">${labelTotal}</td>
+                <td class="text-right font-bold pt-2 pb-4">${formatAngka(kelompok.total)}</td>
+            </tr>
+        `;
+        return html;
+    };
+
+    let html = '';
+    html += renderKelompokAktivitas(struktur.operasi, 'ARUS KAS DARI OPERASIONAL', 'TOTAL ARUS KAS DARI OPERASIONAL');
+    html += renderKelompokAktivitas(struktur.investasi, 'ARUS KAS DARI INVESTASI', 'TOTAL ARUS KAS DARI INVESTASI');
+    html += renderKelompokAktivitas(struktur.pendanaan, 'ARUS KAS DARI PENDANAAN', 'TOTAL ARUS KAS DARI PENDANAAN');
+    html += `
+        <tr class="border-t-2 border-gray-800">
+            <td class="text-right font-bold pt-4">KAS PADA SAAT AWAL PERIODE</td>
+            <td class="text-right font-bold pt-4">${formatAngka(struktur.kasAwal)}</td>
+        </tr>
+        <tr>
+            <td class="text-right font-bold py-1">TOTAL KAS YANG DITERIMA</td>
+            <td class="text-right font-bold py-1">${formatAngka(struktur.totalDiterima)}</td>
+        </tr>
+        <tr class="bg-gray-200 border-t border-gray-800">
+            <td class="text-right font-bold py-2">KAS PADA SAAT AKHIR PERIODE</td>
+            <td class="text-right font-bold py-2">${formatAngka(struktur.kasAkhir)}</td>
+        </tr>
+    `;
+    tbody.innerHTML = html;
 }
 
 window.eksporArusKasKeCsv = function() {
@@ -151,7 +188,6 @@ async function muatDataRekonsiliasi() {
         if (select) select.addEventListener('change', renderLaporanArusKas);
 
         renderLaporanArusKas();
-        muatDataKopCetak();
     } catch (error) {
         console.error("Gagal memuat data arus kas:", error);
     }

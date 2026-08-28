@@ -142,6 +142,59 @@ export function kalkulasiArusKas(semuaJurnal) {
     };
 }
 
+// ==================== Struktur Laporan Berjenjang: Arus Kas (khusus cetak) ====================
+// Menyajikan hasil kalkulasiArusKas() yang sudah ada (tidak diubah) dalam
+// format berjenjang bergaya konvensional: 3 kelompok Aktivitas (Operasi/
+// Investasi/Pendanaan) + ringkasan Kas Awal/Akhir Periode. TIDAK memecah
+// lebih jauh ke sub-kelompok rinci (Pelanggan/Vendor/Pajak/Biaya Operasional)
+// seperti sebagian software akuntansi lain, karena itu perlu aturan
+// klasifikasi baru per kode akun yang berisiko salah kategorisasi jika kode
+// akun di lapangan tidak mengikuti pola yang diasumsikan - dipertahankan
+// tetap pada 3 kategori yang sudah teruji dari kalkulasiArusKas().
+
+// Total saldo kas (akun berawalan "11") secara kumulatif dari seluruh
+// transaksi yang tanggalnya SEBELUM sebuah batas tanggal (eksklusif).
+function totalKasSebelumTanggal(semuaJurnal, batasTanggalYYYYMMDD) {
+    let total = 0;
+    semuaJurnal.forEach(jurnal => {
+        if (!jurnal.tanggal || jurnal.tanggal >= batasTanggalYYYYMMDD) return;
+        (jurnal.rows || []).forEach(baris => {
+            const kode = String(baris.kode_akun || "");
+            if (!kode.startsWith("11")) return;
+            total += (parseFloat(baris.debit) || 0) - (parseFloat(baris.kredit) || 0);
+        });
+    });
+    return total;
+}
+
+// `semuaJurnal`: seluruh jurnal (tidak difilter periode) - dipakai untuk
+// menghitung Kas Awal Periode. `arusKasPeriode`: hasil kalkulasiArusKas()
+// yang SUDAH difilter ke periode terpilih. `masaTerpilih`: "SEMUA" atau
+// string "YYYY-MM" sesuai pilihan filter di layar.
+export function susunStrukturArusKas(semuaJurnal, arusKasPeriode, masaTerpilih) {
+    const kasAwal = (masaTerpilih && masaTerpilih !== 'SEMUA')
+        ? totalKasSebelumTanggal(semuaJurnal, `${masaTerpilih}-01`)
+        : 0;
+    const totalDiterima = arusKasPeriode.totalBersih;
+    const kasAkhir = kasAwal + totalDiterima;
+
+    const kelompokKategori = (kategori, nomorUrut) => {
+        const rincian = arusKasPeriode.rincian.filter(r => r.kategori === kategori);
+        const total = rincian.reduce((s, r) => s + r.netKas, 0);
+        return { nomor: nomorUrut, label: kategori, rincian, total };
+    };
+
+    return {
+        operasi: kelompokKategori('Operasi', 'A'),
+        investasi: kelompokKategori('Investasi', 'B'),
+        pendanaan: kelompokKategori('Pendanaan', 'C'),
+        kasAwal,
+        totalDiterima,
+        kasAkhir,
+        formatAngkaLaporan
+    };
+}
+
 // Tarif penyusutan fiskal sesuai kelompok harta berwujud (UU PPh Pasal 11 / PMK).
 // saldoMenurun bernilai null untuk bangunan karena UU PPh hanya mengizinkan
 // metode garis lurus untuk kelompok bangunan.
