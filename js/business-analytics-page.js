@@ -198,6 +198,136 @@ function renderSemuaTampilan(tahunFilter) {
     renderKpi(daftarUnit);
     renderTabelDanKartu(daftarUnit);
     renderGrafik(daftarUnit);
+    renderStrukturBeban(tahunFilter);
+}
+
+// ==================== Analisis Struktur Beban ====================
+
+let chartBebanInstance = null;
+
+function hitungStrukturBeban(tahunFilter) {
+    const dataPerAkun = {};
+
+    semuaJurnalCache.forEach(jurnal => {
+        const tahunJurnal = jurnal.tanggal ? jurnal.tanggal.split("-")[0] : null;
+        if (tahunFilter !== "SEMUA" && tahunJurnal !== tahunFilter) return;
+
+        (jurnal.rows || []).forEach(baris => {
+            const kodeAkun = baris.kode_akun || "";
+            if (!(kodeAkun.startsWith("5") || kodeAkun.startsWith("6"))) return;
+
+            const debit = parseFloat(baris.debit) || 0;
+            const kredit = parseFloat(baris.kredit) || 0;
+            const nilai = debit - kredit;
+
+            if (!dataPerAkun[kodeAkun]) {
+                dataPerAkun[kodeAkun] = { nama: baris.nama_akun || kodeAkun, total: 0 };
+            }
+            dataPerAkun[kodeAkun].total += nilai;
+        });
+    });
+
+    return Object.keys(dataPerAkun)
+        .map(kode => ({ kode, nama: dataPerAkun[kode].nama, total: dataPerAkun[kode].total }))
+        .filter(a => a.total !== 0)
+        .sort((a, b) => b.total - a.total);
+}
+
+function renderStrukturBeban(tahunFilter) {
+    const daftarAkun = hitungStrukturBeban(tahunFilter);
+    const totalBeban = daftarAkun.reduce((s, a) => s + a.total, 0);
+
+    setTeksAman('bebanTotalKeseluruhan', formatRupiah(totalBeban));
+
+    const elNama = document.getElementById('bebanTerbesarNama');
+    const elPersen = document.getElementById('bebanTerbesarPersen');
+    if (daftarAkun.length > 0 && totalBeban > 0) {
+        const terbesar = daftarAkun[0];
+        const persen = (terbesar.total / totalBeban) * 100;
+        if (elNama) elNama.innerText = terbesar.nama;
+        if (elPersen) elPersen.innerText = `${persen.toFixed(1)}% dari total beban`;
+    } else {
+        if (elNama) elNama.innerText = "Belum ada data";
+        if (elPersen) elPersen.innerText = "-";
+    }
+
+    // Tampilkan Top 10 akun, sisanya digabung jadi baris "Lainnya"
+    const BATAS_TAMPIL = 10;
+    const tampil = daftarAkun.slice(0, BATAS_TAMPIL);
+    const sisa = daftarAkun.slice(BATAS_TAMPIL);
+    const totalSisa = sisa.reduce((s, a) => s + a.total, 0);
+
+    const baris = tampil.map(a => ({ nama: `${a.kode} - ${a.nama}`, total: a.total }));
+    if (sisa.length > 0) {
+        baris.push({ nama: `Lainnya (${sisa.length} akun)`, total: totalSisa });
+    }
+
+    const tbody = document.getElementById('tabelStrukturBeban');
+    const kartuContainer = document.getElementById('kartuStrukturBeban');
+
+    if (baris.length === 0) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">Belum ada data beban pada periode ini.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Belum ada data beban pada periode ini.</p>`;
+    } else {
+        if (tbody) {
+            tbody.innerHTML = baris.map(a => {
+                const persen = totalBeban > 0 ? (a.total / totalBeban) * 100 : 0;
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(a.nama)}</td>
+                        <td class="p-3 text-right">${formatRupiah(a.total)}</td>
+                        <td class="p-3 text-right">${persen.toFixed(1)}%</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        if (kartuContainer) {
+            kartuContainer.innerHTML = baris.map(a => {
+                const persen = totalBeban > 0 ? (a.total / totalBeban) * 100 : 0;
+                return `
+                    <div class="border border-gray-100 rounded-xl p-4 flex justify-between items-center gap-2">
+                        <div class="overflow-hidden">
+                            <div class="font-semibold text-gray-800 text-sm truncate">${escapeHtml(a.nama)}</div>
+                            <div class="text-xs text-gray-400 mt-0.5">${persen.toFixed(1)}% dari total beban</div>
+                        </div>
+                        <div class="font-bold text-red-700 text-sm shrink-0">${formatRupiah(a.total)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    const canvasEl = document.getElementById('grafikStrukturBeban');
+    if (canvasEl && window.Chart) {
+        if (chartBebanInstance) {
+            chartBebanInstance.destroy();
+            chartBebanInstance = null;
+        }
+        if (tampil.length > 0) {
+            chartBebanInstance = new Chart(canvasEl.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: tampil.map(a => a.nama),
+                    datasets: [{
+                        label: 'Total Beban (Rp)',
+                        data: tampil.map(a => Math.round(a.total)),
+                        backgroundColor: 'rgba(239, 68, 68, 0.75)',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#f3f4f6' } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    }
 }
 
 // ==================== Perbandingan Tahun ke Tahun (YoY) ====================

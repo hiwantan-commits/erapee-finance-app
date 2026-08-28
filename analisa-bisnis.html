@@ -138,6 +138,49 @@
                         <p class="p-8 text-center text-gray-400 text-sm">Memuat data analisis bisnis...</p>
                     </div>
                 </div>
+
+                <!-- Analisis Struktur Beban -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm mb-8">
+                    <h3 class="font-bold text-gray-800 text-base mb-1">Analisis Struktur Beban</h3>
+                    <p class="text-xs text-gray-500 mb-4">Akun beban dengan kontribusi terbesar terhadap total pengeluaran, mengikuti filter Tahun di bagian Profitabilitas per Unit Usaha di atas</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Beban</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="bebanTotalKeseluruhan">Rp 0</h4>
+                        </div>
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50 md:col-span-2">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Kontributor Beban Terbesar</p>
+                            <h4 class="text-lg font-bold text-red-600 mt-1" id="bebanTerbesarNama">-</h4>
+                            <p class="text-xs text-gray-500 mt-0.5" id="bebanTerbesarPersen">-</p>
+                        </div>
+                    </div>
+
+                    <div class="relative h-72 w-full mb-6">
+                        <canvas id="grafikStrukturBeban"></canvas>
+                    </div>
+
+                    <div class="hidden md:block overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-3">Kode &amp; Nama Akun</th>
+                                    <th class="p-3 text-right">Total Beban (Rp)</th>
+                                    <th class="p-3 text-right">Kontribusi (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelStrukturBeban" class="divide-y divide-gray-100 text-xs">
+                                <tr>
+                                    <td colspan="3" class="p-8 text-center text-gray-400">Memuat data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="kartuStrukturBeban" class="md:hidden space-y-3">
+                        <p class="p-8 text-center text-gray-400 text-sm">Memuat data...</p>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
