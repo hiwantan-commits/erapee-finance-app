@@ -200,6 +200,132 @@ function renderSemuaTampilan(tahunFilter) {
     renderTabelDanKartu(daftarUnit);
     renderGrafik(daftarUnit);
     renderStrukturBeban(tahunFilter);
+    renderVendorPelanggan(tahunFilter);
+}
+
+// ==================== Vendor & Pelanggan Teratas ====================
+// Ranking dibangun dari field "Lawan Transaksi" pada header jurnal. Setiap
+// jurnal diklasifikasikan sebagai transaksi Pelanggan (jika ada baris yang
+// mengkredit akun Pendapatan, kode awalan 4 - heuristik yang sama dengan
+// tentukanArahPPN() di tax-page.js) atau transaksi Vendor (selain itu).
+
+function hitungNilaiTransaksiPelanggan(jurnal) {
+    let total = 0;
+    (jurnal.rows || []).forEach(baris => {
+        const kode = String(baris.kode_akun || "");
+        if (!kode.startsWith("4")) return;
+        total += parseFloat(baris.kredit) || 0;
+    });
+    return total;
+}
+
+function hitungNilaiTransaksiVendor(jurnal) {
+    // Nilai barang/jasa yang diterima dari vendor = total debit pada baris
+    // non-kas (beban, HPP, aset tetap, perlengkapan, dll) - bukan sisi kas
+    // keluarnya sendiri, supaya nilainya mencerminkan objek pembelian.
+    let total = 0;
+    (jurnal.rows || []).forEach(baris => {
+        const kode = String(baris.kode_akun || "");
+        if (kode.startsWith("11")) return;
+        total += parseFloat(baris.debit) || 0;
+    });
+    return total;
+}
+
+function hitungVendorPelanggan(tahunFilter) {
+    const petaVendor = {};
+    const petaPelanggan = {};
+
+    semuaJurnalCache.forEach(jurnal => {
+        const tahunJurnal = jurnal.tanggal ? jurnal.tanggal.split("-")[0] : null;
+        if (tahunFilter !== "SEMUA" && tahunJurnal !== tahunFilter) return;
+
+        const nama = (jurnal.lawan_transaksi || "").trim();
+        if (!nama) return;
+
+        const adaPendapatan = (jurnal.rows || []).some(baris =>
+            String(baris.kode_akun || "").startsWith("4") && (parseFloat(baris.kredit) || 0) > 0
+        );
+
+        if (adaPendapatan) {
+            const nilai = hitungNilaiTransaksiPelanggan(jurnal);
+            if (!petaPelanggan[nama]) petaPelanggan[nama] = { nama, total: 0, jumlahTransaksi: 0 };
+            petaPelanggan[nama].total += nilai;
+            petaPelanggan[nama].jumlahTransaksi += 1;
+        } else {
+            const nilai = hitungNilaiTransaksiVendor(jurnal);
+            if (!petaVendor[nama]) petaVendor[nama] = { nama, total: 0, jumlahTransaksi: 0 };
+            petaVendor[nama].total += nilai;
+            petaVendor[nama].jumlahTransaksi += 1;
+        }
+    });
+
+    return {
+        daftarVendor: Object.values(petaVendor).sort((a, b) => b.total - a.total),
+        daftarPelanggan: Object.values(petaPelanggan).sort((a, b) => b.total - a.total)
+    };
+}
+
+function persenKonsentrasiTopN(daftar, n) {
+    const total = daftar.reduce((s, d) => s + d.total, 0);
+    if (total <= 0) return null;
+    const topN = daftar.slice(0, n).reduce((s, d) => s + d.total, 0);
+    return (topN / total) * 100;
+}
+
+function renderDaftarPeringkat(containerId, daftar, warnaBar, warnaTeks) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (daftar.length === 0) {
+        container.innerHTML = `<p class="p-6 text-center text-gray-400 text-sm">Belum ada data pada periode ini.</p>`;
+        return;
+    }
+
+    const BATAS_TAMPIL = 10;
+    const tampil = daftar.slice(0, BATAS_TAMPIL);
+    const total = daftar.reduce((s, d) => s + d.total, 0);
+    const nilaiMaks = tampil[0].total;
+
+    container.innerHTML = tampil.map((d, idx) => {
+        const persenDariTotal = total > 0 ? (d.total / total) * 100 : 0;
+        const lebarBar = nilaiMaks > 0 ? Math.max((d.total / nilaiMaks) * 100, 3) : 0;
+        return `
+            <div class="p-3 rounded-xl border border-gray-100">
+                <div class="flex justify-between items-center gap-2 mb-1.5">
+                    <span class="font-semibold text-gray-800 text-sm truncate">${idx + 1}. ${escapeHtml(d.nama)}</span>
+                    <span class="font-bold ${warnaTeks} text-sm shrink-0">${formatRupiah(d.total)}</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-1.5 mb-1">
+                    <div class="${warnaBar} h-1.5 rounded-full" style="width: ${lebarBar.toFixed(0)}%"></div>
+                </div>
+                <p class="text-[10px] text-gray-400">${d.jumlahTransaksi} transaksi &middot; ${persenDariTotal.toFixed(1)}% dari total</p>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderVendorPelanggan(tahunFilter) {
+    const { daftarVendor, daftarPelanggan } = hitungVendorPelanggan(tahunFilter);
+
+    renderDaftarPeringkat('daftarPelangganTeratas', daftarPelanggan, 'bg-green-500', 'text-green-700');
+    renderDaftarPeringkat('daftarVendorTeratas', daftarVendor, 'bg-red-500', 'text-red-700');
+
+    const elInsightPelanggan = document.getElementById('insightKonsentrasiPelanggan');
+    if (elInsightPelanggan) {
+        const persenTop5 = persenKonsentrasiTopN(daftarPelanggan, 5);
+        elInsightPelanggan.innerText = persenTop5 !== null
+            ? `5 pelanggan teratas menyumbang ${persenTop5.toFixed(1)}% dari total pendapatan bernama lawan transaksi.`
+            : 'Belum ada transaksi pendapatan dengan nama lawan transaksi pada periode ini.';
+    }
+
+    const elInsightVendor = document.getElementById('insightKonsentrasiVendor');
+    if (elInsightVendor) {
+        const persenTop5 = persenKonsentrasiTopN(daftarVendor, 5);
+        elInsightVendor.innerText = persenTop5 !== null
+            ? `5 vendor teratas menyumbang ${persenTop5.toFixed(1)}% dari total pengeluaran bernama lawan transaksi.`
+            : 'Belum ada transaksi pengeluaran dengan nama lawan transaksi pada periode ini.';
+    }
 }
 
 // ==================== Analisis Struktur Beban ====================
