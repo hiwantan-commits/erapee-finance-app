@@ -47,7 +47,7 @@
                 </div>
 
                 <!-- Tabel Rincian Akun Terkonsolidasi -->
-                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm mb-8">
                     <h3 class="font-bold text-gray-800 text-base mb-4">Rekapitulasi Saldo Akun (Trial Balance / Buku Besar)</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
@@ -68,85 +68,59 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Neraca (Laporan Posisi Keuangan) -->
+                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">Neraca (Laporan Posisi Keuangan)</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Aset = Liabilitas + Ekuitas, per seluruh transaksi tercatat</p>
+                        </div>
+                        <span id="neracaStatusBalance" class="px-2 py-0.5 bg-gray-100 text-gray-500 font-semibold rounded text-xs">Memuat...</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="dashboard-card p-5 bg-white rounded-xl border border-gray-100">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Aset</p>
+                            <h3 class="text-xl font-bold text-indigo-700 mt-2" id="neracaTotalAset">Rp 0</h3>
+                        </div>
+                        <div class="dashboard-card p-5 bg-white rounded-xl border border-gray-100">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Liabilitas</p>
+                            <h3 class="text-xl font-bold text-red-700 mt-2" id="neracaTotalLiabilitas">Rp 0</h3>
+                        </div>
+                        <div class="dashboard-card p-5 bg-white rounded-xl border border-gray-100">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Ekuitas (termasuk Laba)</p>
+                            <h3 class="text-xl font-bold text-amber-700 mt-2" id="neracaTotalEkuitas">Rp 0</h3>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Aset</h4>
+                            <table class="w-full text-left border-collapse">
+                                <tbody id="tabelNeracaAset" class="divide-y divide-gray-100"></tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Liabilitas & Ekuitas</h4>
+                            <table class="w-full text-left border-collapse">
+                                <tbody id="tabelNeracaLiabilitasEkuitas" class="divide-y divide-gray-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-gray-400 mt-6">
+                        * Karena sistem belum memiliki mekanisme jurnal penutup periode, saldo Pendapatan
+                        dikurangi Beban ditampilkan sebagai "Laba (Rugi) Ditahan/Berjalan" kumulatif sejak
+                        transaksi pertama, bukan direset per tahun buku. Total Laba Kumulatif saat ini:
+                        <span id="neracaLabaKumulatif" class="font-semibold">Rp 0</span>.
+                    </p>
+                </div>
             </main>
         </div>
     </div>
 
-    <!-- Skrip Integrasi Laporan Keuangan -->
-    <script type="module">
-        import { ambilSemuaJurnalPusat } from "./js/db.js";
-
-        async function muatLaporanKeuangan() {
-            try {
-                const semuaJurnal = await ambilSemuaJurnalPusat();
-                
-                let totalPendapatan = 0;
-                let totalBeban = 0;
-                
-                // Objek untuk mengelompokkan saldo per akun (COA)
-                const petaAkun = {};
-
-                semuaJurnal.forEach(jurnal => {
-                    jurnal.rows.forEach(baris => {
-                        const kode = baris.kode_akun || "UMUM";
-                        const nama = baris.nama_akun || "Akun Tanpa Nama";
-                        const debit = parseFloat(baris.debit) || 0;
-                        const kredit = parseFloat(baris.kredit) || 0;
-
-                        if (!petaAkun[kode]) {
-                            petaAkun[kode] = { kode, nama, totalDebit: 0, totalKredit: 0 };
-                        }
-                        petaAkun[kode].totalDebit += debit;
-                        petaAkun[kode].totalKredit += kredit;
-
-                        // Akumulasi Laba Rugi sederhana berdasarkan kepala akun
-                        if (kode.startsWith("4")) {
-                            totalPendapatan += (kredit - debit);
-                        } else if (kode.startsWith("6")) {
-                            totalBeban += (debit - kredit);
-                        }
-                    });
-                });
-
-                const labaBersih = totalPendapatan - totalBeban;
-
-                // Update Kartu Ringkasan
-                document.getElementById('laporanTotalPendapatan').innerText = "Rp " + totalPendapatan.toLocaleString('id-ID');
-                document.getElementById('laporanTotalBeban').innerText = "Rp " + totalBeban.toLocaleString('id-ID');
-                document.getElementById('laporanLabaBersih').innerText = "Rp " + labaBersih.toLocaleString('id-ID');
-
-                // Render Tabel Akun
-                const tbody = document.getElementById('tabelLaporanAkun');
-                tbody.innerHTML = "";
-
-                const keysAkun = Object.keys(petaAkun).sort();
-                if (keysAkun.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">Belum ada data transaksi untuk dilaporkan.</td></tr>`;
-                    return;
-                }
-
-                keysAkun.forEach(kode => {
-                    const acc = petaAkun[kode];
-                    const selisihSaldo = acc.totalDebit - acc.totalKredit;
-
-                    let tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="p-3 font-mono font-bold text-indigo-700">${acc.kode}</td>
-                        <td class="p-3 font-medium text-gray-800">${acc.nama}</td>
-                        <td class="p-3 text-right">${acc.totalDebit === 0 ? '-' : acc.totalDebit.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right">${acc.totalKredit === 0 ? '-' : acc.totalKredit.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-right font-bold text-gray-900">${selisihSaldo.toLocaleString('id-ID')}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-
-            } catch (error) {
-                console.error("Gagal memuat laporan:", error);
-            }
-        }
-
-        muatLaporanKeuangan();
-    </script>
+    <!-- Panggil Modular Controller & Komponen Global -->
+    <script type="module" src="js/reports-page.js"></script>
     <script type="module" src="js/component.js"></script>
 </body>
 </html>

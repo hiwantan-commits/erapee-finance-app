@@ -27,6 +27,121 @@ export function klasifikasikanAkun(kodeAkun) {
     return "LAINNYA";
 }
 
+// Validasi kode akun COA: harus berawalan digit 1-6 sesuai konvensi klasifikasi
+// (1 Aset, 2 Liabilitas, 3 Ekuitas, 4 Pendapatan, 5 HPP, 6 Beban). Kode yang
+// tidak mengikuti konvensi ini akan jatuh ke kategori "LAINNYA" dan tidak
+// pernah ikut terhitung di Neraca maupun Laporan Laba Rugi.
+export function isKodeAkunValid(kodeAkun) {
+    return /^[1-6]/.test(String(kodeAkun || "").trim());
+}
+
+// Menghitung Neraca (Laporan Posisi Keuangan): Aset = Liabilitas + Ekuitas.
+// Catatan: karena aplikasi ini tidak memiliki mekanisme jurnal penutup periode,
+// saldo Pendapatan & Beban diakumulasikan sejak awal sebagai "Laba Ditahan/
+// Berjalan" di sisi Ekuitas, bukan direset per tahun buku.
+export function kalkulasiNeraca(semuaJurnal) {
+    let totalAset = 0, totalLiabilitas = 0, totalEkuitasDasar = 0;
+    let totalPendapatan = 0, totalBeban = 0;
+    const petaAset = {}, petaLiabilitas = {}, petaEkuitas = {};
+
+    semuaJurnal.forEach(jurnal => {
+        jurnal.rows.forEach(baris => {
+            const kode = baris.kode_akun || "UMUM";
+            const nama = baris.nama_akun || "Akun Umum";
+            const debit = parseFloat(baris.debit) || 0;
+            const kredit = parseFloat(baris.kredit) || 0;
+            const kategori = klasifikasikanAkun(kode);
+
+            if (kategori === "ASET") {
+                const saldo = debit - kredit;
+                totalAset += saldo;
+                if (!petaAset[kode]) petaAset[kode] = { kode, nama, saldo: 0 };
+                petaAset[kode].saldo += saldo;
+            } else if (kategori === "LIABILITAS") {
+                const saldo = kredit - debit;
+                totalLiabilitas += saldo;
+                if (!petaLiabilitas[kode]) petaLiabilitas[kode] = { kode, nama, saldo: 0 };
+                petaLiabilitas[kode].saldo += saldo;
+            } else if (kategori === "EKUITAS") {
+                const saldo = kredit - debit;
+                totalEkuitasDasar += saldo;
+                if (!petaEkuitas[kode]) petaEkuitas[kode] = { kode, nama, saldo: 0 };
+                petaEkuitas[kode].saldo += saldo;
+            } else if (kategori === "PENDAPATAN") {
+                totalPendapatan += (kredit - debit);
+            } else if (kategori === "HPP" || kategori === "BEBAN") {
+                totalBeban += (debit - kredit);
+            }
+        });
+    });
+
+    const labaKumulatif = totalPendapatan - totalBeban;
+    const totalEkuitas = totalEkuitasDasar + labaKumulatif;
+
+    return {
+        totalAset,
+        totalLiabilitas,
+        totalEkuitasDasar,
+        labaKumulatif,
+        totalEkuitas,
+        seimbang: Math.round(totalAset) === Math.round(totalLiabilitas + totalEkuitas),
+        petaAset: Object.values(petaAset).sort((a, b) => a.kode.localeCompare(b.kode)),
+        petaLiabilitas: Object.values(petaLiabilitas).sort((a, b) => a.kode.localeCompare(b.kode)),
+        petaEkuitas: Object.values(petaEkuitas).sort((a, b) => a.kode.localeCompare(b.kode))
+    };
+}
+
+// Menghitung Laporan Arus Kas (metode langsung, disederhanakan). Setiap
+// jurnal yang menyentuh akun kas/bank (awalan kode "11") diklasifikasikan
+// berdasarkan akun lawan transaksinya:
+// - Aset Tetap (awalan "15"/"16") -> Aktivitas Investasi
+// - Ekuitas, atau nama akun mengandung "pinjaman"/"kredit bank"/"obligasi" -> Aktivitas Pendanaan
+// - Selain itu (Pendapatan, Beban, HPP, Liabilitas operasional) -> Aktivitas Operasi
+// Ini estimasi berbasis kode akun, bukan pencatatan arus kas langsung per kategori.
+export function kalkulasiArusKas(semuaJurnal) {
+    let operasi = 0, investasi = 0, pendanaan = 0;
+    const rincian = [];
+
+    semuaJurnal.forEach(jurnal => {
+        const barisKas = jurnal.rows.filter(b => String(b.kode_akun || '').startsWith("11"));
+        if (barisKas.length === 0) return;
+
+        const barisLain = jurnal.rows.filter(b => !String(b.kode_akun || '').startsWith("11"));
+
+        const adaAsetTetap = barisLain.some(b => {
+            const k = String(b.kode_akun || '');
+            return k.startsWith("15") || k.startsWith("16");
+        });
+        const adaPendanaan = barisLain.some(b => {
+            const k = String(b.kode_akun || '');
+            const nama = (b.nama_akun || '').toLowerCase();
+            return klasifikasikanAkun(k) === "EKUITAS" ||
+                nama.includes("pinjaman") || nama.includes("kredit bank") || nama.includes("obligasi");
+        });
+
+        const kategori = adaAsetTetap ? "Investasi" : (adaPendanaan ? "Pendanaan" : "Operasi");
+
+        let netKasJurnal = 0;
+        barisKas.forEach(b => {
+            netKasJurnal += (parseFloat(b.debit) || 0) - (parseFloat(b.kredit) || 0);
+        });
+
+        if (kategori === "Investasi") investasi += netKasJurnal;
+        else if (kategori === "Pendanaan") pendanaan += netKasJurnal;
+        else operasi += netKasJurnal;
+
+        rincian.push({ jurnal, kategori, netKas: netKasJurnal });
+    });
+
+    return {
+        operasi,
+        investasi,
+        pendanaan,
+        totalBersih: operasi + investasi + pendanaan,
+        rincian: rincian.sort((a, b) => (b.jurnal.id_jurnal || '').localeCompare(a.jurnal.id_jurnal || ''))
+    };
+}
+
 export function kalkulasiLaporanKeuangan(semuaJurnal) {
     let totalPendapatan = 0;
     let totalBeban = 0;
