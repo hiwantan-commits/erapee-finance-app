@@ -13,7 +13,7 @@ async function muatManajemenJurnal() {
     const tbody = document.getElementById('tabelManajemenJurnal');
     const kartuContainer = document.getElementById('kartuManajemenJurnal');
     if (!tbody) return;
-    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Memuat data teroptimasi dari pusat...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-stone-400 dark:text-stone-500">Memuat data teroptimasi dari pusat...</td></tr>`;
 
     try {
         const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
@@ -31,8 +31,8 @@ async function muatManajemenJurnal() {
         const listJurnal = await ambilSemuaJurnalPusat();
 
         if (listJurnal.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Belum ada transaksi jurnal tercatat.</td></tr>`;
-            if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Belum ada transaksi jurnal tercatat.</p>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-stone-400 dark:text-stone-500">Belum ada transaksi jurnal tercatat.</td></tr>`;
+            if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-stone-400 dark:text-stone-500 text-sm">Belum ada transaksi jurnal tercatat.</p>`;
             return;
         }
 
@@ -46,17 +46,40 @@ async function muatManajemenJurnal() {
         renderTabelDenganPagination(listJurnalCache);
     } catch (err) {
         console.error("Gagal memuat manajemen jurnal:", err);
-        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500">Gagal memuat data dari pusat database.</td></tr>`;
-        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-red-500 text-sm">Gagal memuat data dari pusat database.</p>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500 dark:text-red-400">Gagal memuat data dari pusat database.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-red-500 dark:text-red-400 text-sm">Gagal memuat data dari pusat database.</p>`;
     }
 }
 
+// Menu aksi per-baris memakai pola dropdown/3-titik (bukan 3 tombol
+// terpisah) - konsisten dengan menu akun di sidebar. Setiap baris butuh ID
+// panel unik, jadi karakter di luar alfanumerik pada id_jurnal diamankan
+// dulu supaya selalu jadi id HTML yang valid.
 function tombolAksiHtml(id_jurnal) {
+    const idAman = String(id_jurnal).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const panelId = `menuAksiJurnal-${idAman}`;
     return `
-        <div class="flex items-center justify-center flex-nowrap gap-1.5">
-            <button onclick="editJurnal('${id_jurnal}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg font-semibold text-xs transition whitespace-nowrap">Edit</button>
-            <button onclick="cetakVoucher('${id_jurnal}')" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded-lg font-semibold text-xs transition whitespace-nowrap">Cetak</button>
-            <button onclick="hapusJurnalGrup('${id_jurnal}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg font-semibold text-xs transition whitespace-nowrap">Hapus</button>
+        <div class="relative inline-block">
+            <button type="button" onclick="window.toggleDropdownElegant(event, '${panelId}')" class="btn-elegant-icon" title="Aksi">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="12" cy="19" r="1.75"/></svg>
+            </button>
+            <div id="${panelId}" class="hidden absolute right-0 mt-1 z-50" data-dropdown-elegant>
+                <div class="dropdown-elegant-panel">
+                    <button type="button" onclick="editJurnal('${id_jurnal}')" class="dropdown-elegant-item">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                        Edit
+                    </button>
+                    <button type="button" onclick="cetakVoucher('${id_jurnal}')" class="dropdown-elegant-item">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8"/><path d="M6 17H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2"/></svg>
+                        Cetak
+                    </button>
+                    <div class="dropdown-elegant-divider"></div>
+                    <button type="button" onclick="hapusJurnalGrup('${id_jurnal}')" class="dropdown-elegant-item dropdown-elegant-item-danger">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+                        Hapus
+                    </button>
+                </div>
+            </div>
         </div>
     `;
 }
@@ -67,8 +90,8 @@ function renderTabelDenganPagination(dataList) {
     if (!tbody) return;
 
     if (dataList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Tidak ada transaksi yang cocok.</td></tr>`;
-        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-gray-400 text-sm">Tidak ada transaksi yang cocok.</p>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-stone-400 dark:text-stone-500">Tidak ada transaksi yang cocok.</td></tr>`;
+        if (kartuContainer) kartuContainer.innerHTML = `<p class="p-8 text-center text-stone-400 dark:text-stone-500 text-sm">Tidak ada transaksi yang cocok.</p>`;
         hapusKontrolPagination();
         return;
     }
@@ -89,55 +112,55 @@ function renderTabelDenganPagination(dataList) {
         const tidakSeimbang = !(jurnal.total_debit === jurnal.total_kredit && jurnal.total_debit > 0);
 
         const badgeStatus = jurnal.status === 'POSTED'
-            ? '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded font-semibold">POSTED</span>'
-            : '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold">DRAFT</span>';
+            ? '<span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded font-semibold">POSTED</span>'
+            : '<span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400 rounded font-semibold">DRAFT</span>';
 
         const balanceStatus = tidakSeimbang
-            ? '<span class="text-xs text-red-500 font-semibold mt-0.5 block">⚠️ Selisih</span>'
-            : '<span class="text-xs text-green-600 font-semibold mt-0.5 block">✓ Seimbang</span>';
+            ? '<span class="text-xs text-red-500 dark:text-red-400 font-semibold mt-0.5 block">⚠️ Selisih</span>'
+            : '<span class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 block">✓ Seimbang</span>';
 
         // Baris tidak seimbang diberi latar merah muda agar langsung terlihat -
         // ini seharusnya jarang terjadi dan perlu segera diperiksa.
         barisTabel.push(`
-            <tr class="${tidakSeimbang ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'}">
+            <tr class="${tidakSeimbang ? 'bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50' : 'hover:bg-stone-50 dark:hover:bg-stone-800/40'}">
                 <td class="p-3">
-                    <div class="font-bold text-indigo-700">${escapeHtml(jurnal.id_jurnal)}</div>
+                    <div class="font-bold text-stone-900 dark:text-stone-100">${escapeHtml(jurnal.id_jurnal)}</div>
                 </td>
-                <td class="p-3 text-gray-600">${escapeHtml(jurnal.tanggal)}</td>
+                <td class="p-3 text-stone-500 dark:text-stone-400">${escapeHtml(jurnal.tanggal)}</td>
                 <td class="p-3">
-                    <div class="font-semibold text-gray-800">${escapeHtml(jurnal.unit_usaha) || '-'}</div>
-                    <div class="text-xs text-gray-500 font-mono mt-0.5">${escapeHtml(jurnal.no_bukti)}</div>
+                    <div class="font-semibold text-stone-800 dark:text-stone-200">${escapeHtml(jurnal.unit_usaha) || '-'}</div>
+                    <div class="text-xs text-stone-400 dark:text-stone-500 font-mono mt-0.5">${escapeHtml(jurnal.no_bukti)}</div>
                 </td>
                 <td class="p-3">
-                    <div class="font-medium text-gray-800">${escapeHtml(jurnal.lawan_transaksi) || '-'}</div>
-                    <div class="text-xs text-gray-500 truncate max-w-xs mt-0.5">${escapeHtml(jurnal.keterangan) || '-'}</div>
+                    <div class="font-medium text-stone-800 dark:text-stone-200">${escapeHtml(jurnal.lawan_transaksi) || '-'}</div>
+                    <div class="text-xs text-stone-400 dark:text-stone-500 truncate max-w-xs mt-0.5">${escapeHtml(jurnal.keterangan) || '-'}</div>
                 </td>
                 <td class="p-3 text-right">
-                    <div class="font-bold text-gray-800">${jurnal.total_debit.toLocaleString('id-ID')}</div>
+                    <div class="font-bold text-stone-800 dark:text-stone-200">${jurnal.total_debit.toLocaleString('id-ID')}</div>
                     ${balanceStatus}
                 </td>
                 <td class="p-3 text-center">${badgeStatus}</td>
-                <td class="p-3">${tombolAksiHtml(jurnal.id_jurnal)}</td>
+                <td class="p-3 text-center">${tombolAksiHtml(jurnal.id_jurnal)}</td>
             </tr>
         `);
 
         // Tampilan kartu untuk layar sempit (pengganti tabel horizontal yang
         // sulit dibaca di HP karena banyak kolom).
         kartuMobile.push(`
-            <div class="border ${tidakSeimbang ? 'border-red-200 bg-red-50' : 'border-gray-100'} rounded-xl p-4">
+            <div class="border ${tidakSeimbang ? 'border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30' : 'border-stone-100 dark:border-stone-800'} rounded-xl p-4">
                 <div class="flex justify-between items-start gap-2 mb-2">
                     <div>
-                        <div class="font-bold text-indigo-700 text-sm">${escapeHtml(jurnal.id_jurnal)}</div>
-                        <div class="text-xs text-gray-500">${escapeHtml(jurnal.tanggal)}</div>
+                        <div class="font-bold text-stone-900 dark:text-stone-100 text-sm">${escapeHtml(jurnal.id_jurnal)}</div>
+                        <div class="text-xs text-stone-400 dark:text-stone-500">${escapeHtml(jurnal.tanggal)}</div>
                     </div>
                     ${badgeStatus}
                 </div>
-                <div class="text-xs text-gray-500 font-mono mb-1">${escapeHtml(jurnal.unit_usaha) || '-'} &middot; ${escapeHtml(jurnal.no_bukti)}</div>
-                <div class="text-sm font-medium text-gray-800">${escapeHtml(jurnal.lawan_transaksi) || '-'}</div>
-                <div class="text-xs text-gray-500">${escapeHtml(jurnal.keterangan) || '-'}</div>
-                <div class="flex justify-between items-end border-t border-gray-100 pt-2 mt-3">
+                <div class="text-xs text-stone-400 dark:text-stone-500 font-mono mb-1">${escapeHtml(jurnal.unit_usaha) || '-'} &middot; ${escapeHtml(jurnal.no_bukti)}</div>
+                <div class="text-sm font-medium text-stone-800 dark:text-stone-200">${escapeHtml(jurnal.lawan_transaksi) || '-'}</div>
+                <div class="text-xs text-stone-400 dark:text-stone-500">${escapeHtml(jurnal.keterangan) || '-'}</div>
+                <div class="flex justify-between items-end border-t border-stone-100 dark:border-stone-800 pt-2 mt-3">
                     <div>
-                        <div class="font-bold text-gray-800 text-sm">Rp ${jurnal.total_debit.toLocaleString('id-ID')}</div>
+                        <div class="font-bold text-stone-800 dark:text-stone-200 text-sm">Rp ${jurnal.total_debit.toLocaleString('id-ID')}</div>
                         ${balanceStatus}
                     </div>
                     ${tombolAksiHtml(jurnal.id_jurnal)}
@@ -157,8 +180,8 @@ function renderKontrolPagination(totalHalaman) {
     if (!containerPagination) {
         containerPagination = document.createElement('div');
         containerPagination.id = 'pagination-container';
-        containerPagination.className = 'flex justify-between items-center mt-4 px-2 py-3 border-t border-gray-100 text-xs text-gray-600';
-        const cardTabel = document.querySelector('#tabelManajemenJurnal').closest('.dashboard-card');
+        containerPagination.className = 'flex justify-between items-center mt-4 px-2 py-3 border-t border-stone-100 dark:border-stone-800 text-xs text-stone-500 dark:text-stone-400';
+        const cardTabel = document.getElementById('kartuTabelJurnal');
         if (cardTabel) cardTabel.appendChild(containerPagination);
     }
 
@@ -170,8 +193,8 @@ function renderKontrolPagination(totalHalaman) {
     containerPagination.innerHTML = `
         <span>Halaman <b>${halamanAktif}</b> dari <b>${totalHalaman}</b></span>
         <div class="space-x-1">
-            <button onclick="window.ubahHalaman(${halamanAktif - 1})" ${halamanAktif === 1 ? 'disabled class="px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded hover:bg-indigo-100 transition"'}>Sebelumnya</button>
-            <button onclick="window.ubahHalaman(${halamanAktif + 1})" ${halamanAktif === totalHalaman ? 'disabled class="px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold rounded hover:bg-indigo-100 transition"'}>Berikutnya</button>
+            <button onclick="window.ubahHalaman(${halamanAktif - 1})" ${halamanAktif === 1 ? 'disabled class="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-600 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-semibold rounded hover:bg-stone-200 dark:hover:bg-stone-700 transition"'}>Sebelumnya</button>
+            <button onclick="window.ubahHalaman(${halamanAktif + 1})" ${halamanAktif === totalHalaman ? 'disabled class="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-600 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-semibold rounded hover:bg-stone-200 dark:hover:bg-stone-700 transition"'}>Berikutnya</button>
         </div>
     `;
 }

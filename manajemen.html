@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manajemen Jurnal | PT ERAPEE Anugrah Sejahtera</title>
+    <!-- Inisialisasi tema (terpusat di js/tema-*.js, lihat komentar di file
+         tersebut - supaya perubahan logika tema cukup di satu tempat) -->
+    <script src="js/tema-fouc-init.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tema-tailwind-config.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>body.auth-pending { visibility: hidden; }</style>
 </head>
-<body class="text-gray-800 bg-gray-50 auth-pending">
+<body data-tema="elegant" class="text-stone-900 dark:text-stone-100 bg-stone-50 dark:bg-stone-950 auth-pending">
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
         <div id="sidebar-container"></div>
@@ -18,67 +22,65 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-                <!-- Header Manajemen -->
-                <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <!-- Header Manajemen (polos di atas latar, tanpa bingkai kartu) -->
+                <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-800">Manajemen Jurnal & Buku Besar</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Terhubung ke pusat data tunggal perusahaan</p>
+                        <h1 class="h-elegant-2 text-stone-900 dark:text-stone-50">Manajemen Jurnal & Buku Besar</h1>
+                        <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Terhubung ke pusat data tunggal perusahaan</p>
                     </div>
                     <div class="flex flex-wrap gap-3">
-                        <!-- Perhatikan pemanggilan window.eksporKeExcel() di sini -->
-                        <button onclick="window.eksporKeExcel()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm flex items-center gap-2">
-                            📥 Ekspor Excel
+                        <button onclick="window.eksporKeExcel()" class="btn-elegant-secondary">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                            Ekspor Excel
                         </button>
-                        <a href="/input-jurnal" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
-                            ➕ Buat Jurnal Baru
-                        </a>
+                        <a href="/input-jurnal" class="btn-elegant-primary">+ Buat Jurnal Baru</a>
                     </div>
                 </div>
 
                 <!-- Kotak Pencarian & Filter -->
-                <div class="dashboard-card p-4 md:p-6 bg-white rounded-2xl shadow-sm mb-6 space-y-4">
+                <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-4 md:p-6 shadow-sm mb-6 space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Cari Transaksi (No. Bukti / Keterangan / Vendor)</label>
-                            <input type="text" id="inputPencarian" onkeyup="window.filterTabelJurnal()" placeholder="Ketik kata kunci pencarian..." class="form-input-custom text-xs">
+                            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Cari Transaksi (No. Bukti / Keterangan / Vendor)</label>
+                            <input type="text" id="inputPencarian" onkeyup="window.filterTabelJurnal()" placeholder="Ketik kata kunci pencarian..." class="form-input-elegant text-xs">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Filter Berdasarkan Unit Usaha</label>
-                            <select id="filterUnit" onchange="window.filterTabelJurnal()" class="form-input-custom text-xs">
+                            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Filter Berdasarkan Unit Usaha</label>
+                            <select id="filterUnit" onchange="window.filterTabelJurnal()" class="form-input-elegant text-xs">
                                 <option value="ALL">Semua Unit Usaha</option>
                             </select>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Dari Tanggal</label>
-                            <input type="date" id="filterTanggalDari" onchange="window.filterTabelJurnal()" class="form-input-custom text-xs">
+                            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Dari Tanggal</label>
+                            <input type="date" id="filterTanggalDari" onchange="window.filterTabelJurnal()" class="form-input-elegant text-xs">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Sampai Tanggal</label>
-                            <input type="date" id="filterTanggalSampai" onchange="window.filterTabelJurnal()" class="form-input-custom text-xs">
+                            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Sampai Tanggal</label>
+                            <input type="date" id="filterTanggalSampai" onchange="window.filterTabelJurnal()" class="form-input-elegant text-xs">
                         </div>
                     </div>
                 </div>
 
                 <!-- Tabel Jurnal Interaktif (layar md ke atas) -->
-                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
+                <div id="kartuTabelJurnal" class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
                     <div class="hidden md:block overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-                                    <th class="p-3">ID Jurnal</th>
-                                    <th class="p-3">Tanggal</th>
-                                    <th class="p-3">Unit Usaha & No. Bukti</th>
-                                    <th class="p-3">Keterangan / Lawan Transaksi</th>
-                                    <th class="p-3 text-right">Total Transaksi (Rp)</th>
-                                    <th class="p-3 text-center">Status</th>
-                                    <th class="p-3 text-center">Aksi</th>
+                                <tr class="text-stone-400 dark:text-stone-500 text-xs normal-case tracking-normal border-b border-stone-100 dark:border-stone-800">
+                                    <th class="p-3 font-medium">ID Jurnal</th>
+                                    <th class="p-3 font-medium">Tanggal</th>
+                                    <th class="p-3 font-medium">Unit Usaha & No. Bukti</th>
+                                    <th class="p-3 font-medium">Keterangan / Lawan Transaksi</th>
+                                    <th class="p-3 text-right font-medium">Total Transaksi (Rp)</th>
+                                    <th class="p-3 text-center font-medium">Status</th>
+                                    <th class="p-3 text-center font-medium">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelManajemenJurnal" class="divide-y divide-gray-100 text-xs">
+                            <tbody id="tabelManajemenJurnal" class="divide-y divide-stone-100 dark:divide-stone-800 text-xs">
                                 <tr>
-                                    <td colspan="7" class="p-8 text-center text-gray-400">Memuat data dari pusat database...</td>
+                                    <td colspan="7" class="p-8 text-center text-stone-400 dark:text-stone-500">Memuat data dari pusat database...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -86,7 +88,7 @@
 
                     <!-- Tampilan kartu untuk layar sempit (di bawah md) -->
                     <div id="kartuManajemenJurnal" class="md:hidden space-y-3">
-                        <p class="p-8 text-center text-gray-400 text-sm">Memuat data dari pusat database...</p>
+                        <p class="p-8 text-center text-stone-400 dark:text-stone-500 text-sm">Memuat data dari pusat database...</p>
                     </div>
                 </div>
             </main>
