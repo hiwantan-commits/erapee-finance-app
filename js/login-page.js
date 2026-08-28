@@ -21,10 +21,10 @@ document.addEventListener("DOMContentLoaded", function() {
             const currentType = passwordInput.getAttribute("type");
             if (currentType === "password") {
                 passwordInput.setAttribute("type", "text");
-                this.classList.add("text-indigo-600");
+                this.classList.add("text-[#D97757]");
             } else {
                 passwordInput.setAttribute("type", "password");
-                this.classList.remove("text-indigo-600");
+                this.classList.remove("text-[#D97757]");
             }
         });
     }
@@ -80,7 +80,6 @@ document.addEventListener("DOMContentLoaded", function() {
             const originalBtnText = btnSubmit.innerText;
             btnSubmit.disabled = true;
             btnSubmit.innerText = "Memverifikasi...";
-            btnSubmit.classList.add("opacity-75", "cursor-not-allowed");
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
@@ -88,10 +87,9 @@ document.addEventListener("DOMContentLoaded", function() {
             } catch (error) {
                 console.error("Error login:", error);
                 alert("Gagal masuk: Email atau Kata Sandi salah.");
-                
+
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = originalBtnText;
-                btnSubmit.classList.remove("opacity-75", "cursor-not-allowed");
             }
         });
     }

@@ -4,46 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk - PT ERAPEE Anugrah Sejahtera</title>
-    <!-- Tailwind CSS CDN -->
+    <!-- Inisialisasi tema (terpusat di js/tema-*.js, lihat komentar di file
+         tersebut - supaya perubahan logika tema cukup di satu tempat) -->
+    <script src="js/tema-fouc-init.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tema-tailwind-config.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4 font-sans">
+<body class="bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 min-h-screen flex items-center justify-center p-4 font-sans">
 
     <!-- Kotak Form Login -->
-    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-gray-100 max-w-md w-full">
-        
+    <div class="bg-white dark:bg-stone-900 p-8 md:p-10 rounded-3xl shadow-sm border border-stone-200/70 dark:border-stone-800 max-w-md w-full">
+
         <!-- Bagian Header (Branding & Logo Dinamis) -->
         <div class="text-center mb-8 flex flex-col items-center justify-center">
-            
+
             <!-- Wadah Logo Dinamis dari Firestore -->
             <img id="loginLogoImg" src="" alt="Logo PT ERAPEE" class="h-16 w-auto max-w-[200px] object-contain mb-3 transition-all duration-300" style="display: none;">
-            
+
             <!-- Teks Judul Fallback -->
-            <h1 id="loginTitleText" class="text-2xl font-black text-gray-900 mb-1 tracking-tight">PT ERAPEE</h1>
-            
-            <p class="text-sm text-gray-500 font-medium">Anugrah Sejahtera — Sistem Keuangan & Coretax</p>
+            <h1 id="loginTitleText" class="font-serif-elegant text-stone-900 dark:text-stone-50 text-2xl tracking-tight mb-1">PT ERAPEE</h1>
+
+            <p class="text-sm text-stone-500 dark:text-stone-400 font-medium">Anugrah Sejahtera — Sistem Keuangan & Coretax</p>
         </div>
 
         <!-- Form Autentikasi -->
         <form id="formLogin" class="space-y-5">
-            
+
             <!-- Input Email -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Alamat Email Perusahaan</label>
-                <input type="email" required placeholder="admin@erapee.com" 
-                    class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-all text-gray-800">
+                <label class="block text-sm font-medium text-stone-600 dark:text-stone-300 mb-1.5">Alamat Email Perusahaan</label>
+                <input type="email" required placeholder="admin@erapee.com"
+                    class="form-input-elegant text-sm">
             </div>
 
             <!-- Input Password dengan Tombol Mata Interaktif -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Kata Sandi (Password)</label>
+                <label class="block text-sm font-medium text-stone-600 dark:text-stone-300 mb-1.5">Kata Sandi (Password)</label>
                 <div class="relative">
-                    <input type="password" id="passwordInput" required placeholder="••••••••" 
-                        class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-all text-gray-800 pr-12">
-                    
+                    <input type="password" id="passwordInput" required placeholder="••••••••"
+                        class="form-input-elegant text-sm pr-12">
+
                     <!-- Tombol Toggle Mata -->
-                    <button type="button" id="togglePasswordBtn" class="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors">
+                    <button type="button" id="togglePasswordBtn" class="absolute right-4 top-3.5 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 focus:outline-none transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -54,8 +57,7 @@
 
             <!-- Tombol Masuk -->
             <div class="pt-2">
-                <button type="submit" 
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-sm hover:shadow-md">
+                <button type="submit" class="btn-elegant-primary w-full">
                     Masuk ke Sistem
                 </button>
             </div>
@@ -64,7 +66,7 @@
 
         <!-- Footer Keamanan -->
         <div class="mt-8 text-center">
-            <p class="text-[11px] text-gray-400 font-medium">
+            <p class="text-[11px] text-stone-400 dark:text-stone-500 font-medium">
                 Dilindungi oleh Protokol Keamanan Enkripsi Standar Industri
             </p>
         </div>
