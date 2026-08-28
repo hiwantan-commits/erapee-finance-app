@@ -334,6 +334,89 @@ export function susunStrukturLabaRugi(hasilLabaRugi) {
     return { pendapatan, hpp, beban, labaKotor, labaBersih, formatAngkaLaporan };
 }
 
+// ==================== Struktur Laporan Berjenjang: Perubahan Modal (khusus cetak) ====================
+// Laporan Perubahan Modal murni hasil hitungan dari data jurnal yang sudah
+// ada (sama seperti Neraca/Laba Rugi/Arus Kas) - tidak perlu koleksi
+// Firestore baru maupun akun baru.
+//
+// Catatan keterbatasan: aplikasi ini belum punya akun/mekanisme khusus untuk
+// mencatat pembagian Dividen secara terpisah dari transaksi ekuitas biasa,
+// sehingga baris "Dividen" pada laporan ini selalu 0 (bukan estimasi/tebakan).
+
+function batasAwalPeriode(masaTerpilih) {
+    if (!masaTerpilih || masaTerpilih === 'SEMUA') return null;
+    if (masaTerpilih.length === 4) return `${masaTerpilih}-01-01`; // Filter per Tahun (YYYY)
+    return `${masaTerpilih}-01`; // Filter per Bulan (YYYY-MM)
+}
+
+function labaSebelumTanggal(semuaJurnal, batasTanggal) {
+    if (!batasTanggal) return 0;
+    let pendapatan = 0, beban = 0;
+    semuaJurnal.forEach(jurnal => {
+        if (!jurnal.tanggal || jurnal.tanggal >= batasTanggal) return;
+        (jurnal.rows || []).forEach(baris => {
+            const kategori = klasifikasikanAkun(baris.kode_akun);
+            const debit = parseFloat(baris.debit) || 0;
+            const kredit = parseFloat(baris.kredit) || 0;
+            if (kategori === 'PENDAPATAN') pendapatan += (kredit - debit);
+            else if (kategori === 'HPP' || kategori === 'BEBAN') beban += (debit - kredit);
+        });
+    });
+    return pendapatan - beban;
+}
+
+function modalDisetorSebelumTanggal(semuaJurnal, batasTanggal) {
+    if (!batasTanggal) return 0;
+    let total = 0;
+    semuaJurnal.forEach(jurnal => {
+        if (!jurnal.tanggal || jurnal.tanggal >= batasTanggal) return;
+        (jurnal.rows || []).forEach(baris => {
+            if (klasifikasikanAkun(baris.kode_akun) !== 'EKUITAS') return;
+            total += (parseFloat(baris.kredit) || 0) - (parseFloat(baris.debit) || 0);
+        });
+    });
+    return total;
+}
+
+// `semuaJurnal`: seluruh jurnal (tidak difilter periode) - dipakai untuk
+// menghitung saldo SEBELUM periode terpilih. `jurnalDalamPeriode`: jurnal
+// yang SUDAH difilter ke periode terpilih (jurnalTersaring yang sama dengan
+// yang dipakai kalkulasiLaporanKeuangan() di layar). `masaTerpilih`: "SEMUA",
+// "YYYY", atau "YYYY-MM" sesuai filter yang sama dengan Laba Rugi.
+export function susunStrukturPerubahanModal(semuaJurnal, jurnalDalamPeriode, masaTerpilih, labelPeriode) {
+    const batasAwal = batasAwalPeriode(masaTerpilih);
+
+    const modalAwal = modalDisetorSebelumTanggal(semuaJurnal, batasAwal);
+    const labaDitahanAwal = labaSebelumTanggal(semuaJurnal, batasAwal);
+
+    let modalTambahan = 0;
+    jurnalDalamPeriode.forEach(jurnal => {
+        (jurnal.rows || []).forEach(baris => {
+            if (klasifikasikanAkun(baris.kode_akun) !== 'EKUITAS') return;
+            modalTambahan += (parseFloat(baris.kredit) || 0) - (parseFloat(baris.debit) || 0);
+        });
+    });
+
+    const labaTahunBerjalan = kalkulasiLaporanKeuangan(jurnalDalamPeriode).labaBersih;
+    const dividen = 0; // lihat catatan keterbatasan di atas
+
+    const labaDitahanAkhir = labaDitahanAwal + labaTahunBerjalan - dividen;
+    const modalAkhirDisetor = modalAwal + modalTambahan;
+    const modalAkhir = modalAkhirDisetor + labaDitahanAkhir;
+
+    return {
+        labelPeriode,
+        modalAwal,
+        modalTambahan,
+        labaDitahanAwal,
+        labaTahunBerjalan,
+        dividen,
+        labaDitahanAkhir,
+        modalAkhir,
+        formatAngkaLaporan
+    };
+}
+
 export function kalkulasiLaporanKeuangan(semuaJurnal) {
     let totalPendapatan = 0;
     let totalBeban = 0;
