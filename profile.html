@@ -32,17 +32,17 @@
             <div id="header-container"></div>
 
             <main class="p-4 md:p-8 max-w-5xl mx-auto w-full">
-                <!-- Header Profil -->
-                <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 md:p-8 shadow-sm mb-6">
-                    <h2 class="text-xl font-semibold text-stone-900 dark:text-stone-50">Profil & Pengaturan Akun</h2>
-                    <p class="text-xs text-stone-400 dark:text-stone-500 mt-0.5">Kelola informasi identitas akun dan perbarui keamanan (kata sandi) Anda</p>
+                <!-- Header Profil (polos di atas latar, tanpa bingkai kartu - gaya Claude.ai) -->
+                <div class="mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold text-stone-900 dark:text-stone-50">Profil & Pengaturan Akun</h2>
+                    <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Kelola informasi identitas akun dan perbarui keamanan (kata sandi) Anda</p>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Kartu Informasi Akun -->
                     <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 shadow-sm h-fit">
                         <div class="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
-                            <span class="text-2xl">👤</span>
+                            <svg class="w-5 h-5 text-stone-400 dark:text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
                             <h3 class="font-semibold text-stone-900 dark:text-stone-50 text-base">Informasi Sesi Saat Ini</h3>
                         </div>
 
@@ -69,7 +69,7 @@
                     <!-- Kartu Ganti Kata Sandi -->
                     <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
                         <div class="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
-                            <span class="text-2xl">🔐</span>
+                            <svg class="w-5 h-5 text-stone-400 dark:text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
                             <h3 class="font-semibold text-stone-900 dark:text-stone-50 text-base">Pembaruan Kata Sandi</h3>
                         </div>
 

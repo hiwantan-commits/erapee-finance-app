@@ -75,6 +75,31 @@ function perbaruiIkonDarkMode() {
     ikon.innerText = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
 }
 
+// Ikon garis (line icon) bergaya Claude.ai - dipetakan berdasarkan href menu,
+// menggantikan emoji khusus untuk mode elegant. menuGroups (data emoji untuk
+// mode klasik) sengaja tidak diubah sama sekali.
+const PETA_IKON_ELEGANT = {
+    'index': '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/>',
+    'master-data': '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
+    'input-jurnal': '<path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/><path d="M12 12v6M9 15h6"/>',
+    'manajemen': '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
+    'profil-pajak': '<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M14 9h5a1 1 0 0 1 1 1v11"/><path d="M8 8h1M8 12h1M8 16h1M11 8h1M11 12h1M11 16h1"/>',
+    'aset-tetap': '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
+    'pajak': '<path d="M3 21h18M4 21V10M20 21V10M2 10l10-6 10 6M6 10v6M10 10v6M14 10v6M18 10v6"/>',
+    'rekonsiliasi': '<path d="M12 3v18M5 7l-3 6a3 3 0 0 0 6 0Zm14 0-3 6a3 3 0 0 0 6 0ZM5 7h14M9 3h6"/>',
+    'laporan': '<path d="M4 20V10M10 20V4M16 20v-7M4 20h16"/>',
+    'analisa-bisnis': '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.5.4.9 1 1 1.7L9.6 17h4.8l.2-1.5c.1-.7.5-1.3 1-1.7A6 6 0 0 0 12 3Z"/>',
+    'histori': '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+    'branding': '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.9 1.5-1.9-.1-.4-.4-.8-.4-1.2 0-.8.7-1.4 1.5-1.4H16a4 4 0 0 0 4-4c0-5-3.6-9.5-8-9.5Z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15" cy="8" r="1"/>',
+    'users': '<circle cx="9" cy="8" r="3"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 12.5c2.2 0 4 1.9 4 4.3"/>',
+    'closing': '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'
+};
+
+function ikonElegantHtml(href) {
+    const isiSvg = PETA_IKON_ELEGANT[href] || '<circle cx="12" cy="12" r="9"/>';
+    return `<svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${isiSvg}</svg>`;
+}
+
 function bangunGroupsHtmlKlasik(menuGroups, userRole, currentFile) {
     let groupsHtml = '';
     menuGroups.forEach((group) => {
@@ -122,14 +147,17 @@ function bangunGroupsHtmlElegant(menuGroups, userRole, currentFile) {
             if (!item.roles.includes(userRole)) return;
             hasVisibleItem = true;
 
+            // Referensi screenshot Claude.ai asli: item aktif memakai highlight
+            // abu-abu netral (bukan warna aksen) dengan teks tetap gelap/terang
+            // biasa - aksen terracotta hanya dipakai sebagai sentuhan kecil.
             const isActive = currentFile === item.href || currentFile === item.href + '.html';
             const activeClass = isActive
-                ? 'bg-[#D97757]/10 dark:bg-[#D97757]/15 text-[#D97757] font-medium'
+                ? 'bg-stone-200/70 dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-medium'
                 : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800/60 hover:text-stone-900 dark:hover:text-stone-100';
 
             itemsHtml += `
                 <a href="/${item.href}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${activeClass} my-0.5">
-                    <span class="text-sm">${item.icon}</span>
+                    ${ikonElegantHtml(item.href)}
                     <span>${item.name}</span>
                 </a>
             `;
@@ -139,7 +167,7 @@ function bangunGroupsHtmlElegant(menuGroups, userRole, currentFile) {
 
         groupsHtml += `
             <div class="mb-3">
-                <p class="px-3 text-[10px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-1">${group.groupName}</p>
+                <p class="px-3 text-[10px] font-medium text-stone-400 dark:text-stone-500 mb-1">${group.groupName}</p>
                 <div class="space-y-0.5">
                     ${itemsHtml}
                 </div>
@@ -237,47 +265,41 @@ async function muatSidebarAndBranding() {
     if (modeElegant) {
         const groupsHtml = bangunGroupsHtmlElegant(menuGroups, userRole, currentFile);
 
-        const roleBadgeClass = userRole === "Super Admin" ? "text-amber-600 dark:text-amber-400 font-medium" : "text-stone-600 dark:text-stone-300";
-        // Kartu profil memakai tint aksen lembut saat aktif (bukan latar solid
-        // yang dibalik) - avatar & teks selalu memakai warna tetap yang sama,
-        // jadi tidak ada lagi risiko warna teks "hilang" karena tertimpa latar.
-        const profileActiveClass = isProfileActive
-            ? 'bg-[#D97757]/10 dark:bg-[#D97757]/15 border-[#D97757]/30'
-            : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800/60';
+        const roleBadgeClass = userRole === "Super Admin" ? "text-amber-600 dark:text-amber-400" : "text-stone-500 dark:text-stone-400";
+        // Referensi screenshot Claude.ai: baris profil di bawah sidebar polos
+        // (tanpa kartu berbingkai), hanya di-highlight lembut saat hover/aktif.
+        const profileRowActiveClass = isProfileActive
+            ? 'bg-stone-100 dark:bg-stone-800/60'
+            : 'hover:bg-stone-100 dark:hover:bg-stone-800/60';
         const logoHtml = logoSrc
-            ? `<img src="${logoSrc}" alt="PT ERAPEE" class="h-10 w-auto max-w-[150px] object-contain object-left">`
-            : `<h1 class="font-semibold text-stone-900 dark:text-stone-100 text-base tracking-tight">PT ERAPEE</h1>`;
+            ? `<img src="${logoSrc}" alt="PT ERAPEE" class="h-9 w-auto max-w-[150px] object-contain object-left">`
+            : `<h1 class="font-serif-elegant text-stone-900 dark:text-stone-100 text-xl tracking-tight">PT ERAPEE</h1>`;
 
         sidebarContainer.innerHTML = `
             <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/40 z-40 hidden md:hidden"></div>
             <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-stone-950 border-r border-stone-200 dark:border-stone-800 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
 
-                <div class="p-6 border-b border-stone-100 dark:border-stone-800 flex items-start justify-between">
-                    <div class="flex flex-col gap-3 overflow-hidden w-full">
+                <div class="p-5 flex items-start justify-between">
+                    <div class="flex flex-col gap-1.5 overflow-hidden w-full">
                         ${logoHtml}
-                        <div class="inline-flex items-center self-start px-2.5 py-1 rounded-md bg-stone-50 dark:bg-stone-900 border border-stone-100 dark:border-stone-800">
-                            <span class="text-[9px] text-stone-400 dark:text-stone-500 uppercase tracking-widest mr-1.5 font-medium">Role</span>
-                            <span class="text-[10px] ${roleBadgeClass} tracking-wide">${userRole}</span>
-                        </div>
+                        <span class="text-[11px] ${roleBadgeClass}">${userRole}</span>
                     </div>
                     <button onclick="toggleSidebar()" class="md:hidden text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 -mt-1 -mr-1">✕</button>
                 </div>
 
-                <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
                     ${groupsHtml}
                 </nav>
 
-                <div class="p-3 border-t border-stone-100 dark:border-stone-800 space-y-2">
-                    <a href="/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all border ${profileActiveClass}">
-                        <div class="w-8 h-8 rounded-full bg-[#D97757] text-white flex items-center justify-center text-[11px] font-medium shrink-0">
+                <div class="p-3 border-t border-stone-100 dark:border-stone-800 space-y-0.5">
+                    <a href="/profile" class="flex items-center gap-2.5 px-2 py-2 rounded-lg text-xs transition-all ${profileRowActiveClass}">
+                        <div class="w-7 h-7 rounded-full bg-[#D97757] text-white flex items-center justify-center text-[10px] font-medium shrink-0">
                             ${inisialUser}
                         </div>
-                        <div class="overflow-hidden">
-                            <p class="font-medium truncate text-stone-900 dark:text-stone-100">${escapeHtml(namaTampilan)}</p>
-                            <p class="text-[10px] text-stone-400 dark:text-stone-500 truncate">Lihat Profil</p>
-                        </div>
+                        <p class="font-medium truncate text-stone-900 dark:text-stone-100 text-xs">${escapeHtml(namaTampilan)}</p>
                     </a>
-                    <button onclick="prosesLogout()" class="w-full bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-2 border border-stone-100 dark:border-stone-800">
+                    <button onclick="prosesLogout()" class="w-full text-left px-2 py-2 rounded-lg text-xs text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800/60 transition flex items-center gap-2.5">
+                        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
                         Keluar Sistem
                     </button>
                 </div>
@@ -353,25 +375,25 @@ function muatHeader() {
 
     if (modeTemaElegantAktif()) {
         headerContainer.innerHTML = `
-            <header class="bg-white dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+            <header class="bg-stone-50/90 dark:bg-stone-950/90 backdrop-blur-sm px-6 py-4 flex items-center justify-between sticky top-0 z-30">
                 <div class="flex items-center gap-4">
                     <button onclick="toggleSidebar()" class="md:hidden text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 focus:outline-none">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
-                    <h2 class="text-lg font-semibold text-stone-900 dark:text-stone-100">${pageTitle}</h2>
+                    <h2 class="text-sm font-medium text-stone-500 dark:text-stone-400">${pageTitle}</h2>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="window.toggleDarkMode()" id="btnToggleDarkMode" class="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-900 transition" title="Ganti tema gelap/terang">
+                <div class="flex items-center gap-4">
+                    <button onclick="window.toggleDarkMode()" id="btnToggleDarkMode" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 dark:text-stone-500 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition" title="Ganti tema gelap/terang">
                         <span id="ikonDarkMode">🌙</span>
                     </button>
-                    <a href="/profile" class="hidden sm:inline text-xs text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 font-medium transition-colors cursor-pointer">
+                    <div class="hidden sm:flex items-center gap-1.5 text-xs text-stone-400 dark:text-stone-500">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Online
+                    </div>
+                    <a href="/profile" class="text-xs text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 font-medium transition-colors cursor-pointer">
                         ${escapeHtml(namaTampilan)}
                     </a>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-stone-50 dark:bg-stone-900 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-800">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>Online
-                    </span>
                 </div>
             </header>
         `;
