@@ -48,7 +48,8 @@ async function muatSidebarAndBranding() {
     if (currentFile === '') currentFile = 'index';
 
     const currentUser = ambilUserAktif();
-    const userRole = currentUser.role || "Akuntan"; 
+    const userRole = currentUser.role || "Akuntan";
+    const namaTampilan = currentUser.nama || currentUser.email;
 
     // 1. Ambil data branding terlebih dahulu dari Firestore sebelum merender sidebar
     let logoSrc = "";
@@ -189,7 +190,7 @@ async function muatSidebarAndBranding() {
                     <span class="text-sm">👤</span>
                     <div class="overflow-hidden">
                         <p class="font-bold truncate">Profil Akun Saya</p>
-                        <p class="text-[10px] text-gray-400 truncate">${escapeHtml(currentUser.email)}</p>
+                        <p class="text-[10px] text-gray-400 truncate">${escapeHtml(namaTampilan)}</p>
                     </div>
                 </a>
                 <button onclick="prosesLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold py-2 px-3 rounded-lg transition flex items-center justify-center gap-2">
@@ -205,6 +206,7 @@ function muatHeader() {
     if (!headerContainer) return;
     let pageTitle = document.title.split('|')[0].trim();
     const currentUser = ambilUserAktif();
+    const namaTampilan = currentUser.nama || currentUser.email;
 
     headerContainer.innerHTML = `
         <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
@@ -218,7 +220,7 @@ function muatHeader() {
             </div>
             <div class="flex items-center gap-3">
                 <a href="/profile" class="hidden sm:inline text-xs text-indigo-600 hover:text-indigo-800 font-bold transition-colors cursor-pointer">
-                    ${escapeHtml(currentUser.email)}
+                    ${escapeHtml(namaTampilan)}
                 </a>
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
                     ● Sistem Online

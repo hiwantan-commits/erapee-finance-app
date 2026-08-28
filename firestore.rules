@@ -81,6 +81,11 @@ service cloud.firestore {
       allow list: if adalahSuperAdmin();
       // Hanya Super Admin yang boleh menetapkan/mencabut role pengguna lain.
       allow write: if adalahSuperAdmin();
+      // Pengguna boleh memperbarui data profilnya sendiri (mis. nama tampilan),
+      // TAPI tidak boleh mengubah role atau email miliknya sendiri (cegah eskalasi hak akses).
+      allow update: if sudahLogin() && emailId == emailSaatIni()
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.email == resource.data.email;
     }
 
     // ---- Master Data: Unit Usaha & Chart of Accounts ----
