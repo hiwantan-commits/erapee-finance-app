@@ -1,6 +1,6 @@
 // js/reports-page.js - Controller untuk laporan.html
 import { ambilSemuaJurnalPusat } from "./db.js";
-import { kalkulasiLaporanKeuangan, kalkulasiNeraca, susunStrukturNeraca, susunStrukturLabaRugi } from "./accounting.js";
+import { kalkulasiLaporanKeuangan, kalkulasiNeraca, susunStrukturNeraca, susunStrukturLabaRugi, susunStrukturPerubahanModal } from "./accounting.js";
 import { db } from "./config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { escapeHtml, amankanSelCsv, unduhCsv } from "./utils.js";
@@ -271,6 +271,54 @@ function renderLabaRugiDanTrialBalance() {
             </tr>
         `;
         tbodyCetakLR.innerHTML = htmlCetakLR;
+    }
+
+    // Cetakan Laporan Perubahan Modal - ikut filter periode yang sama.
+    const tbodyCetakModal = document.getElementById('tabelCetakPerubahanModal');
+    if (tbodyCetakModal) {
+        const strukturModal = susunStrukturPerubahanModal(SEMUA_JURNAL, jurnalTersaring, masaTerpilih, labelPeriode);
+        const fmt = strukturModal.formatAngkaLaporan;
+
+        const elPeriodeModal = document.getElementById('cetakPeriodePerubahanModal');
+        if (elPeriodeModal) elPeriodeModal.innerText = labelPeriode;
+
+        tbodyCetakModal.innerHTML = `
+            <tr>
+                <td class="font-bold py-1">Modal (Awal) sebelum ${escapeHtml(labelPeriode)}</td>
+                <td></td>
+                <td class="text-right font-bold py-1">${fmt(strukturModal.modalAwal)}</td>
+            </tr>
+            <tr class="border-b border-gray-800">
+                <td class="font-bold py-1">Modal (Tambahan) untuk ${escapeHtml(labelPeriode)}</td>
+                <td></td>
+                <td class="text-right font-bold py-1">${fmt(strukturModal.modalTambahan)}</td>
+            </tr>
+            <tr>
+                <td class="py-1">Saldo Laba Ditahan sebelum ${escapeHtml(labelPeriode)}</td>
+                <td class="text-right py-1">${fmt(strukturModal.labaDitahanAwal)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="py-1">Saldo Laba Tahun Berjalan untuk ${escapeHtml(labelPeriode)}</td>
+                <td class="text-right py-1">${fmt(strukturModal.labaTahunBerjalan)}</td>
+                <td></td>
+            </tr>
+            <tr class="border-b border-gray-800">
+                <td class="py-1">Dividen untuk ${escapeHtml(labelPeriode)}</td>
+                <td class="text-right py-1">${fmt(strukturModal.dividen)}</td>
+                <td></td>
+            </tr>
+            <tr class="border-b border-gray-800">
+                <td class="font-bold py-1">Saldo Laba Ditahan per akhir ${escapeHtml(labelPeriode)}</td>
+                <td></td>
+                <td class="text-right font-bold py-1">${fmt(strukturModal.labaDitahanAkhir)}</td>
+            </tr>
+            <tr class="border-b-2 border-gray-800">
+                <td class="font-bold py-1">Modal Akhir</td>
+                <td></td>
+                <td class="text-right font-bold py-1">${fmt(strukturModal.modalAkhir)}</td>
+            </tr>
+        `;
     }
 }
 
