@@ -443,3 +443,24 @@ window.prosesLogout = function() {
         });
     }
 };
+
+// ==================== Util Dropdown / Menu 3-Titik (reusable) ====================
+// Dipakai oleh halaman manapun yang menyertakan markup:
+//   <button onclick="window.toggleDropdownElegant(event, 'idPanel')">...</button>
+//   <div id="idPanel" class="hidden absolute ..." data-dropdown-elegant>
+//       <div class="dropdown-elegant-panel">...</div>
+//   </div>
+// Tidak spesifik ke satu halaman - aman didefinisikan secara global karena
+// hanya aktif jika markup di atas benar-benar dipakai.
+window.toggleDropdownElegant = function(event, panelId) {
+    event.stopPropagation();
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    const sedangTerbuka = !panel.classList.contains('hidden');
+    document.querySelectorAll('[data-dropdown-elegant]').forEach(p => p.classList.add('hidden'));
+    if (!sedangTerbuka) panel.classList.remove('hidden');
+};
+
+document.addEventListener('click', function() {
+    document.querySelectorAll('[data-dropdown-elegant]').forEach(p => p.classList.add('hidden'));
+});
