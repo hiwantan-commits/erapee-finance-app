@@ -94,6 +94,12 @@ service cloud.firestore {
       allow write: if adalahOperator();
     }
 
+    // ---- Master Data: Aset Tetap (skedul penyusutan) ----
+    match /aset_tetap/{docId} {
+      allow read: if adalahPenggunaInternal();
+      allow write: if adalahOperator();
+    }
+
     // ---- Pengaturan Sistem: Branding & Tutup Buku ----
     match /pengaturan_sistem/{docId} {
       allow read: if adalahPenggunaInternal();

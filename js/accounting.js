@@ -142,6 +142,47 @@ export function kalkulasiArusKas(semuaJurnal) {
     };
 }
 
+// Tarif penyusutan fiskal sesuai kelompok harta berwujud (UU PPh Pasal 11 / PMK).
+// saldoMenurun bernilai null untuk bangunan karena UU PPh hanya mengizinkan
+// metode garis lurus untuk kelompok bangunan.
+export const KELOMPOK_PENYUSUTAN = {
+    "Kelompok 1": { tahun: 4, garisLurus: 0.25, saldoMenurun: 0.50 },
+    "Kelompok 2": { tahun: 8, garisLurus: 0.125, saldoMenurun: 0.25 },
+    "Kelompok 3": { tahun: 16, garisLurus: 0.0625, saldoMenurun: 0.125 },
+    "Kelompok 4": { tahun: 20, garisLurus: 0.05, saldoMenurun: 0.10 },
+    "Bangunan Permanen": { tahun: 20, garisLurus: 0.05, saldoMenurun: null },
+    "Bangunan Tidak Permanen": { tahun: 10, garisLurus: 0.10, saldoMenurun: null }
+};
+
+// Menghitung akumulasi penyusutan & nilai buku satu aset pada tanggal referensi
+// (default: hari ini), berdasarkan kelompok dan metode penyusutannya.
+export function hitungPenyusutanAset(aset, tanggalReferensi = new Date()) {
+    const nilaiPerolehan = parseFloat(aset.nilai_perolehan) || 0;
+    const kelompok = KELOMPOK_PENYUSUTAN[aset.kelompok];
+
+    if (!kelompok || nilaiPerolehan <= 0 || !aset.tanggal_perolehan) {
+        return { nilaiPerolehan, akumulasiPenyusutan: 0, nilaiBuku: nilaiPerolehan, tahunBerjalan: 0 };
+    }
+
+    const tglPerolehan = new Date(aset.tanggal_perolehan);
+    const MS_PER_TAHUN = 365.25 * 24 * 60 * 60 * 1000;
+    let tahunBerjalan = (tanggalReferensi.getTime() - tglPerolehan.getTime()) / MS_PER_TAHUN;
+    if (tahunBerjalan < 0) tahunBerjalan = 0;
+    if (tahunBerjalan > kelompok.tahun) tahunBerjalan = kelompok.tahun;
+
+    let akumulasiPenyusutan, nilaiBuku;
+    if (aset.metode === "Saldo Menurun" && kelompok.saldoMenurun) {
+        nilaiBuku = nilaiPerolehan * Math.pow(1 - kelompok.saldoMenurun, tahunBerjalan);
+        akumulasiPenyusutan = nilaiPerolehan - nilaiBuku;
+    } else {
+        akumulasiPenyusutan = nilaiPerolehan * kelompok.garisLurus * tahunBerjalan;
+        if (akumulasiPenyusutan > nilaiPerolehan) akumulasiPenyusutan = nilaiPerolehan;
+        nilaiBuku = nilaiPerolehan - akumulasiPenyusutan;
+    }
+
+    return { nilaiPerolehan, akumulasiPenyusutan, nilaiBuku, tahunBerjalan };
+}
+
 export function kalkulasiLaporanKeuangan(semuaJurnal) {
     let totalPendapatan = 0;
     let totalBeban = 0;

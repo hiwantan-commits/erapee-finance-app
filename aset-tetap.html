@@ -21,13 +21,54 @@
                 <div class="dashboard-card p-6 md:p-8 bg-white rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h2 class="text-xl font-bold text-gray-800">Manajemen Aset Tetap & Akumulasi Penyusutan</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Daftar inventaris dan aset perusahaan terekam otomatis dari jurnal</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Skedul penyusutan per aset sesuai kelompok tarif fiskal (UU PPh)</p>
                     </div>
                     <div>
                         <a href="input-jurnal.html" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm">
                             + Catat Pembelian Aset
                         </a>
                     </div>
+                </div>
+
+                <!-- Form Tambah/Edit Aset Tetap -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 mb-6">
+                    <h3 class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Daftarkan Aset Tetap</h3>
+                    <form id="formAset" class="space-y-4">
+                        <input type="hidden" id="editIdAset" value="">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium mb-1 text-gray-700">Nama Aset</label>
+                                <input type="text" id="namaAset" placeholder="Contoh: Mobil Operasional Avanza" class="form-input-custom text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1 text-gray-700">Tanggal Perolehan</label>
+                                <input type="date" id="tanggalPerolehanAset" class="form-input-custom text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1 text-gray-700">Nilai Perolehan (Rp)</label>
+                                <input type="number" id="nilaiPerolehanAset" min="0" step="any" class="form-input-custom text-sm font-mono text-right" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1 text-gray-700">Kelompok Penyusutan (Fiskal)</label>
+                                <select id="kelompokAset" class="form-input-custom text-sm"></select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium mb-1 text-gray-700">Metode Penyusutan</label>
+                                <select id="metodeAset" class="form-input-custom text-sm">
+                                    <option value="Garis Lurus">Garis Lurus</option>
+                                    <option value="Saldo Menurun">Saldo Menurun (tidak berlaku untuk Bangunan)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 pt-2">
+                            <button type="submit" id="btnSimpanAset" class="flex-1 md:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition">
+                                Simpan Aset Tetap
+                            </button>
+                            <button type="button" id="btnBatalAset" onclick="window.batalEditAset()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2.5 px-6 rounded-xl text-sm transition">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <!-- Kartu Ringkasan Aset -->
@@ -46,9 +87,35 @@
                     </div>
                 </div>
 
-                <!-- Tabel Daftar Aset -->
+                <!-- Tabel Daftar Aset & Skedul Penyusutan -->
+                <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm mb-8">
+                    <h3 class="font-bold text-gray-800 text-base mb-4">Daftar Aset Tetap & Skedul Penyusutan</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase border-b">
+                                    <th class="p-3">Nama Aset</th>
+                                    <th class="p-3">Tgl. Perolehan</th>
+                                    <th class="p-3">Kelompok / Metode</th>
+                                    <th class="p-3 text-right">Nilai Perolehan (Rp)</th>
+                                    <th class="p-3 text-right">Akumulasi Penyusutan (Rp)</th>
+                                    <th class="p-3 text-right">Nilai Buku (Rp)</th>
+                                    <th class="p-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelDaftarAset" class="divide-y divide-gray-100 text-xs">
+                                <tr>
+                                    <td colspan="7" class="p-8 text-center text-gray-400">Memuat daftar aset tetap...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Riwayat Transaksi Pembelian Aset dari Jurnal -->
                 <div class="dashboard-card p-6 bg-white rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-gray-800 text-base mb-4">Daftar Transaksi Aset Tetap</h3>
+                    <h3 class="font-bold text-gray-800 text-base mb-1">Riwayat Transaksi Pembelian Aset (dari Jurnal)</h3>
+                    <p class="text-xs text-gray-500 mb-4">Referensi audit trail - tidak dipakai untuk kalkulasi penyusutan di atas</p>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
