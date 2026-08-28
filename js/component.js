@@ -21,15 +21,18 @@ document.addEventListener("DOMContentLoaded", function() {
     if (currentFile === '') currentFile = 'index';
 
     if (currentFile !== 'login') {
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 sessionStorage.removeItem("erapee_user_session");
                 window.location.href = '/login';
             } else {
-                muatSidebarAndBranding();
+                await muatSidebarAndBranding();
                 muatHeader();
+                document.body.classList.remove('auth-pending');
             }
         });
+    } else {
+        document.body.classList.remove('auth-pending');
     }
 });
 

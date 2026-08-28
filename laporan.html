@@ -6,6 +6,7 @@
     <title>Laporan Keuangan | PT ERAPEE Anugrah Sejahtera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
+    <style>body.auth-pending { visibility: hidden; }</style>
     <style>
         @media print {
             thead { display: table-header-group; }
@@ -13,7 +14,7 @@
         }
     </style>
 </head>
-<body class="text-gray-800 bg-gray-50">
+<body class="text-gray-800 bg-gray-50 auth-pending">
     <div class="flex h-screen overflow-hidden print:h-auto print:overflow-visible">
         <!-- SIDEBAR -->
         <div id="sidebar-container" class="print:hidden"></div>
