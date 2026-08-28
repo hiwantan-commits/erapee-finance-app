@@ -1,0 +1,23 @@
+name: Backup Firestore ke Google Drive
+
+on:
+  schedule:
+    # Setiap hari jam 19:17 UTC = 02:17 WIB (dini hari, setelah jam kerja)
+    - cron: '17 19 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Jalankan backup ke Google Drive
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          GDRIVE_BACKUP_FOLDER_ID: ${{ secrets.GDRIVE_BACKUP_FOLDER_ID }}
+        run: node scripts/backup-ke-drive.mjs
