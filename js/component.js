@@ -291,17 +291,27 @@ async function muatSidebarAndBranding() {
                     ${groupsHtml}
                 </nav>
 
-                <div class="p-3 border-t border-stone-100 dark:border-stone-800 space-y-0.5">
-                    <a href="/profile" class="flex items-center gap-2.5 px-2 py-2 rounded-lg text-xs transition-all ${profileRowActiveClass}">
+                <div class="p-3 border-t border-stone-100 dark:border-stone-800 relative">
+                    <button onclick="window.toggleDropdownElegant(event, 'menuAkunSidebar')" class="w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-xs transition-all ${profileRowActiveClass}">
                         <div class="w-7 h-7 rounded-full bg-[#D97757] text-white flex items-center justify-center text-[10px] font-medium shrink-0">
                             ${inisialUser}
                         </div>
-                        <p class="font-medium truncate text-stone-900 dark:text-stone-100 text-xs">${escapeHtml(namaTampilan)}</p>
-                    </a>
-                    <button onclick="prosesLogout()" class="w-full text-left px-2 py-2 rounded-lg text-xs text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800/60 transition flex items-center gap-2.5">
-                        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
-                        Keluar Sistem
+                        <p class="font-medium truncate text-stone-900 dark:text-stone-100 text-xs flex-1 text-left">${escapeHtml(namaTampilan)}</p>
+                        <svg class="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
+                    <div id="menuAkunSidebar" class="hidden absolute bottom-full left-3 right-3 mb-2 z-50" data-dropdown-elegant>
+                        <div class="dropdown-elegant-panel">
+                            <a href="/profile" class="dropdown-elegant-item">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                                Lihat Profil
+                            </a>
+                            <div class="dropdown-elegant-divider"></div>
+                            <button type="button" onclick="prosesLogout()" class="dropdown-elegant-item dropdown-elegant-item-danger">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+                                Keluar Sistem
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </aside>
         `;

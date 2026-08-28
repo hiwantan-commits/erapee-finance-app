@@ -36,9 +36,9 @@
             <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
                 <!-- Sapaan (polos di atas latar, tanpa kotak berwarna - gaya Claude.ai) -->
                 <div class="mb-8">
-                    <h2 class="font-serif-elegant text-3xl md:text-4xl text-stone-900 dark:text-stone-50 mb-2">
+                    <h1 class="h-elegant-1 text-stone-900 dark:text-stone-50 mb-2">
                         <span class="text-[#D97757]">✳</span> Selamat datang, <span id="sapaNamaUser">Pengguna</span>
-                    </h2>
+                    </h1>
                     <p class="text-stone-500 dark:text-stone-400 text-sm max-w-2xl mb-6">Sistem Informasi Keuangan, Akuntansi Terpadu, dan Kepatuhan Pajak Standar Coretax (Tahun Buku 2026).</p>
                     <div class="flex flex-wrap gap-3">
                         <a href="/input-jurnal" class="btn-elegant-primary">+ Input Jurnal Baru</a>
@@ -49,22 +49,22 @@
                 <!-- Statistik Ringkas (Total Keseluruhan) -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
-                        <p class="text-xs font-medium text-stone-400 dark:text-stone-500">Total Pendapatan (YTD)</p>
+                        <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Total Pendapatan (YTD)</p>
                         <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-50 mt-2" id="valPendapatanTotal">Rp 0</h3>
                         <p class="text-xs text-stone-400 dark:text-stone-500 mt-1">Konsolidasi Segmen</p>
                     </div>
                     <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
-                        <p class="text-xs font-medium text-stone-400 dark:text-stone-500">Keuntungan (Laba Bersih)</p>
+                        <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Keuntungan (Laba Bersih)</p>
                         <h3 class="text-xl font-semibold text-emerald-600 dark:text-emerald-400 mt-2" id="valLabaBersih">Rp 0</h3>
                         <p class="text-xs text-stone-400 dark:text-stone-500 mt-1">Setelah Pajak</p>
                     </div>
                     <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
-                        <p class="text-xs font-medium text-stone-400 dark:text-stone-500">Total Utang (Liabilitas)</p>
+                        <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Total Utang (Liabilitas)</p>
                         <h3 class="text-xl font-semibold text-red-600 dark:text-red-400 mt-2" id="valTotalUtang">Rp 0</h3>
                         <p class="text-xs text-stone-400 dark:text-stone-500 mt-1">Usaha & Akrual</p>
                     </div>
                     <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
-                        <p class="text-xs font-medium text-stone-400 dark:text-stone-500">Akumulasi Pajak</p>
+                        <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Akumulasi Pajak</p>
                         <h3 class="text-xl font-semibold text-amber-600 dark:text-amber-400 mt-2" id="valAkumulasiPajak">Rp 0</h3>
                         <p class="text-xs text-stone-400 dark:text-stone-500 mt-1">PPN & PPh Terutang</p>
                     </div>
@@ -74,7 +74,7 @@
                 <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-8">
                     <div class="mb-4 pb-4 border-b border-stone-100 dark:border-stone-800 flex justify-between items-center">
                         <div>
-                            <h3 class="font-semibold text-stone-900 dark:text-stone-50 text-base">Detail Keuangan Per Unit Usaha (Sesuai Master Data)</h3>
+                            <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50">Detail Keuangan Per Unit Usaha (Sesuai Master Data)</h3>
                             <p class="text-xs text-stone-400 dark:text-stone-500 mt-0.5">Klasifikasi divisi digital, pertanian, korporat, dan biaya bersama</p>
                         </div>
                         <span class="text-xs text-stone-400 dark:text-stone-500">Master Data 03</span>
@@ -103,7 +103,7 @@
                     <!-- Grafik Tren Keuangan (2 Kolom) -->
                     <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm lg:col-span-2">
                         <div class="flex justify-between items-center mb-4 pb-4 border-b border-stone-100 dark:border-stone-800">
-                            <h3 class="font-semibold text-stone-900 dark:text-stone-50 text-sm">Grafik Kinerja Pendapatan & Keuntungan Bulanan</h3>
+                            <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50">Grafik Kinerja Pendapatan & Keuntungan Bulanan</h3>
                             <span class="text-xs text-stone-400 dark:text-stone-500">2026</span>
                         </div>
                         <div class="relative h-64 w-full">
@@ -114,7 +114,7 @@
                     <!-- Status Pemeriksaan Legal (1 Kolom) -->
                     <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
                         <div class="flex justify-between items-center mb-4 pb-4 border-b border-stone-100 dark:border-stone-800">
-                            <h3 class="font-semibold text-stone-900 dark:text-stone-50 text-sm">Status Pemeriksaan & Legal</h3>
+                            <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50">Status Pemeriksaan & Legal</h3>
                             <span class="text-xs text-stone-400 dark:text-stone-500">Checks</span>
                         </div>
                         <div class="space-y-2 text-xs">
@@ -142,7 +142,7 @@
                 <!-- Tabel Tren Bulanan -->
                 <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
                     <div class="mb-4 pb-4 border-b border-stone-100 dark:border-stone-800 flex justify-between items-center">
-                        <h3 class="font-semibold text-stone-900 dark:text-stone-50 text-base">Tabel Tren Kinerja Bulanan (Januari s.d. Desember 2026)</h3>
+                        <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50">Tabel Tren Kinerja Bulanan (Januari s.d. Desember 2026)</h3>
                         <span class="text-xs text-stone-400 dark:text-stone-500">Sheet 15</span>
                     </div>
                     <div class="overflow-x-auto" style="max-height: 300px; overflow-y: auto;">
