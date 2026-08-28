@@ -4,86 +4,106 @@ import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://
 import { escapeHtml } from "./utils.js";
 import { isKodeAkunValid } from "./accounting.js";
 
+// Menu aksi per-baris memakai pola dropdown/3-titik (bukan 2 tombol
+// terpisah) - konsisten dengan halaman Manajemen Jurnal. `prefix` membedakan
+// panel Unit Usaha dan COA supaya id HTML-nya tidak pernah bentrok satu sama
+// lain di halaman yang sama.
+function tombolAksiHtml(prefix, id, onEdit, onHapus) {
+    const idAman = String(id).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const panelId = `menuAksi${prefix}-${idAman}`;
+    return `
+        <div class="relative inline-block">
+            <button type="button" onclick="window.toggleDropdownElegant(event, '${panelId}')" class="btn-elegant-icon" title="Aksi">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="12" cy="19" r="1.75"/></svg>
+            </button>
+            <div id="${panelId}" class="hidden absolute right-0 mt-1 z-50" data-dropdown-elegant>
+                <div class="dropdown-elegant-panel">
+                    <button type="button" onclick="${onEdit}" class="dropdown-elegant-item">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                        Edit
+                    </button>
+                    <div class="dropdown-elegant-divider"></div>
+                    <button type="button" onclick="${onHapus}" class="dropdown-elegant-item dropdown-elegant-item-danger">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+                        Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 // ==========================================
 // 1. MODUL MASTER DATA UNIT USAHA
 // ==========================================
 async function muatUnitUsaha() {
     const tbody = document.getElementById('tabelUnitUsaha');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500 font-medium">Memuat data unit usaha dari pusat...</td></tr>';
-    
+    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 dark:text-stone-500 font-medium">Memuat data unit usaha dari pusat...</td></tr>';
+
     try {
         const snap = await getDocs(collection(db, "master_unit_usaha"));
         tbody.innerHTML = '';
-        
+
         if (snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">Belum ada master data unit usaha.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 dark:text-stone-500">Belum ada master data unit usaha.</td></tr>';
             return;
         }
 
         snap.forEach(docSnap => {
             const data = docSnap.data();
             const klasifikasiTeks = data.klasifikasi || '-';
-            
+
             const encKode = encodeURIComponent(data.kode || '');
             const encNama = encodeURIComponent(data.nama || '');
             const encKlas = encodeURIComponent(klasifikasiTeks);
 
             // Tambahkan atribut id baris agar mudah diberi efek highlight
             tbody.innerHTML += `
-                <tr id="row-unit-${docSnap.id}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="p-3"><span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-mono font-bold text-xs">${escapeHtml(data.kode)}</span></td>
-                    <td class="p-3 font-medium text-gray-800 text-sm">${escapeHtml(data.nama)}</td>
-                    <td class="p-3 text-gray-500 text-sm">${escapeHtml(klasifikasiTeks)}</td>
-                    <td class="p-3 text-center">
-                        <div class="flex justify-center items-center gap-2">
-                            <button onclick="window.editUnitUsaha('${docSnap.id}', '${encKode}', '${encNama}', '${encKlas}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Edit</button>
-                            <button onclick="window.hapusUnitUsaha('${docSnap.id}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Hapus</button>
-                        </div>
-                    </td>
+                <tr id="row-unit-${docSnap.id}" class="hover:bg-stone-50 dark:hover:bg-stone-800/40 transition-colors">
+                    <td class="p-3"><span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded font-mono font-bold text-xs">${escapeHtml(data.kode)}</span></td>
+                    <td class="p-3 font-medium text-stone-800 dark:text-stone-200 text-sm">${escapeHtml(data.nama)}</td>
+                    <td class="p-3 text-stone-500 dark:text-stone-400 text-sm">${escapeHtml(klasifikasiTeks)}</td>
+                    <td class="p-3 text-center">${tombolAksiHtml('Unit', docSnap.id, `window.editUnitUsaha('${docSnap.id}', '${encKode}', '${encNama}', '${encKlas}')`, `window.hapusUnitUsaha('${docSnap.id}')`)}</td>
                 </tr>
             `;
         });
     } catch (error) {
         console.error("Error muat unit usaha:", error);
-        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-red-500">Gagal memuat data unit usaha.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-red-500 dark:text-red-400">Gagal memuat data unit usaha.</td></tr>';
     }
 }
 
 window.editUnitUsaha = function(id, encKode, encNama, encKlas) {
     const klasifikasi = decodeURIComponent(encKlas);
-    
+
     // Hapus highlight dari semua baris unit usaha lain, lalu beri highlight ke baris yang dipilih
-    document.querySelectorAll('#tabelUnitUsaha tr').forEach(tr => tr.classList.remove('bg-amber-50', 'border-amber-200'));
+    document.querySelectorAll('#tabelUnitUsaha tr').forEach(tr => tr.classList.remove('bg-amber-50', 'dark:bg-amber-900/20'));
     const activeRow = document.getElementById(`row-unit-${id}`);
-    if (activeRow) activeRow.classList.add('bg-amber-50', 'border-amber-200');
+    if (activeRow) activeRow.classList.add('bg-amber-50', 'dark:bg-amber-900/20');
 
     document.getElementById('editIdUnit').value = id;
     document.getElementById('kodeUnit').value = decodeURIComponent(encKode);
     document.getElementById('namaUnit').value = decodeURIComponent(encNama);
     document.getElementById('klasifikasiUnit').value = klasifikasi === '-' ? '' : klasifikasi;
-    
+
     const btn = document.getElementById('btnSimpanUnit');
     btn.innerText = 'Update Data';
     btn.disabled = false;
-    btn.classList.replace('bg-indigo-600', 'bg-amber-500');
-    btn.classList.replace('hover:bg-indigo-700', 'hover:bg-amber-600');
     document.getElementById('btnBatalUnit').classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 window.batalEditUnit = function() {
     // Bersihkan semua highlight baris aktif
-    document.querySelectorAll('#tabelUnitUsaha tr').forEach(tr => tr.classList.remove('bg-amber-50', 'border-amber-200'));
-    
+    document.querySelectorAll('#tabelUnitUsaha tr').forEach(tr => tr.classList.remove('bg-amber-50', 'dark:bg-amber-900/20'));
+
     document.getElementById('formUnitUsaha').reset();
     document.getElementById('editIdUnit').value = '';
-    
+
     const btn = document.getElementById('btnSimpanUnit');
     btn.innerText = 'Simpan Unit Usaha';
     btn.disabled = false;
-    btn.classList.replace('bg-amber-500', 'bg-indigo-600');
-    btn.classList.replace('hover:bg-amber-600', 'hover:bg-indigo-700');
     document.getElementById('btnBatalUnit').classList.add('hidden');
 }
 
@@ -104,21 +124,21 @@ window.hapusUnitUsaha = async function(id) {
 async function muatCOA() {
     const tbody = document.getElementById('tabelCOA');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-500 font-medium">Memuat data COA dari pusat...</td></tr>';
-    
+    tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-stone-400 dark:text-stone-500 font-medium">Memuat data COA dari pusat...</td></tr>';
+
     try {
         const snap = await getDocs(collection(db, "master_coa"));
         tbody.innerHTML = '';
-        
+
         let coaList = [];
         snap.forEach(docSnap => {
             coaList.push({ id: docSnap.id, ...docSnap.data() });
         });
-        
+
         coaList.sort((a, b) => String(a.kode).localeCompare(String(b.kode)));
 
         if (coaList.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-400">Belum ada master data COA (Chart of Accounts).</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-stone-400 dark:text-stone-500">Belum ada master data COA (Chart of Accounts).</td></tr>';
             return;
         }
 
@@ -128,55 +148,46 @@ async function muatCOA() {
 
             // Tambahkan atribut id baris COA
             tbody.innerHTML += `
-                <tr id="row-coa-${data.id}" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="p-3"><span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-mono font-bold text-xs">${escapeHtml(data.kode)}</span></td>
-                    <td class="p-3 font-medium text-gray-800 text-sm">${escapeHtml(data.nama)}</td>
-                    <td class="p-3 text-center">
-                        <div class="flex justify-center items-center gap-2">
-                            <button onclick="window.editCOA('${data.id}', '${encKode}', '${encNama}')" class="text-amber-600 bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Edit</button>
-                            <button onclick="window.hapusCOA('${data.id}')" class="text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Hapus</button>
-                        </div>
-                    </td>
+                <tr id="row-coa-${data.id}" class="hover:bg-stone-50 dark:hover:bg-stone-800/40 transition-colors">
+                    <td class="p-3"><span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded font-mono font-bold text-xs">${escapeHtml(data.kode)}</span></td>
+                    <td class="p-3 font-medium text-stone-800 dark:text-stone-200 text-sm">${escapeHtml(data.nama)}</td>
+                    <td class="p-3 text-center">${tombolAksiHtml('Coa', data.id, `window.editCOA('${data.id}', '${encKode}', '${encNama}')`, `window.hapusCOA('${data.id}')`)}</td>
                 </tr>
             `;
         });
     } catch (error) {
         console.error("Error muat COA:", error);
-        tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-500">Gagal memuat data COA.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-500 dark:text-red-400">Gagal memuat data COA.</td></tr>';
     }
 }
 
 window.editCOA = function(id, encKode, encNama) {
     // Hapus highlight dari baris COA lain, lalu beri highlight ke baris yang dipilih
-    document.querySelectorAll('#tabelCOA tr').forEach(tr => tr.classList.remove('bg-amber-50', 'border-amber-200'));
+    document.querySelectorAll('#tabelCOA tr').forEach(tr => tr.classList.remove('bg-amber-50', 'dark:bg-amber-900/20'));
     const activeRow = document.getElementById(`row-coa-${id}`);
-    if (activeRow) activeRow.classList.add('bg-amber-50', 'border-amber-200');
+    if (activeRow) activeRow.classList.add('bg-amber-50', 'dark:bg-amber-900/20');
 
     document.getElementById('editIdCOA').value = id;
     document.getElementById('kodeCOA').value = decodeURIComponent(encKode);
     document.getElementById('namaCOA').value = decodeURIComponent(encNama);
-    
+
     const btn = document.getElementById('btnSimpanCOA');
     btn.innerText = 'Update COA';
     btn.disabled = false;
-    btn.classList.replace('bg-blue-600', 'bg-amber-500');
-    btn.classList.replace('hover:bg-blue-700', 'hover:bg-amber-600');
     document.getElementById('btnBatalCOA').classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 window.batalEditCOA = function() {
     // Bersihkan semua highlight baris aktif COA
-    document.querySelectorAll('#tabelCOA tr').forEach(tr => tr.classList.remove('bg-amber-50', 'border-amber-200'));
-    
+    document.querySelectorAll('#tabelCOA tr').forEach(tr => tr.classList.remove('bg-amber-50', 'dark:bg-amber-900/20'));
+
     document.getElementById('formCOA').reset();
     document.getElementById('editIdCOA').value = '';
-    
+
     const btn = document.getElementById('btnSimpanCOA');
     btn.innerText = 'Simpan COA';
     btn.disabled = false;
-    btn.classList.replace('bg-amber-500', 'bg-blue-600');
-    btn.classList.replace('hover:bg-amber-600', 'hover:bg-blue-700');
     document.getElementById('btnBatalCOA').classList.add('hidden');
 }
 
