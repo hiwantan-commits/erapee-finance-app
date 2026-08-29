@@ -9,7 +9,14 @@ import { escapeHtml } from "./utils.js";
 // langsung), supaya pemanggil tetap bisa memperbarui daftar COA-nya
 // belakangan (mis. setelah fetch async selesai) tanpa perlu memasang ulang
 // autocomplete di setiap input yang sudah ada.
-export function pasangAutocompleteAkun(inputEl, ambilCoaArray) {
+//
+// `ambilKodeDikecualikan` (opsional) adalah fungsi () => Set<string> berisi
+// kode akun yang TIDAK boleh muncul di daftar (mis. akun yang sudah dipakai
+// record lain, atau sudah dipilih di field pasangannya pada form yang sama).
+// Dipanggil ulang setiap dropdown dibuka, jadi selalu memakai kondisi
+// terbaru. Pemanggil yang tidak butuh pengecualian cukup tidak mengirim
+// argumen ini sama sekali - perilakunya identik seperti sebelumnya.
+export function pasangAutocompleteAkun(inputEl, ambilCoaArray, ambilKodeDikecualikan) {
     let dropdownEl = null;
     let indexAktif = -1;
 
@@ -47,9 +54,11 @@ export function pasangAutocompleteAkun(inputEl, ambilCoaArray) {
     function tampilkanDropdown() {
         const kataKunci = inputEl.value.toLowerCase().trim();
         const coaArray = ambilCoaArray();
-        const hasil = coaArray.filter(c =>
-            !kataKunci || c.kode.toLowerCase().includes(kataKunci) || c.nama.toLowerCase().includes(kataKunci)
-        ).slice(0, 50);
+        const kodeDikecualikan = ambilKodeDikecualikan ? ambilKodeDikecualikan() : null;
+        const hasil = coaArray.filter(c => {
+            if (kodeDikecualikan && kodeDikecualikan.has(c.kode)) return false;
+            return !kataKunci || c.kode.toLowerCase().includes(kataKunci) || c.nama.toLowerCase().includes(kataKunci);
+        }).slice(0, 50);
 
         tutupDropdown();
         if (hasil.length === 0) return;
