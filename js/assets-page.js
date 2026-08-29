@@ -1,7 +1,7 @@
 // js/assets-page.js - Controller untuk aset-tetap.html (Master Aset & Skedul Penyusutan)
 import { db } from "./config.js";
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { ambilSemuaJurnalPusat } from "./db.js";
+import { ambilSemuaJurnalPusat, ambilBarisJurnalPerKodeAkun } from "./db.js";
 import { hitungPenyusutanAset, KELOMPOK_PENYUSUTAN } from "./accounting.js";
 import { pasangAutocompleteAkun } from "./coa-autocomplete.js";
 import { pasangPilihTransaksi } from "./transaksi-picker.js";
@@ -11,31 +11,29 @@ import { ambilUserAktif } from "./auth.js";
 const KOLEKSI_ASET = "aset_tetap";
 let coaArray = []; // Array COA untuk mapping otomatis di input akun (sama pola dengan journal-page.js/sewa-page.js)
 
-// Mengumpulkan "kandidat transaksi pembelian aset" dari seluruh jurnal yang
-// sudah tercatat - baris mana pun yang mendebit akun kelompok Aset Tetap
-// (kategori_aset_tetap=true & kode berawalan '1'), supaya bisa dipilih untuk
-// mengisi form secara otomatis. Pola identik bangunKandidatTransaksiSewa()
-// di js/sewa-page.js, hanya beda sumber tanda kategorinya.
-function bangunKandidatTransaksiAset(semuaJurnal, coaList) {
-    const kodeAsetTetap = new Set(
-        coaList.filter(c => c.kategori_aset_tetap && String(c.kode).startsWith('1')).map(c => c.kode)
-    );
+// Mengubah daftar KODE akun bertag kategori_aset_tetap di Master COA jadi
+// "kandidat transaksi pembelian aset" siap pakai untuk fitur "Isi Otomatis
+// dari Transaksi Jurnal". `barisJurnal` sudah difilter kode_akun-nya di sisi
+// Firestore lewat ambilBarisJurnalPerKodeAkun() (query where(...,"in",...))
+// - sebelumnya fungsi ini yang menyaring dari SELURUH koleksi jurnal_transaksi
+// di klien, dan cara lama itu makin lambat/mahal seiring jumlah transaksi
+// bertambah. Pola identik bangunKandidatTransaksiSewa() di js/sewa-page.js,
+// hanya beda sumber tanda kategorinya.
+function bangunKandidatTransaksiAset(barisJurnal) {
     const kandidat = [];
-    semuaJurnal.forEach(jurnal => {
-        jurnal.rows.forEach(row => {
-            const debit = parseFloat(row.debit) || 0;
-            if (debit > 0 && kodeAsetTetap.has(row.kode_akun)) {
-                kandidat.push({
-                    id_jurnal: jurnal.id_jurnal,
-                    tanggal: jurnal.tanggal,
-                    no_bukti: jurnal.no_bukti,
-                    keterangan: jurnal.keterangan || '',
-                    lawan_transaksi: jurnal.lawan_transaksi || '',
-                    kode_akun: row.kode_akun,
-                    nominal: debit
-                });
-            }
-        });
+    barisJurnal.forEach(row => {
+        const debit = parseFloat(row.debit) || 0;
+        if (debit > 0) {
+            kandidat.push({
+                id_jurnal: row.id_jurnal,
+                tanggal: row.tanggal,
+                no_bukti: row.no_bukti,
+                keterangan: row.keterangan || '',
+                lawan_transaksi: row.lawan_transaksi || '',
+                kode_akun: row.kode_akun,
+                nominal: debit
+            });
+        }
     });
     kandidat.sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
     return kandidat;
@@ -338,8 +336,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {}
 
         try {
-            const semuaJurnal = await ambilSemuaJurnalPusat();
-            kandidatTransaksiAset = bangunKandidatTransaksiAset(semuaJurnal, coaArray);
+            const kodeAsetTetap = coaArray.filter(c => c.kategori_aset_tetap && String(c.kode).startsWith('1')).map(c => c.kode);
+            const barisJurnal = await ambilBarisJurnalPerKodeAkun(kodeAsetTetap);
+            kandidatTransaksiAset = bangunKandidatTransaksiAset(barisJurnal);
         } catch (err) {}
     })();
 
