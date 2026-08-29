@@ -1,45 +1,147 @@
 // js/sewa-page.js - Controller untuk sewa.html (Master Sewa Dibayar Dimuka & Skedul Amortisasi)
 import { db } from "./config.js";
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { ambilSemuaJurnalPusat } from "./db.js";
 import { hitungAmortisasiSewa } from "./accounting.js";
+import { pasangAutocompleteAkun } from "./coa-autocomplete.js";
 import { escapeHtml } from "./utils.js";
 
 const KOLEKSI_SEWA = "sewa_dibayar_dimuka";
-let coaArray = []; // Array COA (dipakai untuk mengisi pilihan akun Sewa)
+let coaArray = []; // Array COA untuk mapping otomatis di input akun (sama pola dengan journal-page.js)
+
+// Mengumpulkan "kandidat transaksi sewa" dari seluruh jurnal yang sudah
+// tercatat - baris mana pun yang mendebit akun kelompok Sewa sisi Aset
+// (kategori_sewa=true & kode berawalan '1', mewakili momen pembayaran sewa
+// dimuka), supaya bisa dipilih untuk mengisi form secara otomatis alih-alih
+// mengetik ulang dari nol.
+function bangunKandidatTransaksiSewa(semuaJurnal, coaList) {
+    const kodeSewaAset = new Set(
+        coaList.filter(c => c.kategori_sewa && String(c.kode).startsWith('1')).map(c => c.kode)
+    );
+    const kandidat = [];
+    semuaJurnal.forEach(jurnal => {
+        jurnal.rows.forEach(row => {
+            const debit = parseFloat(row.debit) || 0;
+            if (debit > 0 && kodeSewaAset.has(row.kode_akun)) {
+                kandidat.push({
+                    id_jurnal: jurnal.id_jurnal,
+                    tanggal: jurnal.tanggal,
+                    no_bukti: jurnal.no_bukti,
+                    keterangan: jurnal.keterangan || '',
+                    lawan_transaksi: jurnal.lawan_transaksi || '',
+                    kode_akun: row.kode_akun,
+                    nominal: debit
+                });
+            }
+        });
+    });
+    kandidat.sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
+    return kandidat;
+}
+
+// Dropdown pencarian transaksi jurnal - pola & interaksinya sengaja mirip
+// pasangAutocompleteAkun() di coa-autocomplete.js, tapi tidak digabung ke
+// sana karena bentuk data & tampilan opsinya berbeda (transaksi jurnal,
+// bukan akun COA) dan baru dipakai di satu tempat ini saja.
+function pasangPilihTransaksiSewa(inputEl, ambilKandidat, onPilih) {
+    let dropdownEl = null;
+    let indexAktif = -1;
+
+    function tutupDropdown() {
+        if (dropdownEl) { dropdownEl.remove(); dropdownEl = null; }
+        indexAktif = -1;
+        window.removeEventListener('scroll', saatScrollLuar, true);
+    }
+    function saatScrollLuar(e) {
+        if (dropdownEl && e.target instanceof Node && dropdownEl.contains(e.target)) return;
+        tutupDropdown();
+    }
+    function pilihOpsi(t) {
+        inputEl.value = `${t.no_bukti} - ${t.lawan_transaksi || t.keterangan || ''}`;
+        tutupDropdown();
+        onPilih(t);
+    }
+    function perbaruiSorotan(opsiEl) {
+        opsiEl.forEach((el, i) => {
+            el.classList.toggle('bg-stone-100', i === indexAktif);
+            el.classList.toggle('dark:bg-stone-800', i === indexAktif);
+        });
+        if (indexAktif >= 0) opsiEl[indexAktif].scrollIntoView({ block: 'nearest' });
+    }
+    function tampilkanDropdown() {
+        const kataKunci = inputEl.value.toLowerCase().trim();
+        const daftar = ambilKandidat();
+        const hasil = daftar.filter(t =>
+            !kataKunci ||
+            (t.no_bukti || '').toLowerCase().includes(kataKunci) ||
+            (t.keterangan || '').toLowerCase().includes(kataKunci) ||
+            (t.lawan_transaksi || '').toLowerCase().includes(kataKunci)
+        ).slice(0, 50);
+
+        tutupDropdown();
+        if (hasil.length === 0) return;
+
+        dropdownEl = document.createElement('div');
+        dropdownEl.className = 'fixed z-50 max-h-64 overflow-y-auto bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg shadow-lg text-xs';
+        const rect = inputEl.getBoundingClientRect();
+        dropdownEl.style.left = rect.left + 'px';
+        dropdownEl.style.top = (rect.bottom + 4) + 'px';
+        dropdownEl.style.width = rect.width + 'px';
+
+        hasil.forEach(t => {
+            const opt = document.createElement('div');
+            opt.className = 'px-3 py-2 cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-800';
+            opt.innerHTML = `
+                <div class="flex justify-between gap-3">
+                    <span class="font-mono font-bold text-stone-700 dark:text-stone-300">${escapeHtml(t.no_bukti || t.id_jurnal)}</span>
+                    <span class="text-stone-400 dark:text-stone-500">${escapeHtml(t.tanggal || '')}</span>
+                </div>
+                <div class="flex justify-between gap-3 mt-0.5">
+                    <span class="text-stone-600 dark:text-stone-300 truncate">${escapeHtml(t.lawan_transaksi || t.keterangan || '-')}</span>
+                    <span class="font-semibold text-stone-700 dark:text-stone-300 shrink-0">${Math.round(t.nominal).toLocaleString('id-ID')}</span>
+                </div>
+            `;
+            opt.addEventListener('mousedown', (e) => { e.preventDefault(); pilihOpsi(t); });
+            dropdownEl.appendChild(opt);
+        });
+
+        document.body.appendChild(dropdownEl);
+        window.addEventListener('scroll', saatScrollLuar, true);
+    }
+
+    inputEl.addEventListener('focus', tampilkanDropdown);
+    inputEl.addEventListener('input', tampilkanDropdown);
+    inputEl.addEventListener('blur', () => setTimeout(tutupDropdown, 150));
+    inputEl.addEventListener('keydown', (e) => {
+        if (!dropdownEl) return;
+        const opsiEl = Array.from(dropdownEl.children);
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            indexAktif = Math.min(indexAktif + 1, opsiEl.length - 1);
+            perbaruiSorotan(opsiEl);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            indexAktif = Math.max(indexAktif - 1, 0);
+            perbaruiSorotan(opsiEl);
+        } else if (e.key === 'Escape') {
+            tutupDropdown();
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const target = indexAktif >= 0 ? opsiEl[indexAktif] : opsiEl[0];
+            if (target) target.dispatchEvent(new MouseEvent('mousedown'));
+        }
+    });
+}
 
 function formatRupiah(angka) {
     return "Rp " + Math.round(angka).toLocaleString('id-ID');
 }
 
-// Kedua field akun di form ini SENGAJA berupa <select> berisi HANYA akun
-// yang sudah ditandai kategori_sewa=true di Master COA (bukan pencarian
-// bebas ke seluruh COA) - supaya user memilih dari daftar akun yang memang
-// sudah disiapkan untuk sewa, bukan mengetik kode sembarangan. Dipisah
-// berdasarkan digit pertama kode (1=Aset untuk Prabayar, 6=Beban untuk
-// Beban Sewa), mengikuti aturan klasifikasi yang sama dengan
-// klasifikasikanAkun() di accounting.js.
-function populateAkunSewaSelects() {
-    const selectPrabayar = document.getElementById('akunPrabayarSewa');
-    const selectBeban = document.getElementById('akunBebanSewa');
-    if (!selectPrabayar || !selectBeban) return;
-
-    const akunSewa = coaArray.filter(c => c.kategori_sewa);
-    const akunPrabayarList = akunSewa.filter(c => String(c.kode).startsWith('1'));
-    const akunBebanList = akunSewa.filter(c => String(c.kode).startsWith('6'));
-
-    const buatOpsi = (list, teksKosong) => {
-        if (list.length === 0) return `<option value="">${teksKosong}</option>`;
-        return '<option value="">Pilih akun...</option>' + list.map(c =>
-            `<option value="${escapeHtml(c.kode)}">${escapeHtml(c.kode)} - ${escapeHtml(c.nama)}</option>`
-        ).join('');
-    };
-
-    const nilaiSebelumnyaPrabayar = selectPrabayar.value;
-    const nilaiSebelumnyaBeban = selectBeban.value;
-    selectPrabayar.innerHTML = buatOpsi(akunPrabayarList, 'Belum ada akun Sewa (Aset) ditandai di Master COA');
-    selectBeban.innerHTML = buatOpsi(akunBebanList, 'Belum ada akun Sewa (Beban) ditandai di Master COA');
-    if (nilaiSebelumnyaPrabayar) selectPrabayar.value = nilaiSebelumnyaPrabayar;
-    if (nilaiSebelumnyaBeban) selectBeban.value = nilaiSebelumnyaBeban;
+// Ambil kode akun bersih dari value input yang berformat "KODE - Nama Akun"
+// (sama pola dengan pembersihan unit_usaha di journal-page.js).
+function ambilKodeDariInputAkun(inputEl) {
+    const raw = inputEl.value || '';
+    return raw.split(' - ')[0].trim();
 }
 
 // Menu aksi per-baris memakai pola dropdown/3-titik, konsisten dengan
@@ -153,6 +255,12 @@ async function muatDaftarSewa() {
     }
 }
 
+function isiInputAkun(inputEl, kode) {
+    if (!inputEl) return;
+    const found = coaArray.find(c => c.kode === kode);
+    inputEl.value = found ? `${found.kode} - ${found.nama}` : (kode || '');
+}
+
 window.editSewa = function(encId) {
     const id = decodeURIComponent(encId);
     const sewa = window.dataSewaGlobal[id];
@@ -170,8 +278,8 @@ window.editSewa = function(encId) {
     document.getElementById('tanggalSelesaiSewa').value = sewa.tanggal_selesai || '';
     document.getElementById('nilaiTotalSewa').value = sewa.nilai_total || 0;
     document.getElementById('keteranganSewa').value = sewa.keterangan || '';
-    document.getElementById('akunPrabayarSewa').value = sewa.kode_akun_prabayar || '';
-    document.getElementById('akunBebanSewa').value = sewa.kode_akun_beban_sewa || '';
+    isiInputAkun(document.getElementById('akunPrabayarSewa'), sewa.kode_akun_prabayar);
+    isiInputAkun(document.getElementById('akunBebanSewa'), sewa.kode_akun_beban_sewa);
 
     const selectUnitEl = document.getElementById('unitUsahaSewa');
     if (selectUnitEl) {
@@ -215,6 +323,22 @@ window.hapusSewa = async function(encId) {
 document.addEventListener('DOMContentLoaded', () => {
     muatDaftarSewa();
 
+    const inputAkunPrabayar = document.getElementById('akunPrabayarSewa');
+    const inputAkunBeban = document.getElementById('akunBebanSewa');
+    if (inputAkunPrabayar) pasangAutocompleteAkun(inputAkunPrabayar, () => coaArray);
+    if (inputAkunBeban) pasangAutocompleteAkun(inputAkunBeban, () => coaArray);
+
+    let kandidatTransaksiSewa = [];
+    const inputPilihTransaksi = document.getElementById('pilihTransaksiSewa');
+    if (inputPilihTransaksi) {
+        pasangPilihTransaksiSewa(inputPilihTransaksi, () => kandidatTransaksiSewa, (t) => {
+            document.getElementById('namaSewa').value = t.lawan_transaksi || t.keterangan || '';
+            document.getElementById('keteranganSewa').value = t.keterangan || '';
+            document.getElementById('nilaiTotalSewa').value = t.nominal;
+            isiInputAkun(document.getElementById('akunPrabayarSewa'), t.kode_akun);
+        });
+    }
+
     (async () => {
         try {
             const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
@@ -236,7 +360,11 @@ document.addEventListener('DOMContentLoaded', () => {
             snapCOA.forEach(d => coaList.push(d.data()));
             coaList.sort((a, b) => a.kode.localeCompare(b.kode));
             coaArray = coaList;
-            populateAkunSewaSelects();
+        } catch (err) {}
+
+        try {
+            const semuaJurnal = await ambilSemuaJurnalPusat();
+            kandidatTransaksiSewa = bangunKandidatTransaksiSewa(semuaJurnal, coaArray);
         } catch (err) {}
     })();
 
@@ -267,8 +395,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 tanggal_selesai: tanggalSelesai,
                 nilai_total: parseFloat(document.getElementById('nilaiTotalSewa').value) || 0,
                 keterangan: document.getElementById('keteranganSewa').value.trim(),
-                kode_akun_prabayar: document.getElementById('akunPrabayarSewa').value,
-                kode_akun_beban_sewa: document.getElementById('akunBebanSewa').value
+                kode_akun_prabayar: ambilKodeDariInputAkun(document.getElementById('akunPrabayarSewa')),
+                kode_akun_beban_sewa: ambilKodeDariInputAkun(document.getElementById('akunBebanSewa'))
             };
 
             try {
