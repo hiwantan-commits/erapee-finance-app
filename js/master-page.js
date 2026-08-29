@@ -155,15 +155,19 @@ async function muatCOA() {
             const encNama = encodeURIComponent(data.nama || '');
             const badgeSewa = data.kategori_sewa
                 ? `<span class="px-2 py-0.5 bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 rounded text-[10px] font-semibold">Sewa</span>`
-                : `<span class="text-stone-300 dark:text-stone-700 text-xs">-</span>`;
+                : '';
+            const badgeAsetTetap = data.kategori_aset_tetap
+                ? `<span class="px-2 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded text-[10px] font-semibold">Aset Tetap</span>`
+                : '';
+            const badgeKategori = (badgeSewa + badgeAsetTetap) || `<span class="text-stone-300 dark:text-stone-700 text-xs">-</span>`;
 
             // Tambahkan atribut id baris COA
             tbody.innerHTML += `
                 <tr id="row-coa-${data.id}" class="hover:bg-stone-50 dark:hover:bg-stone-800/40 transition-colors">
                     <td class="p-3"><span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded font-mono font-bold text-xs">${escapeHtml(data.kode)}</span></td>
                     <td class="p-3 font-medium text-stone-800 dark:text-stone-200 text-sm">${escapeHtml(data.nama)}</td>
-                    <td class="p-3">${badgeSewa}</td>
-                    <td class="p-3 text-center">${tombolAksiHtml('Coa', data.id, `window.editCOA('${data.id}', '${encKode}', '${encNama}', ${Boolean(data.kategori_sewa)})`, `window.hapusCOA('${data.id}')`)}</td>
+                    <td class="p-3 space-x-1">${badgeKategori}</td>
+                    <td class="p-3 text-center">${tombolAksiHtml('Coa', data.id, `window.editCOA('${data.id}', '${encKode}', '${encNama}', ${Boolean(data.kategori_sewa)}, ${Boolean(data.kategori_aset_tetap)})`, `window.hapusCOA('${data.id}')`)}</td>
                 </tr>
             `;
         });
@@ -173,7 +177,7 @@ async function muatCOA() {
     }
 }
 
-window.editCOA = function(id, encKode, encNama, kategoriSewa) {
+window.editCOA = function(id, encKode, encNama, kategoriSewa, kategoriAsetTetap) {
     // Hapus highlight dari baris COA lain, lalu beri highlight ke baris yang dipilih
     document.querySelectorAll('#tabelCOA tr').forEach(tr => tr.classList.remove('bg-amber-50', 'dark:bg-amber-900/20'));
     const activeRow = document.getElementById(`row-coa-${id}`);
@@ -183,6 +187,7 @@ window.editCOA = function(id, encKode, encNama, kategoriSewa) {
     document.getElementById('kodeCOA').value = decodeURIComponent(encKode);
     document.getElementById('namaCOA').value = decodeURIComponent(encNama);
     document.getElementById('kategoriSewaCOA').checked = Boolean(kategoriSewa);
+    document.getElementById('kategoriAsetTetapCOA').checked = Boolean(kategoriAsetTetap);
 
     const btn = document.getElementById('btnSimpanCOA');
     btn.innerText = 'Update COA';
@@ -271,7 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = {
                 kode: document.getElementById('kodeCOA').value.trim(),
                 nama: document.getElementById('namaCOA').value.trim(),
-                kategori_sewa: document.getElementById('kategoriSewaCOA').checked
+                kategori_sewa: document.getElementById('kategoriSewaCOA').checked,
+                kategori_aset_tetap: document.getElementById('kategoriAsetTetapCOA').checked
             };
 
             if (!isKodeAkunValid(payload.kode)) {

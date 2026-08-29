@@ -4,10 +4,41 @@ import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { hitungPenyusutanAset, KELOMPOK_PENYUSUTAN } from "./accounting.js";
 import { pasangAutocompleteAkun } from "./coa-autocomplete.js";
+import { pasangPilihTransaksi } from "./transaksi-picker.js";
 import { escapeHtml } from "./utils.js";
 
 const KOLEKSI_ASET = "aset_tetap";
 let coaArray = []; // Array COA untuk mapping otomatis di input akun (sama pola dengan journal-page.js/sewa-page.js)
+
+// Mengumpulkan "kandidat transaksi pembelian aset" dari seluruh jurnal yang
+// sudah tercatat - baris mana pun yang mendebit akun kelompok Aset Tetap
+// (kategori_aset_tetap=true & kode berawalan '1'), supaya bisa dipilih untuk
+// mengisi form secara otomatis. Pola identik bangunKandidatTransaksiSewa()
+// di js/sewa-page.js, hanya beda sumber tanda kategorinya.
+function bangunKandidatTransaksiAset(semuaJurnal, coaList) {
+    const kodeAsetTetap = new Set(
+        coaList.filter(c => c.kategori_aset_tetap && String(c.kode).startsWith('1')).map(c => c.kode)
+    );
+    const kandidat = [];
+    semuaJurnal.forEach(jurnal => {
+        jurnal.rows.forEach(row => {
+            const debit = parseFloat(row.debit) || 0;
+            if (debit > 0 && kodeAsetTetap.has(row.kode_akun)) {
+                kandidat.push({
+                    id_jurnal: jurnal.id_jurnal,
+                    tanggal: jurnal.tanggal,
+                    no_bukti: jurnal.no_bukti,
+                    keterangan: jurnal.keterangan || '',
+                    lawan_transaksi: jurnal.lawan_transaksi || '',
+                    kode_akun: row.kode_akun,
+                    nominal: debit
+                });
+            }
+        });
+    });
+    kandidat.sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
+    return kandidat;
+}
 
 // Ambil kode akun bersih dari value input yang berformat "KODE - Nama Akun"
 // (sama pola dengan pembersihan unit_usaha di journal-page.js).
@@ -156,6 +187,7 @@ window.editAset = function(encId) {
     if (activeCard) activeCard.classList.add('bg-amber-50', 'dark:bg-amber-900/20');
 
     document.getElementById('editIdAset').value = id;
+    document.getElementById('noBuktiSumberAset').value = aset.no_bukti_sumber || '';
     document.getElementById('namaAset').value = aset.nama_aset || '';
     document.getElementById('tanggalPerolehanAset').value = aset.tanggal_perolehan || '';
     document.getElementById('nilaiPerolehanAset').value = aset.nilai_perolehan || 0;
@@ -253,6 +285,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (inputAkunBeban) pasangAutocompleteAkun(inputAkunBeban, () => coaArray);
     if (inputAkunAkumulasi) pasangAutocompleteAkun(inputAkunAkumulasi, () => coaArray);
 
+    let kandidatTransaksiAset = [];
+    const inputPilihTransaksi = document.getElementById('pilihTransaksiAset');
+    if (inputPilihTransaksi) {
+        pasangPilihTransaksi(inputPilihTransaksi, () => kandidatTransaksiAset, (t) => {
+            document.getElementById('namaAset').value = t.lawan_transaksi || t.keterangan || '';
+            document.getElementById('tanggalPerolehanAset').value = t.tanggal || '';
+            document.getElementById('nilaiPerolehanAset').value = t.nominal;
+            // Disimpan untuk dasar penomoran No. Bukti jurnal penyusutan
+            // bulanan nanti di Jurnal Berulang: "{No. Bukti transaksi ini}/NNN".
+            document.getElementById('noBuktiSumberAset').value = t.no_bukti || '';
+        });
+    }
+
     (async () => {
         try {
             const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
@@ -274,6 +319,11 @@ document.addEventListener('DOMContentLoaded', () => {
             snapCOA.forEach(d => coaList.push(d.data()));
             coaList.sort((a, b) => a.kode.localeCompare(b.kode));
             coaArray = coaList;
+        } catch (err) {}
+
+        try {
+            const semuaJurnal = await ambilSemuaJurnalPusat();
+            kandidatTransaksiAset = bangunKandidatTransaksiAset(semuaJurnal, coaArray);
         } catch (err) {}
     })();
 
@@ -298,7 +348,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 metode: document.getElementById('metodeAset').value,
                 unit_usaha: cleanUnitCode,
                 kode_akun_beban_penyusutan: ambilKodeDariInputAkun(document.getElementById('akunBebanPenyusutanAset')),
-                kode_akun_akumulasi_penyusutan: ambilKodeDariInputAkun(document.getElementById('akunAkumulasiPenyusutanAset'))
+                kode_akun_akumulasi_penyusutan: ambilKodeDariInputAkun(document.getElementById('akunAkumulasiPenyusutanAset')),
+                no_bukti_sumber: document.getElementById('noBuktiSumberAset').value.trim()
             };
 
             if (payload.metode === "Saldo Menurun" && !KELOMPOK_PENYUSUTAN[payload.kelompok].saldoMenurun) {
