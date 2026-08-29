@@ -273,6 +273,7 @@ window.editSewa = function(encId) {
     if (activeCard) activeCard.classList.add('bg-amber-50', 'dark:bg-amber-900/20');
 
     document.getElementById('editIdSewa').value = id;
+    document.getElementById('noBuktiSumberSewa').value = sewa.no_bukti_sumber || '';
     document.getElementById('namaSewa').value = sewa.nama_sewa || '';
     document.getElementById('tanggalMulaiSewa').value = sewa.tanggal_mulai || '';
     document.getElementById('tanggalSelesaiSewa').value = sewa.tanggal_selesai || '';
@@ -336,6 +337,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('keteranganSewa').value = t.keterangan || '';
             document.getElementById('nilaiTotalSewa').value = t.nominal;
             isiInputAkun(document.getElementById('akunPrabayarSewa'), t.kode_akun);
+            // Disimpan untuk dasar penomoran No. Bukti jurnal amortisasi bulanan
+            // nanti di Jurnal Berulang: "{No. Bukti transaksi ini}/NNN".
+            document.getElementById('noBuktiSumberSewa').value = t.no_bukti || '';
         });
     }
 
@@ -396,7 +400,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 nilai_total: parseFloat(document.getElementById('nilaiTotalSewa').value) || 0,
                 keterangan: document.getElementById('keteranganSewa').value.trim(),
                 kode_akun_prabayar: ambilKodeDariInputAkun(document.getElementById('akunPrabayarSewa')),
-                kode_akun_beban_sewa: ambilKodeDariInputAkun(document.getElementById('akunBebanSewa'))
+                kode_akun_beban_sewa: ambilKodeDariInputAkun(document.getElementById('akunBebanSewa')),
+                no_bukti_sumber: document.getElementById('noBuktiSumberSewa').value.trim()
             };
 
             try {
