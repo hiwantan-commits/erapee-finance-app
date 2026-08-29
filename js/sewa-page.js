@@ -2,37 +2,44 @@
 import { db } from "./config.js";
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { hitungAmortisasiSewa } from "./accounting.js";
-import { pasangAutocompleteAkun } from "./coa-autocomplete.js";
 import { escapeHtml } from "./utils.js";
 
 const KOLEKSI_SEWA = "sewa_dibayar_dimuka";
-let coaArray = []; // Array COA untuk mapping otomatis di input akun (sama pola dengan journal-page.js)
+let coaArray = []; // Array COA (dipakai untuk mengisi pilihan akun Sewa)
 
 function formatRupiah(angka) {
     return "Rp " + Math.round(angka).toLocaleString('id-ID');
 }
 
-// Ambil kode akun bersih dari value input yang berformat "KODE - Nama Akun"
-// (sama pola dengan pembersihan unit_usaha di journal-page.js).
-function ambilKodeDariInputAkun(inputEl) {
-    const raw = inputEl.value || '';
-    return raw.split(' - ')[0].trim();
-}
+// Kedua field akun di form ini SENGAJA berupa <select> berisi HANYA akun
+// yang sudah ditandai kategori_sewa=true di Master COA (bukan pencarian
+// bebas ke seluruh COA) - supaya user memilih dari daftar akun yang memang
+// sudah disiapkan untuk sewa, bukan mengetik kode sembarangan. Dipisah
+// berdasarkan digit pertama kode (1=Aset untuk Prabayar, 6=Beban untuk
+// Beban Sewa), mengikuti aturan klasifikasi yang sama dengan
+// klasifikasikanAkun() di accounting.js.
+function populateAkunSewaSelects() {
+    const selectPrabayar = document.getElementById('akunPrabayarSewa');
+    const selectBeban = document.getElementById('akunBebanSewa');
+    if (!selectPrabayar || !selectBeban) return;
 
-// Setiap perjanjian sewa dimaksudkan punya akun Prabayar & Beban sendiri
-// (bukan berbagi satu akun untuk banyak sewa), supaya saldo per sewa di
-// buku besar tidak tercampur. Fungsi ini mengumpulkan kode akun yang sudah
-// dipakai sewa LAIN (mengecualikan record yang sedang diedit sendiri, kalau
-// ada), supaya autocomplete tidak menawarkan akun yang sudah "jatah" sewa
-// lain.
-function kodeTerpakaiOlehSewaLain(idSewaSaatIni) {
-    const set = new Set();
-    Object.values(window.dataSewaGlobal || {}).forEach(s => {
-        if (s.id === idSewaSaatIni) return;
-        if (s.kode_akun_prabayar) set.add(s.kode_akun_prabayar);
-        if (s.kode_akun_beban_sewa) set.add(s.kode_akun_beban_sewa);
-    });
-    return set;
+    const akunSewa = coaArray.filter(c => c.kategori_sewa);
+    const akunPrabayarList = akunSewa.filter(c => String(c.kode).startsWith('1'));
+    const akunBebanList = akunSewa.filter(c => String(c.kode).startsWith('6'));
+
+    const buatOpsi = (list, teksKosong) => {
+        if (list.length === 0) return `<option value="">${teksKosong}</option>`;
+        return '<option value="">Pilih akun...</option>' + list.map(c =>
+            `<option value="${escapeHtml(c.kode)}">${escapeHtml(c.kode)} - ${escapeHtml(c.nama)}</option>`
+        ).join('');
+    };
+
+    const nilaiSebelumnyaPrabayar = selectPrabayar.value;
+    const nilaiSebelumnyaBeban = selectBeban.value;
+    selectPrabayar.innerHTML = buatOpsi(akunPrabayarList, 'Belum ada akun Sewa (Aset) ditandai di Master COA');
+    selectBeban.innerHTML = buatOpsi(akunBebanList, 'Belum ada akun Sewa (Beban) ditandai di Master COA');
+    if (nilaiSebelumnyaPrabayar) selectPrabayar.value = nilaiSebelumnyaPrabayar;
+    if (nilaiSebelumnyaBeban) selectBeban.value = nilaiSebelumnyaBeban;
 }
 
 // Menu aksi per-baris memakai pola dropdown/3-titik, konsisten dengan
@@ -146,12 +153,6 @@ async function muatDaftarSewa() {
     }
 }
 
-function isiInputAkun(inputEl, kode) {
-    if (!inputEl) return;
-    const found = coaArray.find(c => c.kode === kode);
-    inputEl.value = found ? `${found.kode} - ${found.nama}` : (kode || '');
-}
-
 window.editSewa = function(encId) {
     const id = decodeURIComponent(encId);
     const sewa = window.dataSewaGlobal[id];
@@ -169,8 +170,8 @@ window.editSewa = function(encId) {
     document.getElementById('tanggalSelesaiSewa').value = sewa.tanggal_selesai || '';
     document.getElementById('nilaiTotalSewa').value = sewa.nilai_total || 0;
     document.getElementById('keteranganSewa').value = sewa.keterangan || '';
-    isiInputAkun(document.getElementById('akunPrabayarSewa'), sewa.kode_akun_prabayar);
-    isiInputAkun(document.getElementById('akunBebanSewa'), sewa.kode_akun_beban_sewa);
+    document.getElementById('akunPrabayarSewa').value = sewa.kode_akun_prabayar || '';
+    document.getElementById('akunBebanSewa').value = sewa.kode_akun_beban_sewa || '';
 
     const selectUnitEl = document.getElementById('unitUsahaSewa');
     if (selectUnitEl) {
@@ -214,25 +215,6 @@ window.hapusSewa = async function(encId) {
 document.addEventListener('DOMContentLoaded', () => {
     muatDaftarSewa();
 
-    const inputAkunPrabayar = document.getElementById('akunPrabayarSewa');
-    const inputAkunBeban = document.getElementById('akunBebanSewa');
-    if (inputAkunPrabayar) {
-        pasangAutocompleteAkun(inputAkunPrabayar, () => coaArray, () => {
-            const terpakai = kodeTerpakaiOlehSewaLain(document.getElementById('editIdSewa').value || null);
-            const kodeBeban = ambilKodeDariInputAkun(inputAkunBeban);
-            if (kodeBeban) terpakai.add(kodeBeban);
-            return terpakai;
-        });
-    }
-    if (inputAkunBeban) {
-        pasangAutocompleteAkun(inputAkunBeban, () => coaArray, () => {
-            const terpakai = kodeTerpakaiOlehSewaLain(document.getElementById('editIdSewa').value || null);
-            const kodePrabayar = ambilKodeDariInputAkun(inputAkunPrabayar);
-            if (kodePrabayar) terpakai.add(kodePrabayar);
-            return terpakai;
-        });
-    }
-
     (async () => {
         try {
             const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
@@ -254,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
             snapCOA.forEach(d => coaList.push(d.data()));
             coaList.sort((a, b) => a.kode.localeCompare(b.kode));
             coaArray = coaList;
+            populateAkunSewaSelects();
         } catch (err) {}
     })();
 
@@ -284,8 +267,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 tanggal_selesai: tanggalSelesai,
                 nilai_total: parseFloat(document.getElementById('nilaiTotalSewa').value) || 0,
                 keterangan: document.getElementById('keteranganSewa').value.trim(),
-                kode_akun_prabayar: ambilKodeDariInputAkun(document.getElementById('akunPrabayarSewa')),
-                kode_akun_beban_sewa: ambilKodeDariInputAkun(document.getElementById('akunBebanSewa'))
+                kode_akun_prabayar: document.getElementById('akunPrabayarSewa').value,
+                kode_akun_beban_sewa: document.getElementById('akunBebanSewa').value
             };
 
             try {

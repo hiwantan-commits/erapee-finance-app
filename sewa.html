@@ -70,14 +70,18 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Akun Sewa Dibayar Dimuka (Aset)</label>
-                                <input type="text" id="akunPrabayarSewa" placeholder="Cari kode/nama akun..." class="form-input-elegant text-sm" autocomplete="off" required>
+                                <select id="akunPrabayarSewa" class="form-input-elegant text-sm" required>
+                                    <option value="">Memuat akun...</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1.5">Akun Beban Sewa</label>
-                                <input type="text" id="akunBebanSewa" placeholder="Cari kode/nama akun..." class="form-input-elegant text-sm" autocomplete="off" required>
+                                <select id="akunBebanSewa" class="form-input-elegant text-sm" required>
+                                    <option value="">Memuat akun...</option>
+                                </select>
                             </div>
                         </div>
-                        <p class="text-[11px] text-stone-400 dark:text-stone-500">Setiap sewa disarankan punya akun Prabayar & Beban sendiri (bukan berbagi dengan sewa lain) - akun yang sudah dipakai sewa lain tidak akan muncul lagi di daftar pencarian.</p>
+                        <p class="text-[11px] text-stone-400 dark:text-stone-500">Hanya akun yang ditandai kelompok "Sewa" di Master COA yang muncul di sini. Belum ada akun yang cocok? Tandai dulu lewat halaman COA & Master Data.</p>
                         <div class="flex gap-3 pt-1">
                             <button type="submit" id="btnSimpanSewa" class="btn-elegant-primary">
                                 Simpan Perjanjian Sewa
