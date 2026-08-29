@@ -37,14 +37,22 @@ async function catatLogAktivitas(aksi, idJurnal, detailKeterangan) {
     }
 }
 
-export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = null, buktiBaru = null) {
+// `opsi.lewatiKuncPeriode` (default false) HANYA dipakai oleh alur approval
+// draft Jurnal Berulang (js/recurring-db.js) untuk backfill ke bulan yang
+// sudah ditutup buku - keputusan disengaja user demi akurasi historis, lihat
+// catatan di js/recurring-db.js. Satu-satunya pemanggil lain di aplikasi ini
+// (js/journal-page.js) tidak pernah mengirim argumen ke-5, jadi perilakunya
+// untuk input jurnal manual biasa sama sekali tidak berubah.
+export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = null, buktiBaru = null, opsi = {}) {
     try {
         const isEdit = Boolean(editIdJurnal);
 
         // Tolak jika tanggal transaksi (baru) berada pada periode yang sudah ditutup buku
-        const periodeBaruTerkunci = await cekApakahPeriodeTerkunci(headerData.tanggal);
-        if (periodeBaruTerkunci) {
-            return { success: false, error: "Periode akuntansi untuk tanggal transaksi ini telah ditutup buku (Closed Period)." };
+        if (!opsi.lewatiKuncPeriode) {
+            const periodeBaruTerkunci = await cekApakahPeriodeTerkunci(headerData.tanggal);
+            if (periodeBaruTerkunci) {
+                return { success: false, error: "Periode akuntansi untuk tanggal transaksi ini telah ditutup buku (Closed Period)." };
+            }
         }
 
         // Cegah duplikasi No. Bukti antar transaksi berbeda

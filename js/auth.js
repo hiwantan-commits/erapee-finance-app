@@ -52,11 +52,12 @@ function terapkanBatasanAksesRole(role) {
     
     // 1. Aturan untuk AUDITOR (Hanya Read-Only)
     if (role === "Auditor" && (
-        path.includes("input-jurnal") || 
-        path.includes("master-data") || 
-        path.includes("closing") || 
-        path.includes("users") || 
-        path.includes("profil-pajak")
+        path.includes("input-jurnal") ||
+        path.includes("master-data") ||
+        path.includes("closing") ||
+        path.includes("users") ||
+        path.includes("profil-pajak") ||
+        path.includes("jurnal-berulang")
     )) {
         alert("⚠️ Akses Dibatasi: Peran Anda sebagai Auditor bersifat Read-Only.");
         window.location.href = "/index";
