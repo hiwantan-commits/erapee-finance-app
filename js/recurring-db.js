@@ -148,6 +148,8 @@ export async function generateDanUpsertDraf() {
                 periode,
                 tanggal: akhirBulan(periode),
                 unit_usaha: aset.unit_usaha || '',
+                no_bukti_sumber: aset.no_bukti_sumber || '',
+                bulan_ke: hitungBulanKeberapa(aset.tanggal_perolehan, periode),
                 nominal,
                 rows: [
                     { kode_akun: aset.kode_akun_beban_penyusutan, nama_akun: namaAkun(aset.kode_akun_beban_penyusutan), memo_baris: memo, debit: nominal, kredit: 0 },
@@ -222,14 +224,14 @@ export async function setujuiDraf(idDraf, draf) {
     try {
         const idJurnal = `JRB-${idDraf}`;
 
-        // Amortisasi sewa yang berasal dari transaksi terdaftar (lihat fitur
-        // "Isi Otomatis dari Transaksi Jurnal" di sewa.html) memakai No.
-        // Bukti transaksi sumbernya sendiri + 3 digit bulan berjalan, supaya
-        // rangkaian jurnal bulanannya gampang ditelusuri balik ke transaksi
-        // awal. Sewa yang tidak berasal dari transaksi terdaftar (atau
-        // penyusutan aset, yang belum punya fitur serupa) tetap memakai
-        // format lama.
-        const noBukti = (draf.sumber_modul === 'AMORTISASI_SEWA' && draf.no_bukti_sumber)
+        // Amortisasi sewa/penyusutan aset yang berasal dari transaksi
+        // terdaftar (lihat fitur "Isi Otomatis dari Transaksi Jurnal" di
+        // sewa.html & aset-tetap.html) memakai No. Bukti transaksi sumbernya
+        // sendiri + 3 digit bulan berjalan, supaya rangkaian jurnal
+        // bulanannya gampang ditelusuri balik ke transaksi awal. Sewa/aset
+        // yang tidak berasal dari transaksi terdaftar (input manual) tetap
+        // memakai format lama.
+        const noBukti = draf.no_bukti_sumber
             ? `${draf.no_bukti_sumber}/${String(draf.bulan_ke || 1).padStart(3, '0')}`
             : `AUTO/${draf.sumber_modul === 'PENYUSUTAN_ASET' ? 'PNY' : 'SWA'}/${draf.periode}/${idAmanFirestore(draf.sumber_id).slice(0, 8)}`;
 

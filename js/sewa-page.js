@@ -4,6 +4,7 @@ import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { hitungAmortisasiSewa } from "./accounting.js";
 import { pasangAutocompleteAkun } from "./coa-autocomplete.js";
+import { pasangPilihTransaksi } from "./transaksi-picker.js";
 import { escapeHtml } from "./utils.js";
 
 const KOLEKSI_SEWA = "sewa_dibayar_dimuka";
@@ -37,100 +38,6 @@ function bangunKandidatTransaksiSewa(semuaJurnal, coaList) {
     });
     kandidat.sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
     return kandidat;
-}
-
-// Dropdown pencarian transaksi jurnal - pola & interaksinya sengaja mirip
-// pasangAutocompleteAkun() di coa-autocomplete.js, tapi tidak digabung ke
-// sana karena bentuk data & tampilan opsinya berbeda (transaksi jurnal,
-// bukan akun COA) dan baru dipakai di satu tempat ini saja.
-function pasangPilihTransaksiSewa(inputEl, ambilKandidat, onPilih) {
-    let dropdownEl = null;
-    let indexAktif = -1;
-
-    function tutupDropdown() {
-        if (dropdownEl) { dropdownEl.remove(); dropdownEl = null; }
-        indexAktif = -1;
-        window.removeEventListener('scroll', saatScrollLuar, true);
-    }
-    function saatScrollLuar(e) {
-        if (dropdownEl && e.target instanceof Node && dropdownEl.contains(e.target)) return;
-        tutupDropdown();
-    }
-    function pilihOpsi(t) {
-        inputEl.value = `${t.no_bukti} - ${t.lawan_transaksi || t.keterangan || ''}`;
-        tutupDropdown();
-        onPilih(t);
-    }
-    function perbaruiSorotan(opsiEl) {
-        opsiEl.forEach((el, i) => {
-            el.classList.toggle('bg-stone-100', i === indexAktif);
-            el.classList.toggle('dark:bg-stone-800', i === indexAktif);
-        });
-        if (indexAktif >= 0) opsiEl[indexAktif].scrollIntoView({ block: 'nearest' });
-    }
-    function tampilkanDropdown() {
-        const kataKunci = inputEl.value.toLowerCase().trim();
-        const daftar = ambilKandidat();
-        const hasil = daftar.filter(t =>
-            !kataKunci ||
-            (t.no_bukti || '').toLowerCase().includes(kataKunci) ||
-            (t.keterangan || '').toLowerCase().includes(kataKunci) ||
-            (t.lawan_transaksi || '').toLowerCase().includes(kataKunci)
-        ).slice(0, 50);
-
-        tutupDropdown();
-        if (hasil.length === 0) return;
-
-        dropdownEl = document.createElement('div');
-        dropdownEl.className = 'fixed z-50 max-h-64 overflow-y-auto bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg shadow-lg text-xs';
-        const rect = inputEl.getBoundingClientRect();
-        dropdownEl.style.left = rect.left + 'px';
-        dropdownEl.style.top = (rect.bottom + 4) + 'px';
-        dropdownEl.style.width = rect.width + 'px';
-
-        hasil.forEach(t => {
-            const opt = document.createElement('div');
-            opt.className = 'px-3 py-2 cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-800';
-            opt.innerHTML = `
-                <div class="flex justify-between gap-3">
-                    <span class="font-mono font-bold text-stone-700 dark:text-stone-300">${escapeHtml(t.no_bukti || t.id_jurnal)}</span>
-                    <span class="text-stone-400 dark:text-stone-500">${escapeHtml(t.tanggal || '')}</span>
-                </div>
-                <div class="flex justify-between gap-3 mt-0.5">
-                    <span class="text-stone-600 dark:text-stone-300 truncate">${escapeHtml(t.lawan_transaksi || t.keterangan || '-')}</span>
-                    <span class="font-semibold text-stone-700 dark:text-stone-300 shrink-0">${Math.round(t.nominal).toLocaleString('id-ID')}</span>
-                </div>
-            `;
-            opt.addEventListener('mousedown', (e) => { e.preventDefault(); pilihOpsi(t); });
-            dropdownEl.appendChild(opt);
-        });
-
-        document.body.appendChild(dropdownEl);
-        window.addEventListener('scroll', saatScrollLuar, true);
-    }
-
-    inputEl.addEventListener('focus', tampilkanDropdown);
-    inputEl.addEventListener('input', tampilkanDropdown);
-    inputEl.addEventListener('blur', () => setTimeout(tutupDropdown, 150));
-    inputEl.addEventListener('keydown', (e) => {
-        if (!dropdownEl) return;
-        const opsiEl = Array.from(dropdownEl.children);
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            indexAktif = Math.min(indexAktif + 1, opsiEl.length - 1);
-            perbaruiSorotan(opsiEl);
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            indexAktif = Math.max(indexAktif - 1, 0);
-            perbaruiSorotan(opsiEl);
-        } else if (e.key === 'Escape') {
-            tutupDropdown();
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            const target = indexAktif >= 0 ? opsiEl[indexAktif] : opsiEl[0];
-            if (target) target.dispatchEvent(new MouseEvent('mousedown'));
-        }
-    });
 }
 
 function formatRupiah(angka) {
@@ -332,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let kandidatTransaksiSewa = [];
     const inputPilihTransaksi = document.getElementById('pilihTransaksiSewa');
     if (inputPilihTransaksi) {
-        pasangPilihTransaksiSewa(inputPilihTransaksi, () => kandidatTransaksiSewa, (t) => {
+        pasangPilihTransaksi(inputPilihTransaksi, () => kandidatTransaksiSewa, (t) => {
             document.getElementById('namaSewa').value = t.lawan_transaksi || t.keterangan || '';
             document.getElementById('keteranganSewa').value = t.keterangan || '';
             document.getElementById('nilaiTotalSewa').value = t.nominal;
