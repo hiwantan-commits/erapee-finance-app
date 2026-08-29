@@ -124,7 +124,7 @@ window.hapusUnitUsaha = async function(id) {
 async function muatCOA() {
     const tbody = document.getElementById('tabelCOA');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-stone-400 dark:text-stone-500 font-medium">Memuat data COA dari pusat...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 dark:text-stone-500 font-medium">Memuat data COA dari pusat...</td></tr>';
 
     try {
         const snap = await getDocs(collection(db, "master_coa"));
@@ -138,30 +138,34 @@ async function muatCOA() {
         coaList.sort((a, b) => String(a.kode).localeCompare(String(b.kode)));
 
         if (coaList.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-stone-400 dark:text-stone-500">Belum ada master data COA (Chart of Accounts).</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 dark:text-stone-500">Belum ada master data COA (Chart of Accounts).</td></tr>';
             return;
         }
 
         coaList.forEach(data => {
             const encKode = encodeURIComponent(data.kode || '');
             const encNama = encodeURIComponent(data.nama || '');
+            const badgeSewa = data.kategori_sewa
+                ? `<span class="px-2 py-0.5 bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 rounded text-[10px] font-semibold">Sewa</span>`
+                : `<span class="text-stone-300 dark:text-stone-700 text-xs">-</span>`;
 
             // Tambahkan atribut id baris COA
             tbody.innerHTML += `
                 <tr id="row-coa-${data.id}" class="hover:bg-stone-50 dark:hover:bg-stone-800/40 transition-colors">
                     <td class="p-3"><span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded font-mono font-bold text-xs">${escapeHtml(data.kode)}</span></td>
                     <td class="p-3 font-medium text-stone-800 dark:text-stone-200 text-sm">${escapeHtml(data.nama)}</td>
-                    <td class="p-3 text-center">${tombolAksiHtml('Coa', data.id, `window.editCOA('${data.id}', '${encKode}', '${encNama}')`, `window.hapusCOA('${data.id}')`)}</td>
+                    <td class="p-3">${badgeSewa}</td>
+                    <td class="p-3 text-center">${tombolAksiHtml('Coa', data.id, `window.editCOA('${data.id}', '${encKode}', '${encNama}', ${Boolean(data.kategori_sewa)})`, `window.hapusCOA('${data.id}')`)}</td>
                 </tr>
             `;
         });
     } catch (error) {
         console.error("Error muat COA:", error);
-        tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-500 dark:text-red-400">Gagal memuat data COA.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-red-500 dark:text-red-400">Gagal memuat data COA.</td></tr>';
     }
 }
 
-window.editCOA = function(id, encKode, encNama) {
+window.editCOA = function(id, encKode, encNama, kategoriSewa) {
     // Hapus highlight dari baris COA lain, lalu beri highlight ke baris yang dipilih
     document.querySelectorAll('#tabelCOA tr').forEach(tr => tr.classList.remove('bg-amber-50', 'dark:bg-amber-900/20'));
     const activeRow = document.getElementById(`row-coa-${id}`);
@@ -170,6 +174,7 @@ window.editCOA = function(id, encKode, encNama) {
     document.getElementById('editIdCOA').value = id;
     document.getElementById('kodeCOA').value = decodeURIComponent(encKode);
     document.getElementById('namaCOA').value = decodeURIComponent(encNama);
+    document.getElementById('kategoriSewaCOA').checked = Boolean(kategoriSewa);
 
     const btn = document.getElementById('btnSimpanCOA');
     btn.innerText = 'Update COA';
@@ -256,7 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const payload = {
                 kode: document.getElementById('kodeCOA').value.trim(),
-                nama: document.getElementById('namaCOA').value.trim()
+                nama: document.getElementById('namaCOA').value.trim(),
+                kategori_sewa: document.getElementById('kategoriSewaCOA').checked
             };
 
             if (!isKodeAkunValid(payload.kode)) {
