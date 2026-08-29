@@ -270,6 +270,97 @@ export function hitungAmortisasiSewa(sewa, tanggalReferensi = new Date()) {
     return { nilaiTotal, akumulasiAmortisasi, nilaiBuku, bulanBerjalan, totalBulan };
 }
 
+// ==================== Jurnal Berulang: nominal bulanan & enumerasi periode ====================
+// hitungPenyusutanAset()/hitungAmortisasiSewa() di atas menghitung angka
+// KUMULATIF (dipakai untuk tampilan skedul di halaman Aset Tetap/Sewa).
+// Untuk menentukan nominal draft jurnal SATU bulan tertentu, dibutuhkan
+// fungsi terpisah di bawah ini - dipakai generator draft, bukan tampilan.
+
+// Nominal penyusutan garis lurus dibuat FLAT tiap bulan (nilai_perolehan
+// dibagi rata jumlah bulan umur ekonomis), bukan diturunkan dari pecahan
+// hari seperti tahunBerjalan di atas - supaya setiap bulan bernilai sama
+// persis (sesuai maksud "garis lurus"), bulan Februari yang lebih pendek
+// pun tidak boleh menghasilkan beban yang lebih kecil. Bulan terakhir
+// dibulatkan ke sisa yang pas supaya totalnya presisi sama dengan
+// nilai_perolehan (hindari selisih pembulatan floating-point).
+export function hitungPenyusutanBulanan(aset, tahun, bulan) {
+    const nilaiPerolehan = parseFloat(aset.nilai_perolehan) || 0;
+    const kelompok = KELOMPOK_PENYUSUTAN[aset.kelompok];
+    if (!kelompok || nilaiPerolehan <= 0 || !aset.tanggal_perolehan) return 0;
+
+    const tglPerolehan = new Date(aset.tanggal_perolehan);
+    const totalBulanUmur = kelompok.tahun * 12;
+    const indeksBulan = (tahun - tglPerolehan.getFullYear()) * 12 + (bulan - 1 - tglPerolehan.getMonth());
+    if (indeksBulan < 0 || indeksBulan >= totalBulanUmur) return 0;
+
+    if (aset.metode === "Saldo Menurun" && kelompok.saldoMenurun) {
+        // Saldo menurun memang tidak flat per definisi - ambil selisih nilai
+        // buku di awal vs akhir bulan (dua titik waktu persis di batas bulan),
+        // supaya jumlah semua bulan otomatis rekonsiliasi dengan angka yang
+        // sudah tampil di halaman Aset Tetap tanpa rumus baru yang terpisah.
+        const akumulasiAwal = hitungPenyusutanAset(aset, new Date(tahun, bulan - 1, 1)).akumulasiPenyusutan;
+        const akumulasiAkhir = hitungPenyusutanAset(aset, new Date(tahun, bulan, 1)).akumulasiPenyusutan;
+        return Math.max(0, akumulasiAkhir - akumulasiAwal);
+    }
+
+    const nominalBulanan = nilaiPerolehan / totalBulanUmur;
+    if (indeksBulan === totalBulanUmur - 1) {
+        return nilaiPerolehan - (nominalBulanan * (totalBulanUmur - 1));
+    }
+    return nominalBulanan;
+}
+
+// Nominal amortisasi sewa untuk satu bulan tertentu - flat (nilai_total
+// dibagi rata jumlah bulan sewa), sama alasannya dengan penyusutan garis
+// lurus di atas: sewa tidak mengenal "saldo menurun", jadi selalu flat.
+export function hitungAmortisasiSewaBulanan(sewa, tahun, bulan) {
+    const nilaiTotal = parseFloat(sewa.nilai_total) || 0;
+    if (nilaiTotal <= 0 || !sewa.tanggal_mulai || !sewa.tanggal_selesai) return 0;
+
+    const tglMulai = new Date(sewa.tanggal_mulai);
+    const tglSelesai = new Date(sewa.tanggal_selesai);
+    const MS_PER_HARI = 24 * 60 * 60 * 1000;
+    const totalHari = Math.max(1, (tglSelesai.getTime() - tglMulai.getTime()) / MS_PER_HARI);
+    const totalBulan = Math.max(1, Math.round(totalHari / 30.4375));
+
+    const indeksBulan = (tahun - tglMulai.getFullYear()) * 12 + (bulan - 1 - tglMulai.getMonth());
+    if (indeksBulan < 0 || indeksBulan >= totalBulan) return 0;
+
+    const nominalBulanan = nilaiTotal / totalBulan;
+    if (indeksBulan === totalBulan - 1) {
+        return nilaiTotal - (nominalBulanan * (totalBulan - 1));
+    }
+    return nominalBulanan;
+}
+
+// Helper murni (tanpa Firestore) - mengembalikan daftar "YYYY-MM" dari bulan
+// tanggalMulai s/d bulan min(tanggalAkhir, tanggalReferensi), MENGECUALIKAN
+// periode yang sudah ada di `periodeSudahAda` (Set berisi string "YYYY-MM").
+// tanggalAkhir boleh null (mis. aset tetap belum ada tanggal jatuh temponya
+// sendiri - dibatasi oleh umur kelompok penyusutan di sisi pemanggil).
+export function enumerasiPeriodeBelumDiproses(tanggalMulaiStr, tanggalAkhirStr, tanggalReferensi, periodeSudahAda) {
+    if (!tanggalMulaiStr) return [];
+    const tglMulai = new Date(tanggalMulaiStr);
+    const tglAkhir = tanggalAkhirStr ? new Date(tanggalAkhirStr) : null;
+
+    const hasilPeriode = [];
+    let tahun = tglMulai.getFullYear();
+    let bulan = tglMulai.getMonth() + 1; // 1-12
+
+    while (true) {
+        const tglAwalBulanIni = new Date(tahun, bulan - 1, 1);
+        if (tglAwalBulanIni > tanggalReferensi) break;
+        if (tglAkhir && tglAwalBulanIni > tglAkhir) break;
+
+        const periode = `${tahun}-${String(bulan).padStart(2, '0')}`;
+        if (!periodeSudahAda.has(periode)) hasilPeriode.push(periode);
+
+        bulan += 1;
+        if (bulan > 12) { bulan = 1; tahun += 1; }
+    }
+    return hasilPeriode;
+}
+
 // ==================== Struktur Laporan Berjenjang (khusus cetak) ====================
 // Mengelompokkan akun Neraca & Laba Rugi ke struktur berjenjang ala software
 // akuntansi konvensional (Kelas > Sub-Kelas > Akun), murni diturunkan dari
