@@ -407,15 +407,17 @@ function muatHeader() {
                     </button>
                     <h2 class="text-sm font-semibold text-stone-800 dark:text-stone-100">${pageTitle}</h2>
                 </div>
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <button onclick="window.toggleDarkMode()" id="btnToggleDarkMode" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition" title="Ganti tema gelap/terang">
                         <span id="ikonDarkMode">🌙</span>
                     </button>
-                    <div class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-stone-500 dark:text-stone-400">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Online
-                    </div>
-                    <a href="/profile" class="text-xs text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-stone-100 font-semibold transition-colors cursor-pointer">
-                        ${escapeHtml(namaTampilan)}
+                    <a href="/profile" class="flex items-center gap-2 pl-3 pr-4 py-1.5 rounded-full border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors cursor-pointer">
+                        <span class="hidden sm:inline-flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span class="text-xs font-medium text-stone-500 dark:text-stone-400">Online</span>
+                            <span class="w-px h-3 bg-stone-200 dark:bg-stone-700"></span>
+                        </span>
+                        <span class="text-xs font-semibold text-stone-700 dark:text-stone-200">${escapeHtml(namaTampilan)}</span>
                     </a>
                 </div>
             </header>
