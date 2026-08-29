@@ -69,10 +69,17 @@ window.toggleDarkMode = function() {
     window.dispatchEvent(new CustomEvent('erapee-tema-berubah'));
 };
 
+// Ikon garis (bukan emoji) supaya gaya visualnya konsisten dengan ikon
+// menu di sidebar (viewBox/stroke-width/currentColor yang sama persis -
+// lihat ikonElegantHtml()).
+const IKON_BULAN_SVG = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+const IKON_MATAHARI_SVG = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>';
+
 function perbaruiIkonDarkMode() {
     const ikon = document.getElementById('ikonDarkMode');
     if (!ikon) return;
-    ikon.innerText = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+    const modeGelapAktif = document.documentElement.classList.contains('dark');
+    ikon.innerHTML = modeGelapAktif ? IKON_MATAHARI_SVG : IKON_BULAN_SVG;
 }
 
 // Ikon garis (line icon) bergaya Claude.ai - dipetakan berdasarkan href menu,
@@ -409,7 +416,7 @@ function muatHeader() {
                 </div>
                 <div class="flex items-center gap-3">
                     <button onclick="window.toggleDarkMode()" id="btnToggleDarkMode" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition" title="Ganti tema gelap/terang">
-                        <span id="ikonDarkMode">🌙</span>
+                        <svg id="ikonDarkMode" class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></svg>
                     </button>
                     <a href="/profile" class="flex items-center gap-2 pl-3 pr-4 py-1.5 rounded-full border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors cursor-pointer">
                         <span class="hidden sm:inline-flex items-center gap-2">
