@@ -75,6 +75,7 @@ async function muatDashboard() {
                 kode: u.kode,
                 nama: u.nama,
                 klasifikasi: u.klasifikasi || "Tidak ada klasifikasi",
+                status: u.status || "Aktif",
                 color: "indigo" // Warna default badge
             });
         });
@@ -195,7 +196,11 @@ async function muatDashboard() {
             if (unitUsahaMaster.length === 1 && unitUsahaMaster[0].kode === "SHARED") {
                  tbodyUnit.innerHTML = `<tr><td colspan="6" class="p-4 text-center ${kelasKlasifikasi}">Belum ada master data unit usaha.</td></tr>`;
             } else {
-                unitUsahaMaster.forEach(u => {
+                // Unit berstatus "Ditutup/Selesai" tidak ditampilkan sebagai baris
+                // di sini, tapi transaksinya tetap ikut dihitung penuh di baris
+                // TOTAL KESELURUHAN di bawah (yang memakai totalPendapatanGlobal
+                // dkk, bukan hasil re-sum baris yang tampil).
+                unitUsahaMaster.filter(u => u.status !== "Ditutup").forEach(u => {
                     const dataU = dataPerUnit[u.kode] || { pendapatan: 0, beban: 0, utang: 0 };
                     const labaU = dataU.pendapatan - dataU.beban;
                     let tr = document.createElement('tr');

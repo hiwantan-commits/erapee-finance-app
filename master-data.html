@@ -55,6 +55,14 @@
                                     <label class="block text-xs font-medium mb-1.5 text-stone-600 dark:text-stone-300">Keterangan / Klasifikasi KBLI</label>
                                     <input type="text" id="klasifikasiUnit" placeholder="Kantor Pusat & Administrasi" class="form-input-elegant text-sm">
                                 </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1.5 text-stone-600 dark:text-stone-300">Status</label>
+                                    <select id="statusUnit" class="form-input-elegant text-sm">
+                                        <option value="Aktif">Aktif</option>
+                                        <option value="Ditutup">Ditutup / Selesai</option>
+                                    </select>
+                                    <p class="text-[11px] text-stone-400 dark:text-stone-500 mt-1">Unit berstatus "Ditutup/Selesai" tidak lagi ditampilkan sebagai baris di tabel Per Unit Usaha (Dashboard & Analisa Bisnis), tapi transaksi historisnya tetap ikut dihitung di Total Keseluruhan.</p>
+                                </div>
                                 <div class="flex gap-3 pt-1">
                                     <button type="submit" id="btnSimpanUnit" class="btn-elegant-primary flex-1">
                                         Simpan Unit Usaha
@@ -76,6 +84,7 @@
                                             <th class="p-3 w-24 font-medium">Kode</th>
                                             <th class="p-3 font-medium">Nama Unit</th>
                                             <th class="p-3 font-medium">Klasifikasi</th>
+                                            <th class="p-3 w-20 font-medium">Status</th>
                                             <th class="p-3 w-16 text-center font-medium">Aksi</th>
                                         </tr>
                                     </thead>
