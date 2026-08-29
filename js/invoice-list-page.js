@@ -1,16 +1,29 @@
 // js/invoice-list-page.js - Controller untuk invoice.html (daftar Invoice & Kwitansi)
 import { ambilSemuaInvoice, hapusInvoice } from "./invoice-db.js";
 import { escapeHtml } from "./utils.js";
+import { ambilUserAktif } from "./auth.js";
 
 let daftarInvoiceCache = [];
 let halamanAktif = 1;
 const dataPerHalaman = 10;
 
+// Auditor bersifat read-only di seluruh aplikasi (lihat js/auth.js) - boleh
+// tetap melihat/mencetak invoice, tapi tidak boleh membuat/menghapus.
+const adalahAuditor = ambilUserAktif().role === 'Auditor';
+
 // Menu aksi per-baris memakai pola dropdown/3-titik, konsisten dengan
-// Manajemen Jurnal & halaman lain.
+// Manajemen Jurnal & halaman lain. Tombol "Hapus" disembunyikan untuk
+// Auditor supaya tidak mencoba menghapus lalu terbentur error izin dari
+// Firestore rules.
 function tombolAksiHtml(id) {
     const idAman = String(id).replace(/[^a-zA-Z0-9_-]/g, '_');
     const panelId = `menuAksiInvoice-${idAman}`;
+    const tombolHapusHtml = adalahAuditor ? '' : `
+                    <div class="dropdown-elegant-divider"></div>
+                    <button type="button" onclick="window.hapusInvoiceTerpilih('${id}')" class="dropdown-elegant-item dropdown-elegant-item-danger">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+                        Hapus
+                    </button>`;
     return `
         <div class="relative inline-block">
             <button type="button" onclick="window.toggleDropdownElegant(event, '${panelId}')" class="btn-elegant-icon" title="Aksi">
@@ -20,13 +33,8 @@ function tombolAksiHtml(id) {
                 <div class="dropdown-elegant-panel">
                     <button type="button" onclick="window.location.href='/invoice-baru?id=${id}'" class="dropdown-elegant-item">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                        Edit / Cetak
-                    </button>
-                    <div class="dropdown-elegant-divider"></div>
-                    <button type="button" onclick="window.hapusInvoiceTerpilih('${id}')" class="dropdown-elegant-item dropdown-elegant-item-danger">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
-                        Hapus
-                    </button>
+                        ${adalahAuditor ? 'Lihat / Cetak' : 'Edit / Cetak'}
+                    </button>${tombolHapusHtml}
                 </div>
             </div>
         </div>
@@ -165,6 +173,11 @@ async function muatDaftarInvoice() {
         console.error("Gagal memuat daftar invoice:", error);
         tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500 dark:text-red-400">Gagal memuat data invoice.</td></tr>`;
     }
+}
+
+if (adalahAuditor) {
+    const btnBuatInvoiceBaru = document.getElementById('btnBuatInvoiceBaru');
+    if (btnBuatInvoiceBaru) btnBuatInvoiceBaru.style.display = 'none';
 }
 
 muatDaftarInvoice();

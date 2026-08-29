@@ -11,6 +11,10 @@ import { ambilUserAktif } from "./auth.js";
 const KOLEKSI_ASET = "aset_tetap";
 let coaArray = []; // Array COA untuk mapping otomatis di input akun (sama pola dengan journal-page.js/sewa-page.js)
 
+// Auditor bersifat read-only di seluruh aplikasi (lihat js/auth.js) - boleh
+// tetap melihat daftar & skedul penyusutan, tapi tidak boleh mengubah/menghapus.
+const adalahAuditor = ambilUserAktif().role === 'Auditor';
+
 // Mengubah daftar KODE akun bertag kategori_aset_tetap di Master COA jadi
 // "kandidat transaksi pembelian aset" siap pakai untuk fitur "Isi Otomatis
 // dari Transaksi Jurnal". `barisJurnal` sudah difilter kode_akun-nya di sisi
@@ -59,7 +63,11 @@ function formatRupiah(angka) {
 // Menu aksi per-baris memakai pola dropdown/3-titik, konsisten dengan
 // Manajemen Jurnal & Master Data. `encId` sudah di-encodeURIComponent oleh
 // pemanggil, tapi tetap disaring lagi untuk id panel HTML yang valid.
+// Tidak ditampilkan sama sekali untuk Auditor - baik Edit maupun Hapus
+// bukan aksi yang berguna untuk role read-only (Edit hanya membuka form
+// pendaftaran yang sudah disembunyikan, Hapus akan ditolak Firestore rules).
 function tombolAksiAsetHtml(encId) {
+    if (adalahAuditor) return `<span class="text-stone-300 dark:text-stone-700 text-xs">-</span>`;
     const idAman = String(encId).replace(/[^a-zA-Z0-9_-]/g, '_');
     const panelId = `menuAksiAset-${idAman}`;
     return `
@@ -276,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // halaman ini tetap bisa diakses Auditor untuk melihat skedul penyusutan,
     // tapi form pendaftaran/edit-nya disembunyikan supaya tidak mencoba
     // menyimpan lalu terbentur error izin dari Firestore rules.
-    if (ambilUserAktif().role === 'Auditor') {
+    if (adalahAuditor) {
         const formEl = document.getElementById('formAset');
         if (formEl) {
             const notice = document.createElement('p');
