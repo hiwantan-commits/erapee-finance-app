@@ -415,7 +415,7 @@ function muatHeader() {
                     <h2 class="text-sm font-semibold text-stone-800 dark:text-stone-100">${pageTitle}</h2>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="window.toggleDarkMode()" id="btnToggleDarkMode" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition" title="Ganti tema gelap/terang">
+                    <button onclick="window.toggleDarkMode()" id="btnToggleDarkMode" class="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors" title="Ganti tema gelap/terang">
                         <svg id="ikonDarkMode" class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></svg>
                     </button>
                     <a href="/profile" class="flex items-center gap-2 pl-3 pr-4 py-1.5 rounded-full border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors cursor-pointer">
