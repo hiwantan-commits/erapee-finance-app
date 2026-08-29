@@ -126,51 +126,128 @@ export async function simpanJurnalPusat(headerData, rowsData, editIdJurnal = nul
     }
 }
 
+// Mengelompokkan snapshot baris-baris jurnal (satu dokumen Firestore = satu
+// baris) menjadi satu objek per id_jurnal - diekstrak dari
+// ambilSemuaJurnalPusat() supaya bisa dipakai ulang oleh query bertarget
+// (per tanggal/per id) tanpa duplikasi logika pengelompokan.
+function kelompokkanBarisJurnal(querySnapshot) {
+    let groupedJurnal = {};
+
+    querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const docId = docSnap.id;
+        const id_jurnal = data.id_jurnal || 'NO-ID';
+
+        if (!groupedJurnal[id_jurnal]) {
+            groupedJurnal[id_jurnal] = {
+                id_jurnal: id_jurnal,
+                tanggal: data.tanggal,
+                no_bukti: data.no_bukti,
+                keterangan: data.keterangan,
+                status: data.status,
+                unit_usaha: data.unit_usaha || '',
+                lawan_transaksi: data.lawan_transaksi || '',
+                sifat_transaksi: data.sifat_transaksi || 'Tunai',
+                jatuh_tempo: data.jatuh_tempo || '',
+                punya_bukti: Boolean(data.punya_bukti),
+                kode_pajak: data.kode_pajak || 'NON',
+                dpp_penjualan: parseFloat(data.dpp_penjualan) || 0,
+                total_debit: 0,
+                total_kredit: 0,
+                rows: [],
+                docIds: []
+            };
+        }
+        groupedJurnal[id_jurnal].rows.push(data);
+        groupedJurnal[id_jurnal].docIds.push(docId);
+        groupedJurnal[id_jurnal].total_debit += parseFloat(data.debit) || 0;
+        groupedJurnal[id_jurnal].total_kredit += parseFloat(data.kredit) || 0;
+    });
+
+    return Object.values(groupedJurnal).sort((a, b) => b.id_jurnal.localeCompare(a.id_jurnal));
+}
+
 export async function ambilSemuaJurnalPusat(batasiJumlah = null) {
     try {
         // Catatan: sebelumnya ada limit(500) default yang membuat data terpotong
         // secara arbitrer (tanpa orderBy) begitu transaksi melebihi 500 dokumen,
         // sehingga laporan bisa diam-diam menampilkan data tidak lengkap.
         // Sekarang seluruh data diambil kecuali caller memang meminta batas eksplisit.
+        //
+        // Fungsi ini sengaja masih mengambil SELURUH koleksi - dipakai oleh
+        // laporan (Neraca, Laba Rugi, dashboard, dst) yang butuh riwayat
+        // lengkap untuk kalkulasi saldo kumulatif/laba ditahan. Caller yang
+        // hanya butuh satu tanggal/id/kelompok akun tertentu (No. Bukti
+        // otomatis, Edit Jurnal, pencarian transaksi sumber Aset/Sewa)
+        // sebaiknya memakai ambilJurnalPerTanggal/ambilJurnalById/
+        // ambilBarisJurnalPerKodeAkun di bawah supaya tidak membaca seluruh
+        // koleksi hanya untuk mengambil sebagian kecil data.
         const baseQuery = collection(db, KOLEKSI_UTAMA);
         const q = batasiJumlah ? query(baseQuery, limit(batasiJumlah)) : query(baseQuery);
         const querySnapshot = await getDocs(q);
-        let groupedJurnal = {};
-
-        querySnapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            const docId = docSnap.id;
-            const id_jurnal = data.id_jurnal || 'NO-ID';
-
-            if (!groupedJurnal[id_jurnal]) {
-                groupedJurnal[id_jurnal] = {
-                    id_jurnal: id_jurnal,
-                    tanggal: data.tanggal,
-                    no_bukti: data.no_bukti,
-                    keterangan: data.keterangan,
-                    status: data.status,
-                    unit_usaha: data.unit_usaha || '',
-                    lawan_transaksi: data.lawan_transaksi || '',
-                    sifat_transaksi: data.sifat_transaksi || 'Tunai',
-                    jatuh_tempo: data.jatuh_tempo || '',
-                    punya_bukti: Boolean(data.punya_bukti),
-                    kode_pajak: data.kode_pajak || 'NON',
-                    dpp_penjualan: parseFloat(data.dpp_penjualan) || 0,
-                    total_debit: 0,
-                    total_kredit: 0,
-                    rows: [],
-                    docIds: []
-                };
-            }
-            groupedJurnal[id_jurnal].rows.push(data);
-            groupedJurnal[id_jurnal].docIds.push(docId);
-            groupedJurnal[id_jurnal].total_debit += parseFloat(data.debit) || 0;
-            groupedJurnal[id_jurnal].total_kredit += parseFloat(data.kredit) || 0;
-        });
-
-        return Object.values(groupedJurnal).sort((a, b) => b.id_jurnal.localeCompare(a.id_jurnal));
+        return kelompokkanBarisJurnal(querySnapshot);
     } catch (error) {
         console.error("Gagal mengambil data:", error);
+        return [];
+    }
+}
+
+// Versi bertarget dari ambilSemuaJurnalPusat() - hanya membaca baris jurnal
+// pada satu tanggal tertentu (dipakai untuk menghitung nomor urut No. Bukti
+// otomatis harian, yang sebelumnya membaca SELURUH koleksi hanya untuk
+// menghitung transaksi hari ini).
+export async function ambilJurnalPerTanggal(tanggal) {
+    try {
+        const q = query(collection(db, KOLEKSI_UTAMA), where("tanggal", "==", tanggal));
+        const querySnapshot = await getDocs(q);
+        return kelompokkanBarisJurnal(querySnapshot);
+    } catch (error) {
+        console.error("Gagal mengambil data jurnal per tanggal:", error);
+        return [];
+    }
+}
+
+// Versi bertarget dari ambilSemuaJurnalPusat() - hanya membaca baris-baris
+// milik satu id_jurnal (dipakai form Edit Jurnal, yang sebelumnya membaca
+// SELURUH koleksi hanya untuk mencari satu jurnal yang sedang diedit).
+export async function ambilJurnalById(id_jurnal) {
+    try {
+        const q = query(collection(db, KOLEKSI_UTAMA), where("id_jurnal", "==", id_jurnal));
+        const querySnapshot = await getDocs(q);
+        const hasil = kelompokkanBarisJurnal(querySnapshot);
+        return hasil.length > 0 ? hasil[0] : null;
+    } catch (error) {
+        console.error("Gagal mengambil jurnal by id:", error);
+        return null;
+    }
+}
+
+// Mengambil baris-baris jurnal (bukan dikelompokkan per jurnal - dipakai
+// pemanggil yang memang cuma butuh baris per-akun mentah, mis. pencarian
+// transaksi sumber untuk fitur "Isi Otomatis" di Aset Tetap/Sewa) yang
+// kode_akun-nya termasuk dalam daftar tertentu, dengan query Firestore
+// where(...,"in",...) alih-alih membaca SELURUH koleksi lalu menyaring di
+// klien. where("in") Firestore dibatasi maksimal 30 nilai per query, jadi
+// daftar kode akun dipecah per 30 kalau lebih dari itu (dalam praktiknya
+// jumlah akun yang ditandai kategori tertentu di Master COA jauh di bawah
+// batas ini).
+export async function ambilBarisJurnalPerKodeAkun(daftarKodeAkun) {
+    if (!daftarKodeAkun || daftarKodeAkun.length === 0) return [];
+    try {
+        const potongan = [];
+        for (let i = 0; i < daftarKodeAkun.length; i += 30) {
+            potongan.push(daftarKodeAkun.slice(i, i + 30));
+        }
+
+        const hasilPerPotongan = await Promise.all(potongan.map(async (kodeList) => {
+            const q = query(collection(db, KOLEKSI_UTAMA), where("kode_akun", "in", kodeList));
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.docs.map(d => d.data());
+        }));
+
+        return hasilPerPotongan.flat();
+    } catch (error) {
+        console.error("Gagal mengambil baris jurnal per kode akun:", error);
         return [];
     }
 }
