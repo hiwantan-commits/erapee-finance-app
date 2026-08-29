@@ -386,38 +386,51 @@ function muatHeader() {
     const namaTampilan = currentUser.nama || currentUser.email;
 
     if (modeTemaElegantAktif()) {
+        // PENTING: class sticky/top-0/z-30 dipasang pada #header-container
+        // ITU SENDIRI (bukan pada div pembungkus di dalamnya). #header-container
+        // adalah anak langsung dari kontainer scroll (.flex-1...overflow-y-auto),
+        // sehingga "containing block"-nya setinggi seluruh area scroll dan
+        // header punya ruang untuk benar-benar menempel saat discroll. Kalau
+        // sticky dipasang pada div di DALAM header-container, containing
+        // block-nya cuma setinggi header itu sendiri (nyaris tanpa "slack"),
+        // sehingga header langsung ikut ter-scroll begitu discroll sedikit
+        // saja - bug ini pernah terjadi dan sudah diverifikasi ulang.
+        headerContainer.classList.add('sticky', 'top-0', 'z-30');
         headerContainer.innerHTML = `
-            <div class="sticky top-0 z-30">
-                <div class="absolute inset-x-0 top-0 -bottom-6 bg-stone-50/85 dark:bg-stone-950/85 header-elegant-blur pointer-events-none"></div>
-                <header class="relative px-6 py-4 flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <button onclick="toggleSidebar()" class="md:hidden text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 focus:outline-none">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                            </svg>
-                        </button>
-                        <h2 class="text-sm font-semibold text-stone-800 dark:text-stone-100">${pageTitle}</h2>
+            <div class="absolute inset-x-0 top-0 -bottom-6 bg-stone-50/85 dark:bg-stone-950/85 header-elegant-blur pointer-events-none"></div>
+            <header class="relative px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="md:hidden text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <h2 class="text-sm font-semibold text-stone-800 dark:text-stone-100">${pageTitle}</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="window.toggleDarkMode()" id="btnToggleDarkMode" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition" title="Ganti tema gelap/terang">
+                        <span id="ikonDarkMode">🌙</span>
+                    </button>
+                    <div class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-stone-500 dark:text-stone-400">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Online
                     </div>
-                    <div class="flex items-center gap-4">
-                        <button onclick="window.toggleDarkMode()" id="btnToggleDarkMode" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition" title="Ganti tema gelap/terang">
-                            <span id="ikonDarkMode">🌙</span>
-                        </button>
-                        <div class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-stone-500 dark:text-stone-400">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Online
-                        </div>
-                        <a href="/profile" class="text-xs text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-stone-100 font-semibold transition-colors cursor-pointer">
-                            ${escapeHtml(namaTampilan)}
-                        </a>
-                    </div>
-                </header>
-            </div>
+                    <a href="/profile" class="text-xs text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-stone-100 font-semibold transition-colors cursor-pointer">
+                        ${escapeHtml(namaTampilan)}
+                    </a>
+                </div>
+            </header>
         `;
         perbaruiIkonDarkMode();
         return;
     }
 
+    // Sama seperti di atas: sticky/top-0/z-30 dipasang di #header-container
+    // sendiri, bukan pada <header> di dalamnya, supaya containing block-nya
+    // adalah kontainer scroll (bukan header-container yang tingginya
+    // menyusut pas sebesar header).
+    headerContainer.classList.add('sticky', 'top-0', 'z-30');
     headerContainer.innerHTML = `
-        <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <button onclick="toggleSidebar()" class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
