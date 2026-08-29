@@ -8,6 +8,7 @@ import { CONFIG } from "./config.js";
 import { ambilSemuaInvoice, simpanInvoice, generateNomorInvoiceBaru } from "./invoice-db.js";
 import { terbilang } from "./terbilang.js";
 import { escapeHtml } from "./utils.js";
+import { ambilUserAktif } from "./auth.js";
 
 const urlParams = new URLSearchParams(window.location.search);
 const editIdAwal = urlParams.get('id');
@@ -235,6 +236,21 @@ async function inisialisasiForm() {
 
 document.addEventListener('DOMContentLoaded', () => {
     inisialisasiForm();
+
+    // Auditor bersifat read-only di seluruh aplikasi (lihat js/auth.js) -
+    // halaman ini tetap bisa diakses Auditor untuk melihat/mencetak invoice
+    // yang sudah ada, tapi form Buat/Edit-nya disembunyikan supaya tidak
+    // mencoba menyimpan lalu terbentur error izin dari Firestore rules.
+    if (ambilUserAktif().role === 'Auditor') {
+        const formEl = document.getElementById('formInvoice');
+        if (formEl) {
+            const notice = document.createElement('p');
+            notice.className = 'text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-3 print:hidden';
+            notice.textContent = '⚠️ Peran Anda sebagai Auditor bersifat Read-Only - form Buat/Edit Invoice tidak ditampilkan. Gunakan tombol Cetak untuk melihat invoice yang sudah tersimpan.';
+            formEl.parentNode.insertBefore(notice, formEl);
+            formEl.style.display = 'none';
+        }
+    }
 
     const formInvoice = document.getElementById('formInvoice');
     if (formInvoice) {
