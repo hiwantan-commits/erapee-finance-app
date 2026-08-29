@@ -6,6 +6,7 @@ import { hitungAmortisasiSewa } from "./accounting.js";
 import { pasangAutocompleteAkun } from "./coa-autocomplete.js";
 import { pasangPilihTransaksi } from "./transaksi-picker.js";
 import { escapeHtml } from "./utils.js";
+import { ambilUserAktif } from "./auth.js";
 
 const KOLEKSI_SEWA = "sewa_dibayar_dimuka";
 let coaArray = []; // Array COA untuk mapping otomatis di input akun (sama pola dengan journal-page.js)
@@ -230,6 +231,21 @@ window.hapusSewa = async function(encId) {
 
 document.addEventListener('DOMContentLoaded', () => {
     muatDaftarSewa();
+
+    // Auditor bersifat read-only di seluruh aplikasi (lihat js/auth.js) -
+    // halaman ini tetap bisa diakses Auditor untuk melihat skedul amortisasi,
+    // tapi form pendaftaran/edit-nya disembunyikan supaya tidak mencoba
+    // menyimpan lalu terbentur error izin dari Firestore rules.
+    if (ambilUserAktif().role === 'Auditor') {
+        const formEl = document.getElementById('formSewa');
+        if (formEl) {
+            const notice = document.createElement('p');
+            notice.className = 'text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-3';
+            notice.textContent = '⚠️ Peran Anda sebagai Auditor bersifat Read-Only - form pendaftaran/edit Sewa Dibayar Dimuka tidak ditampilkan.';
+            formEl.parentNode.insertBefore(notice, formEl);
+            formEl.style.display = 'none';
+        }
+    }
 
     const inputAkunPrabayar = document.getElementById('akunPrabayarSewa');
     const inputAkunBeban = document.getElementById('akunBebanSewa');

@@ -1,7 +1,4 @@
 // js/auth.js - Modul Manajemen Sesi, Autentikasi, & Hierarki Peran (RBAC)
-import { db } from "./config.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
 export async function cekSesiLogin() {
     const pathAktif = window.location.pathname;
     
@@ -23,28 +20,6 @@ export async function cekSesiLogin() {
     } catch (e) {
         console.error("Gagal memparsing sesi:", e);
     }
-}
-
-export async function ambilDataRoleUser(uid, email) {
-    try {
-        // Cek koleksi 'users' di Firestore untuk mengambil role (Super Admin, Admin, Akuntan, Auditor)
-        const docRef = doc(db, "users", uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists() && docSnap.data().role) {
-            return docSnap.data().role;
-        }
-    } catch (err) {
-        console.error("Gagal mengambil role dari database:", err);
-    }
-
-    // Default fallback (Jalur khusus Super Admin)
-    if (email === "hi.wantan@gmail.com") return "Super Admin"; 
-    
-    // Default fallback lainnya
-    if (email && email.includes("admin")) return "Admin";
-    if (email && email.includes("auditor")) return "Auditor";
-    
-    return "Akuntan"; // Default role standar
 }
 
 function terapkanBatasanAksesRole(role) {

@@ -152,9 +152,9 @@ window.tambahBaris = function(akunVal = "", memoVal = "", debitVal = 0, kreditVa
 
     tr.innerHTML = `
         <td class="p-2"><input type="text" placeholder="Pilih atau Ketik Akun..." class="form-input-elegant kode_akun text-xs font-medium" required autocomplete="off"></td>
-        <td class="p-2"><input type="text" class="form-input-elegant memo_baris text-xs" value="${memoVal}" placeholder="Memo..."></td>
-        <td class="p-2"><input type="number" class="form-input-elegant debit font-bold text-emerald-600 dark:text-emerald-400 text-right" value="${debitVal}" min="0" step="any" oninput="hitungTotal()" required></td>
-        <td class="p-2"><input type="number" class="form-input-elegant kredit font-bold text-red-600 dark:text-red-400 text-right" value="${kreditVal}" min="0" step="any" oninput="hitungTotal()" required></td>
+        <td class="p-2"><input type="text" class="form-input-elegant memo_baris text-xs" value="${escapeHtml(memoVal)}" placeholder="Memo..."></td>
+        <td class="p-2"><input type="number" class="form-input-elegant debit font-bold text-emerald-600 dark:text-emerald-400 text-right" value="${escapeHtml(debitVal)}" min="0" step="any" oninput="hitungTotal()" required></td>
+        <td class="p-2"><input type="number" class="form-input-elegant kredit font-bold text-red-600 dark:text-red-400 text-right" value="${escapeHtml(kreditVal)}" min="0" step="any" oninput="hitungTotal()" required></td>
         <td class="p-2 text-center">
             <button type="button" onclick="hapusBaris(this)" class="btn-elegant-icon" title="Hapus Baris">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>

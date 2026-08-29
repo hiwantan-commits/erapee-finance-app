@@ -6,6 +6,7 @@ import { hitungPenyusutanAset, KELOMPOK_PENYUSUTAN } from "./accounting.js";
 import { pasangAutocompleteAkun } from "./coa-autocomplete.js";
 import { pasangPilihTransaksi } from "./transaksi-picker.js";
 import { escapeHtml } from "./utils.js";
+import { ambilUserAktif } from "./auth.js";
 
 const KOLEKSI_ASET = "aset_tetap";
 let coaArray = []; // Array COA untuk mapping otomatis di input akun (sama pola dengan journal-page.js/sewa-page.js)
@@ -272,6 +273,21 @@ async function muatRiwayatJurnalAset() {
 document.addEventListener('DOMContentLoaded', () => {
     muatDaftarAset();
     muatRiwayatJurnalAset();
+
+    // Auditor bersifat read-only di seluruh aplikasi (lihat js/auth.js) -
+    // halaman ini tetap bisa diakses Auditor untuk melihat skedul penyusutan,
+    // tapi form pendaftaran/edit-nya disembunyikan supaya tidak mencoba
+    // menyimpan lalu terbentur error izin dari Firestore rules.
+    if (ambilUserAktif().role === 'Auditor') {
+        const formEl = document.getElementById('formAset');
+        if (formEl) {
+            const notice = document.createElement('p');
+            notice.className = 'text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-3';
+            notice.textContent = '⚠️ Peran Anda sebagai Auditor bersifat Read-Only - form pendaftaran/edit Aset Tetap tidak ditampilkan.';
+            formEl.parentNode.insertBefore(notice, formEl);
+            formEl.style.display = 'none';
+        }
+    }
 
     const selectKelompok = document.getElementById('kelompokAset');
     if (selectKelompok) {
