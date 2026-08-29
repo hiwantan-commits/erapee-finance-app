@@ -225,6 +225,24 @@ select.form-input-custom {
     color: #78716c;
 }
 
+/* Ikon panah bawaan browser pada <select class="form-input-elegant"> dibuang
+   dan diganti versi kustom - bawaan browser menempel terlalu mepet ke tepi
+   kanan (tanpa padding tambahan) sehingga terasa tidak seimbang dibanding
+   padding kiri teks. */
+select.form-input-elegant {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2378716c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+}
+.dark select.form-input-elegant {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
 /* ---- Tab bergaya segmented control (referensi: tab "Semua/Milik Anda/..."
    di Claude.ai) ---- */
 .tab-elegant {
