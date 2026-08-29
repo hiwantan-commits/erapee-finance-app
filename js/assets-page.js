@@ -3,9 +3,24 @@ import { db } from "./config.js";
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { ambilSemuaJurnalPusat } from "./db.js";
 import { hitungPenyusutanAset, KELOMPOK_PENYUSUTAN } from "./accounting.js";
+import { pasangAutocompleteAkun } from "./coa-autocomplete.js";
 import { escapeHtml } from "./utils.js";
 
 const KOLEKSI_ASET = "aset_tetap";
+let coaArray = []; // Array COA untuk mapping otomatis di input akun (sama pola dengan journal-page.js/sewa-page.js)
+
+// Ambil kode akun bersih dari value input yang berformat "KODE - Nama Akun"
+// (sama pola dengan pembersihan unit_usaha di journal-page.js).
+function ambilKodeDariInputAkun(inputEl) {
+    const raw = inputEl.value || '';
+    return raw.split(' - ')[0].trim();
+}
+
+function isiInputAkun(inputEl, kode) {
+    if (!inputEl) return;
+    const found = coaArray.find(c => c.kode === kode);
+    inputEl.value = found ? `${found.kode} - ${found.nama}` : (kode || '');
+}
 
 function formatRupiah(angka) {
     return "Rp " + Math.round(angka).toLocaleString('id-ID');
@@ -67,10 +82,14 @@ async function muatDaftarAset() {
                 totalNilaiBuku += hasil.nilaiBuku;
 
                 const encId = encodeURIComponent(aset.id);
+                const akunBelumLengkap = !aset.kode_akun_beban_penyusutan || !aset.kode_akun_akumulasi_penyusutan;
+                const badgeAkunKurang = akunBelumLengkap
+                    ? `<span class="ml-1.5 inline-block px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded text-[10px] font-semibold align-middle" title="Akun beban/akumulasi penyusutan belum diisi - aset ini tidak akan diikutkan program Jurnal Berulang">Akun belum diatur</span>`
+                    : '';
 
                 barisTabel.push(`
                     <tr id="row-aset-${aset.id}" class="hover:bg-stone-50 dark:hover:bg-stone-800/40 transition-colors">
-                        <td class="p-3 text-xs font-medium text-stone-800 dark:text-stone-200">${escapeHtml(aset.nama_aset)}</td>
+                        <td class="p-3 text-xs font-medium text-stone-800 dark:text-stone-200">${escapeHtml(aset.nama_aset)}${badgeAkunKurang}</td>
                         <td class="p-3 text-xs text-stone-500 dark:text-stone-400">${escapeHtml(aset.tanggal_perolehan)}</td>
                         <td class="p-3 text-xs"><span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded font-semibold">${escapeHtml(aset.kelompok)}</span><div class="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">${escapeHtml(aset.metode)}</div></td>
                         <td class="p-3 text-xs text-right font-medium text-stone-800 dark:text-stone-200">${hasil.nilaiPerolehan.toLocaleString('id-ID')}</td>
@@ -84,7 +103,7 @@ async function muatDaftarAset() {
                     <div id="kartu-aset-${aset.id}" class="border border-stone-100 dark:border-stone-800 rounded-xl p-4">
                         <div class="flex justify-between items-start gap-2 mb-2">
                             <div>
-                                <div class="font-bold text-stone-900 dark:text-stone-100 text-sm">${escapeHtml(aset.nama_aset)}</div>
+                                <div class="font-bold text-stone-900 dark:text-stone-100 text-sm">${escapeHtml(aset.nama_aset)}${badgeAkunKurang}</div>
                                 <div class="text-xs text-stone-400 dark:text-stone-500">${escapeHtml(aset.tanggal_perolehan)}</div>
                             </div>
                             <div class="text-right">
@@ -142,6 +161,20 @@ window.editAset = function(encId) {
     document.getElementById('nilaiPerolehanAset').value = aset.nilai_perolehan || 0;
     document.getElementById('kelompokAset').value = aset.kelompok || 'Kelompok 1';
     document.getElementById('metodeAset').value = aset.metode || 'Garis Lurus';
+    isiInputAkun(document.getElementById('akunBebanPenyusutanAset'), aset.kode_akun_beban_penyusutan);
+    isiInputAkun(document.getElementById('akunAkumulasiPenyusutanAset'), aset.kode_akun_akumulasi_penyusutan);
+
+    const selectUnitEl = document.getElementById('unitUsahaAset');
+    if (selectUnitEl) {
+        const unitVal = aset.unit_usaha || '';
+        selectUnitEl.value = '';
+        for (let opt of selectUnitEl.options) {
+            if (opt.value.startsWith(unitVal) && unitVal) {
+                selectUnitEl.value = opt.value;
+                break;
+            }
+        }
+    }
 
     const btn = document.getElementById('btnSimpanAset');
     btn.innerText = 'Update Aset';
@@ -215,6 +248,35 @@ document.addEventListener('DOMContentLoaded', () => {
         ).join('');
     }
 
+    const inputAkunBeban = document.getElementById('akunBebanPenyusutanAset');
+    const inputAkunAkumulasi = document.getElementById('akunAkumulasiPenyusutanAset');
+    if (inputAkunBeban) pasangAutocompleteAkun(inputAkunBeban, () => coaArray);
+    if (inputAkunAkumulasi) pasangAutocompleteAkun(inputAkunAkumulasi, () => coaArray);
+
+    (async () => {
+        try {
+            const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
+            const selectUnit = document.getElementById('unitUsahaAset');
+            if (selectUnit) {
+                let units = [];
+                snapUnit.forEach(d => units.push(d.data()));
+                selectUnit.innerHTML = '<option value="">Pilih Unit...</option>';
+                units.forEach(u => {
+                    const label = escapeHtml(u.kode) + " - " + escapeHtml(u.nama);
+                    selectUnit.innerHTML += `<option value="${label}">${label}</option>`;
+                });
+            }
+        } catch (err) {}
+
+        try {
+            const snapCOA = await getDocs(collection(db, "master_coa"));
+            let coaList = [];
+            snapCOA.forEach(d => coaList.push(d.data()));
+            coaList.sort((a, b) => a.kode.localeCompare(b.kode));
+            coaArray = coaList;
+        } catch (err) {}
+    })();
+
     const formAset = document.getElementById('formAset');
     if (formAset) {
         formAset.addEventListener('submit', async (e) => {
@@ -225,12 +287,18 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.disabled = true;
             btn.innerText = 'Menyimpan...';
 
+            const rawUnitValue = document.getElementById('unitUsahaAset').value;
+            const cleanUnitCode = rawUnitValue ? rawUnitValue.split(' - ')[0].trim() : '';
+
             const payload = {
                 nama_aset: document.getElementById('namaAset').value.trim(),
                 tanggal_perolehan: document.getElementById('tanggalPerolehanAset').value,
                 nilai_perolehan: parseFloat(document.getElementById('nilaiPerolehanAset').value) || 0,
                 kelompok: document.getElementById('kelompokAset').value,
-                metode: document.getElementById('metodeAset').value
+                metode: document.getElementById('metodeAset').value,
+                unit_usaha: cleanUnitCode,
+                kode_akun_beban_penyusutan: ambilKodeDariInputAkun(document.getElementById('akunBebanPenyusutanAset')),
+                kode_akun_akumulasi_penyusutan: ambilKodeDariInputAkun(document.getElementById('akunAkumulasiPenyusutanAset'))
             };
 
             if (payload.metode === "Saldo Menurun" && !KELOMPOK_PENYUSUTAN[payload.kelompok].saldoMenurun) {
