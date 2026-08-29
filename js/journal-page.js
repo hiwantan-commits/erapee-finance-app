@@ -4,6 +4,7 @@ import { db } from "./config.js";
 import { simpanJurnalPusat, ambilSemuaJurnalPusat, ambilBuktiTransaksi } from "./db.js";
 import { cekApakahPeriodeTerkunci } from "./closing-period.js";
 import { escapeHtml } from "./utils.js";
+import { pasangAutocompleteAkun } from "./coa-autocomplete.js";
 
 // Bukti transaksi disimpan langsung di Firestore (base64), bukan Firebase Storage,
 // karena Storage membutuhkan paket berbayar (Blaze) dan project ini tetap di paket gratis.
@@ -143,96 +144,6 @@ window.hitungTotal = function() {
     }
 };
 
-// Dropdown pencarian akun buatan sendiri (menggantikan <datalist> bawaan
-// browser yang tampilannya tidak bisa dikustomisasi lewat CSS).
-function pasangAutocompleteAkun(inputEl) {
-    let dropdownEl = null;
-    let indexAktif = -1;
-
-    function tutupDropdown() {
-        if (dropdownEl) {
-            dropdownEl.remove();
-            dropdownEl = null;
-        }
-        indexAktif = -1;
-        window.removeEventListener('scroll', saatScrollLuar, true);
-    }
-
-    // Tutup dropdown hanya kalau yang di-scroll itu DI LUAR dropdown
-    // (misalnya tabel/halaman) - scroll di dalam daftar hasil sendiri
-    // (saat mencari akun ke bawah) tidak boleh menutup dropdown-nya.
-    function saatScrollLuar(e) {
-        if (dropdownEl && e.target instanceof Node && dropdownEl.contains(e.target)) return;
-        tutupDropdown();
-    }
-
-    function pilihOpsi(coa) {
-        inputEl.value = `${coa.kode} - ${coa.nama}`;
-        tutupDropdown();
-        inputEl.dispatchEvent(new Event('change'));
-    }
-
-    function perbaruiSorotan(opsiEl) {
-        opsiEl.forEach((el, i) => {
-            el.classList.toggle('bg-stone-100', i === indexAktif);
-            el.classList.toggle('dark:bg-stone-800', i === indexAktif);
-        });
-        if (indexAktif >= 0) opsiEl[indexAktif].scrollIntoView({ block: 'nearest' });
-    }
-
-    function tampilkanDropdown() {
-        const kataKunci = inputEl.value.toLowerCase().trim();
-        const hasil = coaArray.filter(c =>
-            !kataKunci || c.kode.toLowerCase().includes(kataKunci) || c.nama.toLowerCase().includes(kataKunci)
-        ).slice(0, 50);
-
-        tutupDropdown();
-        if (hasil.length === 0) return;
-
-        dropdownEl = document.createElement('div');
-        dropdownEl.className = 'fixed z-50 max-h-56 overflow-y-auto bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg shadow-lg text-xs';
-        const rect = inputEl.getBoundingClientRect();
-        dropdownEl.style.left = rect.left + 'px';
-        dropdownEl.style.top = (rect.bottom + 4) + 'px';
-        dropdownEl.style.width = rect.width + 'px';
-
-        hasil.forEach(coa => {
-            const opt = document.createElement('div');
-            opt.className = 'px-3 py-2 cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-800 flex justify-between gap-3';
-            opt.innerHTML = `<span class="font-mono font-bold text-stone-700 dark:text-stone-300 shrink-0">${escapeHtml(coa.kode)}</span><span class="text-stone-500 dark:text-stone-400 truncate">${escapeHtml(coa.nama)}</span>`;
-            opt.addEventListener('mousedown', (e) => { e.preventDefault(); pilihOpsi(coa); });
-            dropdownEl.appendChild(opt);
-        });
-
-        document.body.appendChild(dropdownEl);
-        window.addEventListener('scroll', saatScrollLuar, true);
-    }
-
-    inputEl.addEventListener('focus', tampilkanDropdown);
-    inputEl.addEventListener('input', tampilkanDropdown);
-    inputEl.addEventListener('blur', () => setTimeout(tutupDropdown, 150));
-    inputEl.addEventListener('keydown', (e) => {
-        if (!dropdownEl) return;
-        const opsiEl = Array.from(dropdownEl.children);
-
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            indexAktif = Math.min(indexAktif + 1, opsiEl.length - 1);
-            perbaruiSorotan(opsiEl);
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            indexAktif = Math.max(indexAktif - 1, 0);
-            perbaruiSorotan(opsiEl);
-        } else if (e.key === 'Escape') {
-            tutupDropdown();
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            const target = indexAktif >= 0 ? opsiEl[indexAktif] : opsiEl[0];
-            if (target) target.dispatchEvent(new MouseEvent('mousedown'));
-        }
-    });
-}
-
 window.tambahBaris = function(akunVal = "", memoVal = "", debitVal = 0, kreditVal = 0) {
     const tbody = document.getElementById('tbodyJurnal');
     if (!tbody) return;
@@ -251,7 +162,7 @@ window.tambahBaris = function(akunVal = "", memoVal = "", debitVal = 0, kreditVa
         </td>
     `;
     tbody.appendChild(tr);
-    pasangAutocompleteAkun(tr.querySelector('.kode_akun'));
+    pasangAutocompleteAkun(tr.querySelector('.kode_akun'), () => coaArray);
 
     if (akunVal) {
         const found = coaArray.find(c => c.kode === akunVal);

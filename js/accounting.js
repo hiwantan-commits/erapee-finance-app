@@ -236,6 +236,40 @@ export function hitungPenyusutanAset(aset, tanggalReferensi = new Date()) {
     return { nilaiPerolehan, akumulasiPenyusutan, nilaiBuku, tahunBerjalan };
 }
 
+// Menghitung akumulasi amortisasi & sisa nilai buku Sewa Dibayar Dimuka pada
+// tanggal referensi (default: hari ini). Berbeda dari aset tetap, sewa tidak
+// punya tarif tahunan tetap (Kelompok 1-4/Bangunan) - jangka waktunya murni
+// dari tanggal_mulai s/d tanggal_selesai yang diisi manual, dan metodenya
+// selalu garis lurus (tidak ada konsep "saldo menurun" untuk beban sewa).
+// Memakai pecahan hari berjalan (bukan pembulatan ke bulan kalender) supaya
+// konsisten dengan cara hitungPenyusutanAset() menghitung `tahunBerjalan` -
+// akrual bergerak halus, bukan melompat di tanggal ulang-tahun kontraknya.
+export function hitungAmortisasiSewa(sewa, tanggalReferensi = new Date()) {
+    const nilaiTotal = parseFloat(sewa.nilai_total) || 0;
+
+    if (nilaiTotal <= 0 || !sewa.tanggal_mulai || !sewa.tanggal_selesai) {
+        return { nilaiTotal, akumulasiAmortisasi: 0, nilaiBuku: nilaiTotal, bulanBerjalan: 0, totalBulan: 0 };
+    }
+
+    const tglMulai = new Date(sewa.tanggal_mulai);
+    const tglSelesai = new Date(sewa.tanggal_selesai);
+    const MS_PER_HARI = 24 * 60 * 60 * 1000;
+    const totalHari = Math.max(1, (tglSelesai.getTime() - tglMulai.getTime()) / MS_PER_HARI);
+    const totalBulan = Math.max(1, Math.round(totalHari / 30.4375));
+
+    let hariBerjalan = (tanggalReferensi.getTime() - tglMulai.getTime()) / MS_PER_HARI;
+    if (hariBerjalan < 0) hariBerjalan = 0;
+    if (hariBerjalan > totalHari) hariBerjalan = totalHari;
+    const fraksiBerjalan = hariBerjalan / totalHari;
+
+    let akumulasiAmortisasi = nilaiTotal * fraksiBerjalan;
+    if (akumulasiAmortisasi > nilaiTotal) akumulasiAmortisasi = nilaiTotal;
+    const nilaiBuku = nilaiTotal - akumulasiAmortisasi;
+    const bulanBerjalan = fraksiBerjalan * totalBulan;
+
+    return { nilaiTotal, akumulasiAmortisasi, nilaiBuku, bulanBerjalan, totalBulan };
+}
+
 // ==================== Struktur Laporan Berjenjang (khusus cetak) ====================
 // Mengelompokkan akun Neraca & Laba Rugi ke struktur berjenjang ala software
 // akuntansi konvensional (Kelas > Sub-Kelas > Akun), murni diturunkan dari
