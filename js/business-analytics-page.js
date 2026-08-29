@@ -36,7 +36,7 @@ function hitungStatusMargin(margin, laba) {
 function hitungDataPerUnit(tahunFilter) {
     const dataPerUnit = {};
     unitUsahaMasterCache.forEach(u => {
-        dataPerUnit[u.kode] = { nama: u.nama, pendapatan: 0, beban: 0 };
+        dataPerUnit[u.kode] = { nama: u.nama, status: u.status || "Aktif", pendapatan: 0, beban: 0 };
     });
 
     semuaJurnalCache.forEach(jurnal => {
@@ -48,7 +48,7 @@ function hitungDataPerUnit(tahunFilter) {
             kodeUnit = jurnal.unit_usaha.split(" - ")[0].trim();
         }
         if (!dataPerUnit[kodeUnit]) {
-            dataPerUnit[kodeUnit] = { nama: kodeUnit, pendapatan: 0, beban: 0 };
+            dataPerUnit[kodeUnit] = { nama: kodeUnit, status: "Aktif", pendapatan: 0, beban: 0 };
         }
 
         (jurnal.rows || []).forEach(baris => {
@@ -69,7 +69,7 @@ function hitungDataPerUnit(tahunFilter) {
             const d = dataPerUnit[kode];
             const laba = d.pendapatan - d.beban;
             const margin = d.pendapatan > 0 ? (laba / d.pendapatan) * 100 : null;
-            return { kode, nama: d.nama, pendapatan: d.pendapatan, beban: d.beban, laba, margin };
+            return { kode, nama: d.nama, status: d.status, pendapatan: d.pendapatan, beban: d.beban, laba, margin };
         })
         // Sembunyikan unit usaha yang sama sekali tidak ada transaksi di periode ini
         .filter(u => u.pendapatan !== 0 || u.beban !== 0);
@@ -203,8 +203,11 @@ function renderGrafik(daftarUnit) {
 
 function renderSemuaTampilan(tahunFilter) {
     const daftarUnit = hitungDataPerUnit(tahunFilter).sort((a, b) => b.laba - a.laba);
+    // KPI (margin konsolidasi dkk) & grafik tetap memakai daftarUnit LENGKAP
+    // (termasuk unit berstatus Ditutup/Selesai) supaya angka totalnya utuh -
+    // hanya tabel ranking yang menyembunyikan baris unit yang sudah ditutup.
     renderKpi(daftarUnit);
-    renderTabelDanKartu(daftarUnit);
+    renderTabelDanKartu(daftarUnit.filter(u => u.status !== "Ditutup"));
     renderGrafik(daftarUnit);
     renderStrukturBeban(tahunFilter);
     renderVendorPelanggan(tahunFilter);
@@ -846,7 +849,7 @@ async function muatAnalisisBisnis() {
         unitUsahaMasterCache = [];
         snapUnit.forEach(docSnap => {
             const u = docSnap.data();
-            unitUsahaMasterCache.push({ kode: u.kode, nama: u.nama });
+            unitUsahaMasterCache.push({ kode: u.kode, nama: u.nama, status: u.status || "Aktif" });
         });
         if (!unitUsahaMasterCache.find(u => u.kode === "SHARED")) {
             unitUsahaMasterCache.push({ kode: "SHARED", nama: "Biaya Bersama / Lainnya" });

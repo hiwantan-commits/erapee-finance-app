@@ -39,24 +39,30 @@ function tombolAksiHtml(prefix, id, onEdit, onHapus) {
 async function muatUnitUsaha() {
     const tbody = document.getElementById('tabelUnitUsaha');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 dark:text-stone-500 font-medium">Memuat data unit usaha dari pusat...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-stone-400 dark:text-stone-500 font-medium">Memuat data unit usaha dari pusat...</td></tr>';
 
     try {
         const snap = await getDocs(collection(db, "master_unit_usaha"));
         tbody.innerHTML = '';
 
         if (snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 dark:text-stone-500">Belum ada master data unit usaha.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-stone-400 dark:text-stone-500">Belum ada master data unit usaha.</td></tr>';
             return;
         }
 
         snap.forEach(docSnap => {
             const data = docSnap.data();
             const klasifikasiTeks = data.klasifikasi || '-';
+            const status = data.status || 'Aktif';
 
             const encKode = encodeURIComponent(data.kode || '');
             const encNama = encodeURIComponent(data.nama || '');
             const encKlas = encodeURIComponent(klasifikasiTeks);
+            const encStatus = encodeURIComponent(status);
+
+            const badgeStatus = status === 'Ditutup'
+                ? `<span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded text-[10px] font-semibold">Ditutup</span>`
+                : `<span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded text-[10px] font-semibold">Aktif</span>`;
 
             // Tambahkan atribut id baris agar mudah diberi efek highlight
             tbody.innerHTML += `
@@ -64,17 +70,18 @@ async function muatUnitUsaha() {
                     <td class="p-3"><span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded font-mono font-bold text-xs">${escapeHtml(data.kode)}</span></td>
                     <td class="p-3 font-medium text-stone-800 dark:text-stone-200 text-sm">${escapeHtml(data.nama)}</td>
                     <td class="p-3 text-stone-500 dark:text-stone-400 text-sm">${escapeHtml(klasifikasiTeks)}</td>
-                    <td class="p-3 text-center">${tombolAksiHtml('Unit', docSnap.id, `window.editUnitUsaha('${docSnap.id}', '${encKode}', '${encNama}', '${encKlas}')`, `window.hapusUnitUsaha('${docSnap.id}')`)}</td>
+                    <td class="p-3">${badgeStatus}</td>
+                    <td class="p-3 text-center">${tombolAksiHtml('Unit', docSnap.id, `window.editUnitUsaha('${docSnap.id}', '${encKode}', '${encNama}', '${encKlas}', '${encStatus}')`, `window.hapusUnitUsaha('${docSnap.id}')`)}</td>
                 </tr>
             `;
         });
     } catch (error) {
         console.error("Error muat unit usaha:", error);
-        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-red-500 dark:text-red-400">Gagal memuat data unit usaha.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500 dark:text-red-400">Gagal memuat data unit usaha.</td></tr>';
     }
 }
 
-window.editUnitUsaha = function(id, encKode, encNama, encKlas) {
+window.editUnitUsaha = function(id, encKode, encNama, encKlas, encStatus) {
     const klasifikasi = decodeURIComponent(encKlas);
 
     // Hapus highlight dari semua baris unit usaha lain, lalu beri highlight ke baris yang dipilih
@@ -86,6 +93,7 @@ window.editUnitUsaha = function(id, encKode, encNama, encKlas) {
     document.getElementById('kodeUnit').value = decodeURIComponent(encKode);
     document.getElementById('namaUnit').value = decodeURIComponent(encNama);
     document.getElementById('klasifikasiUnit').value = klasifikasi === '-' ? '' : klasifikasi;
+    document.getElementById('statusUnit').value = encStatus ? decodeURIComponent(encStatus) : 'Aktif';
 
     const btn = document.getElementById('btnSimpanUnit');
     btn.innerText = 'Update Data';
@@ -227,7 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = {
                 kode: document.getElementById('kodeUnit').value.toUpperCase().trim(),
                 nama: document.getElementById('namaUnit').value.trim(),
-                klasifikasi: document.getElementById('klasifikasiUnit').value.trim()
+                klasifikasi: document.getElementById('klasifikasiUnit').value.trim(),
+                status: document.getElementById('statusUnit').value
             };
 
             try {
