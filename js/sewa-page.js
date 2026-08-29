@@ -11,6 +11,10 @@ import { ambilUserAktif } from "./auth.js";
 const KOLEKSI_SEWA = "sewa_dibayar_dimuka";
 let coaArray = []; // Array COA untuk mapping otomatis di input akun (sama pola dengan journal-page.js)
 
+// Auditor bersifat read-only di seluruh aplikasi (lihat js/auth.js) - boleh
+// tetap melihat daftar & skedul amortisasi, tapi tidak boleh mengubah/menghapus.
+const adalahAuditor = ambilUserAktif().role === 'Auditor';
+
 // Mengubah daftar KODE akun bertag kategori_sewa (sisi Aset, mewakili momen
 // pembayaran sewa dimuka) di Master COA jadi "kandidat transaksi sewa" siap
 // pakai untuk fitur "Isi Otomatis dari Transaksi Jurnal". `barisJurnal` sudah
@@ -50,8 +54,12 @@ function ambilKodeDariInputAkun(inputEl) {
 }
 
 // Menu aksi per-baris memakai pola dropdown/3-titik, konsisten dengan
-// Aset Tetap & Manajemen Jurnal.
+// Aset Tetap & Manajemen Jurnal. Tidak ditampilkan sama sekali untuk
+// Auditor - baik Edit maupun Hapus bukan aksi yang berguna untuk role
+// read-only (Edit hanya membuka form pendaftaran yang sudah disembunyikan,
+// Hapus akan ditolak Firestore rules).
 function tombolAksiSewaHtml(encId) {
+    if (adalahAuditor) return `<span class="text-stone-300 dark:text-stone-700 text-xs">-</span>`;
     const idAman = String(encId).replace(/[^a-zA-Z0-9_-]/g, '_');
     const panelId = `menuAksiSewa-${idAman}`;
     return `
@@ -233,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // halaman ini tetap bisa diakses Auditor untuk melihat skedul amortisasi,
     // tapi form pendaftaran/edit-nya disembunyikan supaya tidak mencoba
     // menyimpan lalu terbentur error izin dari Firestore rules.
-    if (ambilUserAktif().role === 'Auditor') {
+    if (adalahAuditor) {
         const formEl = document.getElementById('formSewa');
         if (formEl) {
             const notice = document.createElement('p');
