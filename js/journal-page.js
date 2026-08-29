@@ -1,7 +1,7 @@
 // js/journal-page.js - Controller untuk input-jurnal.html dengan Bukti Transaksi & Auto No. Bukti
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { db } from "./config.js";
-import { simpanJurnalPusat, ambilSemuaJurnalPusat, ambilBuktiTransaksi } from "./db.js";
+import { simpanJurnalPusat, ambilJurnalPerTanggal, ambilJurnalById, ambilBuktiTransaksi } from "./db.js";
 import { cekApakahPeriodeTerkunci } from "./closing-period.js";
 import { escapeHtml } from "./utils.js";
 import { pasangAutocompleteAkun } from "./coa-autocomplete.js";
@@ -102,14 +102,13 @@ async function generateIdJurnal() {
 
     // GENERATE OTOMATIS NO. BUKTI (INV-YYYY/MM/DD/NoUrut)
     try {
-        const semuaData = await ambilSemuaJurnalPusat();
         const tglHariIni = `${yyyy}-${mm}-${dd}`;
-        
-        let countHariIni = 0;
-        if (semuaData && semuaData.length > 0) {
-            countHariIni = semuaData.filter(j => j.tanggal === tglHariIni).length;
-        }
-        
+        // Query bertarget per tanggal - sebelumnya membaca SELURUH koleksi
+        // jurnal_transaksi hanya untuk menghitung transaksi hari ini.
+        const dataHariIni = await ambilJurnalPerTanggal(tglHariIni);
+
+        const countHariIni = dataHariIni.length;
+
         const noUrut = String(countHariIni + 1).padStart(3, '0');
         
         const inputNoBukti = document.getElementById('no_bukti');
@@ -258,8 +257,9 @@ async function inisialisasiData() {
         document.getElementById('btnSubmit').innerHTML = "Simpan Perubahan Jurnal";
         
         try {
-            const semuaData = await ambilSemuaJurnalPusat();
-            const jurnalTarget = semuaData.find(j => j.id_jurnal === editIdJurnal);
+            // Query bertarget per id_jurnal - sebelumnya membaca SELURUH
+            // koleksi jurnal_transaksi hanya untuk mencari satu jurnal ini.
+            const jurnalTarget = await ambilJurnalById(editIdJurnal);
 
             if (jurnalTarget) {
                 document.getElementById('id_jurnal').value = jurnalTarget.id_jurnal;
