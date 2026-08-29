@@ -19,6 +19,22 @@ function ambilKodeDariInputAkun(inputEl) {
     return raw.split(' - ')[0].trim();
 }
 
+// Setiap perjanjian sewa dimaksudkan punya akun Prabayar & Beban sendiri
+// (bukan berbagi satu akun untuk banyak sewa), supaya saldo per sewa di
+// buku besar tidak tercampur. Fungsi ini mengumpulkan kode akun yang sudah
+// dipakai sewa LAIN (mengecualikan record yang sedang diedit sendiri, kalau
+// ada), supaya autocomplete tidak menawarkan akun yang sudah "jatah" sewa
+// lain.
+function kodeTerpakaiOlehSewaLain(idSewaSaatIni) {
+    const set = new Set();
+    Object.values(window.dataSewaGlobal || {}).forEach(s => {
+        if (s.id === idSewaSaatIni) return;
+        if (s.kode_akun_prabayar) set.add(s.kode_akun_prabayar);
+        if (s.kode_akun_beban_sewa) set.add(s.kode_akun_beban_sewa);
+    });
+    return set;
+}
+
 // Menu aksi per-baris memakai pola dropdown/3-titik, konsisten dengan
 // Aset Tetap & Manajemen Jurnal.
 function tombolAksiSewaHtml(encId) {
@@ -200,8 +216,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const inputAkunPrabayar = document.getElementById('akunPrabayarSewa');
     const inputAkunBeban = document.getElementById('akunBebanSewa');
-    if (inputAkunPrabayar) pasangAutocompleteAkun(inputAkunPrabayar, () => coaArray);
-    if (inputAkunBeban) pasangAutocompleteAkun(inputAkunBeban, () => coaArray);
+    if (inputAkunPrabayar) {
+        pasangAutocompleteAkun(inputAkunPrabayar, () => coaArray, () => {
+            const terpakai = kodeTerpakaiOlehSewaLain(document.getElementById('editIdSewa').value || null);
+            const kodeBeban = ambilKodeDariInputAkun(inputAkunBeban);
+            if (kodeBeban) terpakai.add(kodeBeban);
+            return terpakai;
+        });
+    }
+    if (inputAkunBeban) {
+        pasangAutocompleteAkun(inputAkunBeban, () => coaArray, () => {
+            const terpakai = kodeTerpakaiOlehSewaLain(document.getElementById('editIdSewa').value || null);
+            const kodePrabayar = ambilKodeDariInputAkun(inputAkunPrabayar);
+            if (kodePrabayar) terpakai.add(kodePrabayar);
+            return terpakai;
+        });
+    }
 
     (async () => {
         try {
