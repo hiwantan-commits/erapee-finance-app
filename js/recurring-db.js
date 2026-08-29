@@ -40,6 +40,16 @@ function periodeSaatIni(tanggalReferensi) {
     return `${tanggalReferensi.getFullYear()}-${String(tanggalReferensi.getMonth() + 1).padStart(2, '0')}`;
 }
 
+// Bulan ke berapa (1-based) suatu periode "YYYY-MM" dihitung dari bulan
+// tanggal_mulai - dipakai untuk 3 digit akhir No. Bukti amortisasi sewa
+// ("{No. Bukti transaksi sumber}/NNN").
+function hitungBulanKeberapa(tanggalMulaiStr, periode) {
+    const tglMulai = new Date(tanggalMulaiStr);
+    const [tahun, bulan] = periode.split('-').map(Number);
+    const indeks = (tahun - tglMulai.getFullYear()) * 12 + (bulan - 1 - tglMulai.getMonth());
+    return indeks + 1;
+}
+
 function ambilEmailPengguna() {
     try {
         const sesi = sessionStorage.getItem("erapee_user_session");
@@ -178,6 +188,8 @@ export async function generateDanUpsertDraf() {
                 periode,
                 tanggal: akhirBulan(periode),
                 unit_usaha: sewa.unit_usaha || '',
+                no_bukti_sumber: sewa.no_bukti_sumber || '',
+                bulan_ke: hitungBulanKeberapa(sewa.tanggal_mulai, periode),
                 nominal,
                 rows: [
                     { kode_akun: sewa.kode_akun_beban_sewa, nama_akun: namaAkun(sewa.kode_akun_beban_sewa), memo_baris: memo, debit: nominal, kredit: 0 },
@@ -209,11 +221,22 @@ export async function generateDanUpsertDraf() {
 export async function setujuiDraf(idDraf, draf) {
     try {
         const idJurnal = `JRB-${idDraf}`;
-        const prefixBukti = draf.sumber_modul === 'PENYUSUTAN_ASET' ? 'PNY' : 'SWA';
+
+        // Amortisasi sewa yang berasal dari transaksi terdaftar (lihat fitur
+        // "Isi Otomatis dari Transaksi Jurnal" di sewa.html) memakai No.
+        // Bukti transaksi sumbernya sendiri + 3 digit bulan berjalan, supaya
+        // rangkaian jurnal bulanannya gampang ditelusuri balik ke transaksi
+        // awal. Sewa yang tidak berasal dari transaksi terdaftar (atau
+        // penyusutan aset, yang belum punya fitur serupa) tetap memakai
+        // format lama.
+        const noBukti = (draf.sumber_modul === 'AMORTISASI_SEWA' && draf.no_bukti_sumber)
+            ? `${draf.no_bukti_sumber}/${String(draf.bulan_ke || 1).padStart(3, '0')}`
+            : `AUTO/${draf.sumber_modul === 'PENYUSUTAN_ASET' ? 'PNY' : 'SWA'}/${draf.periode}/${idAmanFirestore(draf.sumber_id).slice(0, 8)}`;
+
         const headerData = {
             id_jurnal: idJurnal,
             tanggal: draf.tanggal,
-            no_bukti: `AUTO/${prefixBukti}/${draf.periode}/${idAmanFirestore(draf.sumber_id).slice(0, 8)}`,
+            no_bukti: noBukti,
             sifat_transaksi: 'Non-Tunai',
             unit_usaha: draf.unit_usaha || '',
             lawan_transaksi: draf.sumber_nama || '',
