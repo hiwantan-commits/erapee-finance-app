@@ -93,6 +93,7 @@ const PETA_IKON_ELEGANT = {
     'invoice': '<path d="M6 3h12a1 1 0 0 1 1 1v17l-3-2-2 2-2-2-2 2-2-2-3 2V4a1 1 0 0 1 1-1Z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
     'profil-pajak': '<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M14 9h5a1 1 0 0 1 1 1v11"/><path d="M8 8h1M8 12h1M8 16h1M11 8h1M11 12h1M11 16h1"/>',
     'aset-tetap': '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
+    'sewa': '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14v3l2 1"/>',
     'pajak': '<path d="M3 21h18M4 21V10M20 21V10M2 10l10-6 10 6M6 10v6M10 10v6M14 10v6M18 10v6"/>',
     'rekonsiliasi': '<path d="M12 3v18M5 7l-3 6a3 3 0 0 0 6 0Zm14 0-3 6a3 3 0 0 0 6 0ZM5 7h14M9 3h6"/>',
     'laporan': '<path d="M4 20V10M10 20V4M16 20v-7M4 20h16"/>',
@@ -246,6 +247,7 @@ async function muatSidebarAndBranding() {
             items: [
                 { name: 'Profil & Param Pajak', href: 'profil-pajak', icon: '🏢', roles: ['Super Admin', 'Admin', 'Akuntan'] },
                 { name: 'Aset Tetap', href: 'aset-tetap', icon: '🏭', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
+                { name: 'Sewa Dibayar Dimuka', href: 'sewa', icon: '📅', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
                 { name: 'Rekapitulasi PPN & PPh', href: 'pajak', icon: '🏛️', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] },
                 { name: 'Laporan Arus Kas', href: 'rekonsiliasi', icon: '⚖️', roles: ['Super Admin', 'Admin', 'Akuntan', 'Auditor'] }
             ]
