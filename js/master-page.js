@@ -50,12 +50,12 @@ async function muatUnitUsaha() {
             return;
         }
 
-        // Urutkan berdasarkan abjad nama unit usaha - Firestore mengembalikan
+        // Urutkan berdasarkan abjad kode unit usaha - Firestore mengembalikan
         // dokumen dalam urutan yang tidak bisa diandalkan (biasanya urutan
         // insert), jadi disortir di klien sebelum dirender.
         const daftarUnit = [];
         snap.forEach(docSnap => daftarUnit.push({ id: docSnap.id, ...docSnap.data() }));
-        daftarUnit.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id'));
+        daftarUnit.sort((a, b) => (a.kode || '').localeCompare(b.kode || '', 'id'));
 
         daftarUnit.forEach(data => {
             const klasifikasiTeks = data.klasifikasi || '-';

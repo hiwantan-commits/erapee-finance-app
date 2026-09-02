@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (selectUnit) {
                 let units = [];
                 snapUnit.forEach(d => units.push(d.data()));
-                units.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id'));
+                units.sort((a, b) => (a.kode || '').localeCompare(b.kode || '', 'id'));
                 selectUnit.innerHTML = '<option value="">Pilih Unit...</option>';
                 units.forEach(u => {
                     const label = escapeHtml(u.kode) + " - " + escapeHtml(u.nama);

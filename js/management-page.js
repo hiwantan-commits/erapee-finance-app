@@ -29,7 +29,7 @@ async function muatManajemenJurnal() {
             let unitOptions = '<option value="ALL">Semua Unit Usaha</option>';
             const daftarUnit = [];
             snapUnit.forEach(d => daftarUnit.push(d.data()));
-            daftarUnit.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id'));
+            daftarUnit.sort((a, b) => (a.kode || '').localeCompare(b.kode || '', 'id'));
             daftarUnit.forEach(u => {
                 const kode = escapeHtml(u.kode);
                 const label = kode + " - " + escapeHtml(u.nama);
