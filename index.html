@@ -31,7 +31,49 @@
         <div class="flex-1 flex flex-col min-h-0 overflow-y-auto md:ml-64">
             <div id="header-container"></div>
 
-            <main class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+            <!-- ======= Beranda Mobile ("Home") - Sprint 1 dari peta jalan tampilan
+                 mobile. Hanya tampil di layar sempit (md:hidden); versi desktop di
+                 bawah (hidden md:block) tidak diubah sama sekali. Elemen di sini
+                 diisi js/dashboard-page.js dari data yang sama dengan versi
+                 desktop - tidak ada query Firestore tambahan. ======= -->
+            <div class="md:hidden px-4 pt-4 max-w-md mx-auto w-full space-y-5">
+                <div class="stat-card-mobile">
+                    <div class="stat-row-top-mobile">
+                        <p class="stat-label-mobile">Pendapatan Bulan Ini</p>
+                        <span id="deltaPendapatanBulanMobile" class="badge-delta-mobile is-up" hidden></span>
+                    </div>
+                    <p class="stat-value-mobile" id="valPendapatanBulanMobile">Rp 0</p>
+                </div>
+
+                <div class="flex gap-2.5">
+                    <div class="tile-mobile">
+                        <p class="tile-label-mobile">Laba Bersih (YTD)</p>
+                        <p class="tile-value-mobile text-emerald-600 dark:text-emerald-400" id="valLabaBersihMobile">Rp 0</p>
+                    </div>
+                    <div class="tile-mobile">
+                        <p class="tile-label-mobile">Total Beban (YTD)</p>
+                        <p class="tile-value-mobile" id="valTotalBebanMobile">Rp 0</p>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-2.5">
+                        <h3 class="text-[13px] font-semibold text-stone-800 dark:text-stone-100">Unit Usaha</h3>
+                        <a href="/analisa-bisnis" class="text-[11px] font-semibold text-[#D97757]">Lihat semua</a>
+                    </div>
+                    <div class="flex gap-2 overflow-x-auto pb-0.5" id="unitUsahaMobileList"></div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-2.5">
+                        <h3 class="text-[13px] font-semibold text-stone-800 dark:text-stone-100">Aktivitas Terbaru</h3>
+                        <a href="/manajemen" class="text-[11px] font-semibold text-[#D97757]">Lihat semua</a>
+                    </div>
+                    <div id="aktivitasTerbaruMobileList"></div>
+                </div>
+            </div>
+
+            <main class="hidden md:block p-4 md:p-8 max-w-7xl mx-auto w-full">
                 <!-- Sapaan (polos di atas latar, tanpa kotak berwarna - gaya Claude.ai) -->
                 <div class="mb-8">
                     <h1 class="h-elegant-1 text-stone-900 dark:text-stone-50 mb-2">
