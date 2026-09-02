@@ -3,6 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { CONFIG } from "./config.js";
+import { terapkanIkonPwaDariBranding } from "./pwa-icon.js";
 
 const app = initializeApp(CONFIG.FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -101,14 +102,19 @@ async function muatBrandingLogin() {
         const docSnap = await getDoc(doc(db, "pengaturan_sistem", "branding"));
         if (docSnap.exists()) {
             const data = docSnap.data();
-            
+
             // Terapkan Favicon
             if (data.faviconUrl && !data.faviconUrl.endsWith('/branding')) {
-                let faviconTag = document.querySelector("link[rel*='icon']") || document.createElement('link');
+                // Pencocokan rel="icon" harus PERSIS (bukan substring "icon")
+                // supaya tidak ikut menangkap <link rel="apple-touch-icon">
+                // (mengandung kata "icon" juga) dan diam-diam mengubahnya
+                // jadi favicon biasa - lihat perbaikan di commit dukungan PWA.
+                let faviconTag = document.querySelector("link[rel='icon']") || document.createElement('link');
                 faviconTag.type = 'image/png';
                 faviconTag.rel = 'icon';
                 faviconTag.href = data.faviconUrl;
                 document.getElementsByTagName('head')[0].appendChild(faviconTag);
+                terapkanIkonPwaDariBranding(data.faviconUrl);
             }
 
             // Terapkan Logo ke Halaman Login

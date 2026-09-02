@@ -42,6 +42,7 @@ cara proyek di-deploy dari "situs statis murni" menjadi "proyek Node.js".
 │   ├── tema-fouc-init.js       - Terapkan dark mode sebelum render pertama (anti-flash)
 │   ├── tema-tailwind-config.js - Konfigurasi Tailwind CDN (darkMode: 'class')
 │   ├── pwa-register.js - Mendaftarkan sw.js di setiap halaman
+│   ├── pwa-icon.js     - Menyelaraskan ikon PWA dengan favicon dinamis Branding
 │   └── *-page.js       - Satu controller per halaman (lihat 03-halaman.md)
 ├── scripts/
 │   └── backup-ke-drive.mjs  - Skrip backup Firestore -> Google Drive (dijalankan GitHub Actions)
@@ -137,6 +138,37 @@ homescreen/desktop — persis seperti aplikasi native. Tiga berkas pendukungnya:
   setiap halaman.
 - **`icons/apple-touch-icon.png`** — ikon khusus iOS Safari (tidak dibaca dari
   `manifest.json`, harus `<link rel="apple-touch-icon">` terpisah).
+
+Ketiga berkas ikon statis di atas (`icon-192.png`, `icon-512.png`,
+`apple-touch-icon.png`) hanyalah **fallback default** (monogram "E" di atas warna aksen
+aplikasi). Jika Super Admin sudah mengunggah favicon kustom lewat halaman Branding
+(`pengaturan_sistem/branding.faviconUrl`, lihat [03-halaman.md](03-halaman.md)), ikon
+PWA otomatis ikut mengikuti favicon tersebut — bukan tetap memakai file statis yang
+sudah usang. Ini ditangani `js/pwa-icon.js`
+(`terapkanIkonPwaDariBranding(faviconDataUri)`), dipanggil dari `js/component.js` dan
+`js/login-page.js` tepat setelah keduanya membaca `faviconUrl` untuk mengganti
+`<link rel="icon">` tab browser:
+
+1. Mengganti `href` pada `<link rel="apple-touch-icon">` yang sudah ada di halaman
+   dengan favicon (data URI base64) yang sama.
+2. Mengambil `manifest.json` statis sebagai kerangka, mengganti hanya array `icons`-nya
+   dengan favicon yang sama (`sizes: "any"` — resolusi asli favicon unggahan tidak
+   diketahui di sisi klien, jadi tidak mengklaim ukuran piksel tertentu), lalu
+   membungkusnya jadi `Blob` dan menukar `href` pada `<link rel="manifest">` ke Blob URL
+   tersebut.
+
+Jika belum ada favicon kustom (`faviconUrl` kosong), `terapkanIkonPwaDariBranding()`
+langsung kembali tanpa melakukan apa pun — ketiga berkas statis di atas tetap berlaku
+sebagai default.
+
+> ⚠️ **Jebakan yang sudah pernah terjadi**: kode lama yang mencari tag favicon
+> (`document.querySelector("link[rel*='icon']")`, di `js/component.js` &
+> `js/login-page.js`) awalnya memakai pencocokan **substring** pada atribut `rel` —
+> ini secara tidak sengaja ikut mencocokkan `<link rel="apple-touch-icon">` (karena
+> mengandung kata "icon" juga), sehingga tag apple-touch-icon diam-diam berubah rel-nya
+> jadi `"icon"` dan href-nya tertimpa. Sudah diperbaiki menjadi pencocokan **persis**
+> (`link[rel='icon']`). Jika suatu saat menambah tag `<link rel="...">` baru yang
+> mengandung kata "icon" di `<head>`, pastikan tidak mengulang jebakan yang sama.
 
 > **Keputusan desain penting — TIDAK ada mode offline.** `sw.js` sengaja
 > **tidak melakukan caching apa pun** — setiap `fetch` diteruskan langsung ke jaringan
