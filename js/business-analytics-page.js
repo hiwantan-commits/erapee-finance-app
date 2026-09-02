@@ -21,6 +21,30 @@ function setTeksAman(id, teks) {
     if (el) el.innerText = teks;
 }
 
+// Kode unit usaha satu jurnal - dipakai bersama oleh semua kalkulasi
+// per-unit di file ini. Transaksi tanpa unit_usaha dikelompokkan sebagai
+// "SHARED" (Biaya Bersama/Lainnya), bukan diabaikan, supaya totalnya tetap
+// utuh dan bisa dipilih sendiri di filter Unit Usaha.
+function kodeUnitDariJurnal(jurnal) {
+    return jurnal.unit_usaha ? jurnal.unit_usaha.split(" - ")[0].trim() : "SHARED";
+}
+
+// Predikat filter gabungan Tahun + Bulan + Unit Usaha, dipakai bersama oleh
+// hitungDataPerUnit/hitungStrukturBeban/hitungVendorPelanggan supaya
+// logikanya konsisten di satu tempat (tidak diduplikasi 3x). Bulan hanya
+// diperiksa kalau bukan "SEMUA" - dan secara UI hanya bisa dipilih kalau
+// Tahun juga sudah spesifik (lihat muatAnalisisBisnis()).
+function cocokFilterPeriodeUnit(jurnal, tahunFilter, bulanFilter, unitFilter) {
+    if (unitFilter && unitFilter !== "SEMUA" && kodeUnitDariJurnal(jurnal) !== unitFilter) return false;
+    if (tahunFilter !== "SEMUA" || (bulanFilter && bulanFilter !== "SEMUA")) {
+        if (!jurnal.tanggal) return false;
+        const [tahunJurnal, bulanJurnal] = jurnal.tanggal.split("-");
+        if (tahunFilter !== "SEMUA" && tahunJurnal !== tahunFilter) return false;
+        if (bulanFilter && bulanFilter !== "SEMUA" && bulanJurnal !== bulanFilter) return false;
+    }
+    return true;
+}
+
 // Ambang margin bersifat indikatif umum, bukan standar baku industri tertentu -
 // pengguna disarankan menyesuaikan sendiri sesuai karakteristik bisnisnya.
 function hitungStatusMargin(margin, laba) {
@@ -33,20 +57,16 @@ function hitungStatusMargin(margin, laba) {
     return { label: "PERLU PERHATIAN", kelas: "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400" };
 }
 
-function hitungDataPerUnit(tahunFilter) {
+function hitungDataPerUnit(tahunFilter, bulanFilter, unitFilter) {
     const dataPerUnit = {};
     unitUsahaMasterCache.forEach(u => {
         dataPerUnit[u.kode] = { nama: u.nama, status: u.status || "Aktif", pendapatan: 0, beban: 0 };
     });
 
     semuaJurnalCache.forEach(jurnal => {
-        const tahunJurnal = jurnal.tanggal ? jurnal.tanggal.split("-")[0] : null;
-        if (tahunFilter !== "SEMUA" && tahunJurnal !== tahunFilter) return;
+        if (!cocokFilterPeriodeUnit(jurnal, tahunFilter, bulanFilter, unitFilter)) return;
 
-        let kodeUnit = "SHARED";
-        if (jurnal.unit_usaha) {
-            kodeUnit = jurnal.unit_usaha.split(" - ")[0].trim();
-        }
+        const kodeUnit = kodeUnitDariJurnal(jurnal);
         if (!dataPerUnit[kodeUnit]) {
             dataPerUnit[kodeUnit] = { nama: kodeUnit, status: "Aktif", pendapatan: 0, beban: 0 };
         }
@@ -75,10 +95,16 @@ function hitungDataPerUnit(tahunFilter) {
         .filter(u => u.pendapatan !== 0 || u.beban !== 0);
 }
 
-function renderKpi(daftarUnit) {
+function renderKpi(daftarUnit, unitFilter) {
     const totalPendapatan = daftarUnit.reduce((s, u) => s + u.pendapatan, 0);
     const totalLaba = daftarUnit.reduce((s, u) => s + u.laba, 0);
     const marginKonsolidasi = totalPendapatan > 0 ? (totalLaba / totalPendapatan) * 100 : 0;
+
+    const elLabelMargin = document.getElementById('labelMarginKonsolidasi');
+    if (elLabelMargin) {
+        const unitTerpilih = unitUsahaMasterCache.find(u => u.kode === unitFilter);
+        elLabelMargin.innerText = unitTerpilih ? `Margin Laba - ${unitTerpilih.nama}` : 'Margin Laba Konsolidasi';
+    }
 
     const elMarginKonsolidasi = document.getElementById('kpiMarginKonsolidasi');
     if (elMarginKonsolidasi) elMarginKonsolidasi.innerText = marginKonsolidasi.toFixed(1) + "%";
@@ -201,16 +227,16 @@ function renderGrafik(daftarUnit) {
     });
 }
 
-function renderSemuaTampilan(tahunFilter) {
-    const daftarUnit = hitungDataPerUnit(tahunFilter).sort((a, b) => b.laba - a.laba);
+function renderSemuaTampilan(tahunFilter, bulanFilter, unitFilter) {
+    const daftarUnit = hitungDataPerUnit(tahunFilter, bulanFilter, unitFilter).sort((a, b) => b.laba - a.laba);
     // KPI (margin konsolidasi dkk) & grafik tetap memakai daftarUnit LENGKAP
     // (termasuk unit berstatus Ditutup/Selesai) supaya angka totalnya utuh -
     // hanya tabel ranking yang menyembunyikan baris unit yang sudah ditutup.
-    renderKpi(daftarUnit);
+    renderKpi(daftarUnit, unitFilter);
     renderTabelDanKartu(daftarUnit.filter(u => u.status !== "Ditutup"));
     renderGrafik(daftarUnit);
-    renderStrukturBeban(tahunFilter);
-    renderVendorPelanggan(tahunFilter);
+    renderStrukturBeban(tahunFilter, bulanFilter, unitFilter);
+    renderVendorPelanggan(tahunFilter, bulanFilter, unitFilter);
 }
 
 // ==================== Vendor & Pelanggan Teratas ====================
@@ -242,13 +268,12 @@ function hitungNilaiTransaksiVendor(jurnal) {
     return total;
 }
 
-function hitungVendorPelanggan(tahunFilter) {
+function hitungVendorPelanggan(tahunFilter, bulanFilter, unitFilter) {
     const petaVendor = {};
     const petaPelanggan = {};
 
     semuaJurnalCache.forEach(jurnal => {
-        const tahunJurnal = jurnal.tanggal ? jurnal.tanggal.split("-")[0] : null;
-        if (tahunFilter !== "SEMUA" && tahunJurnal !== tahunFilter) return;
+        if (!cocokFilterPeriodeUnit(jurnal, tahunFilter, bulanFilter, unitFilter)) return;
 
         const nama = (jurnal.lawan_transaksi || "").trim();
         if (!nama) return;
@@ -315,8 +340,8 @@ function renderDaftarPeringkat(containerId, daftar, warnaBar, warnaTeks) {
     }).join('');
 }
 
-function renderVendorPelanggan(tahunFilter) {
-    const { daftarVendor, daftarPelanggan } = hitungVendorPelanggan(tahunFilter);
+function renderVendorPelanggan(tahunFilter, bulanFilter, unitFilter) {
+    const { daftarVendor, daftarPelanggan } = hitungVendorPelanggan(tahunFilter, bulanFilter, unitFilter);
 
     renderDaftarPeringkat('daftarPelangganTeratas', daftarPelanggan, 'bg-emerald-500', 'text-emerald-600 dark:text-emerald-400');
     renderDaftarPeringkat('daftarVendorTeratas', daftarVendor, 'bg-red-500', 'text-red-600 dark:text-red-400');
@@ -342,12 +367,11 @@ function renderVendorPelanggan(tahunFilter) {
 
 let chartBebanInstance = null;
 
-function hitungStrukturBeban(tahunFilter) {
+function hitungStrukturBeban(tahunFilter, bulanFilter, unitFilter) {
     const dataPerAkun = {};
 
     semuaJurnalCache.forEach(jurnal => {
-        const tahunJurnal = jurnal.tanggal ? jurnal.tanggal.split("-")[0] : null;
-        if (tahunFilter !== "SEMUA" && tahunJurnal !== tahunFilter) return;
+        if (!cocokFilterPeriodeUnit(jurnal, tahunFilter, bulanFilter, unitFilter)) return;
 
         (jurnal.rows || []).forEach(baris => {
             const kodeAkun = baris.kode_akun || "";
@@ -370,8 +394,8 @@ function hitungStrukturBeban(tahunFilter) {
         .sort((a, b) => b.total - a.total);
 }
 
-function renderStrukturBeban(tahunFilter) {
-    const daftarAkun = hitungStrukturBeban(tahunFilter);
+function renderStrukturBeban(tahunFilter, bulanFilter, unitFilter) {
+    const daftarAkun = hitungStrukturBeban(tahunFilter, bulanFilter, unitFilter);
     const totalBeban = daftarAkun.reduce((s, a) => s + a.total, 0);
 
     setTeksAman('bebanTotalKeseluruhan', formatRupiah(totalBeban));
@@ -473,13 +497,17 @@ function renderStrukturBeban(tahunFilter) {
 
 // ==================== Perbandingan Tahun ke Tahun (YoY) ====================
 
-function hitungDataBulananGlobal(tahun) {
+function hitungDataBulananGlobal(tahun, unitFilter) {
     const dataBulanan = Array.from({ length: 12 }, () => ({ pendapatan: 0, beban: 0 }));
 
     semuaJurnalCache.forEach(jurnal => {
         if (!jurnal.tanggal) return;
         const [tahunJurnal, bulanStr] = jurnal.tanggal.split("-");
         if (tahunJurnal !== tahun) return;
+        // YoY selalu membandingkan 12 bulan penuh satu tahun - hanya Unit
+        // Usaha yang ikut mempersempit di sini, bukan Bulan (bulan tunggal
+        // tidak cocok dengan bentuk grafik tren 12-bulan YoY).
+        if (unitFilter && unitFilter !== "SEMUA" && kodeUnitDariJurnal(jurnal) !== unitFilter) return;
 
         const bulanIndex = parseInt(bulanStr) - 1;
         if (bulanIndex < 0 || bulanIndex > 11) return;
@@ -500,8 +528,8 @@ function hitungDataBulananGlobal(tahun) {
     return dataBulanan;
 }
 
-function hitungTotalTahun(tahun) {
-    const bulanan = hitungDataBulananGlobal(tahun);
+function hitungTotalTahun(tahun, unitFilter) {
+    const bulanan = hitungDataBulananGlobal(tahun, unitFilter);
     const pendapatan = bulanan.reduce((s, b) => s + b.pendapatan, 0);
     const beban = bulanan.reduce((s, b) => s + b.beban, 0);
     return { pendapatan, beban, laba: pendapatan - beban, bulanan };
@@ -541,8 +569,13 @@ function renderYoY(tahunIni, tahunLalu) {
         return;
     }
 
-    const dataIni = hitungTotalTahun(tahunIni);
-    const dataLalu = tahunLalu ? hitungTotalTahun(tahunLalu) : null;
+    // Ikut Unit Usaha yang sedang dipilih di bagian "Profitabilitas per Unit
+    // Usaha" (dibaca langsung dari DOM, bukan diteruskan sebagai parameter,
+    // supaya pemanggil lama seperti listener ganti tema/ganti tahun YoY
+    // tetap otomatis memakai unit terkini tanpa perlu ikut diubah).
+    const unitFilter = document.getElementById('filterUnitBisnis')?.value || 'SEMUA';
+    const dataIni = hitungTotalTahun(tahunIni, unitFilter);
+    const dataLalu = tahunLalu ? hitungTotalTahun(tahunLalu, unitFilter) : null;
 
     if (areaTanpaPembanding) areaTanpaPembanding.classList.toggle('hidden', !!dataLalu);
 
@@ -868,6 +901,9 @@ async function muatAnalisisBisnis() {
         const daftarTahun = Array.from(tahunSet).sort((a, b) => b.localeCompare(a));
 
         const selectTahun = document.getElementById('filterTahunBisnis');
+        const selectBulan = document.getElementById('filterBulanBisnis');
+        const selectUnit = document.getElementById('filterUnitBisnis');
+
         let tahunTerpilih = "SEMUA";
         if (selectTahun) {
             let optionsHtml = '<option value="SEMUA">Semua Tahun</option>';
@@ -879,14 +915,51 @@ async function muatAnalisisBisnis() {
                 tahunTerpilih = daftarTahun[0];
                 selectTahun.value = tahunTerpilih;
             }
-            selectTahun.addEventListener('change', () => renderSemuaTampilan(selectTahun.value));
         }
 
-        renderSemuaTampilan(tahunTerpilih);
+        // Bulan hanya masuk akal kalau satu Tahun spesifik sudah dipilih -
+        // dinonaktifkan & dikembalikan ke "Semua Bulan" saat "Semua Tahun".
+        if (selectBulan) {
+            const NAMA_BULAN_OPSI = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            selectBulan.innerHTML = '<option value="SEMUA">Semua Bulan</option>' +
+                NAMA_BULAN_OPSI.map((nama, i) => `<option value="${String(i + 1).padStart(2, '0')}">${nama}</option>`).join('');
+            selectBulan.disabled = (tahunTerpilih === "SEMUA");
+        }
+
+        if (selectUnit) {
+            let unitOptionsHtml = '<option value="SEMUA">Semua Unit Usaha</option>';
+            unitUsahaMasterCache.forEach(u => {
+                const kode = escapeHtml(u.kode);
+                const labelStatus = u.status === "Ditutup" ? " (Ditutup)" : "";
+                unitOptionsHtml += `<option value="${kode}">${kode} - ${escapeHtml(u.nama)}${labelStatus}</option>`;
+            });
+            selectUnit.innerHTML = unitOptionsHtml;
+        }
+
+        const perbaruiTampilanUtama = () => renderSemuaTampilan(
+            selectTahun ? selectTahun.value : "SEMUA",
+            selectBulan ? selectBulan.value : "SEMUA",
+            selectUnit ? selectUnit.value : "SEMUA"
+        );
+
+        if (selectTahun) {
+            selectTahun.addEventListener('change', () => {
+                if (selectBulan) {
+                    const tahunSemua = selectTahun.value === "SEMUA";
+                    selectBulan.disabled = tahunSemua;
+                    if (tahunSemua) selectBulan.value = "SEMUA";
+                }
+                perbaruiTampilanUtama();
+            });
+        }
+        if (selectBulan) selectBulan.addEventListener('change', perbaruiTampilanUtama);
+
+        perbaruiTampilanUtama();
 
         // Siapkan dropdown Perbandingan Tahun ke Tahun (YoY)
         const selectTahunIniYoY = document.getElementById('filterTahunIniYoY');
         const selectTahunLaluYoY = document.getElementById('filterTahunLaluYoY');
+        let perbaruiYoY = () => {};
         if (selectTahunIniYoY && selectTahunLaluYoY) {
             if (daftarTahun.length === 0) {
                 selectTahunIniYoY.innerHTML = '<option value="">Belum ada data</option>';
@@ -905,12 +978,22 @@ async function muatAnalisisBisnis() {
                 selectTahunIniYoY.value = tahunIniYoY;
                 selectTahunLaluYoY.value = tahunLaluYoY;
 
-                const perbaruiYoY = () => renderYoY(selectTahunIniYoY.value, selectTahunLaluYoY.value || null);
+                perbaruiYoY = () => renderYoY(selectTahunIniYoY.value, selectTahunLaluYoY.value || null);
                 selectTahunIniYoY.addEventListener('change', perbaruiYoY);
                 selectTahunLaluYoY.addEventListener('change', perbaruiYoY);
 
                 renderYoY(tahunIniYoY, tahunLaluYoY || null);
             }
+        }
+
+        // Unit Usaha memengaruhi baik tampilan utama (KPI/tabel/grafik/struktur
+        // beban/vendor-pelanggan) maupun grafik YoY - keduanya perlu di-refresh
+        // saat unit yang dipilih berubah.
+        if (selectUnit) {
+            selectUnit.addEventListener('change', () => {
+                perbaruiTampilanUtama();
+                perbaruiYoY();
+            });
         }
     } catch (error) {
         console.error("Gagal memuat analisis bisnis:", error);
@@ -929,7 +1012,11 @@ document.addEventListener("DOMContentLoaded", muatAnalisisBisnis);
 // dipakai lagi dari cache terakhir masing-masing grafik.
 window.addEventListener('erapee-tema-berubah', () => {
     renderGrafik(dataUnitTerkini);
-    renderStrukturBeban(document.getElementById('filterTahunBisnis')?.value || 'SEMUA');
+    renderStrukturBeban(
+        document.getElementById('filterTahunBisnis')?.value || 'SEMUA',
+        document.getElementById('filterBulanBisnis')?.value || 'SEMUA',
+        document.getElementById('filterUnitBisnis')?.value || 'SEMUA'
+    );
     if (yoyTerkini.tahunIni) renderYoY(yoyTerkini.tahunIni, yoyTerkini.tahunLalu);
     renderProyeksiArusKas();
 });
