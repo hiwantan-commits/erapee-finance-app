@@ -22,8 +22,14 @@ async function muatManajemenJurnal() {
             let unitOptions = '<option value="ALL">Semua Unit Usaha</option>';
             snapUnit.forEach(d => {
                 const u = d.data();
-                const label = escapeHtml(u.kode) + " - " + escapeHtml(u.nama);
-                unitOptions += `<option value="${label}">${label}</option>`;
+                const kode = escapeHtml(u.kode);
+                const label = kode + " - " + escapeHtml(u.nama);
+                // value = kode saja, karena jurnal.unit_usaha tersimpan bersih
+                // sebagai kode tanpa nama (lihat journal-page.js) - sebelumnya
+                // value di sini ikut memuat " - Nama" sehingga perbandingan
+                // di dapatkanDataTersaring() tidak pernah cocok dan filter
+                // diam-diam tidak berfungsi (kecuali opsi "Semua Unit Usaha").
+                unitOptions += `<option value="${kode}">${label}</option>`;
             });
             selectFilter.innerHTML = unitOptions;
         }
