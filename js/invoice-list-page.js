@@ -167,7 +167,12 @@ async function muatDaftarInvoice() {
 
     try {
         daftarInvoiceCache = await ambilSemuaInvoice();
-        halamanAktif = 1;
+        // Sengaja TIDAK mereset halamanAktif ke 1 di sini - fungsi ini juga
+        // dipanggil ulang setelah hapus invoice (hapusInvoiceTerpilih), dan
+        // pengguna yang menghapus baris dari halaman 2+ mengharapkan tetap
+        // di halaman itu, bukan terlempar balik ke halaman 1 (lihat
+        // perbaikan yang sama di management-page.js). renderTabelDenganPagination()
+        // sendiri sudah menurunkan halaman aktif kalau jadi tidak valid.
         renderTabelDenganPagination(dapatkanDataTersaring());
     } catch (error) {
         console.error("Gagal memuat daftar invoice:", error);
