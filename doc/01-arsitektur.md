@@ -10,6 +10,7 @@
 | Database | Firebase Firestore (NoSQL, koleksi/dokumen) |
 | Autentikasi | Firebase Authentication (email/password) |
 | Hosting | Vercel (situs statis) |
+| PWA (installable) | `manifest.json` + `sw.js` — lihat [Dukungan PWA](#dukungan-pwa-installable) di bawah |
 | Backup terjadwal | GitHub Actions + Google Drive API (lihat [06-deployment-operasional.md](06-deployment-operasional.md)) |
 
 Tidak ada `package.json` di root repo secara sengaja — lihat komentar di
@@ -20,6 +21,9 @@ cara proyek di-deploy dari "situs statis murni" menjadi "proyek Node.js".
 
 ```
 /                     - Setiap file .html adalah satu halaman aplikasi (lihat 03-halaman.md)
+├── manifest.json     - Manifest PWA (nama, ikon, warna, mode tampilan "standalone")
+├── sw.js             - Service worker minimal, hanya untuk syarat instalasi (lihat di bawah)
+├── icons/            - Ikon PWA (icon-192.png, icon-512.png, apple-touch-icon.png)
 ├── css/
 │   └── style.css     - Gaya kustom di luar Tailwind (dropdown, animasi, gaya cetak, dll)
 ├── js/                - Seluruh logika aplikasi, satu modul ES per file
@@ -37,6 +41,8 @@ cara proyek di-deploy dari "situs statis murni" menjadi "proyek Node.js".
 │   ├── recurring-db.js - Lapisan data & orkestrasi Jurnal Berulang
 │   ├── tema-fouc-init.js       - Terapkan dark mode sebelum render pertama (anti-flash)
 │   ├── tema-tailwind-config.js - Konfigurasi Tailwind CDN (darkMode: 'class')
+│   ├── pwa-register.js - Mendaftarkan sw.js di setiap halaman
+│   ├── pwa-icon.js     - Menyelaraskan ikon PWA dengan favicon dinamis Branding
 │   └── *-page.js       - Satu controller per halaman (lihat 03-halaman.md)
 ├── scripts/
 │   └── backup-ke-drive.mjs  - Skrip backup Firestore -> Google Drive (dijalankan GitHub Actions)
@@ -116,3 +122,63 @@ Setiap item menu punya daftar `roles` sendiri yang menentukan visibilitasnya —
 Halaman `profile.html` (profil akun milik pengguna sendiri) sengaja **tidak** masuk
 `menuGroups` — diakses lewat baris profil di bagian bawah sidebar / tautan nama pengguna di
 header, bukan lewat navigasi menu utama.
+
+## Dukungan PWA (Installable)
+
+Aplikasi bisa di-"Instal" lewat browser (Chrome/Edge: ikon instal di address bar atau
+menu "Instal Aplikasi"; Android: "Add to Home Screen"; iOS Safari: "Add to Home Screen"
+lewat menu Share) sehingga terbuka tanpa chrome browser, dengan ikon sendiri di
+homescreen/desktop — persis seperti aplikasi native. Tiga berkas pendukungnya:
+
+- **`manifest.json`** (di root) — nama aplikasi, ikon (`icons/icon-192.png`,
+  `icons/icon-512.png`), warna tema (`#D97757`, aksen terracotta yang sama dipakai
+  avatar sidebar), dan `display: "standalone"`. Ditautkan di `<head>` setiap halaman
+  lewat `<link rel="manifest" href="/manifest.json">`.
+- **`sw.js`** (di root) — service worker, didaftarkan oleh `js/pwa-register.js` di
+  setiap halaman.
+- **`icons/apple-touch-icon.png`** — ikon khusus iOS Safari (tidak dibaca dari
+  `manifest.json`, harus `<link rel="apple-touch-icon">` terpisah).
+
+Ketiga berkas ikon statis di atas (`icon-192.png`, `icon-512.png`,
+`apple-touch-icon.png`) hanyalah **fallback default** (monogram "E" di atas warna aksen
+aplikasi). Jika Super Admin sudah mengunggah favicon kustom lewat halaman Branding
+(`pengaturan_sistem/branding.faviconUrl`, lihat [03-halaman.md](03-halaman.md)), ikon
+PWA otomatis ikut mengikuti favicon tersebut — bukan tetap memakai file statis yang
+sudah usang. Ini ditangani `js/pwa-icon.js`
+(`terapkanIkonPwaDariBranding(faviconDataUri)`), dipanggil dari `js/component.js` dan
+`js/login-page.js` tepat setelah keduanya membaca `faviconUrl` untuk mengganti
+`<link rel="icon">` tab browser:
+
+1. Mengganti `href` pada `<link rel="apple-touch-icon">` yang sudah ada di halaman
+   dengan favicon (data URI base64) yang sama.
+2. Mengambil `manifest.json` statis sebagai kerangka, mengganti hanya array `icons`-nya
+   dengan favicon yang sama (`sizes: "any"` — resolusi asli favicon unggahan tidak
+   diketahui di sisi klien, jadi tidak mengklaim ukuran piksel tertentu), lalu
+   membungkusnya jadi `Blob` dan menukar `href` pada `<link rel="manifest">` ke Blob URL
+   tersebut.
+
+Jika belum ada favicon kustom (`faviconUrl` kosong), `terapkanIkonPwaDariBranding()`
+langsung kembali tanpa melakukan apa pun — ketiga berkas statis di atas tetap berlaku
+sebagai default.
+
+> ⚠️ **Jebakan yang sudah pernah terjadi**: kode lama yang mencari tag favicon
+> (`document.querySelector("link[rel*='icon']")`, di `js/component.js` &
+> `js/login-page.js`) awalnya memakai pencocokan **substring** pada atribut `rel` —
+> ini secara tidak sengaja ikut mencocokkan `<link rel="apple-touch-icon">` (karena
+> mengandung kata "icon" juga), sehingga tag apple-touch-icon diam-diam berubah rel-nya
+> jadi `"icon"` dan href-nya tertimpa. Sudah diperbaiki menjadi pencocokan **persis**
+> (`link[rel='icon']`). Jika suatu saat menambah tag `<link rel="...">` baru yang
+> mengandung kata "icon" di `<head>`, pastikan tidak mengulang jebakan yang sama.
+
+> **Keputusan desain penting — TIDAK ada mode offline.** `sw.js` sengaja
+> **tidak melakukan caching apa pun** — setiap `fetch` diteruskan langsung ke jaringan
+> persis seperti tanpa service worker. Ini disengaja: aplikasi bergantung penuh pada
+> data live Firestore dan validasi real-time saat menyimpan transaksi (duplikat No.
+> Bukti, kunci periode tutup buku — lihat [04-modul-akuntansi.md](04-modul-akuntansi.md)).
+> Meng-cache HTML/JS/data akan berisiko menyajikan versi aplikasi yang sudah usang ke
+> pengguna yang sudah meng-install PWA-nya, atau memutus konsistensi antara yang
+> terlihat di layar dengan yang sungguh-sungguh tersimpan di server. Kehadiran service
+> worker ini semata memenuhi syarat teknis browser untuk menampilkan prompt instalasi —
+> bukan untuk kemampuan bekerja tanpa koneksi internet. Menambahkan caching di kemudian
+> hari (mis. app-shell caching untuk aset statis yang jarang berubah) memerlukan strategi
+> invalidasi cache yang hati-hati agar tidak mengulang masalah "versi usang" ini.
