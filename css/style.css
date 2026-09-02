@@ -10,6 +10,20 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: #F9FAFB;
     color: #1F2937;
+    /* Cegah efek "rubber-band"/pull-to-refresh bawaan browser saat scroll
+       sampai ke ujung halaman - salah satu hal yang paling membedakan
+       "terasa seperti web" vs "terasa seperti aplikasi native" ketika
+       aplikasi dijalankan sebagai PWA ter-instal. Kontainer scroll internal
+       (tabel, dropdown, dst) tidak terpengaruh karena masing-masing punya
+       overflow-y sendiri. */
+    overscroll-behavior-y: contain;
+}
+
+/* Hilangkan efek highlight abu-abu bawaan saat elemen disentuh di layar
+   sentuh (Android/iOS) - tidak terlihat di browser desktop biasa, tapi
+   terasa sangat "web" kalau muncul di aplikasi yang sudah ter-instal. */
+html {
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Transisi halus untuk interaksi tombol & menu */
@@ -367,4 +381,19 @@ select.form-input-elegant {
     -webkit-backdrop-filter: blur(14px);
     -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+}
+
+/* ---- Dukungan PWA: hormati notch/Dynamic Island & home-indicator ----
+   Berlaku bersama viewport-fit=cover & apple-mobile-web-app-status-bar-style
+   "black-translucent" di setiap <head> (lihat doc/01-arsitektur.md) - tanpa
+   ini, saat aplikasi ter-instal dijalankan fullscreen di iPhone, header bisa
+   tertutup notch dan baris profil paling bawah sidebar bisa tertutup
+   home-indicator. env(safe-area-inset-*) bernilai 0 di perangkat tanpa
+   notch/home-indicator (termasuk semua browser desktop), jadi aman dipasang
+   secara global tanpa mempengaruhi tampilan yang sudah ada. */
+#header-container {
+    padding-top: env(safe-area-inset-top);
+}
+#app-sidebar {
+    padding-bottom: env(safe-area-inset-bottom);
 }
