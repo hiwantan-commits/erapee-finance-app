@@ -89,7 +89,7 @@ async function muatDashboard() {
                 color: "gray"
             });
         }
-        unitUsahaMaster.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id'));
+        unitUsahaMaster.sort((a, b) => (a.kode || '').localeCompare(b.kode || '', 'id'));
 
         // 2. AMBIL DATA JURNAL
         const semuaJurnal = await ambilSemuaJurnalPusat();

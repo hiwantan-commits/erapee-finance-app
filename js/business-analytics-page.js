@@ -890,7 +890,7 @@ async function muatAnalisisBisnis() {
         if (!unitUsahaMasterCache.find(u => u.kode === "SHARED")) {
             unitUsahaMasterCache.push({ kode: "SHARED", nama: "Biaya Bersama / Lainnya" });
         }
-        unitUsahaMasterCache.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id'));
+        unitUsahaMasterCache.sort((a, b) => (a.kode || '').localeCompare(b.kode || '', 'id'));
 
         semuaJurnalCache = await ambilSemuaJurnalPusat();
 
