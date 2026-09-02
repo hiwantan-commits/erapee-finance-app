@@ -678,6 +678,7 @@ select.form-input-elegant {
     font-size: 0.59375rem;
     font-weight: 600;
     color: #a8a29e;
+    text-decoration: none;
 }
 .tab-mobile svg {
     width: 1.1875rem;
@@ -685,4 +686,18 @@ select.form-input-elegant {
 }
 .tab-mobile.is-active {
     color: #D97757;
+}
+
+/* ---- Jarak bawah kontainer scroll saat tab bawah mobile terpasang
+   (ditambahkan lewat JS oleh muatTabBarMobile() di js/component.js) supaya
+   konten paling bawah halaman tidak tertutup tab bar yang fixed. Hanya
+   berlaku di layar sempit - di desktop tab bar tidak dirender sama sekali
+   (lihat .md:hidden pada elemennya), jadi jarak ini juga harus hilang. ---- */
+.has-mobile-tabbar-padding {
+    padding-bottom: 4.5rem;
+}
+@media (min-width: 768px) {
+    .has-mobile-tabbar-padding {
+        padding-bottom: 0;
+    }
 }

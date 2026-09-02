@@ -11,6 +11,50 @@ function setBadge(el, className, teks) {
     el.innerText = teks;
 }
 
+// ==================== Beranda Mobile ("Home") - Sprint 1 ====================
+// Helper murni (tanpa Firestore) khusus tampilan mobile - dipakai bersama
+// oleh beberapa fungsi render di bawah, memakai data yang sama dengan versi
+// desktop (tidak ada query tambahan).
+
+// Format angka Rupiah singkat ala aplikasi native (mis. "Rp98,3jt"),
+// dipakai di kartu-kartu kecil yang tidak muat angka penuh. Nilai di bawah
+// Rp1 juta ditampilkan penuh (tidak masuk akal disingkat "0,4jt").
+function formatRupiahSingkatMobile(angka) {
+    const nilai = Number(angka) || 0;
+    const absolut = Math.abs(nilai);
+    const tanda = nilai < 0 ? "-" : "";
+    if (absolut >= 1_000_000_000) {
+        return `${tanda}Rp${(absolut / 1_000_000_000).toLocaleString('id-ID', { maximumFractionDigits: 1 })}m`;
+    }
+    if (absolut >= 1_000_000) {
+        return `${tanda}Rp${(absolut / 1_000_000).toLocaleString('id-ID', { maximumFractionDigits: 1 })}jt`;
+    }
+    return `${tanda}Rp${absolut.toLocaleString('id-ID')}`;
+}
+
+// Inisial dari nama lawan transaksi untuk avatar bulat di Aktivitas Terbaru -
+// awalan badan usaha umum (PT/CV/UD) dilewati supaya inisialnya bermakna
+// (mis. "PT Klien Contoh" -> "KC", bukan "PK").
+function inisialLawanTransaksiMobile(nama) {
+    if (!nama) return "?";
+    const bersih = nama.replace(/^(PT|CV|UD)\.?\s+/i, "").trim();
+    const kata = bersih.split(/\s+/).filter(Boolean);
+    if (kata.length === 0) return "?";
+    if (kata.length === 1) return kata[0].substring(0, 2).toUpperCase();
+    return (kata[0][0] + kata[1][0]).toUpperCase();
+}
+
+// Warna avatar deterministik (nama yang sama selalu dapat warna yang sama)
+// dari palet tetap - murni pembeda visual antar baris, tidak membawa makna
+// semantik apa pun.
+const PALET_AVATAR_MOBILE = ['#57534e', '#0d9269', '#2563eb', '#7c3aed', '#b45309', '#be123c'];
+function warnaAvatarMobile(teks) {
+    const str = String(teks || '');
+    let jumlah = 0;
+    for (let i = 0; i < str.length; i++) jumlah += str.charCodeAt(i);
+    return PALET_AVATAR_MOBILE[jumlah % PALET_AVATAR_MOBILE.length];
+}
+
 // Sapaan personal ("Selamat datang, [Nama]") di puncak Dashboard, mengambil
 // nama tampilan yang sama dipakai header & sidebar (fallback ke email).
 function muatSapaanUser() {
@@ -164,6 +208,37 @@ async function muatDashboard() {
         if (elUtang) elUtang.innerText = "Rp " + totalUtangGlobal.toLocaleString('id-ID');
         if (elPajak) elPajak.innerText = "Rp " + totalPajakGlobal.toLocaleString('id-ID');
 
+        // 3b. Render Kartu Statistik Beranda Mobile ("Home") - data sama
+        // dengan kartu desktop di atas, hanya tata letaknya berbeda.
+        // Catatan: dataBulanan mengelompokkan transaksi berdasarkan NOMOR
+        // BULAN saja (lihat komentar di kalkulasi di atas) - "bulan ini"
+        // berarti gabungan seluruh transaksi bulan tersebut lintas tahun,
+        // sama seperti Grafik & Tabel Tren Bulanan yang sudah ada, bukan
+        // murni bulan berjalan tahun ini saja.
+        const elValPendapatanBulanMobile = document.getElementById('valPendapatanBulanMobile');
+        const elDeltaPendapatanBulanMobile = document.getElementById('deltaPendapatanBulanMobile');
+        const elValLabaBersihMobile = document.getElementById('valLabaBersihMobile');
+        const elValTotalBebanMobile = document.getElementById('valTotalBebanMobile');
+
+        const bulanIniIndex = new Date().getMonth();
+        const pendapatanBulanIni = dataBulanan[bulanIniIndex].pendapatan;
+        if (elValPendapatanBulanMobile) elValPendapatanBulanMobile.innerText = "Rp" + pendapatanBulanIni.toLocaleString('id-ID');
+        if (elValLabaBersihMobile) elValLabaBersihMobile.innerText = formatRupiahSingkatMobile(labaBersihGlobal);
+        if (elValTotalBebanMobile) elValTotalBebanMobile.innerText = formatRupiahSingkatMobile(totalBebanGlobal);
+
+        if (elDeltaPendapatanBulanMobile) {
+            const pendapatanBulanLalu = bulanIniIndex > 0 ? dataBulanan[bulanIniIndex - 1].pendapatan : 0;
+            if (pendapatanBulanLalu > 0) {
+                const persenPerubahan = ((pendapatanBulanIni - pendapatanBulanLalu) / pendapatanBulanLalu) * 100;
+                const naik = persenPerubahan >= 0;
+                elDeltaPendapatanBulanMobile.hidden = false;
+                elDeltaPendapatanBulanMobile.className = "badge-delta-mobile " + (naik ? "is-up" : "is-down");
+                elDeltaPendapatanBulanMobile.innerText = (naik ? "▲ " : "▼ ") + Math.abs(persenPerubahan).toLocaleString('id-ID', { maximumFractionDigits: 1 }) + "%";
+            } else {
+                elDeltaPendapatanBulanMobile.hidden = true;
+            }
+        }
+
         // 4. Render Status Keseimbangan
         const elStatusBalance = document.getElementById('statusBalanceGlobal');
         if (elStatusBalance) {
@@ -227,6 +302,48 @@ async function muatDashboard() {
                     <td class="p-3 text-right ${kelasUtang}">Rp ${totalUtangGlobal.toLocaleString('id-ID')}</td>
                 </tr>
             `;
+        }
+
+        // 5b. Render Kartu Unit Usaha Beranda Mobile - data sama dengan
+        // tabel desktop di atas, unit berstatus "Ditutup" juga disembunyikan
+        // di sini agar konsisten.
+        const elUnitUsahaMobileList = document.getElementById('unitUsahaMobileList');
+        if (elUnitUsahaMobileList) {
+            const unitDitampilkan = unitUsahaMaster.filter(u => u.status !== "Ditutup" && u.kode !== "SHARED");
+            elUnitUsahaMobileList.innerHTML = unitDitampilkan.map(u => {
+                const dataU = dataPerUnit[u.kode] || { pendapatan: 0, beban: 0, utang: 0 };
+                const labaU = dataU.pendapatan - dataU.beban;
+                return `
+                    <div class="unit-card-mobile" style="flex:0 0 8.5rem;">
+                        <div class="unit-badge-mobile" style="background:${warnaAvatarMobile(u.kode)};">${escapeHtml((u.kode || '?').slice(0, 2).toUpperCase())}</div>
+                        <p class="unit-name-mobile">${escapeHtml(u.nama)}</p>
+                        <p class="unit-value-mobile">${formatRupiahSingkatMobile(labaU)}</p>
+                    </div>
+                `;
+            }).join('') || `<p class="text-xs text-stone-400 dark:text-stone-500">Belum ada master data unit usaha.</p>`;
+        }
+
+        // 5c. Render Aktivitas Terbaru Beranda Mobile - 5 jurnal paling baru
+        // (ambilSemuaJurnalPusat() sudah mengurutkan menurun berdasarkan
+        // id_jurnal, lihat kelompokkanBarisJurnal() di js/db.js). Nominal
+        // yang ditampilkan adalah total_debit jurnal (= total_kredit, karena
+        // jurnal double-entry selalu seimbang) TANPA tanda +/- semu - satu
+        // jurnal tidak punya satu "arah" tunggal yang sahih secara akuntansi
+        // seperti mutasi rekening pribadi, jadi tidak dipaksakan warna
+        // merah/hijau di sini.
+        const elAktivitasTerbaruMobileList = document.getElementById('aktivitasTerbaruMobileList');
+        if (elAktivitasTerbaruMobileList) {
+            const aktivitasTerbaru = semuaJurnal.slice(0, 5);
+            elAktivitasTerbaruMobileList.innerHTML = aktivitasTerbaru.map(jurnal => `
+                <div class="list-row-mobile">
+                    <div class="row-avatar-mobile" style="background:${warnaAvatarMobile(jurnal.lawan_transaksi)};">${escapeHtml(inisialLawanTransaksiMobile(jurnal.lawan_transaksi))}</div>
+                    <div class="row-main-mobile">
+                        <p class="row-title-mobile">${escapeHtml(jurnal.lawan_transaksi || 'Tanpa Nama')}</p>
+                        <p class="row-sub-mobile">${escapeHtml(jurnal.keterangan || '-')}</p>
+                    </div>
+                    <span class="row-amt-mobile">${formatRupiahSingkatMobile(jurnal.total_debit)}</span>
+                </div>
+            `).join('') || `<p class="text-xs text-stone-400 dark:text-stone-500">Belum ada transaksi.</p>`;
         }
 
         // 6. Render Tabel Tren Bulanan

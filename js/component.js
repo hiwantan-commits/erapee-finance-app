@@ -103,12 +103,61 @@ const PETA_IKON_ELEGANT = {
     'histori': '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
     'branding': '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.9 1.5-1.9-.1-.4-.4-.8-.4-1.2 0-.8.7-1.4 1.5-1.4H16a4 4 0 0 0 4-4c0-5-3.6-9.5-8-9.5Z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15" cy="8" r="1"/>',
     'users': '<circle cx="9" cy="8" r="3"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 12.5c2.2 0 4 1.9 4 4.3"/>',
-    'closing': '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'
+    'closing': '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+    'profile': '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>'
 };
 
 function ikonElegantHtml(href) {
     const isiSvg = PETA_IKON_ELEGANT[href] || '<circle cx="12" cy="12" r="9"/>';
     return `<svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${isiSvg}</svg>`;
+}
+
+// ==================== Tab Navigasi Bawah (mobile, Sprint 1) ====================
+// Dipakai lewat kelas .tabbar-mobile/.tab-mobile dari css/style.css (fondasi
+// Sprint 0). Hanya 4 tujuan utama dipilih - bukan seluruh menuGroups - karena
+// tab bawah cuma muat sedikit item; menu lengkap tetap lewat sidebar (dibuka
+// via tombol hamburger, tidak dihapus). Keempatnya sengaja dipilih dari
+// halaman yang bisa diakses SEMUA peran (Super Admin/Admin/Akuntan/Auditor)
+// supaya tab bawah tidak perlu logika penyaringan peran seperti sidebar.
+const TAB_BAWAH_MOBILE = [
+    { name: 'Beranda', href: 'index' },
+    { name: 'Jurnal', href: 'manajemen' },
+    { name: 'Laporan', href: 'laporan' },
+    { name: 'Akun', href: 'profile' }
+];
+
+function muatTabBarMobile(currentFile) {
+    // Tab bawah hanya untuk halaman bertema elegant (satu-satunya tema yang
+    // sudah mendukung dark mode & komponen -mobile dari Sprint 0).
+    if (!modeTemaElegantAktif()) return;
+
+    const lama = document.getElementById('tabbar-mobile-container');
+    if (lama) lama.remove();
+
+    const tabsHtml = TAB_BAWAH_MOBILE.map(tab => {
+        const aktif = currentFile === tab.href;
+        return `
+            <a href="/${tab.href}" class="tab-mobile${aktif ? ' is-active' : ''}">
+                ${ikonElegantHtml(tab.href)}
+                ${tab.name}
+            </a>
+        `;
+    }).join('');
+
+    const nav = document.createElement('nav');
+    nav.id = 'tabbar-mobile-container';
+    nav.className = 'tabbar-mobile md:hidden';
+    nav.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:40;padding-bottom:env(safe-area-inset-bottom);';
+    nav.innerHTML = tabsHtml;
+    document.body.appendChild(nav);
+
+    // Beri jarak bawah pada kontainer scroll (elemen setelah #sidebar-container
+    // di setiap halaman bertema elegant) supaya konten paling bawah tidak
+    // tertutup tab bar - lihat .has-mobile-tabbar-padding di css/style.css
+    // (hanya berlaku di layar mobile lewat media query di sana).
+    const sidebarEl = document.getElementById('sidebar-container');
+    const kontainerScroll = sidebarEl ? sidebarEl.nextElementSibling : null;
+    if (kontainerScroll) kontainerScroll.classList.add('has-mobile-tabbar-padding');
 }
 
 function bangunGroupsHtmlKlasik(menuGroups, userRole, currentFile) {
@@ -334,6 +383,7 @@ async function muatSidebarAndBranding() {
                 </div>
             </aside>
         `;
+        muatTabBarMobile(currentFile);
         return;
     }
 
