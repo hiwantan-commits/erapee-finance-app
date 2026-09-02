@@ -19,6 +19,13 @@ async function muatManajemenJurnal() {
         const snapUnit = await getDocs(collection(db, "master_unit_usaha"));
         const selectFilter = document.getElementById('filterUnit');
         if (selectFilter) {
+            // Fungsi ini dipanggil ulang setelah hapus transaksi (bukan cuma
+            // saat halaman pertama kali dibuka) - simpan & kembalikan pilihan
+            // filter yang sedang aktif, supaya membangun ulang isi <select>
+            // di bawah ini tidak diam-diam mengembalikannya ke "Semua Unit
+            // Usaha".
+            const nilaiTerpilihSebelumnya = selectFilter.value || 'ALL';
+
             let unitOptions = '<option value="ALL">Semua Unit Usaha</option>';
             snapUnit.forEach(d => {
                 const u = d.data();
@@ -32,6 +39,7 @@ async function muatManajemenJurnal() {
                 unitOptions += `<option value="${kode}">${label}</option>`;
             });
             selectFilter.innerHTML = unitOptions;
+            selectFilter.value = nilaiTerpilihSebelumnya;
         }
 
         const listJurnal = await ambilSemuaJurnalPusat();
@@ -48,8 +56,19 @@ async function muatManajemenJurnal() {
         });
         listJurnalCache = listJurnal;
 
-        halamanAktif = 1;
-        renderTabelDenganPagination(listJurnalCache);
+        // Sengaja TIDAK mereset halamanAktif ke 1 di sini - fungsi ini juga
+        // dipanggil ulang setelah hapus transaksi (hapusJurnalGrup), dan
+        // pengguna yang menghapus baris dari halaman 3 mengharapkan tetap
+        // berada di halaman 3, bukan terlempar balik ke halaman 1.
+        // renderTabelDenganPagination() sendiri sudah menangani kasus
+        // halaman aktif jadi tidak valid lagi (mis. halaman terakhir jadi
+        // kosong setelah baris terakhirnya dihapus) dengan menurunkannya ke
+        // halaman terakhir yang masih ada.
+        //
+        // Dipakai bersama dapatkanDataTersaring() (bukan listJurnalCache
+        // mentah) supaya filter pencarian/unit/tanggal yang sedang aktif
+        // tetap diterapkan setelah reload, bukan diam-diam terlewati.
+        renderTabelDenganPagination(dapatkanDataTersaring());
     } catch (err) {
         console.error("Gagal memuat manajemen jurnal:", err);
         tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500 dark:text-red-400">Gagal memuat data dari pusat database.</td></tr>`;
