@@ -165,7 +165,7 @@ function renderDraf() {
         `);
 
         kartuMobile.push(`
-            <div id="kartu-draf-${draf.id}" class="border border-stone-100 dark:border-stone-800 rounded-xl p-4">
+            <div id="kartu-draf-${draf.id}" class="border border-stone-200/70 dark:border-stone-800 rounded-[0.625rem] p-4">
                 <div class="flex justify-between items-start gap-2 mb-2">
                     <div class="flex items-start gap-2">
                         ${checkboxHtml ? `<div class="pt-1">${checkboxHtml}</div>` : ''}
