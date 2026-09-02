@@ -165,7 +165,7 @@ function renderTabelDanKartu(daftarUnit) {
         kartuContainer.innerHTML = daftarUnit.map(u => {
             const status = hitungStatusMargin(u.margin, u.laba);
             return `
-                <div class="border border-stone-100 dark:border-stone-800 rounded-xl p-4">
+                <div class="border border-stone-200/70 dark:border-stone-800 rounded-[0.625rem] p-4">
                     <div class="flex justify-between items-start gap-2 mb-2">
                         <div class="font-bold text-stone-900 dark:text-stone-100 text-sm">${escapeHtml(u.nama)}</div>
                         <span class="px-2 py-0.5 rounded font-semibold text-[11px] ${status.kelas} shrink-0">${status.label}</span>
@@ -562,6 +562,27 @@ function renderIndikatorPertumbuhan(elId, nilaiIni, nilaiLalu, tahunLalu, naikBa
     el.innerHTML = `<span class="${warna} font-semibold">${panah} ${Math.abs(pertumbuhan).toFixed(1)}%</span> <span class="text-stone-400 dark:text-stone-500">vs ${escapeHtml(tahunLalu)}</span>`;
 }
 
+// Versi badge pill untuk kartu hero mobile (badge-delta-mobile, lihat
+// css/style.css) - is-up/is-down dipetakan dari kabarBaik (bukan dari arah
+// kenaikan mentah), supaya "▼" tetap tampil hijau/oranye ketika penurunan
+// itu sendiri adalah kabar baik.
+function renderBadgeDeltaMobile(elId, nilaiIni, nilaiLalu, naikBaik) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+
+    const pertumbuhan = hitungPertumbuhan(nilaiIni, nilaiLalu);
+    if (pertumbuhan === null) {
+        el.hidden = true;
+        return;
+    }
+
+    const naik = pertumbuhan >= 0;
+    const kabarBaik = naik === naikBaik;
+    el.hidden = false;
+    el.className = `badge-delta-mobile ${kabarBaik ? 'is-up' : 'is-down'}`;
+    el.innerText = `${naik ? '▲' : '▼'} ${Math.abs(pertumbuhan).toFixed(1)}%`;
+}
+
 let yoyTerkini = { tahunIni: null, tahunLalu: null };
 
 function renderYoY(tahunIni, tahunLalu) {
@@ -586,15 +607,23 @@ function renderYoY(tahunIni, tahunLalu) {
     setTeksAman('yoyBebanIni', formatRupiah(dataIni.beban));
     setTeksAman('yoyLabaIni', formatRupiah(dataIni.laba));
 
+    // Kartu ringkas Beranda-style untuk layar sempit (Sprint 2) - data sama.
+    setTeksAman('yoyPendapatanIniMobile', formatRupiah(dataIni.pendapatan));
+    setTeksAman('yoyBebanIniMobile', formatRupiah(dataIni.beban));
+    setTeksAman('yoyLabaIniMobile', formatRupiah(dataIni.laba));
+
     if (dataLalu) {
         renderIndikatorPertumbuhan('yoyPendapatanGrowth', dataIni.pendapatan, dataLalu.pendapatan, tahunLalu, true);
         renderIndikatorPertumbuhan('yoyBebanGrowth', dataIni.beban, dataLalu.beban, tahunLalu, false);
         renderIndikatorPertumbuhan('yoyLabaGrowth', dataIni.laba, dataLalu.laba, tahunLalu, true);
+        renderBadgeDeltaMobile('yoyLabaGrowthMobile', dataIni.laba, dataLalu.laba, true);
     } else {
         ['yoyPendapatanGrowth', 'yoyBebanGrowth', 'yoyLabaGrowth'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.innerHTML = '<span class="text-stone-400 dark:text-stone-500">Tanpa data pembanding</span>';
         });
+        const elBadgeMobile = document.getElementById('yoyLabaGrowthMobile');
+        if (elBadgeMobile) elBadgeMobile.hidden = true;
     }
 
     const canvasEl = document.getElementById('grafikYoY');

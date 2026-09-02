@@ -66,7 +66,31 @@
                 </div>
 
                 <!-- Kartu Ringkasan Arus Kas -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 print:hidden">
+                <!-- Layar sempit: hero + tile gaya Beranda mobile (Sprint 2).
+                     Layar md ke atas: empat kartu berdampingan seperti semula. -->
+                <div class="md:hidden mb-8 space-y-2.5 print:hidden">
+                    <div class="stat-card-mobile">
+                        <div class="stat-row-top-mobile">
+                            <p class="stat-label-mobile">Kenaikan/Penurunan Kas Bersih</p>
+                        </div>
+                        <p class="stat-value-mobile" id="arusKasBersihMobile">Rp 0</p>
+                    </div>
+                    <div class="flex gap-2.5">
+                        <div class="tile-mobile">
+                            <p class="tile-label-mobile">Operasi</p>
+                            <p class="tile-value-mobile" id="arusKasOperasiMobile">Rp 0</p>
+                        </div>
+                        <div class="tile-mobile">
+                            <p class="tile-label-mobile">Investasi</p>
+                            <p class="tile-value-mobile text-amber-600 dark:text-amber-400" id="arusKasInvestasiMobile">Rp 0</p>
+                        </div>
+                        <div class="tile-mobile">
+                            <p class="tile-label-mobile">Pendanaan</p>
+                            <p class="tile-value-mobile text-[#D97757]" id="arusKasPendanaanMobile">Rp 0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:grid md:grid-cols-4 gap-4 mb-8 print:hidden">
                     <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
                         <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Aktivitas Operasi</p>
                         <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-50 mt-2" id="arusKasOperasi">Rp 0</h3>

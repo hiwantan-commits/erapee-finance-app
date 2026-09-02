@@ -90,7 +90,29 @@
                         Belum ada data tahun pembanding untuk dianalisis - angka di bawah hanya menampilkan tahun yang sedang berjalan.
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <!-- Layar sempit: hero + tile gaya Beranda mobile (Sprint 2), mengikuti
+                         data & filter yang sama dengan kartu md+ di bawah - diisi ulang
+                         oleh renderYoY() di js/business-analytics-page.js. -->
+                    <div class="md:hidden mb-6 space-y-2.5">
+                        <div class="stat-card-mobile">
+                            <div class="stat-row-top-mobile">
+                                <p class="stat-label-mobile">Laba Bersih (Tahun Ini)</p>
+                                <span id="yoyLabaGrowthMobile" class="badge-delta-mobile is-up" hidden></span>
+                            </div>
+                            <p class="stat-value-mobile" id="yoyLabaIniMobile">Rp 0</p>
+                        </div>
+                        <div class="flex gap-2.5">
+                            <div class="tile-mobile">
+                                <p class="tile-label-mobile">Total Pendapatan</p>
+                                <p class="tile-value-mobile" id="yoyPendapatanIniMobile">Rp 0</p>
+                            </div>
+                            <div class="tile-mobile">
+                                <p class="tile-label-mobile">Total Beban</p>
+                                <p class="tile-value-mobile" id="yoyBebanIniMobile">Rp 0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:grid md:grid-cols-3 gap-4 mb-6">
                         <div class="p-4 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/60">
                             <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Total Pendapatan</p>
                             <h4 class="text-xl font-semibold text-stone-900 dark:text-stone-50 mt-1" id="yoyPendapatanIni">Rp 0</h4>
