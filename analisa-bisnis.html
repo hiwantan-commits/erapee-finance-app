@@ -33,7 +33,7 @@
                 <!-- Rasio Keuangan Kunci -->
                 <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-8">
                     <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-1">Rasio Keuangan Kunci</h3>
-                    <p class="text-[11px] text-stone-400 dark:text-stone-500 mb-5">Snapshot kesehatan keuangan kumulatif seluruh perusahaan hingga transaksi terbaru - tidak ikut filter Unit Usaha/Bulan/Tahun di atas, karena akun Kas &amp; Neraca tidak ditandai per unit usaha. *Ambang status bersifat indikatif umum, bukan standar baku industri - sesuaikan dengan karakteristik bisnis Anda.</p>
+                    <p class="text-[11px] text-stone-400 dark:text-stone-500 mb-5">Snapshot kesehatan keuangan kumulatif seluruh perusahaan hingga transaksi terbaru - tidak ikut filter Unit Usaha/Rentang Tanggal di atas, karena akun Kas &amp; Neraca tidak ditandai per unit usaha. *Ambang status bersifat indikatif umum, bukan standar baku industri - sesuaikan dengan karakteristik bisnis Anda.</p>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                         <div class="p-4 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/60">
@@ -109,18 +109,24 @@
                 <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50">Profitabilitas per Unit Usaha</h3>
-                        <p class="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Pilih satu Unit Usaha untuk fokus pada laporannya sendiri, dan/atau persempit ke bulan &amp; tahun tertentu</p>
+                        <p class="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Pilih satu Unit Usaha untuk fokus pada laporannya sendiri, dan/atau persempit ke rentang tanggal tertentu (bebas lintas bulan/tahun)</p>
                     </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <select id="filterUnitBisnis" class="form-input-elegant text-xs font-semibold py-2">
-                            <option value="SEMUA">Semua Unit Usaha</option>
-                        </select>
-                        <select id="filterBulanBisnis" class="form-input-elegant text-xs font-semibold py-2">
-                            <option value="SEMUA">Semua Bulan</option>
-                        </select>
-                        <select id="filterTahunBisnis" class="form-input-elegant text-xs font-semibold py-2">
-                            <option value="SEMUA">Semua Tahun</option>
-                        </select>
+                    <div class="flex flex-wrap items-end gap-2">
+                        <div>
+                            <label for="filterUnitBisnis" class="block text-[11px] text-stone-500 dark:text-stone-400 mb-1">Unit Usaha</label>
+                            <select id="filterUnitBisnis" class="form-input-elegant text-xs font-semibold py-2">
+                                <option value="SEMUA">Semua Unit Usaha</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterTanggalDariBisnis" class="block text-[11px] text-stone-500 dark:text-stone-400 mb-1">Dari Tanggal</label>
+                            <input type="date" id="filterTanggalDariBisnis" class="form-input-elegant text-xs font-semibold py-2">
+                        </div>
+                        <div>
+                            <label for="filterTanggalSampaiBisnis" class="block text-[11px] text-stone-500 dark:text-stone-400 mb-1">Sampai Tanggal</label>
+                            <input type="date" id="filterTanggalSampaiBisnis" class="form-input-elegant text-xs font-semibold py-2">
+                        </div>
+                        <button type="button" id="btnSemuaPeriodeBisnis" class="btn-elegant-secondary text-xs py-2 px-3">Semua Periode</button>
                     </div>
                 </div>
 
@@ -186,7 +192,7 @@
                 <!-- Analisis Struktur Beban -->
                 <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-8">
                     <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-1">Analisis Struktur Beban</h3>
-                    <p class="text-xs text-stone-500 dark:text-stone-400 mb-4">Akun beban dengan kontribusi terbesar terhadap total pengeluaran, mengikuti filter Unit Usaha/Bulan/Tahun di bagian Profitabilitas per Unit Usaha di atas</p>
+                    <p class="text-xs text-stone-500 dark:text-stone-400 mb-4">Akun beban dengan kontribusi terbesar terhadap total pengeluaran, mengikuti filter Unit Usaha/Rentang Tanggal di bagian Profitabilitas per Unit Usaha di atas</p>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div class="p-4 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/60">
@@ -229,7 +235,7 @@
                 <!-- Vendor & Pelanggan Teratas -->
                 <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-8">
                     <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-1">Vendor &amp; Pelanggan Teratas</h3>
-                    <p class="text-xs text-stone-500 dark:text-stone-400 mb-5">Ranking berdasarkan nama "Lawan Transaksi" yang dicatat di setiap jurnal - mengikuti filter Unit Usaha/Bulan/Tahun di bagian Profitabilitas per Unit Usaha di atas. Transaksi tanpa nama lawan transaksi tidak ikut dihitung.</p>
+                    <p class="text-xs text-stone-500 dark:text-stone-400 mb-5">Ranking berdasarkan nama "Lawan Transaksi" yang dicatat di setiap jurnal - mengikuti filter Unit Usaha/Rentang Tanggal di bagian Profitabilitas per Unit Usaha di atas. Transaksi tanpa nama lawan transaksi tidak ikut dihitung.</p>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <!-- Pelanggan Teratas -->
@@ -255,7 +261,7 @@
                 <!-- Proyeksi Arus Kas & Cash Runway -->
                 <div class="bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm mb-8">
                     <h3 class="h-elegant-3 text-stone-900 dark:text-stone-50 mb-1">Proyeksi Arus Kas &amp; Cash Runway</h3>
-                    <p class="text-xs text-stone-500 dark:text-stone-400 mb-5">Estimasi sederhana berbasis tren transaksi beberapa bulan terakhir - bukan prediksi presisi, gunakan sebagai sinyal awal saja. Selalu memakai data kas konsolidasi seluruh perusahaan, tidak ikut filter Unit Usaha/Bulan/Tahun di atas.</p>
+                    <p class="text-xs text-stone-500 dark:text-stone-400 mb-5">Estimasi sederhana berbasis tren transaksi beberapa bulan terakhir - bukan prediksi presisi, gunakan sebagai sinyal awal saja. Selalu memakai data kas konsolidasi seluruh perusahaan, tidak ikut filter Unit Usaha/Rentang Tanggal di atas.</p>
 
                     <div id="proyeksiCatatanKurang" class="hidden p-4 bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-xl text-sm text-center">
                         Riwayat transaksi masih kurang dari 2 bulan berjalan - proyeksi memerlukan minimal 2 bulan data untuk mulai dihitung.
