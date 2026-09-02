@@ -1,0 +1,17 @@
+{
+    "name": "PT ERAPEE Anugrah Sejahtera - Aplikasi Keuangan",
+    "short_name": "ERAPEE Finance",
+    "description": "Aplikasi akuntansi & keuangan internal PT ERAPEE Anugrah Sejahtera.",
+    "start_url": "/index",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#fafaf9",
+    "theme_color": "#D97757",
+    "lang": "id",
+    "icons": [
+        { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+        { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+        { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ]
+}

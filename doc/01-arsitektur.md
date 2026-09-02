@@ -10,6 +10,7 @@
 | Database | Firebase Firestore (NoSQL, koleksi/dokumen) |
 | Autentikasi | Firebase Authentication (email/password) |
 | Hosting | Vercel (situs statis) |
+| PWA (installable) | `manifest.json` + `sw.js` — lihat [Dukungan PWA](#dukungan-pwa-installable) di bawah |
 | Backup terjadwal | GitHub Actions + Google Drive API (lihat [06-deployment-operasional.md](06-deployment-operasional.md)) |
 
 Tidak ada `package.json` di root repo secara sengaja — lihat komentar di
@@ -20,6 +21,9 @@ cara proyek di-deploy dari "situs statis murni" menjadi "proyek Node.js".
 
 ```
 /                     - Setiap file .html adalah satu halaman aplikasi (lihat 03-halaman.md)
+├── manifest.json     - Manifest PWA (nama, ikon, warna, mode tampilan "standalone")
+├── sw.js             - Service worker minimal, hanya untuk syarat instalasi (lihat di bawah)
+├── icons/            - Ikon PWA (icon-192.png, icon-512.png, apple-touch-icon.png)
 ├── css/
 │   └── style.css     - Gaya kustom di luar Tailwind (dropdown, animasi, gaya cetak, dll)
 ├── js/                - Seluruh logika aplikasi, satu modul ES per file
@@ -37,6 +41,7 @@ cara proyek di-deploy dari "situs statis murni" menjadi "proyek Node.js".
 │   ├── recurring-db.js - Lapisan data & orkestrasi Jurnal Berulang
 │   ├── tema-fouc-init.js       - Terapkan dark mode sebelum render pertama (anti-flash)
 │   ├── tema-tailwind-config.js - Konfigurasi Tailwind CDN (darkMode: 'class')
+│   ├── pwa-register.js - Mendaftarkan sw.js di setiap halaman
 │   └── *-page.js       - Satu controller per halaman (lihat 03-halaman.md)
 ├── scripts/
 │   └── backup-ke-drive.mjs  - Skrip backup Firestore -> Google Drive (dijalankan GitHub Actions)
@@ -116,3 +121,32 @@ Setiap item menu punya daftar `roles` sendiri yang menentukan visibilitasnya —
 Halaman `profile.html` (profil akun milik pengguna sendiri) sengaja **tidak** masuk
 `menuGroups` — diakses lewat baris profil di bagian bawah sidebar / tautan nama pengguna di
 header, bukan lewat navigasi menu utama.
+
+## Dukungan PWA (Installable)
+
+Aplikasi bisa di-"Instal" lewat browser (Chrome/Edge: ikon instal di address bar atau
+menu "Instal Aplikasi"; Android: "Add to Home Screen"; iOS Safari: "Add to Home Screen"
+lewat menu Share) sehingga terbuka tanpa chrome browser, dengan ikon sendiri di
+homescreen/desktop — persis seperti aplikasi native. Tiga berkas pendukungnya:
+
+- **`manifest.json`** (di root) — nama aplikasi, ikon (`icons/icon-192.png`,
+  `icons/icon-512.png`), warna tema (`#D97757`, aksen terracotta yang sama dipakai
+  avatar sidebar), dan `display: "standalone"`. Ditautkan di `<head>` setiap halaman
+  lewat `<link rel="manifest" href="/manifest.json">`.
+- **`sw.js`** (di root) — service worker, didaftarkan oleh `js/pwa-register.js` di
+  setiap halaman.
+- **`icons/apple-touch-icon.png`** — ikon khusus iOS Safari (tidak dibaca dari
+  `manifest.json`, harus `<link rel="apple-touch-icon">` terpisah).
+
+> **Keputusan desain penting — TIDAK ada mode offline.** `sw.js` sengaja
+> **tidak melakukan caching apa pun** — setiap `fetch` diteruskan langsung ke jaringan
+> persis seperti tanpa service worker. Ini disengaja: aplikasi bergantung penuh pada
+> data live Firestore dan validasi real-time saat menyimpan transaksi (duplikat No.
+> Bukti, kunci periode tutup buku — lihat [04-modul-akuntansi.md](04-modul-akuntansi.md)).
+> Meng-cache HTML/JS/data akan berisiko menyajikan versi aplikasi yang sudah usang ke
+> pengguna yang sudah meng-install PWA-nya, atau memutus konsistensi antara yang
+> terlihat di layar dengan yang sungguh-sungguh tersimpan di server. Kehadiran service
+> worker ini semata memenuhi syarat teknis browser untuk menampilkan prompt instalasi —
+> bukan untuk kemampuan bekerja tanpa koneksi internet. Menambahkan caching di kemudian
+> hari (mis. app-shell caching untuk aset statis yang jarang berubah) memerlukan strategi
+> invalidasi cache yang hati-hati agar tidak mengulang masalah "versi usang" ini.
