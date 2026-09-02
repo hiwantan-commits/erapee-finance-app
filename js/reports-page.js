@@ -272,10 +272,19 @@ function renderLabaRugiDanTrialBalance() {
                 <div class="border border-stone-200/70 dark:border-stone-800 rounded-[0.625rem] p-4">
                     <div class="font-medium text-stone-800 dark:text-stone-200 mb-1">${escapeHtml(acc.nama)}</div>
                     <span class="badge-tag-mobile">${escapeHtml(acc.kode)}</span>
-                    <div class="grid grid-cols-3 gap-2 text-xs border-t border-stone-100 dark:border-stone-800 pt-2 mt-2.5">
-                        <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Debit</p><p class="font-semibold text-stone-700 dark:text-stone-300 break-words">${acc.totalDebit === 0 ? '-' : acc.totalDebit.toLocaleString('id-ID')}</p></div>
-                        <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Kredit</p><p class="font-semibold text-stone-700 dark:text-stone-300 break-words">${acc.totalKredit === 0 ? '-' : acc.totalKredit.toLocaleString('id-ID')}</p></div>
-                        <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Saldo</p><p class="font-bold text-stone-900 dark:text-stone-100 break-words">${selisihSaldo.toLocaleString('id-ID')}</p></div>
+                    <div class="space-y-1.5 text-xs border-t border-stone-100 dark:border-stone-800 pt-2 mt-2.5">
+                        <div class="flex justify-between items-center gap-2">
+                            <p class="text-stone-400 dark:text-stone-500 shrink-0">Debit</p>
+                            <p class="font-semibold text-stone-700 dark:text-stone-300 text-right break-words">${acc.totalDebit === 0 ? '-' : acc.totalDebit.toLocaleString('id-ID')}</p>
+                        </div>
+                        <div class="flex justify-between items-center gap-2">
+                            <p class="text-stone-400 dark:text-stone-500 shrink-0">Kredit</p>
+                            <p class="font-semibold text-stone-700 dark:text-stone-300 text-right break-words">${acc.totalKredit === 0 ? '-' : acc.totalKredit.toLocaleString('id-ID')}</p>
+                        </div>
+                        <div class="flex justify-between items-center gap-2">
+                            <p class="text-stone-400 dark:text-stone-500 shrink-0">Saldo</p>
+                            <p class="font-bold text-stone-900 dark:text-stone-100 text-right break-words">${selisihSaldo.toLocaleString('id-ID')}</p>
+                        </div>
                     </div>
                 </div>
             `;

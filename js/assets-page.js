@@ -149,10 +149,19 @@ async function muatDaftarAset() {
                                 <div class="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">${escapeHtml(aset.metode)}</div>
                             </div>
                         </div>
-                        <div class="grid grid-cols-3 gap-2 text-xs border-t border-stone-100 dark:border-stone-800 pt-2 mb-3">
-                            <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Perolehan</p><p class="font-semibold text-stone-700 dark:text-stone-300 break-words">${hasil.nilaiPerolehan.toLocaleString('id-ID')}</p></div>
-                            <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Penyusutan</p><p class="font-semibold text-amber-600 dark:text-amber-400 break-words">${Math.round(hasil.akumulasiPenyusutan).toLocaleString('id-ID')}</p></div>
-                            <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Nilai Buku</p><p class="font-bold text-emerald-600 dark:text-emerald-400 break-words">${Math.round(hasil.nilaiBuku).toLocaleString('id-ID')}</p></div>
+                        <div class="space-y-1.5 text-xs border-t border-stone-100 dark:border-stone-800 pt-2 mb-3">
+                            <div class="flex justify-between items-center gap-2">
+                                <p class="text-stone-400 dark:text-stone-500 shrink-0">Perolehan</p>
+                                <p class="font-semibold text-stone-700 dark:text-stone-300 text-right break-words">${hasil.nilaiPerolehan.toLocaleString('id-ID')}</p>
+                            </div>
+                            <div class="flex justify-between items-center gap-2">
+                                <p class="text-stone-400 dark:text-stone-500 shrink-0">Penyusutan</p>
+                                <p class="font-semibold text-amber-600 dark:text-amber-400 text-right break-words">${Math.round(hasil.akumulasiPenyusutan).toLocaleString('id-ID')}</p>
+                            </div>
+                            <div class="flex justify-between items-center gap-2">
+                                <p class="text-stone-400 dark:text-stone-500 shrink-0">Nilai Buku</p>
+                                <p class="font-bold text-emerald-600 dark:text-emerald-400 text-right break-words">${Math.round(hasil.nilaiBuku).toLocaleString('id-ID')}</p>
+                            </div>
                         </div>
                         <div class="flex justify-end">
                             ${tombolAksiAsetHtml(encId)}
