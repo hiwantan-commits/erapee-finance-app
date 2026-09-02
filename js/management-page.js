@@ -174,7 +174,7 @@ function renderTabelDenganPagination(dataList) {
         // Tampilan kartu untuk layar sempit (pengganti tabel horizontal yang
         // sulit dibaca di HP karena banyak kolom).
         kartuMobile.push(`
-            <div class="border ${tidakSeimbang ? 'border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30' : 'border-stone-100 dark:border-stone-800'} rounded-xl p-4">
+            <div class="border ${tidakSeimbang ? 'border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30' : 'border-stone-200/70 dark:border-stone-800'} rounded-[0.625rem] p-4">
                 <div class="flex justify-between items-start gap-2 mb-2">
                     <div>
                         <div class="font-bold text-stone-900 dark:text-stone-100 text-sm">${escapeHtml(jurnal.id_jurnal)}</div>
