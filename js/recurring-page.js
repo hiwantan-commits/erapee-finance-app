@@ -1,6 +1,6 @@
 // js/recurring-page.js - Controller untuk jurnal-berulang.html (generate
 // draft otomatis penyusutan/amortisasi + antrean persetujuan per item).
-import { generateDanUpsertDraf, ambilSemuaDraf, setujuiDraf, tolakDraf } from "./recurring-db.js";
+import { generateDanUpsertDraf, ambilSemuaDraf, setujuiDraf, tolakDraf, batalkanPersetujuanDraf } from "./recurring-db.js";
 import { escapeHtml } from "./utils.js";
 
 let semuaDraf = [];
@@ -44,35 +44,67 @@ function akunRingkasHtml(draf) {
     return `<span class="font-mono text-stone-600 dark:text-stone-300">${escapeHtml(kodeDebit)}</span> → <span class="font-mono text-stone-600 dark:text-stone-300">${escapeHtml(kodeKredit)}</span>`;
 }
 
-// Menu aksi per-baris 3-titik (Setujui/Tolak) - hanya ditampilkan untuk
-// draft berstatus PENDING, mengikuti pola dropdown yang sudah ada di
-// halaman lain (assets-page.js, sewa-page.js).
-function tombolAksiDrafHtml(encId, status) {
-    if (status !== 'PENDING') {
-        return `<span class="text-stone-300 dark:text-stone-700 text-xs">-</span>`;
-    }
+// Menu aksi per-baris 3-titik, mengikuti pola dropdown yang sudah ada di
+// halaman lain (assets-page.js, sewa-page.js):
+// - PENDING: Setujui/Tolak.
+// - APPROVED: Edit (buka jurnalnya di Input Jurnal - draft ini sudah jadi
+//   jurnal sungguhan, jadi diedit lewat alur edit jurnal yang sudah ada,
+//   bukan form terpisah) & Hapus (batalkan persetujuan - lihat catatan di
+//   batalkanPersetujuanDraf() di recurring-db.js).
+// - REJECTED: tidak ada aksi lanjutan.
+function tombolAksiDrafHtml(draf) {
+    const encId = encodeURIComponent(draf.id);
     const idAman = String(encId).replace(/[^a-zA-Z0-9_-]/g, '_');
     const panelId = `menuAksiDraf-${idAman}`;
-    return `
-        <div class="relative inline-block">
-            <button type="button" onclick="window.toggleDropdownElegant(event, '${panelId}')" class="btn-elegant-icon" title="Aksi">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="12" cy="19" r="1.75"/></svg>
-            </button>
-            <div id="${panelId}" class="hidden absolute right-0 mt-1 z-50" data-dropdown-elegant>
-                <div class="dropdown-elegant-panel">
-                    <button type="button" onclick="window.setujuiSatu('${encId}')" class="dropdown-elegant-item">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                        Setujui
-                    </button>
-                    <div class="dropdown-elegant-divider"></div>
-                    <button type="button" onclick="window.tolakSatu('${encId}')" class="dropdown-elegant-item dropdown-elegant-item-danger">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                        Tolak
-                    </button>
+
+    if (draf.status === 'PENDING') {
+        return `
+            <div class="relative inline-block">
+                <button type="button" onclick="window.toggleDropdownElegant(event, '${panelId}')" class="btn-elegant-icon" title="Aksi">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="12" cy="19" r="1.75"/></svg>
+                </button>
+                <div id="${panelId}" class="hidden absolute right-0 mt-1 z-50" data-dropdown-elegant>
+                    <div class="dropdown-elegant-panel">
+                        <button type="button" onclick="window.setujuiSatu('${encId}')" class="dropdown-elegant-item">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                            Setujui
+                        </button>
+                        <div class="dropdown-elegant-divider"></div>
+                        <button type="button" onclick="window.tolakSatu('${encId}')" class="dropdown-elegant-item dropdown-elegant-item-danger">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                            Tolak
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
+    }
+
+    if (draf.status === 'APPROVED' && draf.id_jurnal_hasil) {
+        const encIdJurnal = encodeURIComponent(draf.id_jurnal_hasil);
+        return `
+            <div class="relative inline-block">
+                <button type="button" onclick="window.toggleDropdownElegant(event, '${panelId}')" class="btn-elegant-icon" title="Aksi">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="12" cy="19" r="1.75"/></svg>
+                </button>
+                <div id="${panelId}" class="hidden absolute right-0 mt-1 z-50" data-dropdown-elegant>
+                    <div class="dropdown-elegant-panel">
+                        <button type="button" onclick="window.location.href='/input-jurnal?edit=${encIdJurnal}'" class="dropdown-elegant-item">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                            Edit Jurnal
+                        </button>
+                        <div class="dropdown-elegant-divider"></div>
+                        <button type="button" onclick="window.batalkanPersetujuanSatu('${encId}')" class="dropdown-elegant-item dropdown-elegant-item-danger">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+                            Hapus & Batalkan Persetujuan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    return `<span class="text-stone-300 dark:text-stone-700 text-xs">-</span>`;
 }
 
 function perbaruiRingkasan() {
@@ -128,7 +160,7 @@ function renderDraf() {
                 <td class="p-3 text-xs">${akunRingkasHtml(draf)}</td>
                 <td class="p-3 text-xs text-right font-semibold text-stone-800 dark:text-stone-200">${Math.round(draf.nominal || 0).toLocaleString('id-ID')}</td>
                 <td class="p-3 text-xs">${badgeStatusHtml(draf.status)}</td>
-                <td class="p-3 text-center">${tombolAksiDrafHtml(encId, draf.status)}</td>
+                <td class="p-3 text-center">${tombolAksiDrafHtml(draf)}</td>
             </tr>
         `);
 
@@ -147,7 +179,7 @@ function renderDraf() {
                     <div class="col-span-2"><p class="text-stone-400 dark:text-stone-500">Akun</p><p>${akunRingkasHtml(draf)}</p></div>
                 </div>
                 <div class="flex justify-end">
-                    ${tombolAksiDrafHtml(encId, draf.status)}
+                    ${tombolAksiDrafHtml(draf)}
                 </div>
             </div>
         `);
@@ -214,6 +246,24 @@ window.tolakSatu = async function(encId) {
     if (!confirm('Tolak draft ini? Draft yang ditolak tidak akan digenerate ulang secara otomatis.')) return;
     await prosesSatuPersatu([id], 'tolak');
     terpilih.delete(id);
+    await muatDraf();
+};
+
+// Menghapus jurnal yang sudah terposting dari draft yang sudah disetujui.
+// Draft dikembalikan ke status Menunggu (bukan ikut terhapus) supaya
+// otomatis dihitung ulang & bisa disetujui lagi lain waktu - lihat catatan
+// di batalkanPersetujuanDraf() (recurring-db.js).
+window.batalkanPersetujuanSatu = async function(encId) {
+    const id = decodeURIComponent(encId);
+    const draf = window.dataDrafGlobal[id];
+    if (!draf) return;
+    if (!confirm('Hapus jurnal yang sudah terposting untuk draft ini? Draft akan kembali berstatus Menunggu dan bisa disetujui ulang. Tindakan ini tidak dapat dibatalkan.')) return;
+
+    const hasil = await batalkanPersetujuanDraf(id, draf);
+    if (!hasil.success) {
+        alert('Gagal menghapus: ' + (hasil.error || 'Terjadi kesalahan tidak diketahui.'));
+        return;
+    }
     await muatDraf();
 };
 

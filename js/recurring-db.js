@@ -10,7 +10,7 @@
 // baru menjadi jurnal sungguhan saat status-nya APPROVED.
 import { db } from "./config.js";
 import { collection, getDocs, doc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { simpanJurnalPusat } from "./db.js";
+import { simpanJurnalPusat, hapusJurnalPusat } from "./db.js";
 import {
     hitungPenyusutanBulanan,
     hitungAmortisasiSewaBulanan,
@@ -280,6 +280,37 @@ export async function tolakDraf(idDraf) {
         return { success: true };
     } catch (error) {
         console.error("Gagal menolak draft jurnal berulang:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Membatalkan persetujuan satu draft APPROVED: hapus jurnal yang sudah
+// terposting lewat hapusJurnalPusat() - tunduk pada kunci periode NORMAL
+// (TIDAK menembus periode yang sudah ditutup buku, berbeda dengan
+// setujuiDraf() yang sengaja bisa menembus untuk backfill; di sini
+// tujuannya justru melindungi periode yang sudah difinalisasi, bukan
+// mengisi bolongnya). Draft dikembalikan ke status PENDING (bukan
+// dihapus) supaya ikut terhitung ulang & bisa disetujui lagi saat
+// generateDanUpsertDraf() berikutnya berjalan - upsertDraf() di sana
+// hanya melewati draft yang BUKAN berstatus PENDING.
+export async function batalkanPersetujuanDraf(idDraf, draf) {
+    if (!draf.id_jurnal_hasil) {
+        return { success: false, error: "Draft ini tidak memiliki jurnal terposting untuk dihapus." };
+    }
+    try {
+        const hasilHapus = await hapusJurnalPusat(draf.id_jurnal_hasil);
+        if (!hasilHapus.success) return hasilHapus;
+
+        await updateDoc(doc(db, KOLEKSI_DRAF, idDraf), {
+            status: 'PENDING',
+            id_jurnal_hasil: null,
+            approved_by: null,
+            approved_at: null
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Gagal membatalkan persetujuan draft jurnal berulang:", error);
         return { success: false, error: error.message };
     }
 }
