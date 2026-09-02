@@ -75,7 +75,29 @@
                 <p class="text-xs text-stone-500 dark:text-stone-400 mb-2 print:hidden">Menampilkan Laba Rugi & Trial Balance untuk: <b id="labelPeriodeAktif" class="text-stone-700 dark:text-stone-300">Semua Periode</b>. Neraca selalu kumulatif (bukan per periode), sesuai sifatnya sebagai laporan posisi keuangan.</p>
 
                 <!-- Kartu Ringkasan Laba Rugi -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 print:hidden">
+                <!-- Layar sempit: kartu ringkas gaya Beranda mobile (Sprint 2).
+                     Layar md ke atas: tiga kartu berdampingan seperti semula,
+                     tidak diubah - elemen mobile ini diisi ulang dari data
+                     yang sama oleh js/reports-page.js, tanpa query tambahan. -->
+                <div class="md:hidden mb-8 space-y-2.5 print:hidden">
+                    <div class="stat-card-mobile">
+                        <div class="stat-row-top-mobile">
+                            <p class="stat-label-mobile">Laba Bersih Konsolidasian</p>
+                        </div>
+                        <p class="stat-value-mobile" id="laporanLabaBersihMobile">Rp 0</p>
+                    </div>
+                    <div class="flex gap-2.5">
+                        <div class="tile-mobile">
+                            <p class="tile-label-mobile">Total Pendapatan</p>
+                            <p class="tile-value-mobile text-emerald-600 dark:text-emerald-400" id="laporanTotalPendapatanMobile">Rp 0</p>
+                        </div>
+                        <div class="tile-mobile">
+                            <p class="tile-label-mobile">Total Beban</p>
+                            <p class="tile-value-mobile text-red-600 dark:text-red-400" id="laporanTotalBebanMobile">Rp 0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:grid md:grid-cols-3 gap-4 mb-8 print:hidden">
                     <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
                         <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Total Pendapatan Usaha</p>
                         <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-50 mt-2" id="laporanTotalPendapatan">Rp 0</h3>
@@ -132,7 +154,27 @@
                         <span id="neracaStatusBalance" class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 font-semibold rounded text-xs">Memuat...</span>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <!-- Layar sempit: hero + tile gaya Beranda mobile (Sprint 2).
+                         Layar md ke atas: tiga kartu berdampingan seperti semula. -->
+                    <div class="md:hidden mb-8 space-y-2.5">
+                        <div class="stat-card-mobile">
+                            <div class="stat-row-top-mobile">
+                                <p class="stat-label-mobile">Total Aset</p>
+                            </div>
+                            <p class="stat-value-mobile" id="neracaTotalAsetMobile">Rp 0</p>
+                        </div>
+                        <div class="flex gap-2.5">
+                            <div class="tile-mobile">
+                                <p class="tile-label-mobile">Total Liabilitas</p>
+                                <p class="tile-value-mobile text-red-600 dark:text-red-400" id="neracaTotalLiabilitasMobile">Rp 0</p>
+                            </div>
+                            <div class="tile-mobile">
+                                <p class="tile-label-mobile">Total Ekuitas</p>
+                                <p class="tile-value-mobile text-amber-600 dark:text-amber-400" id="neracaTotalEkuitasMobile">Rp 0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:grid md:grid-cols-3 gap-4 mb-8">
                         <div class="laporan-card bg-white dark:bg-stone-900 border border-stone-200/70 dark:border-stone-800 rounded-xl p-5">
                             <p class="h-elegant-5 text-stone-400 dark:text-stone-500">Total Aset</p>
                             <h3 class="text-lg font-semibold text-stone-900 dark:text-stone-50 mt-2" id="neracaTotalAset">Rp 0</h3>
@@ -147,7 +189,31 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Layar sempit: kartu ringkas per akun (Sprint 2), pola sama
+                         dengan Trial Balance di atas. Tabel 2 kolom asli tetap
+                         untuk layar md+ (tidak diubah). -->
+                    <div class="md:hidden space-y-5">
+                        <div>
+                            <h4 class="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase mb-2">Aset</h4>
+                            <div id="kartuNeracaAset" class="space-y-2"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase mb-2">Liabilitas</h4>
+                            <div id="kartuNeracaLiabilitas" class="space-y-2"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase mb-2">Ekuitas</h4>
+                            <div id="kartuNeracaEkuitas" class="space-y-2"></div>
+                            <div class="list-row-mobile is-card mt-2">
+                                <div class="row-main-mobile">
+                                    <p class="row-title-mobile">Laba (Rugi) Ditahan / Berjalan *</p>
+                                </div>
+                                <span class="row-amt-mobile" id="neracaLabaKumulatifMobile">Rp 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hidden md:grid md:grid-cols-2 gap-6">
                         <div>
                             <h4 class="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase mb-2">Aset</h4>
                             <table class="w-full text-left border-collapse">

@@ -34,7 +34,7 @@ function isiFilterMasaArusKas() {
 function renderKartu(item) {
     const { jurnal, kategori, netKas } = item;
     return `
-        <div class="border border-stone-100 dark:border-stone-800 rounded-xl p-4">
+        <div class="border border-stone-200/70 dark:border-stone-800 rounded-[0.625rem] p-4">
             <div class="flex justify-between items-start gap-2 mb-2">
                 <div>
                     <div class="font-bold text-stone-900 dark:text-stone-100 text-sm">${escapeHtml(jurnal.id_jurnal)}</div>
@@ -73,6 +73,17 @@ function renderLaporanArusKas() {
     if (elInvestasi) elInvestasi.innerText = formatRupiah(arusKas.investasi);
     if (elPendanaan) elPendanaan.innerText = formatRupiah(arusKas.pendanaan);
     if (elBersih) elBersih.innerText = formatRupiah(arusKas.totalBersih);
+
+    // Kartu ringkas Beranda-style untuk layar sempit (Sprint 2) - data sama.
+    const elOperasiMobile = document.getElementById('arusKasOperasiMobile');
+    const elInvestasiMobile = document.getElementById('arusKasInvestasiMobile');
+    const elPendanaanMobile = document.getElementById('arusKasPendanaanMobile');
+    const elBersihMobile = document.getElementById('arusKasBersihMobile');
+
+    if (elOperasiMobile) elOperasiMobile.innerText = formatRupiah(arusKas.operasi);
+    if (elInvestasiMobile) elInvestasiMobile.innerText = formatRupiah(arusKas.investasi);
+    if (elPendanaanMobile) elPendanaanMobile.innerText = formatRupiah(arusKas.pendanaan);
+    if (elBersihMobile) elBersihMobile.innerText = formatRupiah(arusKas.totalBersih);
 
     const tbody = document.getElementById('tabelRekonsiliasi');
     const kartuContainer = document.getElementById('kartuRekonsiliasi');

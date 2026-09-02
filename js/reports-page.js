@@ -22,6 +22,25 @@ function renderBarisNeraca(tbody, daftarAkun, warnaKode) {
     `).join('');
 }
 
+// Versi kartu untuk layar sempit (Sprint 2) - data sama dengan renderBarisNeraca()
+// di atas, hanya gaya tampilan yang mengikuti komponen "-mobile" (css/style.css).
+function renderKartuAkunMobile(container, daftarAkun) {
+    if (!container) return;
+    if (daftarAkun.length === 0) {
+        container.innerHTML = `<p class="text-xs text-stone-400 dark:text-stone-500 px-1">Belum ada data.</p>`;
+        return;
+    }
+    container.innerHTML = daftarAkun.map(acc => `
+        <div class="list-row-mobile is-card">
+            <div class="row-main-mobile">
+                <p class="row-title-mobile">${escapeHtml(acc.nama)}</p>
+                <span class="badge-tag-mobile">${escapeHtml(acc.kode)}</span>
+            </div>
+            <span class="row-amt-mobile">${acc.saldo === 0 ? '-' : acc.saldo.toLocaleString('id-ID')}</span>
+        </div>
+    `).join('');
+}
+
 // ==================== Cetakan Berjenjang (Neraca & Laba Rugi) ====================
 // Versi cetak bergaya laporan akuntansi konvensional (Kelas > Sub-Kelas >
 // Akun dengan subtotal per level), terpisah dari kartu ringkasan di layar -
@@ -64,6 +83,18 @@ function muatNeraca() {
     if (elEkuitas) elEkuitas.innerText = formatRupiah(neraca.totalEkuitas);
     if (elLaba) elLaba.innerText = formatRupiah(neraca.labaKumulatif);
 
+    // Kartu ringkas Beranda-style untuk layar sempit (Sprint 2) - data sama,
+    // hanya ditampilkan ulang lewat elemen mobile terpisah (lihat laporan.html).
+    const elAsetMobile = document.getElementById('neracaTotalAsetMobile');
+    const elLiabilitasMobile = document.getElementById('neracaTotalLiabilitasMobile');
+    const elEkuitasMobile = document.getElementById('neracaTotalEkuitasMobile');
+    const elLabaMobile = document.getElementById('neracaLabaKumulatifMobile');
+
+    if (elAsetMobile) elAsetMobile.innerText = formatRupiah(neraca.totalAset);
+    if (elLiabilitasMobile) elLiabilitasMobile.innerText = formatRupiah(neraca.totalLiabilitas);
+    if (elEkuitasMobile) elEkuitasMobile.innerText = formatRupiah(neraca.totalEkuitas);
+    if (elLabaMobile) elLabaMobile.innerText = formatRupiah(neraca.labaKumulatif);
+
     if (elStatus) {
         if (neraca.seimbang) {
             elStatus.className = "px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 font-semibold rounded text-xs";
@@ -78,6 +109,10 @@ function muatNeraca() {
     const tbodyLiabilitasEkuitas = document.getElementById('tabelNeracaLiabilitasEkuitas');
 
     if (tbodyAset) renderBarisNeraca(tbodyAset, neraca.petaAset, 'text-stone-700 dark:text-stone-300');
+
+    renderKartuAkunMobile(document.getElementById('kartuNeracaAset'), neraca.petaAset);
+    renderKartuAkunMobile(document.getElementById('kartuNeracaLiabilitas'), neraca.petaLiabilitas);
+    renderKartuAkunMobile(document.getElementById('kartuNeracaEkuitas'), neraca.petaEkuitas);
 
     if (tbodyLiabilitasEkuitas) {
         let html = '';
@@ -198,6 +233,15 @@ function renderLabaRugiDanTrialBalance() {
     if (elBeban) elBeban.innerText = formatRupiah(hasil.totalBeban);
     if (elLaba) elLaba.innerText = formatRupiah(hasil.labaBersih);
 
+    // Kartu ringkas Beranda-style untuk layar sempit (Sprint 2) - data sama.
+    const elPendapatanMobile = document.getElementById('laporanTotalPendapatanMobile');
+    const elBebanMobile = document.getElementById('laporanTotalBebanMobile');
+    const elLabaMobile = document.getElementById('laporanLabaBersihMobile');
+
+    if (elPendapatanMobile) elPendapatanMobile.innerText = formatRupiah(hasil.totalPendapatan);
+    if (elBebanMobile) elBebanMobile.innerText = formatRupiah(hasil.totalBeban);
+    if (elLabaMobile) elLabaMobile.innerText = formatRupiah(hasil.labaBersih);
+
     const tbody = document.getElementById('tabelLaporanAkun');
     const kartuContainer = document.getElementById('kartuLaporanAkun');
     if (!tbody) return;
@@ -225,10 +269,10 @@ function renderLabaRugiDanTrialBalance() {
         kartuContainer.innerHTML = hasil.petaAkun.map(acc => {
             const selisihSaldo = acc.totalDebit - acc.totalKredit;
             return `
-                <div class="border border-stone-100 dark:border-stone-800 rounded-xl p-4">
-                    <div class="font-mono font-bold text-stone-700 dark:text-stone-300 text-sm">${escapeHtml(acc.kode)}</div>
-                    <div class="font-medium text-stone-800 dark:text-stone-200 mb-2">${escapeHtml(acc.nama)}</div>
-                    <div class="grid grid-cols-3 gap-2 text-xs border-t border-stone-100 dark:border-stone-800 pt-2">
+                <div class="border border-stone-200/70 dark:border-stone-800 rounded-[0.625rem] p-4">
+                    <div class="font-medium text-stone-800 dark:text-stone-200 mb-1">${escapeHtml(acc.nama)}</div>
+                    <span class="badge-tag-mobile">${escapeHtml(acc.kode)}</span>
+                    <div class="grid grid-cols-3 gap-2 text-xs border-t border-stone-100 dark:border-stone-800 pt-2 mt-2.5">
                         <div><p class="text-stone-400 dark:text-stone-500">Debit</p><p class="font-semibold text-stone-700 dark:text-stone-300">${acc.totalDebit === 0 ? '-' : acc.totalDebit.toLocaleString('id-ID')}</p></div>
                         <div><p class="text-stone-400 dark:text-stone-500">Kredit</p><p class="font-semibold text-stone-700 dark:text-stone-300">${acc.totalKredit === 0 ? '-' : acc.totalKredit.toLocaleString('id-ID')}</p></div>
                         <div><p class="text-stone-400 dark:text-stone-500">Saldo</p><p class="font-bold text-stone-900 dark:text-stone-100">${selisihSaldo.toLocaleString('id-ID')}</p></div>
