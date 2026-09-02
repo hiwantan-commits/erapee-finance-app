@@ -171,10 +171,10 @@ function renderTabelDanKartu(daftarUnit) {
                         <span class="px-2 py-0.5 rounded font-semibold text-[11px] ${status.kelas} shrink-0">${status.label}</span>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-xs border-t border-stone-100 dark:border-stone-800 pt-2">
-                        <div><p class="text-stone-400 dark:text-stone-500">Pendapatan</p><p class="font-semibold text-stone-700 dark:text-stone-300">${formatRupiah(u.pendapatan)}</p></div>
-                        <div><p class="text-stone-400 dark:text-stone-500">Beban</p><p class="font-semibold text-stone-700 dark:text-stone-300">${formatRupiah(u.beban)}</p></div>
-                        <div><p class="text-stone-400 dark:text-stone-500">Laba</p><p class="font-bold ${u.laba >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}">${formatRupiah(u.laba)}</p></div>
-                        <div><p class="text-stone-400 dark:text-stone-500">Margin</p><p class="font-bold text-stone-800 dark:text-stone-200">${u.margin !== null ? u.margin.toFixed(1) + '%' : '-'}</p></div>
+                        <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Pendapatan</p><p class="font-semibold text-stone-700 dark:text-stone-300 break-words">${formatRupiah(u.pendapatan)}</p></div>
+                        <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Beban</p><p class="font-semibold text-stone-700 dark:text-stone-300 break-words">${formatRupiah(u.beban)}</p></div>
+                        <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Laba</p><p class="font-bold ${u.laba >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'} break-words">${formatRupiah(u.laba)}</p></div>
+                        <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Margin</p><p class="font-bold text-stone-800 dark:text-stone-200 break-words">${u.margin !== null ? u.margin.toFixed(1) + '%' : '-'}</p></div>
                     </div>
                 </div>
             `;

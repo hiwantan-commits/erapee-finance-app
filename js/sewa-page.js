@@ -136,9 +136,9 @@ async function muatDaftarSewa() {
                             <span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded font-semibold text-[11px]">${escapeHtml(sewa.unit_usaha || '-')}</span>
                         </div>
                         <div class="grid grid-cols-3 gap-2 text-xs border-t border-stone-100 dark:border-stone-800 pt-2 mb-3">
-                            <div><p class="text-stone-400 dark:text-stone-500">Total</p><p class="font-semibold text-stone-700 dark:text-stone-300">${hasil.nilaiTotal.toLocaleString('id-ID')}</p></div>
-                            <div><p class="text-stone-400 dark:text-stone-500">Teramortisasi</p><p class="font-semibold text-amber-600 dark:text-amber-400">${Math.round(hasil.akumulasiAmortisasi).toLocaleString('id-ID')}</p></div>
-                            <div><p class="text-stone-400 dark:text-stone-500">Sisa</p><p class="font-bold text-emerald-600 dark:text-emerald-400">${Math.round(hasil.nilaiBuku).toLocaleString('id-ID')}</p></div>
+                            <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Total</p><p class="font-semibold text-stone-700 dark:text-stone-300 break-words">${hasil.nilaiTotal.toLocaleString('id-ID')}</p></div>
+                            <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Teramortisasi</p><p class="font-semibold text-amber-600 dark:text-amber-400 break-words">${Math.round(hasil.akumulasiAmortisasi).toLocaleString('id-ID')}</p></div>
+                            <div class="min-w-0"><p class="text-stone-400 dark:text-stone-500">Sisa</p><p class="font-bold text-emerald-600 dark:text-emerald-400 break-words">${Math.round(hasil.nilaiBuku).toLocaleString('id-ID')}</p></div>
                         </div>
                         <div class="flex justify-end">
                             ${tombolAksiSewaHtml(encId)}
