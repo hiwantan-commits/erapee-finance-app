@@ -50,8 +50,14 @@ async function muatUnitUsaha() {
             return;
         }
 
-        snap.forEach(docSnap => {
-            const data = docSnap.data();
+        // Urutkan berdasarkan abjad nama unit usaha - Firestore mengembalikan
+        // dokumen dalam urutan yang tidak bisa diandalkan (biasanya urutan
+        // insert), jadi disortir di klien sebelum dirender.
+        const daftarUnit = [];
+        snap.forEach(docSnap => daftarUnit.push({ id: docSnap.id, ...docSnap.data() }));
+        daftarUnit.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id'));
+
+        daftarUnit.forEach(data => {
             const klasifikasiTeks = data.klasifikasi || '-';
             const status = data.status || 'Aktif';
 
@@ -66,12 +72,12 @@ async function muatUnitUsaha() {
 
             // Tambahkan atribut id baris agar mudah diberi efek highlight
             tbody.innerHTML += `
-                <tr id="row-unit-${docSnap.id}" class="hover:bg-stone-50 dark:hover:bg-stone-800/40 transition-colors">
+                <tr id="row-unit-${data.id}" class="hover:bg-stone-50 dark:hover:bg-stone-800/40 transition-colors">
                     <td class="p-3"><span class="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded font-mono font-bold text-xs">${escapeHtml(data.kode)}</span></td>
                     <td class="p-3 font-medium text-stone-800 dark:text-stone-200 text-sm">${escapeHtml(data.nama)}</td>
                     <td class="p-3 text-stone-500 dark:text-stone-400 text-sm">${escapeHtml(klasifikasiTeks)}</td>
                     <td class="p-3">${badgeStatus}</td>
-                    <td class="p-3 text-center">${tombolAksiHtml('Unit', docSnap.id, `window.editUnitUsaha('${docSnap.id}', '${encKode}', '${encNama}', '${encKlas}', '${encStatus}')`, `window.hapusUnitUsaha('${docSnap.id}')`)}</td>
+                    <td class="p-3 text-center">${tombolAksiHtml('Unit', data.id, `window.editUnitUsaha('${data.id}', '${encKode}', '${encNama}', '${encKlas}', '${encStatus}')`, `window.hapusUnitUsaha('${data.id}')`)}</td>
                 </tr>
             `;
         });

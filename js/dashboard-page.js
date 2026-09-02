@@ -86,9 +86,10 @@ async function muatDashboard() {
                 kode: "SHARED", 
                 nama: "Biaya Bersama / Lainnya", 
                 klasifikasi: "Alokasi Bersama (Shared Cost)", 
-                color: "gray" 
+                color: "gray"
             });
         }
+        unitUsahaMaster.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id'));
 
         // 2. AMBIL DATA JURNAL
         const semuaJurnal = await ambilSemuaJurnalPusat();

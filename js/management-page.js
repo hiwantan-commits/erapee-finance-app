@@ -27,8 +27,10 @@ async function muatManajemenJurnal() {
             const nilaiTerpilihSebelumnya = selectFilter.value || 'ALL';
 
             let unitOptions = '<option value="ALL">Semua Unit Usaha</option>';
-            snapUnit.forEach(d => {
-                const u = d.data();
+            const daftarUnit = [];
+            snapUnit.forEach(d => daftarUnit.push(d.data()));
+            daftarUnit.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id'));
+            daftarUnit.forEach(u => {
                 const kode = escapeHtml(u.kode);
                 const label = kode + " - " + escapeHtml(u.nama);
                 // value = kode saja, karena jurnal.unit_usaha tersimpan bersih
