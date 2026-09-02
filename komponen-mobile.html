@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sistem Desain Mobile | PT ERAPEE Anugrah Sejahtera</title>
+    <!-- Halaman referensi internal (Sprint 0) - BUKAN halaman produksi.
+         Tidak dimuat lewat js/component.js secara sengaja: tidak perlu
+         sesi login/Firebase untuk sekadar melihat kosakata komponen, dan
+         supaya jelas terpisah dari navigasi aplikasi sungguhan. Tidak
+         didaftarkan di menuGroups (js/component.js) - akses langsung
+         lewat URL /komponen-mobile untuk keperluan tim saja. -->
+    <script src="js/tema-fouc-init.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tema-tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans min-h-screen">
+
+    <header class="sticky top-0 z-30 bg-stone-50/90 dark:bg-stone-950/90 backdrop-blur border-b border-stone-200 dark:border-stone-800">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div>
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-[#D97757] mb-0.5">Sprint 0 &middot; Referensi Internal</p>
+                <h1 class="font-serif-elegant text-xl">Sistem Desain Mobile</h1>
+            </div>
+            <button onclick="window.toggleDarkModeDemo()" class="w-9 h-9 flex items-center justify-center rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800/60 transition-colors" title="Ganti tema gelap/terang">
+                <svg id="ikonDarkModeDemo" class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-10 space-y-16">
+
+        <section>
+            <p class="text-sm text-stone-600 dark:text-stone-400 leading-relaxed max-w-3xl">
+                Kosakata visual bergaya aplikasi native untuk ERAPEE Finance - kartu, chip, tab bawah, baris
+                daftar. Kelas CSS-nya sudah ditambahkan ke <code class="text-xs bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded">css/style.css</code>
+                (murni aditif, tidak mengubah kelas apa pun yang sudah ada) dengan akhiran <code class="text-xs bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded">-mobile</code>
+                supaya tidak bentrok dengan sistem "-elegant" yang sudah dipakai halaman produksi. Halaman ini
+                belum dipasang di halaman produksi mana pun - itu pekerjaan Sprint 1 dan seterusnya.
+            </p>
+        </section>
+
+        <!-- ==================== KARTU STATISTIK ==================== -->
+        <section>
+            <h2 class="font-serif-elegant text-lg mb-1">Kartu Statistik</h2>
+            <p class="text-xs text-stone-500 dark:text-stone-400 mb-4">Kelas <code>.stat-card-mobile</code> - untuk angka utama yang jadi fokus layar (mis. Pendapatan Bulanan di Beranda). Selalu gelap terlepas dari tema halaman.</p>
+            <div class="max-w-xs">
+                <div class="stat-card-mobile">
+                    <div class="stat-row-top-mobile">
+                        <p class="stat-label-mobile">Pendapatan Bulanan</p>
+                        <span class="badge-delta-mobile is-up">&#9650; 12,4%</span>
+                    </div>
+                    <p class="stat-value-mobile">Rp158.490.000</p>
+                    <svg viewBox="0 0 220 36" width="100%" height="34" fill="none" style="display:block;margin-top:6px;">
+                        <path d="M2 24 L37 27 L72 14 L107 19 L142 6 L177 16 L218 4" stroke="#e08a6c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="218" cy="4" r="3.5" fill="#e08a6c"/>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-xs text-stone-500 dark:text-stone-400 mt-3">Varian badge: <code>.is-up</code> (aksen terracotta) untuk pertumbuhan positif, <code>.is-down</code> (merah) untuk penurunan.</p>
+        </section>
+
+        <!-- ==================== TILE BERPASANGAN ==================== -->
+        <section>
+            <h2 class="font-serif-elegant text-lg mb-1">Tile Berpasangan</h2>
+            <p class="text-xs text-stone-500 dark:text-stone-400 mb-4">Kelas <code>.tile-mobile</code> - untuk dua-tiga angka pendukung berdampingan di bawah kartu statistik utama.</p>
+            <div class="max-w-xs flex gap-2.5">
+                <div class="tile-mobile">
+                    <p class="tile-label-mobile">Laba Bersih</p>
+                    <p class="tile-value-mobile text-emerald-600 dark:text-emerald-400">Rp42,2jt</p>
+                </div>
+                <div class="tile-mobile">
+                    <p class="tile-label-mobile">Total Beban</p>
+                    <p class="tile-value-mobile">Rp116,3jt</p>
+                </div>
+            </div>
+            <p class="text-xs text-stone-500 dark:text-stone-400 mt-3">Warna nominal memakai utilitas Tailwind langsung (<code>text-emerald-600 dark:text-emerald-400</code>, dst) - konsisten dengan cara laporan lain di aplikasi mewarnai angka, bukan kelas baru.</p>
+        </section>
+
+        <!-- ==================== KARTU UNIT USAHA ==================== -->
+        <section>
+            <h2 class="font-serif-elegant text-lg mb-1">Kartu Unit Usaha</h2>
+            <p class="text-xs text-stone-500 dark:text-stone-400 mb-4">Kelas <code>.unit-card-mobile</code> - <code>flex:1</code> (bukan lebar tetap) supaya kartu dalam satu baris selalu tampil utuh, tidak pernah terpotong di layar sempit.</p>
+            <div class="max-w-xs flex gap-2">
+                <div class="unit-card-mobile">
+                    <div class="unit-badge-mobile" style="background:#1c1917;">CP</div>
+                    <p class="unit-name-mobile">Kantor Pusat</p>
+                    <p class="unit-value-mobile">Rp98,3jt</p>
+                </div>
+                <div class="unit-card-mobile">
+                    <div class="unit-badge-mobile" style="background:#0d9269;">WT</div>
+                    <p class="unit-name-mobile">Wisata Tani</p>
+                    <p class="unit-value-mobile">Rp24,6jt</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== BARIS DAFTAR ==================== -->
+        <section>
+            <h2 class="font-serif-elegant text-lg mb-1">Baris Daftar</h2>
+            <p class="text-xs text-stone-500 dark:text-stone-400 mb-4">Kelas <code>.list-row-mobile</code> - varian polos (garis pemisah tipis, untuk daftar ringkas seperti Aktivitas Terbaru) dan varian <code>.is-card</code> (kotak sendiri per baris, untuk daftar padat seperti Buku Besar).</p>
+
+            <div class="max-w-sm space-y-6">
+                <div>
+                    <p class="text-[11px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-2">Varian polos</p>
+                    <div>
+                        <div class="list-row-mobile">
+                            <div class="row-avatar-mobile" style="background:#57534e;">DT</div>
+                            <div class="row-main-mobile">
+                                <p class="row-title-mobile">Dealer Toyota</p>
+                                <p class="row-sub-mobile">Pembelian mobil</p>
+                            </div>
+                            <span class="row-amt-mobile">&minus;Rp240jt</span>
+                        </div>
+                        <div class="list-row-mobile" style="border-bottom:none;">
+                            <div class="row-avatar-mobile" style="background:#0d9269;">KC</div>
+                            <div class="row-main-mobile">
+                                <p class="row-title-mobile">PT Klien Contoh</p>
+                                <p class="row-sub-mobile">Jasa konsultasi</p>
+                            </div>
+                            <span class="row-amt-mobile text-emerald-600 dark:text-emerald-400">+Rp5jt</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-[11px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-2">Varian kartu (.is-card)</p>
+                    <div class="space-y-2">
+                        <div class="list-row-mobile is-card">
+                            <div class="row-main-mobile">
+                                <p class="row-title-mobile">Dealer Toyota</p>
+                                <span class="badge-tag-mobile">INV-26/02/10/007</span>
+                            </div>
+                            <span class="row-amt-mobile">&minus;Rp240jt</span>
+                        </div>
+                        <div class="list-row-mobile is-card">
+                            <div class="row-main-mobile">
+                                <p class="row-title-mobile">PT Klien Contoh</p>
+                                <span class="badge-tag-mobile">FT/001/02/2026</span>
+                            </div>
+                            <span class="row-amt-mobile text-emerald-600 dark:text-emerald-400">+Rp5jt</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== CHIP FILTER ==================== -->
+        <section>
+            <h2 class="font-serif-elegant text-lg mb-1">Chip Filter</h2>
+            <p class="text-xs text-stone-500 dark:text-stone-400 mb-4">Kelas <code>.chip-mobile</code> + <code>.is-active</code> - untuk filter cepat sentuh-satu-jari (mis. filter Unit Usaha). Pakai label singkat (kode unit, bukan nama panjang) supaya tidak pernah pecah 2 baris.</p>
+            <div class="flex gap-1.5">
+                <span class="chip-mobile is-active">Semua</span>
+                <span class="chip-mobile">CORP</span>
+                <span class="chip-mobile">WT</span>
+            </div>
+        </section>
+
+        <!-- ==================== TAB NAVIGASI BAWAH ==================== -->
+        <section>
+            <h2 class="font-serif-elegant text-lg mb-1">Tab Navigasi Bawah</h2>
+            <p class="text-xs text-stone-500 dark:text-stone-400 mb-4">Kelas <code>.tabbar-mobile</code> + <code>.tab-mobile</code> (dengan <code>.is-active</code>). Posisi (<code>fixed</code>/statis) sengaja tidak dipatok di kelasnya sendiri - halaman yang memakainya yang menentukan, supaya komponen ini tetap netral.</p>
+            <div class="max-w-xs rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800">
+                <nav class="tabbar-mobile">
+                    <div class="tab-mobile is-active">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+                        Beranda
+                    </div>
+                    <div class="tab-mobile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13H7z"/><path d="M9 12h6M9 16h6"/></svg>
+                        Jurnal
+                    </div>
+                    <div class="tab-mobile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M4 20h16"/></svg>
+                        Laporan
+                    </div>
+                    <div class="tab-mobile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                        Akun
+                    </div>
+                </nav>
+            </div>
+        </section>
+
+        <footer class="pt-8 border-t border-stone-200 dark:border-stone-800 text-xs text-stone-400 dark:text-stone-500">
+            Sprint 0 dari peta jalan tampilan mobile - lihat konsep mockup &amp; sprint selengkapnya di percakapan tim.
+            Sprint berikutnya (1: Beranda jadi layar "Home") menerapkan komponen-komponen ini ke
+            <code>index.html</code> / <code>js/dashboard-page.js</code> sungguhan.
+        </footer>
+
+    </main>
+
+    <script>
+        // Toggle tema mandiri (tanpa Firebase) - dipakai HANYA di halaman
+        // referensi ini. Sengaja memakai key localStorage yang sama
+        // ("erapee_tema") dengan window.toggleDarkMode di js/component.js
+        // supaya konsisten dengan preferensi tema yang sudah dipilih
+        // pengguna di halaman produksi, kalau dibuka di browser yang sama.
+        function perbaruiIkonDarkModeDemo() {
+            const ikon = document.getElementById('ikonDarkModeDemo');
+            if (!ikon) return;
+            const gelap = document.documentElement.classList.contains('dark');
+            ikon.innerHTML = gelap
+                ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>'
+                : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        }
+        window.toggleDarkModeDemo = function () {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                try { localStorage.setItem('erapee_tema', 'light'); } catch (e) {}
+            } else {
+                html.classList.add('dark');
+                try { localStorage.setItem('erapee_tema', 'dark'); } catch (e) {}
+            }
+            perbaruiIkonDarkModeDemo();
+        };
+        perbaruiIkonDarkModeDemo();
+    </script>
+</body>
+</html>

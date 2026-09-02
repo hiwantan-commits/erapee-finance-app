@@ -397,3 +397,292 @@ select.form-input-elegant {
 #app-sidebar {
     padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* ============================================================
+   Sistem Desain "Mobile" (Sprint 0 - fondasi tampilan app-native)
+   ============================================================
+   Kosakata visual kartu/tab/baris bergaya aplikasi native - didemokan di
+   komponen-mobile.html sebagai referensi tim sebelum dipakai di halaman
+   produksi (rencana Sprint 1: Beranda/index.html). MURNI ADITIF, tidak
+   mengubah kelas apa pun di atas - aman digabung ke halaman mana pun.
+   Mengikuti konvensi yang sama seperti komponen "-elegant" di atas (warna
+   hex langsung sesuai gaya file ini, override dark mode lewat selector
+   ".dark .kelas-ini"), tapi radius sengaja dibuat lebih tegas (0.625rem-
+   0.875rem) daripada tren "rounded-lg di mana-mana". */
+
+/* ---- Kartu Statistik: hero selalu gelap terlepas dari tema halaman -
+   untuk angka utama seperti "Pendapatan Bulanan" ---- */
+.stat-card-mobile {
+    background-color: #1c1917;
+    color: #f5f5f4;
+    border-radius: 0.875rem;
+    padding: 0.9375rem 1.125rem 0.75rem;
+}
+.stat-card-mobile .stat-row-top-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.375rem;
+}
+.stat-card-mobile .stat-label-mobile {
+    font-size: 0.6875rem;
+    color: #a8a29e;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+.stat-card-mobile .stat-value-mobile {
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    margin: 0.375rem 0 0;
+}
+.badge-delta-mobile {
+    font-size: 0.625rem;
+    font-weight: 700;
+    padding: 0.1875rem 0.4375rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.badge-delta-mobile.is-up {
+    background-color: rgba(217, 119, 87, 0.22);
+    color: #eb9a7c;
+}
+.badge-delta-mobile.is-down {
+    background-color: rgba(239, 68, 68, 0.18);
+    color: #fca5a5;
+}
+
+/* ---- Tile kecil berpasangan (mis. "Laba Bersih" / "Total Beban") ---- */
+.tile-mobile {
+    flex: 1;
+    background-color: #ffffff;
+    border: 1px solid #e7e5e4;
+    border-radius: 0.75rem;
+    padding: 0.5625rem 0.75rem;
+}
+.dark .tile-mobile {
+    background-color: #1c1917;
+    border-color: #292524;
+}
+.tile-mobile .tile-label-mobile {
+    font-size: 0.65625rem;
+    color: #78716c;
+    margin: 0 0 0.1875rem;
+}
+.dark .tile-mobile .tile-label-mobile {
+    color: #a8a29e;
+}
+.tile-mobile .tile-value-mobile {
+    font-size: 0.84375rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+    color: #1c1917;
+    white-space: nowrap;
+}
+.dark .tile-mobile .tile-value-mobile {
+    color: #f5f5f4;
+}
+
+/* ---- Kartu Unit Usaha: flex:1 (bukan lebar tetap) supaya kartu-kartu
+   dalam satu baris SELALU tampil utuh, tidak pernah terpotong. ---- */
+.unit-card-mobile {
+    flex: 1;
+    min-width: 0;
+    background-color: #ffffff;
+    border: 1px solid #e7e5e4;
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+}
+.dark .unit-card-mobile {
+    background-color: #1c1917;
+    border-color: #292524;
+}
+.unit-badge-mobile {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.4375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.59375rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.875rem;
+}
+.unit-card-mobile .unit-name-mobile {
+    font-size: 0.65625rem;
+    color: #78716c;
+    margin: 0 0 0.1875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dark .unit-card-mobile .unit-name-mobile {
+    color: #a8a29e;
+}
+.unit-card-mobile .unit-value-mobile {
+    font-size: 0.78125rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+    color: #1c1917;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dark .unit-card-mobile .unit-value-mobile {
+    color: #f5f5f4;
+}
+
+/* ---- Baris daftar: avatar/badge + nama+sub + nominal - dipakai untuk
+   Aktivitas Terbaru (varian polos, garis pemisah tipis) maupun daftar
+   transaksi bergaya kartu (varian .is-card, dibungkus kotak sendiri). ---- */
+.list-row-mobile {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #efedeb;
+}
+.dark .list-row-mobile {
+    border-bottom-color: #292524;
+}
+.list-row-mobile.is-card {
+    background-color: #ffffff;
+    border: 1px solid #e7e5e4;
+    border-radius: 0.625rem;
+    padding: 0.6875rem 0.8125rem;
+}
+.dark .list-row-mobile.is-card {
+    background-color: #1c1917;
+    border-color: #292524;
+}
+.row-avatar-mobile {
+    width: 2.125rem;
+    height: 2.125rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+.list-row-mobile .row-main-mobile {
+    flex: 1;
+    min-width: 0;
+}
+.list-row-mobile .row-title-mobile {
+    font-size: 0.78125rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1c1917;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dark .list-row-mobile .row-title-mobile {
+    color: #f5f5f4;
+}
+.list-row-mobile .row-sub-mobile {
+    font-size: 0.65625rem;
+    color: #78716c;
+    margin: 0.125rem 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dark .list-row-mobile .row-sub-mobile {
+    color: #a8a29e;
+}
+.list-row-mobile .row-amt-mobile {
+    font-size: 0.78125rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #1c1917;
+    flex-shrink: 0;
+}
+.dark .list-row-mobile .row-amt-mobile {
+    color: #f5f5f4;
+}
+.badge-tag-mobile {
+    display: inline-block;
+    font-size: 0.53125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.3125rem;
+    background-color: #f1efec;
+    color: #78716c;
+    font-family: 'Inter', monospace;
+    margin-top: 0.25rem;
+}
+.dark .badge-tag-mobile {
+    background-color: #292524;
+    color: #a8a29e;
+}
+
+/* ---- Chip filter (pil) ---- */
+.chip-mobile {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 0.375rem 0.8125rem;
+    border-radius: 9999px;
+    background-color: #ffffff;
+    border: 1px solid #e7e5e4;
+    color: #78716c;
+    white-space: nowrap;
+}
+.dark .chip-mobile {
+    background-color: #1c1917;
+    border-color: #292524;
+    color: #a8a29e;
+}
+.chip-mobile.is-active {
+    background-color: #1c1917;
+    color: #ffffff;
+    border-color: #1c1917;
+}
+.dark .chip-mobile.is-active {
+    background-color: #f5f5f4;
+    color: #1c1917;
+    border-color: #f5f5f4;
+}
+
+/* ---- Tab navigasi bawah - posisi (fixed/statis) sengaja diserahkan ke
+   halaman yang memakainya, supaya komponen ini netral dan bisa dipakai di
+   konteks apa pun (halaman penuh maupun pratinjau komponen). ---- */
+.tabbar-mobile {
+    display: flex;
+    border-top: 1px solid #e7e5e4;
+    background-color: #fbfaf9;
+}
+.dark .tabbar-mobile {
+    border-top-color: #292524;
+    background-color: #0c0a09;
+}
+.tab-mobile {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4375rem 0 0.6875rem;
+    font-size: 0.59375rem;
+    font-weight: 600;
+    color: #a8a29e;
+}
+.tab-mobile svg {
+    width: 1.1875rem;
+    height: 1.1875rem;
+}
+.tab-mobile.is-active {
+    color: #D97757;
+}
