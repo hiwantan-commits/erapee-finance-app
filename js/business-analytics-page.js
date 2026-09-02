@@ -329,7 +329,7 @@ function renderDaftarPeringkat(containerId, daftar, warnaBar, warnaTeks) {
         const persenDariTotal = total > 0 ? (d.total / total) * 100 : 0;
         const lebarBar = nilaiMaks > 0 ? Math.max((d.total / nilaiMaks) * 100, 3) : 0;
         return `
-            <div class="p-3 rounded-xl border border-stone-100 dark:border-stone-800">
+            <div class="p-3 rounded-[0.625rem] border border-stone-200/70 dark:border-stone-800">
                 <div class="flex justify-between items-center gap-2 mb-1.5">
                     <span class="font-semibold text-stone-800 dark:text-stone-200 text-sm truncate">${idx + 1}. ${escapeHtml(d.nama)}</span>
                     <span class="font-bold ${warnaTeks} text-sm shrink-0">${formatRupiah(d.total)}</span>
@@ -449,7 +449,7 @@ function renderStrukturBeban(dariTanggal, sampaiTanggal, unitFilter) {
             kartuContainer.innerHTML = baris.map(a => {
                 const persen = totalBeban > 0 ? (a.total / totalBeban) * 100 : 0;
                 return `
-                    <div class="border border-stone-100 dark:border-stone-800 rounded-xl p-4 flex justify-between items-center gap-2">
+                    <div class="border border-stone-200/70 dark:border-stone-800 rounded-[0.625rem] p-4 flex justify-between items-center gap-2">
                         <div class="overflow-hidden">
                             <div class="font-semibold text-stone-800 dark:text-stone-200 text-sm truncate">${escapeHtml(a.nama)}</div>
                             <div class="text-xs text-stone-400 dark:text-stone-500 mt-0.5">${persen.toFixed(1)}% dari total beban</div>

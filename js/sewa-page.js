@@ -127,7 +127,7 @@ async function muatDaftarSewa() {
                 `);
 
                 kartuMobile.push(`
-                    <div id="kartu-sewa-${sewa.id}" class="border border-stone-100 dark:border-stone-800 rounded-xl p-4">
+                    <div id="kartu-sewa-${sewa.id}" class="border border-stone-200/70 dark:border-stone-800 rounded-[0.625rem] p-4">
                         <div class="flex justify-between items-start gap-2 mb-2">
                             <div>
                                 <div class="font-bold text-stone-900 dark:text-stone-100 text-sm">${escapeHtml(sewa.nama_sewa)}</div>
