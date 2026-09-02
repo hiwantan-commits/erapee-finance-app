@@ -182,3 +182,25 @@ sebagai default.
 > bukan untuk kemampuan bekerja tanpa koneksi internet. Menambahkan caching di kemudian
 > hari (mis. app-shell caching untuk aset statis yang jarang berubah) memerlukan strategi
 > invalidasi cache yang hati-hati agar tidak mengulang masalah "versi usang" ini.
+
+### Polesan Tampilan "App-Native" (tanpa mengubah arsitektur)
+
+Beberapa detail ditambahkan lewat meta tag & CSS murni (tanpa mengubah struktur
+halaman) agar aplikasi yang sudah ter-instal terasa lebih seperti aplikasi native saat
+dijalankan di perangkat sentuh, terutama iPhone dengan notch/Dynamic
+Island/home-indicator:
+
+- `viewport-fit=cover` pada `<meta name="viewport">` + `apple-mobile-web-app-status-bar-style: "black-translucent"` — membuat konten menggambar penuh sampai ke tepi layar (di belakang status bar), alih-alih menyisakan bilah hitam polos di atas seperti halaman web biasa.
+- `#header-container { padding-top: env(safe-area-inset-top) }` dan `#app-sidebar { padding-bottom: env(safe-area-inset-bottom) }` (di `css/style.css`) — mengimbangi `viewport-fit=cover` di atas supaya header tidak tertutup notch dan baris profil paling bawah sidebar tidak tertutup home-indicator. `env(safe-area-inset-*)` bernilai `0` di perangkat tanpa notch (termasuk semua browser desktop), jadi berlaku aman secara global tanpa efek samping di perangkat lain.
+- `mobile-web-app-capable` & `apple-mobile-web-app-capable` — sinyal eksplisit ke Android/iOS bahwa halaman ini dirancang untuk mode `standalone` (sebagian browser lama mengandalkan tag ini, bukan hanya `manifest.json`).
+- `apple-mobile-web-app-title` — nama pendek ("ERAPEE Finance") yang tampil di bawah ikon home screen iOS, terpisah dari `<title>` halaman yang lebih panjang.
+- `overscroll-behavior-y: contain` pada `body` — mematikan efek "rubber-band"/pull-to-refresh bawaan browser saat men-scroll sampai ujung halaman (kontainer scroll internal seperti tabel/dropdown tidak terpengaruh, karena masing-masing sudah punya `overflow-y` sendiri).
+- `-webkit-tap-highlight-color: transparent` pada `html` — menghilangkan highlight abu-abu bawaan saat elemen disentuh di layar sentuh.
+
+**Yang sengaja TIDAK termasuk** dalam polesan ini (dianggap perubahan arsitektur, bukan
+polesan): splash screen kustom per-perangkat (`apple-touch-startup-image`, perlu banyak
+ukuran gambar per model iPhone/iPad — Android sudah otomatis membuatnya sendiri dari
+`manifest.json`), dan transisi mulus antar halaman ala Single Page App — aplikasi ini
+tetap multi-halaman (`.html` terpisah dengan reload penuh browser tiap pindah menu),
+sehingga akan selalu ada jeda/kedip singkat saat navigasi; menghilangkannya memerlukan
+migrasi arsitektur ke SPA yang jauh lebih besar cakupannya.
