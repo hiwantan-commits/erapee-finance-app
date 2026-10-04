@@ -142,11 +142,12 @@ async function muatDashboard() {
         let totalBebanGlobal = 0;
         let totalUtangGlobal = 0;
         let totalPajakGlobal = 0;
+        let totalAsetTetapGlobal = 0;
         let isSemuaBalance = true;
 
         const dataPerUnit = {};
         unitUsahaMaster.forEach(u => {
-            dataPerUnit[u.kode] = { pendapatan: 0, beban: 0, utang: 0 };
+            dataPerUnit[u.kode] = { pendapatan: 0, beban: 0, utang: 0, asetTetap: 0 };
         });
 
         const dataBulanan = Array.from({length: 12}, () => ({ pendapatan: 0, beban: 0 }));
@@ -163,7 +164,7 @@ async function muatDashboard() {
                 kodeUnit = jurnal.unit_usaha.split(" - ")[0].trim();
             }
             if (!dataPerUnit[kodeUnit]) {
-                dataPerUnit[kodeUnit] = { pendapatan: 0, beban: 0, utang: 0 };
+                dataPerUnit[kodeUnit] = { pendapatan: 0, beban: 0, utang: 0, asetTetap: 0 };
             }
 
             jurnal.rows.forEach(baris => {
@@ -191,6 +192,16 @@ async function muatDashboard() {
                     if (kodeAkun === "2105" || kodeAkun === "2106" || (baris.nama_akun && baris.nama_akun.toLowerCase().includes("pajak"))) {
                         totalPajakGlobal += nilai;
                     }
+                }
+                // Aset Tetap (Tanah, Bangunan, Kendaraan, Peralatan, dst - awalan
+                // "15"/"16") - konvensi yang sama dipakai di kalkulasiArusKas()
+                // (klasifikasi Aktivitas Investasi) di accounting.js. Dilacak
+                // terpisah dari Kas/Piutang (awalan "11"/"12"/dst) supaya kolom
+                // ini mencerminkan nilai investasi aset, bukan arus kas harian.
+                else if (kodeAkun.startsWith("15") || kodeAkun.startsWith("16")) {
+                    const nilai = debit - kredit;
+                    totalAsetTetapGlobal += nilai;
+                    dataPerUnit[kodeUnit].asetTetap += nilai;
                 }
             });
         });
@@ -270,14 +281,14 @@ async function muatDashboard() {
             const kelasUtang = 'text-red-600 dark:text-red-400';
 
             if (unitUsahaMaster.length === 1 && unitUsahaMaster[0].kode === "SHARED") {
-                 tbodyUnit.innerHTML = `<tr><td colspan="6" class="p-4 text-center ${kelasKlasifikasi}">Belum ada master data unit usaha.</td></tr>`;
+                 tbodyUnit.innerHTML = `<tr><td colspan="7" class="p-4 text-center ${kelasKlasifikasi}">Belum ada master data unit usaha.</td></tr>`;
             } else {
                 // Unit berstatus "Ditutup/Selesai" tidak ditampilkan sebagai baris
                 // di sini, tapi transaksinya tetap ikut dihitung penuh di baris
                 // TOTAL KESELURUHAN di bawah (yang memakai totalPendapatanGlobal
                 // dkk, bukan hasil re-sum baris yang tampil).
                 unitUsahaMaster.filter(u => u.status !== "Ditutup").forEach(u => {
-                    const dataU = dataPerUnit[u.kode] || { pendapatan: 0, beban: 0, utang: 0 };
+                    const dataU = dataPerUnit[u.kode] || { pendapatan: 0, beban: 0, utang: 0, asetTetap: 0 };
                     const labaU = dataU.pendapatan - dataU.beban;
                     let tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -286,6 +297,7 @@ async function muatDashboard() {
                         <td class="p-3 text-right ${kelasNamaUnit}">${dataU.pendapatan === 0 ? '-' : dataU.pendapatan.toLocaleString('id-ID')}</td>
                         <td class="p-3 text-right ${kelasNamaUnit}">${dataU.beban === 0 ? '-' : dataU.beban.toLocaleString('id-ID')}</td>
                         <td class="p-3 text-right ${labaU > 0 ? kelasLabaPositif + ' font-semibold' : (labaU < 0 ? kelasLabaNegatif + ' font-semibold' : kelasKlasifikasi)}">${labaU === 0 ? '-' : labaU.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right ${kelasNamaUnit}">${dataU.asetTetap === 0 ? '-' : dataU.asetTetap.toLocaleString('id-ID')}</td>
                         <td class="p-3 text-right ${dataU.utang > 0 ? kelasUtang : kelasKlasifikasi}">${dataU.utang === 0 ? '-' : dataU.utang.toLocaleString('id-ID')}</td>
                     `;
                     tbodyUnit.appendChild(tr);
@@ -299,6 +311,7 @@ async function muatDashboard() {
                     <td class="p-3 text-right">Rp ${totalPendapatanGlobal.toLocaleString('id-ID')}</td>
                     <td class="p-3 text-right">Rp ${totalBebanGlobal.toLocaleString('id-ID')}</td>
                     <td class="p-3 text-right ${labaBersihGlobal >= 0 ? kelasLabaPositif : kelasLabaNegatif}">Rp ${labaBersihGlobal.toLocaleString('id-ID')}</td>
+                    <td class="p-3 text-right">Rp ${totalAsetTetapGlobal.toLocaleString('id-ID')}</td>
                     <td class="p-3 text-right ${kelasUtang}">Rp ${totalUtangGlobal.toLocaleString('id-ID')}</td>
                 </tr>
             `;
